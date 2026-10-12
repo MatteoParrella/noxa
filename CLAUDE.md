@@ -28,7 +28,8 @@ badge e riepilogo annuale. È un prodotto destinato al lancio pubblico, non un p
 
 - **App**: Next.js (App Router) in **export statico** + TypeScript strict + Tailwind; PWA
   (Workbox) e app iOS/Android con Capacitor (ADR-0001). TanStack Query, Zod, MapLibre GL JS
-  con PMTiles (ADR-0004).
+  con la basemap Protomaps auto-ospitata in PMTiles, senza servizi di mappe a pagamento
+  (ADR-0016).
 - **Backend**: Supabase in UE (Postgres + PostGIS, Auth, Storage, Realtime, Edge Functions
   Deno, `pg_cron`). **La RLS è l'unico punto di autorizzazione** (ADR-0002).
 - **Worker**: Python 3.12, FastAPI, httpx, Playwright, rapidfuzz, Pydantic, structlog, SDK

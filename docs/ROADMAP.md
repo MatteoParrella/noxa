@@ -33,6 +33,9 @@ completa solo se rispetta la definizione di completato del §6.
   `normalizzazione/`, registro degli adattatori, test di architettura, schema e prompt
   iniziali dei flyer, strumenti `fonti.prova`, `fonti.salva_fixture` e `flyer.valuta`.
 - Funzioni di supporto ai test `supabase/tests/000_supporto.test.sql`.
+- Mappa: file `milano-brianza.pmtiles`, font e icone nel bucket `mappe`; stili Protomaps
+  `dark` e `light` personalizzati con i design token; job trimestrale di aggiornamento
+  (ADR-0016).
 - Shell Capacitor iOS e Android compilabile, con la PWA servita dallo stesso export.
 - Pratiche esterne avviate: App Review Meta per Business Discovery, account sviluppatore Apple
   e Google, bozza di termini, informativa e DPIA con un legale (D-07).
@@ -47,7 +50,7 @@ completa solo se rispetta la definizione di completato del §6.
 4. L'app si compila in export statico e gira su simulatore iOS, emulatore Android e browser.
 5. I token del design system sono in `apps/web/src/styles/tokens.css`, usati dalla
    configurazione di Tailwind e documentati in DESIGN.md.
-6. Le decisioni D-01, D-02 e D-09 sono chiuse e gli ADR e i documenti che le citano sono
+6. Le decisioni D-01 e D-02 sono chiuse e gli ADR e i documenti che le citano sono
    aggiornati (DECISIONI_APERTE.md).
 7. La richiesta di App Review Meta è stata inviata.
 

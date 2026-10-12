@@ -18,7 +18,6 @@ sotto) e rimandano a questo file con l'ID `D-xx`. Quando una decisione viene pre
 | D-06 | Classificazione d'età negli store | Da determinare con i questionari ufficiali di Apple e Google, considerando i riferimenti alla vita notturna | Product owner | Fase 2 |
 | D-07 | Verifiche legali: DPIA, eventuale nomina del DPO, termini e informativa, licenza ODbL per i dati OpenStreetMap usati in `locali`, basi giuridiche dei trasferimenti verso Anthropic, Meta e Google (FCM) | DPIA avviata in Fase 0; i dati OSM sono usati solo come fonte iniziale di verifica e con attribuzione | Consulente legale | Bozza in Fase 0, definitiva prima della Fase 2 |
 | D-08 | Accesso con Apple e Google (F-17) | Non nel MVP; solo email e password | Product owner | Fase 3 |
-| D-09 | Fornitore delle tile della mappa | PMTiles generate da OpenStreetMap e servite dal bucket `mappe` (ADR-0004). Alternativa: MapTiler a pagamento | Tech lead | Fine Fase 0 |
 | D-10 | Organizzazione della moderazione: team interno o esterno, turni per coprire i tempi di R-53 | Team interno ridotto durante la beta, con turni serali e weekend | Product owner | Prima della Fase 1 |
 | D-11 | Modello di business | Nessuna pubblicità (R-61). Ipotesi da valutare dopo il lancio: servizi B2B per i locali (fuori perimetro del MVP) | Fondatori | Dopo la Fase 2 |
 | D-12 | Trattamento dei dati da parte di Anthropic: conservazione, residenza dei dati, accordo sul trattamento (DPA) | Si inviano solo le immagini dei flyer, senza identificativi (R-66); accordo da firmare prima della beta | Consulente legale + tech lead | Prima della Fase 1 |
@@ -28,3 +27,4 @@ sotto) e rimandano a questo file con l'ID `D-xx`. Quando una decisione viene pre
 | ID | Decisione | Esito | Data |
 |---|---|---|---|
 | D-01 (parte) | Nome del prodotto | **Noxa**. Resta aperto il dominio (D-01). | 2026-10-12 |
+| D-09 | Fornitore delle tile della mappa | Protomaps auto-ospitato, gratuito ([ADR-0016](decisions/0016-mappe-protomaps-autospitate.md)) | 2026-10-12 |

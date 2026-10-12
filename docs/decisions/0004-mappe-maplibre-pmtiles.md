@@ -1,6 +1,6 @@
 # ADR-0004: Mappe con MapLibre e PMTiles
 
-- **Stato**: Accettato
+- **Stato**: Sostituito da ADR-0016
 - **Data**: 2026-10-12
 
 ## Contesto

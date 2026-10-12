@@ -111,9 +111,16 @@ pnpm --filter web exec cap open android # oppure ios (solo macOS)
 
 ## Mappe
 
-Il file PMTiles dell'area si genera da un estratto OpenStreetMap con la CLI `pmtiles` di
-Protomaps (`pmtiles extract` con il riquadro delle province MI e MB) e si carica nel bucket
-`mappe` (ADR-0004). Aggiornamento trimestrale.
+Mappe gratuite con la basemap Protomaps auto-ospitata (ADR-0016). Il file dell'area si
+estrae dalla build mondiale di Protomaps con la CLI `pmtiles`:
+
+```bash
+pmtiles extract https://build.protomaps.com/<AAAAMMGG>.pmtiles milano-brianza.pmtiles \
+  --bbox=8.65,45.15,9.60,45.80
+```
+
+Poi si carica il file nel bucket `mappe`, insieme a font e icone di Protomaps
+(`basemaps-assets`) in `mappe/assets/`. L'aggiornamento è trimestrale.
 
 ## Contribuire
 

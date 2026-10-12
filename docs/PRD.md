@@ -50,7 +50,7 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 | ID | Funzionalità | Priorità | Fase | Criteri di accettazione |
 |---|---|---|---|---|
 | F-01 | Elenco eventi con filtri per data, distanza, genere musicale ed età minima | P0 | 1 | Mostra solo eventi visibili secondo R-20 e R-23. Filtri combinabili; la distanza usa la posizione del dispositivo, se concessa, oppure un comune scelto a mano (R-33). Risposta in meno di 800 ms al 95° percentile con 5.000 eventi futuri. |
-| F-02 | Mappa degli eventi (MapLibre con tile PMTiles) | P0 | 1 | Stessi filtri dell'elenco; raggruppamento dei marker; attribuzione OpenStreetMap visibile; utilizzabile anche senza mappa (l'elenco è l'alternativa accessibile). |
+| F-02 | Mappa degli eventi (MapLibre con basemap Protomaps auto-ospitata, tema scuro e chiaro) | P0 | 1 | Stessi filtri dell'elenco; raggruppamento dei marker; attribuzione OpenStreetMap visibile; utilizzabile anche senza mappa (l'elenco è l'alternativa accessibile). |
 | F-03 | Dettaglio evento | P0 | 1 | Titolo, data, orari, locale, età minima (con l'indicazione "età non dichiarata, considerata 18+" se `eta_minima_dichiarata = false`), generi, artisti, prezzo minimo, link alla fonte originale sempre presente, link ai biglietti se disponibile. |
 | F-04 | Amici che partecipano in evidenza | P0 | 1 | Nell'elenco e nel dettaglio compaiono il numero e gli avatar degli amici confermati con partecipazione visibile (R-67); filtro "solo eventi con amici". |
 | F-05 | "Mi interessa" / "Partecipo" | P0 | 1 | Si imposta in un tocco; la visibilità è regolabile per evento; si annulla in un tocco. |

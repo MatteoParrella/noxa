@@ -64,6 +64,7 @@ def main() -> int:
     # 3. Riferimenti
     regole = set(re.findall(r"^\| (R-\d\d) \|", sicurezza, re.MULTILINE))
     id_decisioni = set(re.findall(r"^\| (D-\d\d) \|", decisioni, re.MULTILINE))
+    decisioni_aperte = set(re.findall(r"^\| (D-\d\d) \|", decisioni.split("## Decisioni chiuse")[0], re.MULTILINE))
     adr = {p.name[:4] for p in (DOCS / "decisions").glob("[0-9][0-9][0-9][0-9]-*.md")}
     for percorso, testo in documenti.items():
         for r in set(re.findall(r"(?<![A-Z])R-\d\d", testo)) - regole:
@@ -91,7 +92,7 @@ def main() -> int:
     for problema in sorted(set(problemi)):
         print(f"- {problema}")
     print(
-        f"\n{len(funzionalita)} funzionalità, {len(regole)} regole, {len(id_decisioni)} decisioni aperte, "
+        f"\n{len(funzionalita)} funzionalità, {len(regole)} regole, {len(decisioni_aperte)} decisioni aperte, "
         f"{len(adr) - 1} ADR, {len(tabelle)} tabelle: {len(set(problemi))} problemi."
     )
     return 1 if problemi else 0

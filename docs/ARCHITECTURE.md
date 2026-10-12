@@ -84,7 +84,7 @@ flowchart LR
 | Routing | Route statiche; i dettagli usano parametri di query (`/evento?id=…`, `/gruppo?id=…`) perché l'export statico non genera pagine per identificativi dinamici. |
 | Dati | `@supabase/supabase-js` con tipi generati (`src/lib/database.types.ts`); TanStack Query per cache, retry e stato offline; validazione dei dati in ingresso e uscita con Zod. |
 | Stile | Tailwind con design token generati da Claude Design (ADR-0011, [DESIGN.md](DESIGN.md)). |
-| Mappe | MapLibre GL JS con file PMTiles servito dal bucket `mappe` (ADR-0004). |
+| Mappe | MapLibre GL JS con la basemap Protomaps (stili `dark` e `light` personalizzati con i design token) in un file PMTiles servito, insieme a font e icone, dal bucket `mappe`: nessuna richiesta a servizi di mappe esterni (ADR-0016). |
 | Nativo | Capacitor: geolocalizzazione in background (D-04), notifiche push, fotocamera, condivisione, preferenze sicure per l'area di arrivo (R-32). |
 | PWA | Manifest e service worker (Workbox): cache dell'app shell e dei dati in sola lettura (PRD §5 Offline). |
 | Organizzazione | `src/features/<area>/` (scopri, organizza, vivi, ricorda, account, moderazione) con componenti, hook, query e test della funzionalità; `src/components/ui` per i componenti del design system. |
@@ -336,7 +336,7 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | Funzionalità | Componenti | Flusso o sezione |
 |---|---|---|
 | F-01 Elenco eventi con filtri | App (`features/scopri`), RPC `cerca_eventi` | §4.2 |
-| F-02 Mappa | App (MapLibre), bucket `mappe` | §3.1, §4.2, ADR-0004 |
+| F-02 Mappa | App (MapLibre + Protomaps), bucket `mappe` | §3.1, §4.2, ADR-0016 |
 | F-03 Dettaglio evento | App (`/evento?id=`) | §3.1 |
 | F-04 Amici che partecipano | RPC `cerca_eventi` (conteggio amici) | §4.2 |
 | F-05 Interessato / Partecipo | App, PostgREST | §3.2 |
