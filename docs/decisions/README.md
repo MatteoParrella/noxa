@@ -25,3 +25,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0014](0014-osservabilita-senza-tracciamento.md) | Osservabilità senza tracciamento degli utenti | Accettato |
 | [0015](0015-monorepo-pnpm-uv.md) | Monorepo con pnpm e uv | Accettato |
 | [0016](0016-mappe-protomaps-autospitate.md) | Mappe gratuite con Protomaps auto-ospitato | Accettato |
+| [0017](0017-fascia-unica-minorenni.md) | Un'unica fascia per i minorenni dai 14 ai 17 anni | Accettato |

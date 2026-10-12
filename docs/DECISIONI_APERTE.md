@@ -11,7 +11,6 @@ sotto) e rimandano a questo file con l'ID `D-xx`. Quando una decisione viene pre
 | ID | Decisione | Scelta provvisoria | Chi decide | Entro |
 |---|---|---|---|---|
 | D-01 | Dominio del prodotto (il nome "Noxa" è deciso) | Dominio di lavoro `noxa.app`, usato in user agent dello scraper, email e app Meta; disponibilità del dominio e del marchio "Noxa" da verificare | Product owner | Fine Fase 0 |
-| D-02 | Regola di contatto tra minorenni di età diverse (es. 14 e 17 anni) | Tutti i 14–17 anni sono un'unica fascia e possono cercarsi tra loro, con amicizia reciproca (R-10). Alternativa: ricerca limitata a ±2 anni di differenza | Product owner + consulente legale | Fine Fase 0 |
 | D-03 | Modello Claude per l'estrazione dei flyer in produzione | `claude-opus-5-5` (ADR-0007). Valutare `claude-sonnet-5-5` o `claude-haiku-5-5` sul golden set confrontando qualità e costo per flyer | Product owner su dati della skill `flyer-parser` | Metà Fase 1 |
 | D-04 | Plugin Capacitor per la geolocalizzazione in background | `@capacitor-community/background-geolocation` (open source). Alternativa: plugin commerciale con licenza (maggiore affidabilità su iOS, costo annuo) | Tech lead dopo un prototipo su dispositivi reali | Inizio Fase 2 |
 | D-05 | Accordi con Resident Advisor, Xceed e Dice | Nessuna integrazione finché non c'è un accordo scritto o un'API ufficiale (ADR-0008) | Product owner | Fase 3 |
@@ -27,4 +26,5 @@ sotto) e rimandano a questo file con l'ID `D-xx`. Quando una decisione viene pre
 | ID | Decisione | Esito | Data |
 |---|---|---|---|
 | D-01 (parte) | Nome del prodotto | **Noxa**. Resta aperto il dominio (D-01). | 2026-10-12 |
+| D-02 | Contatti tra minorenni di età diverse | Un'unica fascia 14–17: un minorenne può cercare per username qualsiasi altro minorenne, con amicizia reciproca ([ADR-0017](decisions/0017-fascia-unica-minorenni.md)) | 2026-10-12 |
 | D-09 | Fornitore delle tile della mappa | Protomaps auto-ospitato, gratuito ([ADR-0016](decisions/0016-mappe-protomaps-autospitate.md)) | 2026-10-12 |

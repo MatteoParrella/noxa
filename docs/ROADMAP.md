@@ -50,7 +50,7 @@ completa solo se rispetta la definizione di completato del §6.
 4. L'app si compila in export statico e gira su simulatore iOS, emulatore Android e browser.
 5. I token del design system sono in `apps/web/src/styles/tokens.css`, usati dalla
    configurazione di Tailwind e documentati in DESIGN.md.
-6. Le decisioni D-01 e D-02 sono chiuse e gli ADR e i documenti che le citano sono
+6. La decisione D-01 (dominio) è chiusa e gli ADR e i documenti che la citano sono
    aggiornati (DECISIONI_APERTE.md).
 7. La richiesta di App Review Meta è stata inviata.
 
