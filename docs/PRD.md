@@ -1,6 +1,6 @@
 # Product Requirements Document — Noxa
 
-> "Noxa" è il nome di lavoro. Il nome definitivo è la decisione aperta D-01
+> Il nome del prodotto è **Noxa**. Il dominio è la decisione aperta D-01
 > ([DECISIONI_APERTE.md](DECISIONI_APERTE.md)).
 
 ## 1. Visione
