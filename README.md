@@ -40,7 +40,9 @@ Dettagli in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | Modello dati e policy RLS |
 | [docs/EVENT_INGESTION.md](docs/EVENT_INGESTION.md) | Raccolta degli eventi |
 | [docs/SAFETY_PRIVACY.md](docs/SAFETY_PRIVACY.md) | Sicurezza dei minorenni e privacy |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Fasi e criteri di completamento |
+| [docs/GUIDA_OPERATIVA.md](docs/GUIDA_OPERATIVA.md) | **Da leggere per primo**: come lavorare con Claude Code, iterazioni e Claude Design |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Fasi, iterazioni e criteri di completamento |
+| [docs/REGISTRO_ITERAZIONI.md](docs/REGISTRO_ITERAZIONI.md) | Avanzamento delle iterazioni |
 | [docs/DESIGN.md](docs/DESIGN.md) | Design system e accessibilità |
 | [docs/DECISIONI_APERTE.md](docs/DECISIONI_APERTE.md) | Decisioni ancora da prendere |
 | [docs/decisions/](docs/decisions/) | ADR |
@@ -125,5 +127,6 @@ Poi si carica il file nel bucket `mappe`, insieme a font e icone di Protomaps
 ## Contribuire
 
 1. Leggi [CLAUDE.md](CLAUDE.md).
-2. Per ogni funzionalità segui la skill `new-feature` (`.claude/skills/new-feature/SKILL.md`).
+2. Lo sviluppo procede per iterazioni: `/iterazione <numero>` (docs/GUIDA_OPERATIVA.md).
+   Per le funzionalità fuori dalle iterazioni segui la skill `new-feature` (`.claude/skills/new-feature/SKILL.md`).
 3. Nessuna PR viene unita senza CI verde ed esito di `safety-review` nella descrizione.

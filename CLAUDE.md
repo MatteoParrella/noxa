@@ -19,7 +19,9 @@ badge e riepilogo annuale. È un prodotto destinato al lancio pubblico, non un p
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | Tabelle, funzioni `private.*`, policy RLS, storage, realtime, job |
 | [docs/EVENT_INGESTION.md](docs/EVENT_INGESTION.md) | Fonti, pipeline, schema evento, flyer, deduplicazione, fusione |
 | [docs/SAFETY_PRIVACY.md](docs/SAFETY_PRIVACY.md) | Regole `R-xx` sui minorenni e la privacy, con i motivi |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Fasi, criteri di completamento, definizione di completato |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Fasi, 15 iterazioni, criteri di completamento, definizione di completato |
+| [docs/REGISTRO_ITERAZIONI.md](docs/REGISTRO_ITERAZIONI.md) | Stato delle iterazioni e cicli di revisione (aggiornato dalla skill `iterazione`) |
+| [docs/GUIDA_OPERATIVA.md](docs/GUIDA_OPERATIVA.md) | Come lavorare: iterazioni, skill, calendario di Claude Design |
 | [docs/DESIGN.md](docs/DESIGN.md) | Flusso con Claude Design, token, accessibilità, tono |
 | [docs/DECISIONI_APERTE.md](docs/DECISIONI_APERTE.md) | **Unico** elenco delle decisioni aperte `D-xx` |
 | [docs/decisions/](docs/decisions/) | ADR |
@@ -160,6 +162,7 @@ invece di implementarla.
 
 | Skill | Quando usarla |
 |---|---|
+| `iterazione` | `/iterazione <0-14>` esegue un'iterazione completa della roadmap (ROADMAP.md §5); `/iterazione stato` mostra l'avanzamento. Si avvia solo su richiesta esplicita |
 | `new-feature` | Qualsiasi nuova funzionalità o modifica di comportamento: flusso PRD → piano → implementazione → test → documenti |
 | `db-migration` | Ogni modifica allo schema, alle policy, alle funzioni SQL o allo storage |
 | `safety-review` | Obbligatoria prima di considerare completa qualsiasi funzionalità |

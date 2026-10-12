@@ -137,6 +137,161 @@ il consolidamento di tutte le funzionalità della Fase 1.
 3. Nuova area: almeno 30 locali verificati e le soglie di qualità del PRD §2 rispettate per 4
    settimane.
 
+## 5. Iterazioni
+
+Le fasi sono divise in **15 iterazioni** (da 0 a 14). Ogni iterazione è un blocco di lavoro
+completo e verificabile che si esegue con il comando `/iterazione <numero>` (skill
+`iterazione`). Lo stato di ogni iterazione e il numero di cicli di revisione fatti sono in
+[REGISTRO_ITERAZIONI.md](REGISTRO_ITERAZIONI.md).
+
+Ogni iterazione ha:
+- **Design**: le schermate da preparare in Claude Design e salvare in `design/` **prima** di
+  lanciarla (DESIGN.md §1). Senza questi materiali l'iterazione si ferma all'inizio.
+- **Prerequisiti esterni**: account, chiavi o accordi che servono. Se mancano, il lavoro
+  locale si completa lo stesso e l'iterazione viene chiusa come "completata con attese
+  esterne"; la fase però non si chiude finché le attese non sono risolte.
+- **Criteri di completamento**: tutti verificati prima di chiuderla. L'ultima iterazione di
+  ogni fase verifica anche i criteri della fase.
+
+| N | Fase | Nome | Funzionalità | Design da preparare prima |
+|---|---|---|---|---|
+| 0 | 0 | Fondamenta del repository | infrastruttura | — |
+| 1 | 0 | Design system e guscio dell'app | F-43, F-45, F-02 (stile mappa) | **Design system Noxa**, navigazione, stile della mappa |
+| 2 | 0 | Account e sicurezza di base | F-10, F-41 (consensi) | Accesso e onboarding |
+| 3 | 1 | Amicizie, blocchi e segnalazioni | F-11, F-12, F-42 (bloccati) | Amici, profilo, segnala e blocca |
+| 4 | 1 | Catalogo eventi e scoperta | F-01, F-02, F-03, F-04, F-05 | Scopri: elenco, filtri, mappa, dettaglio |
+| 5 | 1 | Raccolta automatica degli eventi | F-44, F-40 (locali e fonti) | Moderazione: locali e fonti |
+| 6 | 1 | Flyer e moderazione | F-06, F-40 | Carica flyer, stato flyer, code di moderazione |
+| 7 | 1 | Gruppi e serate di gruppo | F-13, F-14, F-15, F-16 | Gruppi, dettaglio gruppo, serata di gruppo |
+| 8 | 1 | Tracker, privacy e beta | F-30, F-41, F-42, F-45, F-43 (build interne) | Tracker, impostazioni di privacy, esporta ed elimina account |
+| 9 | 2 | Notifiche e check-in | F-22, F-20 | Centro notifiche, permessi, check-in |
+| 10 | 2 | Ritorno sicuro | F-21 | Avvio, ritorno in corso, ritorno di un amico, allerta |
+| 11 | 2 | Statistiche, badge e Wrapped | F-31, F-32, F-33 | Statistiche, bacheca badge, schede del Wrapped |
+| 12 | 2 | Preparazione al lancio | F-43 (store), consolidamento | Icona, schermate e testi per gli store |
+| 13 | 3 | Accesso con Apple e Google | F-17 | Accesso social e completamento del profilo |
+| 14 | 3 | Aggregatori e nuove aree | F-07, F-46 | — |
+
+### Iterazione 0 — Fondamenta del repository
+- **Contenuto**: monorepo pnpm + uv; `apps/web` con Next.js in export statico, TypeScript
+  strict, Tailwind, ESLint, Prettier, Vitest, Playwright; `services/worker` con
+  `pyproject.toml`, `uv.lock`, Ruff, mypy strict, pytest, FastAPI con `/salute` e `/pronto`,
+  modulo `coda`; `supabase init` con estensioni e schema `private` vuoto; CI GitHub Actions
+  (lint, typecheck, test, `supabase test db`, build, Docker, audit dipendenze,
+  `scripts/verifica_documentazione.py`); `.nvmrc`, `.python-version`.
+- **Prerequisiti esterni**: repository GitHub remoto per la CI; progetti Supabase staging e
+  produzione, Vercel e Fly.io per i deploy.
+- **Criteri**: `pnpm --filter web build` produce l'export statico; `docker compose up worker`
+  risponde su `/salute`; `supabase start` e `supabase test db` funzionano; la CI è verde su
+  una PR di prova e fallisce su una PR con una tabella senza RLS.
+
+### Iterazione 1 — Design system e guscio dell'app
+- **Contenuto**: `tokens.css` dai design token di Claude Design (tema scuro e chiaro)
+  collegato a Tailwind; componenti di `src/components/ui/` (DESIGN.md §3) con test; catalogo
+  `page.dev.tsx`; layout di navigazione delle aree Scopri, Organizza, Vivi, Ricorda,
+  Profilo; PWA (manifest, service worker); Capacitor iOS e Android; mappa Protomaps con file
+  `milano-brianza.pmtiles`, font e icone nel bucket `mappe` e stili personalizzati
+  (ADR-0016); axe nei test e2e.
+- **Prerequisiti esterni**: account Apple Developer e Google Play Console per firmare le
+  build (le build locali funzionano anche senza).
+- **Criteri**: nessuna violazione axe nel catalogo e nella navigazione, in entrambi i temi;
+  l'app gira su browser, emulatore Android e simulatore iOS; la mappa si apre senza
+  richieste a domini esterni (verificato nel test e2e).
+
+### Iterazione 2 — Account e sicurezza di base
+- **Contenuto**: migrazioni di `profili`, `profili_privati`, `ruoli_utente`, `consensi` e delle
+  funzioni `private.*` per età e fascia (DATA_MODEL.md §4); trigger di registrazione (R-01,
+  R-02); `000_supporto.test.sql`, `001_rls_abilitata.test.sql` e seed con gli utenti per
+  età; schermate di accesso, registrazione con CAPTCHA, verifica email, onboarding di
+  sicurezza, consensi versionati; client tipizzato ed errori di dominio.
+- **Prerequisiti esterni**: chiave Cloudflare Turnstile.
+- **Criteri**: criteri della **Fase 0** (§Fase 0) verificati; test e2e che un utente di 13
+  anni non può registrarsi né dall'app né dall'API.
+
+### Iterazione 3 — Amicizie, blocchi e segnalazioni
+- **Contenuto**: `amicizie`, `codici_invito`, `blocchi`, `segnalazioni`,
+  `azioni_moderazione`; RPC `cerca_utenti`, `crea_codice_invito`,
+  `anteprima_codice_invito`, `usa_codice_invito`, `avviso_richiesta`; schermate amici,
+  ricerca, QR, richieste, profilo, blocca e segnala, elenco dei bloccati.
+- **Criteri**: test pgTAP di R-10…R-14 e R-17 per tutte le età, compreso il tentativo di
+  elencare `profili`; e2e amicizia per ricerca e per codice con l'avviso al minorenne.
+
+### Iterazione 4 — Catalogo eventi e scoperta
+- **Contenuto**: `locali`, `eventi`, `generi_musicali`, `eventi_generi`, `eventi_fonti`,
+  `partecipazioni_evento`; RPC `cerca_eventi`; dati di esempio nel seed; schermate elenco con
+  filtri, mappa, dettaglio, "mi interessa / partecipo", amici che partecipano.
+- **Criteri**: test pgTAP di R-20…R-23 e R-67 per età 14, 15, 16, 17, 18, 20, 21;
+  `cerca_eventi` < 800 ms al 95° percentile con 5.000 eventi sintetici.
+
+### Iterazione 5 — Raccolta automatica degli eventi
+- **Contenuto**: `fonti`, `eventi_grezzi`, `coda_job`; `ClientHttpConforme`, normalizzazione,
+  adattatori `sito_jsonld`, almeno un `sito_html_<locale>`,
+  `instagram_business_discovery`; deduplicazione e fusione con golden set; bootstrap dei
+  locali da OSM e Google Places; `pg_cron` di accodamento; RPC `esegui_fonte_ora` e
+  `decidi_duplicato`; area di moderazione per locali, fonti e duplicati.
+- **Prerequisiti esterni**: App Review Meta approvata; chiave Google Places.
+- **Criteri**: test degli adattatori su fixture; precisione della deduplicazione ≥ 98% e
+  richiamo ≥ 90% sul golden set; almeno 40 locali verificati.
+
+### Iterazione 6 — Flyer e moderazione
+- **Contenuto**: `caricamenti_flyer`, bucket `flyer-caricati` e `flyer-pubblicati`;
+  estrattore con Claude API, prompt versionato, golden set di almeno 50 flyer, comando
+  `valuta`; RPC `coda_flyer`, `decidi_flyer`, `dettaglio_segnalazione`,
+  `decidi_segnalazione`; job `copia_immagine_flyer` e `pulizia_flyer`; schermate di
+  caricamento, stato dei flyer e code di moderazione con MFA.
+- **Prerequisiti esterni**: chiave Claude API con limite di spesa; accordo sul trattamento
+  dei dati (D-12).
+- **Criteri**: soglie della skill `flyer-parser`; test pgTAP di R-51, R-54, R-69.
+
+### Iterazione 7 — Gruppi e serate di gruppo
+- **Contenuto**: `gruppi`, `membri_gruppo`, `serate_gruppo`, `partecipazioni_serata`;
+  invariante delle fasce e job giornaliero; Realtime; schermate di gruppi, inviti, serata
+  con conferme, biglietti e trasporto.
+- **Criteri**: test pgTAP di R-15, R-16, R-24 e del trigger `verifica_trasporto`; e2e di
+  gruppo misto valido e rifiutato; aggiornamento in tempo reale tra due sessioni.
+
+### Iterazione 8 — Tracker, privacy e beta
+- **Contenuto**: tabelle del tracker e trigger di R-40; offline con coda di scritture; Edge
+  Functions `esporta-dati` ed `elimina-account`; impostazioni di privacy;
+  `applica_conservazione`; verifica completa di accessibilità; build interne TestFlight e
+  Google Play.
+- **Criteri**: criteri della **Fase 1** (§Fase 1) verificati per la parte tecnica; la beta
+  con utenti reali si avvia alla chiusura di questa iterazione.
+
+### Iterazione 9 — Notifiche e check-in
+- **Contenuto**: `dispositivi_push`, Edge Function `invia-push` (FCM, APNs, Web Push),
+  permessi e preferenze; `checkin`, `checkin_destinatari`, trigger `verifica_checkin`.
+- **Prerequisiti esterni**: progetto Firebase, chiavi APNs, chiavi VAPID.
+- **Criteri**: test pgTAP di R-30; nessun testo di altri utenti nelle notifiche (test).
+
+### Iterazione 10 — Ritorno sicuro
+- **Contenuto**: plugin di posizione in background (D-04), `ritorni_sicuri`,
+  `ritorni_destinatari`, `posizioni_ritorno`, Broadcast privato, `verifica_ritorni_scaduti`,
+  area di arrivo salvata solo sul dispositivo, modalità solo in primo piano nella PWA.
+- **Criteri**: test pgTAP di R-31 e R-32; prove su dispositivi reali secondo il criterio 1
+  della Fase 2.
+
+### Iterazione 11 — Statistiche, badge e Wrapped
+- **Contenuto**: vista `statistiche_personali`; catalogo dei badge e `assegna_badge`;
+  `genera_riepiloghi` e `rigenera_mio_riepilogo`; Wrapped con esportazione dell'immagine
+  sul dispositivo.
+- **Criteri**: test pgTAP di R-41 e R-42; `safety-review` del catalogo dei badge.
+
+### Iterazione 12 — Preparazione al lancio
+- **Contenuto**: correzioni del penetration test, test di carico, DPIA e testi legali
+  definitivi, questionari degli store (D-06), pubblicazione su App Store e Google Play.
+- **Prerequisiti esterni**: penetration test esterno, consulente legale.
+- **Criteri**: criteri della **Fase 2** (§Fase 2) verificati.
+
+### Iterazione 13 — Accesso con Apple e Google
+- **Contenuto**: ADR per il profilo da completare; provider OAuth; completamento obbligatorio
+  della data di nascita prima di qualsiasi accesso ai dati.
+- **Criteri**: criterio 2 della Fase 3.
+
+### Iterazione 14 — Aggregatori e nuove aree
+- **Contenuto**: adattatori degli aggregatori con accordo (D-05); estensione di
+  `locali.provincia` e bootstrap dei locali della nuova area.
+- **Criteri**: criteri 1 e 3 della **Fase 3**.
+
 ## 6. Definizione di completato
 
 Una funzionalità è completa quando:

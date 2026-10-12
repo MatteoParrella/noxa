@@ -19,7 +19,8 @@ flowchart LR
 
 1. **Brief**: per ogni schermata si parte dalla funzionalità del PRD (ID, criteri di
    accettazione, regole di sicurezza collegate) e si scrive un brief in
-   `design/F-xx-nome/brief.md` con: obiettivo, stati da disegnare (vuoto, caricamento,
+   `design/F-xx-nome/brief.md` (il design system va in `design/sistema/`; il calendario delle
+   cartelle per iterazione è in GUIDA_OPERATIVA.md §4) con: obiettivo, stati da disegnare (vuoto, caricamento,
    errore, successo, offline), varianti per minorenni e maggiorenni se diverse, testi.
 2. **Claude Design**: si genera la schermata partendo dal design system di Noxa già presente
    in Claude Design, così token e componenti restano coerenti.

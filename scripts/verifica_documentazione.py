@@ -22,7 +22,7 @@ RADICE = Path(__file__).resolve().parent.parent
 DOCS = RADICE / "docs"
 ESCLUSI = {".git", "node_modules", ".venv"}
 # Righe che citano i segnaposto per vietarli, non come segnaposto.
-CONTESTI_AMMESSI = re.compile(r"segnaposto|niente `?TODO|Non si lasciano|nessun `?TODO", re.IGNORECASE)
+CONTESTI_AMMESSI = re.compile(r"segnaposto|niente `?TODO|mai come `?TODO|Non si lasciano|nessun `?TODO", re.IGNORECASE)
 
 
 def leggi_documenti() -> dict[Path, str]:
@@ -60,6 +60,20 @@ def main() -> int:
                 problemi.append(f"{f} non compare in {nome}")
         if not re.search(rf"^\| {f} \| .*\| (\d|\d–\d) \|$", prd, re.MULTILINE):
             problemi.append(f"{f} non compare nella matrice di tracciabilità del PRD")
+
+    # 2b. Iterazioni: ogni funzionalità è assegnata a un'iterazione; registro allineato
+    sezione_iterazioni = roadmap.split("## 5. Iterazioni", 1)[-1].split("## 6.", 1)[0]
+    righe_iterazioni = re.findall(r"^\| (\d+) \| \d \| [^|]+ \| ([^|]+) \|", sezione_iterazioni, re.MULTILINE)
+    for f in funzionalita:
+        if not any(f in colonna for _, colonna in righe_iterazioni):
+            problemi.append(f"{f} non è assegnata a nessuna iterazione in ROADMAP.md §5")
+    registro = leggi("REGISTRO_ITERAZIONI.md")
+    numeri_registro = re.findall(r"^\| (\d+) \| (?:da iniziare|in corso|completata|completata con attese esterne|bloccata) \|", registro, re.MULTILINE)
+    if [n for n, _ in righe_iterazioni] != numeri_registro:
+        problemi.append("le iterazioni di ROADMAP.md §5 e di REGISTRO_ITERAZIONI.md non coincidono")
+    for n, _ in righe_iterazioni:
+        if f"### Iterazione {n} " not in sezione_iterazioni:
+            problemi.append(f"iterazione {n} senza sezione di dettaglio in ROADMAP.md §5")
 
     # 3. Riferimenti
     regole = set(re.findall(r"^\| (R-\d\d) \|", sicurezza, re.MULTILINE))
