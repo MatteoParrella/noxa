@@ -1,0 +1,60 @@
+# docker-compose per lo sviluppo locale di Noxa.
+#
+# Il database e i servizi Supabase (Postgres, Auth, Storage, Realtime, Studio) NON sono qui:
+# li avvia e gestisce la CLI con `supabase start`, che crea i propri container. Ricrearli a
+# mano sarebbe fragile e divergerebbe dalla versione gestita in produzione (ADR-0002).
+# Il worker li raggiunge sull'host tramite host.docker.internal:
+#   - API Supabase:  http://host.docker.internal:54321
+#   - Postgres:      host.docker.internal:54322
+#
+# Uso:
+#   supabase start
+#   docker compose up --build worker
+#
+# L'app web si avvia fuori da Docker con `pnpm --filter web dev` per avere il ricaricamento
+# rapido nel filesystem di WSL.
+
+name: noxa
+
+services:
+  worker:
+    build:
+      context: ./services/worker
+      dockerfile: Dockerfile
+    env_file:
+      # Facoltativo per poter validare il file senza .env; il worker senza .env non parte.
+      - path: .env
+        required: false
+    environment:
+      AMBIENTE: locale
+      SUPABASE_URL: http://host.docker.internal:54321
+      WORKER_DATABASE_URL: postgresql://noxa_worker:${WORKER_DB_PASSWORD_LOCALE:-sviluppo-locale}@host.docker.internal:54322/postgres
+      LOG_FORMATO: console
+    command:
+      - uv
+      - run
+      - --no-sync
+      - uvicorn
+      - noxa_worker.api:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+      - --reload-dir
+      - /app/src
+    ports:
+      - "8000:8000"
+    volumes:
+      # Codice montato in sola lettura per il ricaricamento automatico in sviluppo.
+      - ./services/worker/src:/app/src:ro
+    extra_hosts:
+      # Necessario su Linux e WSL con Docker Engine; Docker Desktop lo risolve già.
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/salute', timeout=3).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped

@@ -1,0 +1,44 @@
+# Segreti
+.env
+.env.*
+!.env.example
+
+# Node / Next.js
+node_modules/
+.pnpm-store/
+apps/web/.next/
+apps/web/out/
+apps/web/next-env.d.ts
+*.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+
+# Capacitor (artefatti di build; i progetti ios/ e android/ sono versionati)
+apps/web/android/app/build/
+apps/web/android/.gradle/
+apps/web/android/local.properties
+apps/web/ios/App/Pods/
+apps/web/ios/App/App/public/
+apps/web/android/app/src/main/assets/public/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
+# Sistema ed editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

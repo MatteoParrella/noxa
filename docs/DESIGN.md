@@ -1,0 +1,93 @@
+# Design e interfaccia
+
+L'interfaccia di Noxa nasce in **Claude Design** e viene implementata in `apps/web` con
+Tailwind (ADR-0011). Questo documento definisce il flusso tra design e codice, le regole del
+design system e i requisiti di accessibilità. La procedura passo per passo è nella skill
+`implement-design`.
+
+## 1. Flusso dal design al codice
+
+```mermaid
+flowchart LR
+    B[Brief della schermata<br/>da PRD F-xx] --> CD[Claude Design<br/>esplorazione e versione finale]
+    CD --> EXP[Esportazione nel repository<br/>design/F-xx-nome/]
+    EXP --> TOK[Token aggiornati?<br/>tokens.css + tailwind]
+    TOK --> COMP[Componenti in<br/>src/components/ui]
+    COMP --> SCR[Schermata in<br/>src/features/area]
+    SCR --> REV[Verifica: a11y, safety-review,<br/>confronto con il design]
+```
+
+1. **Brief**: per ogni schermata si parte dalla funzionalità del PRD (ID, criteri di
+   accettazione, regole di sicurezza collegate) e si scrive un brief in
+   `design/F-xx-nome/brief.md` con: obiettivo, stati da disegnare (vuoto, caricamento,
+   errore, successo, offline), varianti per minorenni e maggiorenni se diverse, testi.
+2. **Claude Design**: si genera la schermata partendo dal design system di Noxa già presente
+   in Claude Design, così token e componenti restano coerenti.
+3. **Esportazione**: il materiale finale (link al progetto Claude Design, immagini delle
+   schermate per ogni stato, codice o specifiche esportate) va in `design/F-xx-nome/`. Il
+   codice esportato è un **riferimento**, non si copia direttamente in produzione: va
+   riscritto con i componenti, i token e le convenzioni del progetto.
+4. **Implementazione**: skill `implement-design`.
+
+## 2. Design token
+
+- Fonte di verità nel codice: `apps/web/src/styles/tokens.css` (variabili CSS), mappate nella
+  configurazione di Tailwind (`theme.extend`). Nessun valore di colore, spaziatura o raggio
+  scritto direttamente nei componenti.
+- Categorie: `colore` (superfici, testo, accento, stato: successo, avviso, errore, info),
+  `spazio` (scala di 4 px), `raggio`, `ombra`, `tipografia` (famiglie, scala, interlinea),
+  `movimento` (durate e curve, con la versione ridotta).
+- **Tema scuro come predefinito** (uso notturno), con tema chiaro completo; entrambi
+  rispettano i contrasti del §4.
+- Una modifica ai token si fa prima in Claude Design, poi in `tokens.css`, nella stessa PR.
+
+## 3. Componenti e schermate
+
+- `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda, Avviso,
+  Foglio, Badge, Avatar, Interruttore, Schede, ElencoVuoto, Caricamento, ErroreConAzione,
+  PulsanteSegnala, Mappa). Ognuno ha i test unitari e una pagina di esempio nel catalogo
+  `src/app/catalogo/page.dev.tsx`, inclusa solo in sviluppo: `next.config` aggiunge l'estensione
+  `dev.tsx` a `pageExtensions` solo quando `NODE_ENV=development`, quindi la pagina non entra
+  nella build di produzione.
+- `src/features/<area>/`: schermate e componenti specifici di una funzionalità.
+- Ogni schermata gestisce gli stati: caricamento, vuoto, errore (con un'azione per
+  riprovare), offline, successo.
+
+## 4. Accessibilità (WCAG 2.2 AA)
+
+| Requisito | Regola |
+|---|---|
+| Contrasto | Testo normale ≥ 4,5:1, testo grande e componenti dell'interfaccia ≥ 3:1, in entrambi i temi |
+| Aree di tocco | Almeno 44 × 44 px |
+| Focus | Indicatore di focus visibile, ordine di tabulazione logico, nessuna trappola del focus nei fogli e nelle finestre modali |
+| Lettori di schermo | Etichette accessibili per tutti i controlli; annunci `aria-live` per gli aggiornamenti in tempo reale (conferme della serata, stato del ritorno sicuro) |
+| Movimento | `prefers-reduced-motion` rispettato ovunque, compreso il Wrapped |
+| Testo | Ridimensionabile al 200% senza perdita di contenuto; lingua `it` dichiarata |
+| Mappa | Ogni informazione della mappa è disponibile anche nell'elenco |
+| Colore | Il colore non è mai l'unico modo per comunicare uno stato |
+| Moduli | Errori associati al campo, descritti nel testo, con suggerimento di correzione |
+
+Verifica: axe-core nei test Playwright di ogni schermata, più una prova manuale con VoiceOver
+(iOS) e TalkBack (Android) per i percorsi principali prima di ogni rilascio.
+
+## 5. Tono e testi
+
+- Si usa il "tu", con un linguaggio diretto e amichevole e frasi brevi.
+- Le regole di sicurezza si spiegano senza paternalismo: cosa succede e perché, in una frase.
+- Nessun testo che spinga a bere, a spendere o a uscire più spesso (R-43).
+- Nessun dark pattern: niente conferme colpevolizzanti ("No, non voglio divertirmi"), niente
+  urgenze artificiali, opzioni di privacy presentate con lo stesso peso visivo delle altre.
+- Per i minorenni non compaiono testi o icone che rimandano all'alcol (R-23, R-40).
+- Tutti i testi stanno in `apps/web/src/lib/messaggi/it.ts`.
+
+## 6. Schermate principali
+
+| Area | Schermate | Funzionalità |
+|---|---|---|
+| Accesso | Benvenuto, Registrazione (con data di nascita), Verifica email, Accesso, Onboarding sicurezza (3 schermate) | F-10 |
+| Scopri | Elenco eventi con filtri, Mappa, Dettaglio evento, Carica flyer, Stato dei miei flyer | F-01…F-06 |
+| Organizza | Amici (elenco, richieste, ricerca, codice QR), Gruppi, Dettaglio gruppo, Serata di gruppo (chi c'è, biglietti, trasporto) | F-11…F-16 |
+| Vivi | Check-in, Avvio ritorno sicuro, Ritorno in corso, Ritorno di un amico (mappa e stato), Allerta | F-20…F-22 |
+| Ricorda | Tracker (elenco, nuova serata, dettaglio), Statistiche, Badge, Wrapped | F-30…F-33 |
+| Profilo | Profilo, Impostazioni di privacy, Bloccati, Le mie segnalazioni, Esporta dati, Elimina account, Informativa | F-12, F-41, F-42 |
+| Moderazione | Coda flyer, Coda duplicati, Coda segnalazioni, Dettaglio segnalazione, Locali e fonti | F-40 |

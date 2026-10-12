@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noxa.app/schemas/evento/v1.json",
+  "title": "EventoNormalizzato",
+  "description": "Evento normalizzato prodotto dalla pipeline di raccolta (docs/EVENT_INGESTION.md §3.3). Contratto condiviso tra worker e app.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "versione_schema",
+    "origine",
+    "locale",
+    "titolo",
+    "inizio",
+    "riferimenti_alcol",
+    "generi",
+    "artisti"
+  ],
+  "properties": {
+    "versione_schema": { "const": 1 },
+    "origine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tipo", "raccolto_il"],
+      "properties": {
+        "tipo": {
+          "enum": ["sito_locale", "instagram", "resident_advisor", "xceed", "dice", "flyer"]
+        },
+        "fonte_id": { "type": ["string", "null"], "format": "uuid" },
+        "caricamento_flyer_id": { "type": ["string", "null"], "format": "uuid" },
+        "url": { "type": ["string", "null"], "format": "uri", "pattern": "^https?://" },
+        "id_esterno": { "type": ["string", "null"], "maxLength": 200 },
+        "raccolto_il": { "type": "string", "format": "date-time" }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "tipo": { "const": "flyer" },
+            "caricamento_flyer_id": { "type": "string", "format": "uuid" }
+          },
+          "required": ["caricamento_flyer_id"]
+        },
+        {
+          "properties": {
+            "tipo": { "enum": ["sito_locale", "instagram", "resident_advisor", "xceed", "dice"] },
+            "fonte_id": { "type": "string", "format": "uuid" },
+            "url": { "type": "string", "format": "uri", "pattern": "^https?://" }
+          },
+          "required": ["fonte_id", "url"]
+        }
+      ]
+    },
+    "locale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nome"],
+      "properties": {
+        "id": { "type": ["string", "null"], "format": "uuid" },
+        "nome": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "comune": { "type": ["string", "null"], "maxLength": 80 },
+        "indirizzo": { "type": ["string", "null"], "maxLength": 200 }
+      }
+    },
+    "titolo": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "descrizione": { "type": ["string", "null"], "maxLength": 500 },
+    "inizio": { "type": "string", "format": "date-time" },
+    "fine": { "type": ["string", "null"], "format": "date-time" },
+    "eta_minima": {
+      "description": "Età minima dichiarata dalla fonte; null = non indicata, trattata come 18 (R-21).",
+      "type": ["integer", "null"],
+      "minimum": 14,
+      "maximum": 30
+    },
+    "riferimenti_alcol": { "type": "boolean" },
+    "generi": {
+      "type": "array",
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "techno",
+          "house",
+          "reggaeton",
+          "hip_hop",
+          "commerciale",
+          "latino",
+          "drum_and_bass",
+          "elettronica",
+          "live",
+          "altro"
+        ]
+      }
+    },
+    "artisti": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+    },
+    "prezzo_min_centesimi": { "type": ["integer", "null"], "minimum": 0, "maximum": 100000 },
+    "url_biglietti": { "type": ["string", "null"], "format": "uri", "pattern": "^https://" },
+    "estrazione": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["modello", "versione_prompt", "confidenza", "anno_inferito"],
+      "properties": {
+        "modello": { "type": "string" },
+        "versione_prompt": { "type": "string" },
+        "confidenza": { "type": "number", "minimum": 0, "maximum": 1 },
+        "confidenza_campi": {
+          "type": "object",
+          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "anno_inferito": { "type": "boolean" }
+      }
+    }
+  }
+}
