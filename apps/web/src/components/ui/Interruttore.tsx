@@ -23,10 +23,7 @@ export function Interruttore({
 }: Props) {
   const id = useId();
   return (
-    <div
-      className={classi('scelta', disabled && 'is-disabilitato')}
-      style={{ justifyContent: 'space-between' }}
-    >
+    <div className={classi('scelta justify-between', disabled && 'is-disabilitato')}>
       <span className="flex flex-col">
         <span id={`${id}-etichetta`}>{etichetta}</span>
         {descrizione && (
@@ -44,7 +41,6 @@ export function Interruttore({
         disabled={disabled}
         onClick={() => onCambia(!attivo)}
         className={classi('interruttore', attivo && 'is-on', disabled && 'is-disabilitato')}
-        style={{ border: 0, padding: 0, cursor: disabled ? 'not-allowed' : 'pointer' }}
       >
         {attivo && <Icona icona={Check} className="segno" />}
       </button>
