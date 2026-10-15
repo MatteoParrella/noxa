@@ -1,0 +1,198 @@
+/*
+  Animazioni espressive di Noxa (ADR-0019). Lo stato iniziale sta solo nei keyframes `from`
+  o dietro la classe .movimento su <html>: senza JavaScript, senza animazioni o con
+  prefers-reduced-motion il contenuto è sempre visibile e al suo posto.
+*/
+
+/* ---------- Titolo che sale parola per parola ---------- */
+.titolo-rivelato {
+  display: block;
+}
+.titolo-rivelato .parola {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.titolo-rivelato .parola > span {
+  display: inline-block;
+  animation: sale var(--movimento-ingresso) var(--curva-espressiva) both;
+  animation-delay: calc(var(--indice, 0) * var(--ritardo-passo) + 80ms);
+}
+@keyframes sale {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* ---------- Etichetta che entra dal sfocato ---------- */
+.a-fuoco {
+  animation: a-fuoco var(--movimento-ingresso) var(--curva-espressiva) both;
+  animation-delay: var(--ritardo, 0ms);
+}
+@keyframes a-fuoco {
+  from {
+    opacity: 0;
+    filter: blur(var(--rivela-sfocatura));
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+/* ---------- Bagliore "lampione al sodio" nell'intestazione ---------- */
+.con-bagliore {
+  position: relative;
+  isolation: isolate;
+}
+.con-bagliore::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -140px;
+  right: -120px;
+  width: min(520px, 110vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--bagliore-accento), transparent 100%);
+  filter: blur(32px);
+  pointer-events: none;
+  animation: bagliore var(--movimento-bagliore) var(--curva-espressiva) both;
+}
+@keyframes bagliore {
+  from {
+    opacity: 0;
+    transform: translate(-18%, 22%) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Ingresso della pagina a ogni cambio di area ---------- */
+.pagina-entra {
+  animation: pagina-entra var(--movimento-espressivo) var(--curva-espressiva) both;
+}
+@keyframes pagina-entra {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Elementi che compaiono allo scorrimento ---------- */
+.movimento .rivela {
+  opacity: 0;
+  transform: translateY(var(--rivela-spostamento));
+  filter: blur(var(--rivela-sfocatura));
+  transition:
+    opacity var(--movimento-espressivo) var(--curva-espressiva),
+    transform var(--movimento-espressivo) var(--curva-espressiva),
+    filter var(--movimento-espressivo) var(--curva-espressiva);
+  transition-delay: calc(var(--indice, 0) * var(--ritardo-passo));
+}
+.movimento .rivela.is-visibile {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* ---------- Linea che si disegna sotto le etichette da pensilina ---------- */
+.etichetta-riga::after {
+  transform-origin: left;
+  animation: traccia var(--movimento-ingresso) var(--curva-espressiva) both;
+  animation-delay: 200ms;
+}
+@keyframes traccia {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- Indicatore della barra di navigazione che scorre ---------- */
+.barra-nav {
+  position: relative;
+}
+.nav-voce.is-on::before {
+  content: none;
+}
+.nav-indicatore {
+  position: absolute;
+  top: -1px;
+  left: 4px;
+  width: calc((100% - 8px) / 5);
+  height: 2px;
+  display: flex;
+  justify-content: center;
+  transform: translateX(calc(var(--indice, 0) * 100%));
+  transition: transform var(--movimento-espressivo) var(--curva-espressiva);
+  pointer-events: none;
+}
+.nav-indicatore::after {
+  content: '';
+  width: 24px;
+  height: 2px;
+  background: var(--colore-accento);
+}
+.nav-voce .ico {
+  transition: transform var(--movimento-base) var(--curva-espressiva);
+}
+.nav-voce.is-on .ico {
+  transform: translateY(-1px) scale(1.08);
+}
+
+/* ---------- Micro-interazioni al tocco ---------- */
+.btn,
+.segmento,
+.nav-voce,
+.interruttore {
+  transition-property: background-color, border-color, color, transform;
+}
+.btn:active:not(:disabled),
+.segmento:active,
+.nav-voce:active {
+  transform: scale(0.97);
+}
+.scheda-evento-copertina img {
+  transition: transform var(--movimento-ingresso) var(--curva-espressiva);
+}
+.scheda-evento:hover .scheda-evento-copertina img,
+.scheda-evento:focus-within .scheda-evento-copertina img {
+  transform: scale(1.04);
+}
+
+/* ---------- Movimento ridotto: solo dissolvenze brevi ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .movimento .rivela {
+    transform: none;
+    filter: none;
+    transition-duration: var(--movimento-ridotto);
+    transition-delay: 0ms;
+  }
+  .con-bagliore::before {
+    opacity: 1;
+    transform: none;
+  }
+  .nav-voce.is-on .ico,
+  .btn:active,
+  .segmento:active,
+  .nav-voce:active,
+  .scheda-evento:hover .scheda-evento-copertina img {
+    transform: none;
+  }
+}

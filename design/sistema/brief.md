@@ -36,7 +36,8 @@ Principi:
 4. **Griglia e ritmo.** Spaziature su scala di 4 px, molto respiro, allineamenti rigorosi,
    elenchi densi ma ordinati. Gli eventi si leggono come righe di un palinsesto più che
    come card colorate piene di immagini.
-5. **Movimento discreto.** Transizioni brevi e funzionali (150-250 ms), nessuna animazione
+5. **Movimento** (aggiornato da ADR-0019: ingressi espressivi di 700–900 ms con curva
+   `cubic-bezier(.2,.7,.2,1)`, mai in loop). Versione originale: transizioni brevi e funzionali (150-250 ms), nessuna animazione
    decorativa in loop; versione ridotta per `prefers-reduced-motion`.
 6. **Dettagli che danno carattere** senza rompere la sobrietà: per esempio un'etichetta in
    maiuscoletto spaziato, un bordo tratteggiato da "biglietto strappato" per gli elementi

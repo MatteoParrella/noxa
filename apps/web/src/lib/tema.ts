@@ -22,5 +22,8 @@ export function applicaTema(tema: Tema): void {
 
 export const EVENTO_TEMA = 'noxa:tema';
 
-/** Script eseguito prima del rendering, per evitare il lampo del tema sbagliato. */
-export const SCRIPT_TEMA = `try{if(localStorage.getItem('${CHIAVE}')==='chiaro')document.documentElement.dataset.tema='chiaro'}catch(e){}`;
+/**
+ * Script eseguito prima del rendering: applica il tema (niente lampo del tema sbagliato) e
+ * attiva le animazioni allo scorrimento (.movimento), che senza JavaScript restano spente.
+ */
+export const SCRIPT_TEMA = `document.documentElement.classList.add('movimento');try{if(localStorage.getItem('${CHIAVE}')==='chiaro')document.documentElement.dataset.tema='chiaro'}catch(e){}`;
