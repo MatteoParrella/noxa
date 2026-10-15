@@ -3,13 +3,15 @@
 Worker Python di Noxa: raccolta eventi, estrazione dei flyer con Claude API,
 deduplicazione (ADR-0003, `docs/EVENT_INGESTION.md`).
 
-Viene inizializzato nella Fase 0 (`pyproject.toml` e `uv.lock` con uv). Organizzazione
-prevista di `src/noxa_worker/`:
+Dipendenze in `pyproject.toml` e `uv.lock` (uv). Organizzazione di `src/noxa_worker/`:
 
 | Modulo | Contenuto |
 |---|---|
-| `api.py` | FastAPI interna: `/salute`, `/pronto`; avvia gli esecutori della coda nel lifespan |
-| `coda.py` | Prelievo dei job da `coda_job` con `skip locked`, lease, retry, idempotenza |
+| `api.py` | FastAPI interna: `/salute` (liveness), `/pronto` (database raggiungibile); dall'iterazione 5 avvia gli esecutori della coda nel lifespan |
+| `configurazione.py` | Impostazioni validate dalle variabili d'ambiente (`.env.example`) |
+| `osservabilita.py` | Log JSON con structlog |
+| `database.py` | Pool di connessioni con il ruolo `noxa_worker` |
+| `coda.py` | Esecutore dei job: lease di 10 minuti, timeout, retry con backoff esponenziale (massimo 5 tentativi), errori definitivi; accesso alla tabella `coda_job` tramite il protocollo `ArchivioJob` |
 | `fonti/` | `ClientHttpConforme`, adattatori, registro, bootstrap dei locali |
 | `flyer/` | Schema `FlyerEstratto`, prompt versionato, estrattore, valutazione |
 | `normalizzazione/` | Date, età minima, riferimenti all'alcol, generi |
