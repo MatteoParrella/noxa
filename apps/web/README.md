@@ -3,7 +3,7 @@
 App Noxa: Next.js (App Router) in export statico + TypeScript strict + Tailwind, distribuita
 come PWA e come app iOS e Android con Capacitor (ADR-0001).
 
-Viene inizializzata nella Fase 0 (`docs/ROADMAP.md`). Organizzazione prevista:
+Organizzazione:
 
 | Cartella | Contenuto |
 |---|---|

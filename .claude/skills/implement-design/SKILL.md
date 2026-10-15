@@ -34,7 +34,7 @@ Se manca qualcosa, chiedilo prima di iniziare: non inventare stati o testi.
    corrispondente in `tokens.css`. Un valore senza token **non si scrive a mano**:
    - se è una variazione minima di un token esistente, usa il token e segnalalo nella PR;
    - se è un nuovo valore voluto, aggiungilo prima in Claude Design e poi in `tokens.css` e
-     nella configurazione di Tailwind, nella stessa PR.
+     nella configurazione di Tailwind (`@theme inline` in `src/app/globals.css`), nella stessa PR.
 3. Verifica i contrasti dei colori con i valori dei token, in entrambi i temi (DESIGN.md §4).
 
 ### 2. Codice esportato

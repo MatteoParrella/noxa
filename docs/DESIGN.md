@@ -33,7 +33,7 @@ flowchart LR
 ## 2. Design token
 
 - Fonte di verità nel codice: `apps/web/src/styles/tokens.css` (variabili CSS), mappate nella
-  configurazione di Tailwind (`theme.extend`). Nessun valore di colore, spaziatura o raggio
+  configurazione di Tailwind 4, che sta nel CSS (`@theme inline` in `src/app/globals.css`). Nessun valore di colore, spaziatura o raggio
   scritto direttamente nei componenti.
 - Categorie: `colore` (superfici, testo, accento, stato: successo, avviso, errore, info),
   `spazio` (scala di 4 px), `raggio`, `ombra`, `tipografia` (famiglie, scala, interlinea),

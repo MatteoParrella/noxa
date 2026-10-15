@@ -14,9 +14,8 @@ Accompagna tutta la serata:
 La sicurezza dei minorenni è un requisito del prodotto, applicato nel database con Row Level
 Security: vedi [docs/SAFETY_PRIVACY.md](docs/SAFETY_PRIVACY.md).
 
-> **Stato**: progettazione completata, sviluppo non ancora iniziato. Il prossimo passo è la
-> Fase 0 di [docs/ROADMAP.md](docs/ROADMAP.md), che inizializza `apps/web`,
-> `services/worker` e `supabase/`. Fino ad allora i comandi qui sotto non funzionano.
+> **Stato**: Fase 0 in corso (iterazione 0, fondamenta del repository). L'avanzamento è in
+> [docs/REGISTRO_ITERAZIONI.md](docs/REGISTRO_ITERAZIONI.md).
 
 ## Architettura in breve
 
@@ -55,11 +54,11 @@ Sviluppo su Windows con WSL 2 (Ubuntu) oppure su Linux o macOS.
 |---|---|
 | WSL 2 + Ubuntu | 22.04 o successiva |
 | Docker Desktop (integrazione WSL attiva) o Docker Engine | 24 o successiva |
-| Node.js | 22 LTS (fissata in `.nvmrc`) |
+| Node.js | 22 LTS, almeno 22.13 (fissata in `.nvmrc`) |
 | pnpm | tramite Corepack, versione fissata in `package.json` |
 | Python | 3.12 (fissata in `services/worker/.python-version`) |
 | uv | ultima versione stabile |
-| Supabase CLI | ultima versione stabile |
+| Supabase CLI | installata da `pnpm install` (dipendenza di sviluppo); si usa con `pnpm exec supabase` |
 | Android Studio / Xcode | solo per le build native (Xcode richiede macOS) |
 
 Su WSL clona il repository nel filesystem Linux (per esempio `~/progetti/noxa`), non in
@@ -71,17 +70,20 @@ Su WSL clona il repository nel filesystem Linux (per esempio `~/progetti/noxa`),
 # 1. Variabili d'ambiente
 cp .env.example .env            # compila i valori: vedi i commenti nel file
 
-# 2. Database locale (Postgres, Auth, Storage, Realtime in container gestiti dalla CLI)
+# 2. Dipendenze JS (compresa la CLI Supabase)
+corepack enable
+pnpm install
+alias supabase='pnpm exec supabase'   # facoltativo, da mettere nel ~/.bashrc
+
+# 3. Database locale (Postgres, Auth, Storage, Realtime in container gestiti dalla CLI)
 supabase start
 supabase db reset               # applica migrazioni e seed con gli utenti di test
 
-# 3. App
-corepack enable
-pnpm install
+# 4. App
 supabase gen types typescript --local > apps/web/src/lib/database.types.ts
 pnpm --filter web dev           # http://localhost:3000
 
-# 4. Worker
+# 5. Worker
 docker compose up --build worker   # http://localhost:8000/salute
 ```
 
@@ -96,7 +98,8 @@ Utenti di test (solo in locale, creati da `supabase/seed.sql`): `minore_14`, `mi
 ## Test
 
 ```bash
-python3 scripts/verifica_documentazione.py   # coerenza della documentazione (già disponibile)
+python3 scripts/verifica_documentazione.py   # coerenza della documentazione
+python3 scripts/verifica_migrazioni.py       # ogni tabella ha RLS e test
 supabase test db                    # policy RLS e regole di sicurezza (pgTAP)
 pnpm --filter web test              # unitari app
 pnpm --filter web test:e2e          # percorsi end-to-end con verifica di accessibilità

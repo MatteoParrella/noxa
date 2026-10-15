@@ -67,7 +67,7 @@ logica, poi l'interfaccia.
 supabase db reset && supabase test db
 pnpm --filter web lint && pnpm --filter web typecheck && pnpm --filter web test
 pnpm --filter web test:e2e
-cd services/worker && uv run ruff check . && uv run mypy src && uv run pytest   # se toccato
+cd services/worker && uv run ruff check . && uv run mypy src tests && uv run pytest   # se toccato
 ```
 
 - Ogni criterio di accettazione del PRD ha almeno un test che lo verifica (unitario o e2e).

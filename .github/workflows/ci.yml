@@ -1,0 +1,166 @@
+# CI di Noxa (ROADMAP.md, Fase 0). I job di app, worker e database girano solo quando cambiano
+# le loro cartelle (ADR-0015); i controlli della documentazione e delle migrazioni sempre.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  modifiche:
+    name: Cartelle modificate
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      web: ${{ steps.filtro.outputs.web }}
+      worker: ${{ steps.filtro.outputs.worker }}
+      database: ${{ steps.filtro.outputs.database }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: filtro
+        uses: dorny/paths-filter@v4
+        with:
+          filters: |
+            web:
+              - 'apps/web/**'
+              - 'packages/schemas/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - '.nvmrc'
+              - '.prettierrc.json'
+              - '.prettierignore'
+              - '.github/workflows/ci.yml'
+            worker:
+              - 'services/worker/**'
+              - 'packages/schemas/**'
+              - 'docker-compose.yml'
+              - '.github/workflows/ci.yml'
+            database:
+              - 'supabase/**'
+              - 'scripts/verifica_migrazioni.py'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/ci.yml'
+
+  documentazione:
+    name: Documentazione e migrazioni
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: python3 scripts/verifica_documentazione.py
+      # Ogni tabella di public ha RLS e un file di test (R-68).
+      - run: python3 scripts/verifica_migrazioni.py
+
+  web:
+    name: App web
+    needs: modifiche
+    if: needs.modifiche.outputs.web == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm --filter web lint
+      - run: pnpm --filter web typecheck
+      - run: pnpm --filter web test
+      - run: pnpm --filter web build
+      - run: pnpm --filter web exec playwright install --with-deps chromium
+      - run: pnpm --filter web test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rapporto-playwright
+          path: apps/web/playwright-report/
+          retention-days: 7
+
+  worker:
+    name: Worker
+    needs: modifiche
+    if: needs.modifiche.outputs.worker == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: services/worker
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy src tests
+      - run: uv run pytest
+      - name: Immagine Docker
+        run: docker build --tag noxa-worker:ci .
+      - name: Avvio del container e /salute
+        run: |
+          docker run --detach --name worker -p 8000:8000 \
+            -e AMBIENTE=locale \
+            -e WORKER_DATABASE_URL=postgresql://noxa_worker:ci@127.0.0.1:1/postgres \
+            noxa-worker:ci
+          for tentativo in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:8000/salute; then exit 0; fi
+            sleep 1
+          done
+          docker logs worker
+          exit 1
+
+  database:
+    name: Database (pgTAP)
+    needs: modifiche
+    if: needs.modifiche.outputs.database == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Solo Postgres: migrazioni e seed, senza gli altri servizi di Supabase.
+      - run: pnpm exec supabase db start
+      - run: pnpm exec supabase test db
+      - run: pnpm exec supabase db lint --schema public,private --level warning --fail-on error
+
+  dipendenze:
+    name: Controllo delle dipendenze
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Bloccante sulle dipendenze che finiscono nell'app pubblicata.
+      - run: pnpm audit --prod --audit-level high
+      # Solo informativo sugli strumenti di sviluppo (lint, test), che non vengono pubblicati.
+      - run: pnpm audit --audit-level high
+        continue-on-error: true
+      - uses: astral-sh/setup-uv@v10
+      - name: pip-audit sulle dipendenze del worker
+        working-directory: services/worker
+        run: |
+          uv export --frozen --no-dev --no-emit-project --output-file "$RUNNER_TEMP/requisiti.txt"
+          uvx pip-audit --requirement "$RUNNER_TEMP/requisiti.txt" --disable-pip --strict

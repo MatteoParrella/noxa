@@ -200,8 +200,8 @@ Ogni iterazione ha:
 ### Iterazione 2 — Account e sicurezza di base
 - **Contenuto**: migrazioni di `profili`, `profili_privati`, `ruoli_utente`, `consensi` e delle
   funzioni `private.*` per età e fascia (DATA_MODEL.md §4); trigger di registrazione (R-01,
-  R-02); `000_supporto.test.sql`, `001_rls_abilitata.test.sql` e seed con gli utenti per
-  età; schermate di accesso, registrazione con CAPTCHA, verifica email, onboarding di
+  R-02); `000_supporto.test.sql` e seed con gli utenti per età (`001_rls_abilitata.test.sql`
+  esiste dall'iterazione 0); schermate di accesso, registrazione con CAPTCHA, verifica email, onboarding di
   sicurezza, consensi versionati; client tipizzato ed errori di dominio.
 - **Prerequisiti esterni**: chiave Cloudflare Turnstile.
 - **Criteri**: criteri della **Fase 0** (§Fase 0) verificati; test e2e che un utente di 13
@@ -223,7 +223,9 @@ Ogni iterazione ha:
   `cerca_eventi` < 800 ms al 95° percentile con 5.000 eventi sintetici.
 
 ### Iterazione 5 — Raccolta automatica degli eventi
-- **Contenuto**: `fonti`, `eventi_grezzi`, `coda_job`; `ClientHttpConforme`, normalizzazione,
+- **Contenuto**: `fonti`, `eventi_grezzi`, `coda_job`; archivio Postgres della coda
+  (implementazione di `ArchivioJob` con `for update skip locked`, test di integrazione) e avvio
+  degli esecutori nel lifespan del worker; `ClientHttpConforme`, normalizzazione,
   adattatori `sito_jsonld`, almeno un `sito_html_<locale>`,
   `instagram_business_discovery`; deduplicazione e fusione con golden set; bootstrap dei
   locali da OSM e Google Places; `pg_cron` di accodamento; RPC `esegui_fonte_ora` e

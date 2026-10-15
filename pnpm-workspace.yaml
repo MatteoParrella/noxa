@@ -1,0 +1,40 @@
+packages:
+  - apps/*
+
+# Solo i pacchetti elencati possono eseguire script di installazione.
+allowBuilds:
+  supabase: true
+  sharp: true
+  unrs-resolver: true
+
+# Versioni corrette di dipendenze indirette con vulnerabilità note.
+minimumReleaseAgeExclude:
+  - '@next/env@16.4.1'
+  - '@next/eslint-plugin-next@16.4.1'
+  - '@next/swc-darwin-arm64@16.4.1'
+  - '@next/swc-darwin-x64@16.4.1'
+  - '@next/swc-linux-arm64-gnu@16.4.1'
+  - '@next/swc-linux-arm64-musl@16.4.1'
+  - '@next/swc-linux-x64-gnu@16.4.1'
+  - '@next/swc-linux-x64-musl@16.4.1'
+  - '@next/swc-win32-arm64-msvc@16.4.1'
+  - '@next/swc-win32-x64-msvc@16.4.1'
+  - '@playwright/test@1.64.1'
+  - '@supabase/cli-darwin-arm64@2.121.0'
+  - '@supabase/cli-darwin-x64@2.121.0'
+  - '@supabase/cli-linux-arm64-musl@2.121.0'
+  - '@supabase/cli-linux-arm64@2.121.0'
+  - '@supabase/cli-linux-x64-musl@2.121.0'
+  - '@supabase/cli-linux-x64@2.121.0'
+  - '@supabase/cli-windows-arm64@2.121.0'
+  - '@supabase/cli-windows-x64@2.121.0'
+  - eslint-config-next@16.4.1
+  - next@16.4.1
+  - playwright-core@1.64.1
+  - playwright@1.64.1
+  - react-dom@19.3.1
+  - react@19.3.1
+  - supabase@2.121.0
+
+overrides:
+  compression: '>=1.8.2'

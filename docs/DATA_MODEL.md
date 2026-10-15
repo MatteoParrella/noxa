@@ -882,7 +882,12 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 - `supabase/tests/000_supporto.test.sql` definisce le funzioni di supporto `tests.*`
   (skill `db-migration`).
 - `supabase/tests/001_rls_abilitata.test.sql` fallisce se una tabella di `public` non ha RLS
-  abilitata o se una tabella non compare in nessun file di test.
+  abilitata, se una vista di `public` non è `security_invoker`, se in `public` c'è una vista
+  materializzata, se `anon` può usare lo schema `private` o se `noxa_worker` ha privilegi
+  amministrativi.
+- `scripts/verifica_migrazioni.py` (anche in CI) fallisce se una tabella creata in `public`
+  dalle migrazioni non ha `enable row level security` o non compare in nessun file di
+  `supabase/tests/`.
 - Per ogni tabella esiste `supabase/tests/<nn>_<tabella>.test.sql` con i casi indicati sopra,
   eseguiti impersonando gli utenti del seed (`set local role authenticated` e
   `set local request.jwt.claims`).

@@ -104,7 +104,7 @@ flowchart LR
 
 | Modulo | Responsabilità |
 |---|---|
-| `coda` | Prelievo dei job con `select … for update skip locked`, lease (`bloccato_fino`, 10 minuti), recupero dei job con lease scaduto, retry con backoff esponenziale (massimo 5 tentativi), idempotenza per `tipo` + chiave del payload. Il worker non pianifica nulla: l'unico scheduler è `pg_cron` (ADR-0003). |
+| `coda` | Prelievo dei job con `select … for update skip locked`, lease (`bloccato_fino`, 10 minuti), recupero dei job con lease scaduto, retry con backoff esponenziale (massimo 5 tentativi), idempotenza per `tipo` + chiave del payload. L'esecutore (`EsecutoreCoda`) accede alla tabella tramite il protocollo `ArchivioJob`, verificabile senza database e sostituibile se la coda dovesse uscire da Postgres. Il worker non pianifica nulla: l'unico scheduler è `pg_cron` (ADR-0003). |
 | `fonti` | Adattatori, uno per tipo di fonte, con un'interfaccia comune (EVENT_INGESTION.md §4); controllo di robots.txt; limitazione della frequenza per dominio. |
 | `flyer` | Prompt, schema Pydantic ed estrazione con Claude API (ADR-0007). |
 | `normalizzazione` | Conversione nel formato di `packages/schemas/evento.schema.json`, risoluzione del locale, normalizzazione di date e generi. |

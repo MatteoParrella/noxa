@@ -63,15 +63,16 @@ badge e riepilogo annuale. È un prodotto destinato al lancio pubblico, non un p
 │   ├── functions/           Edge Functions
 │   └── seed.sql             utenti di test per età
 ├── packages/schemas/        JSON Schema condivisi (evento.schema.json)
-├── scripts/                 strumenti di repository (verifica_documentazione.py)
+├── scripts/                 strumenti di repository (verifica_documentazione.py, verifica_migrazioni.py)
 ├── design/F-xx-nome/        brief ed esportazioni da Claude Design
 └── docs/                    documentazione
 ```
 
 ## Comandi
 
-Disponibili dal completamento della Fase 0, quando `apps/web`, `services/worker` e
-`supabase/` sono inizializzati (ROADMAP.md).
+La CLI Supabase è una dipendenza di sviluppo del repository: si esegue con `pnpm exec supabase …`
+(conviene `alias supabase='pnpm exec supabase'` nel `~/.bashrc`). Docker deve essere attivo
+(Docker Desktop con l'integrazione WSL).
 
 | Scopo | Comando |
 |---|---|
@@ -85,10 +86,12 @@ Disponibili dal completamento della Fase 0, quando `apps/web`, `services/worker`
 | Test e2e | `pnpm --filter web test:e2e` |
 | Build ed app native | `pnpm --filter web build && pnpm --filter web exec cap sync` |
 | Worker (dipendenze) | `cd services/worker && uv sync` |
-| Controlli worker | `uv run ruff check .` · `uv run ruff format --check .` · `uv run mypy src` · `uv run pytest` |
+| Controlli worker | `uv run ruff check .` · `uv run ruff format --check .` · `uv run mypy src tests` · `uv run pytest` |
 | Worker in Docker | `docker compose up --build worker` |
 | Valutazione flyer (da `services/worker`) | `uv run python -m noxa_worker.flyer.valuta --golden tests/dati/flyer_golden` |
-| Coerenza documentazione | `python3 scripts/verifica_documentazione.py` (già disponibile) |
+| Formattazione JS/TS | `pnpm format:check` · `pnpm format` |
+| Coerenza documentazione | `python3 scripts/verifica_documentazione.py` |
+| RLS e test delle tabelle | `python3 scripts/verifica_migrazioni.py` |
 
 ## Regole di sicurezza dei minorenni — vincoli sempre validi
 
