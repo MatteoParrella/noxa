@@ -190,7 +190,8 @@ Ogni iterazione ha:
   `page.dev.tsx`; layout di navigazione delle aree Scopri, Organizza, Vivi, Ricorda,
   Profilo; PWA (manifest, service worker); Capacitor iOS e Android; mappa Protomaps con file
   `milano-brianza.pmtiles`, font e icone nel bucket `mappe` e stili personalizzati
-  (ADR-0016); axe nei test e2e.
+  (ADR-0016); scheda evento con spazio per la foto del locale e velatura al posto del blocco
+  colorato del design (ADR-0018); axe nei test e2e.
 - **Prerequisiti esterni**: account Apple Developer e Google Play Console per firmare le
   build (le build locali funzionano anche senza).
 - **Criteri**: nessuna violazione axe nel catalogo e nella navigazione, in entrambi i temi;
@@ -217,9 +218,11 @@ Ogni iterazione ha:
 
 ### Iterazione 4 — Catalogo eventi e scoperta
 - **Contenuto**: `locali`, `eventi`, `generi_musicali`, `eventi_generi`, `eventi_fonti`,
-  `partecipazioni_evento`; RPC `cerca_eventi`; dati di esempio nel seed; schermate elenco con
-  filtri, mappa, dettaglio, "mi interessa / partecipo", amici che partecipano.
-- **Criteri**: test pgTAP di R-20…R-23 e R-67 per età 14, 15, 16, 17, 18, 20, 21;
+  `partecipazioni_evento`; colonne della foto in `locali` e bucket `immagini-locali` con le
+  policy (ADR-0018, R-56); RPC `cerca_eventi`, che restituisce anche l'immagine di copertina
+  secondo l'ordine dell'ADR; dati di esempio nel seed; schermate elenco con filtri, mappa,
+  dettaglio, "mi interessa / partecipo", amici che partecipano.
+- **Criteri**: test pgTAP di R-20…R-23, R-56 e R-67 per età 14, 15, 16, 17, 18, 20, 21;
   `cerca_eventi` < 800 ms al 95° percentile con 5.000 eventi sintetici.
 
 ### Iterazione 5 — Raccolta automatica degli eventi
@@ -229,8 +232,10 @@ Ogni iterazione ha:
   adattatori `sito_jsonld`, almeno un `sito_html_<locale>`,
   `instagram_business_discovery`; deduplicazione e fusione con golden set; bootstrap dei
   locali da OSM e Google Places; `pg_cron` di accodamento; RPC `esegui_fonte_ora` e
-  `decidi_duplicato`; area di moderazione per locali, fonti e duplicati.
-- **Prerequisiti esterni**: App Review Meta approvata; chiave Google Places.
+  `decidi_duplicato`; area di moderazione per locali (con caricamento e approvazione della
+  foto, ADR-0018), fonti e duplicati.
+- **Prerequisiti esterni**: App Review Meta approvata; chiave Google Places; foto autorizzate
+  o con licenza libera dei locali verificati (ADR-0018).
 - **Criteri**: test degli adattatori su fixture; precisione della deduplicazione ≥ 98% e
   richiamo ≥ 90% sul golden set; almeno 40 locali verificati.
 

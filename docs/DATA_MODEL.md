@@ -84,7 +84,8 @@ erDiagram
 | `tipo_consenso` | `termini`, `privacy` |
 | `stato_amicizia` | `in_attesa`, `accettata` |
 | `canale_amicizia` | `ricerca`, `codice_invito` |
-| `tipo_oggetto_segnalabile` | `profilo`, `evento`, `caricamento_flyer`, `gruppo`, `serata_gruppo` |
+| `tipo_oggetto_segnalabile` | `profilo`, `evento`, `caricamento_flyer`, `gruppo`, `serata_gruppo`, `immagine_locale` |
+| `fonte_immagine_locale` | `autorizzazione_locale`, `noxa`, `licenza_libera` |
 | `motivo_segnalazione` | `contenuto_inappropriato`, `molestie`, `adescamento_o_rischio_minore`, `spam`, `evento_falso`, `eta_errata`, `alcol_a_minori`, `altro` |
 | `stato_segnalazione` | `aperta`, `in_lavorazione`, `chiusa` |
 | `azione_moderazione` | `nessuna_violazione`, `rimuovi_contenuto`, `modifica_evento`, `approva_flyer`, `rifiuta_flyer`, `sospendi_account`, `riattiva_account`, `correggi_data_nascita`, `escalation_autorita`, `accesso_segnalazione` |
@@ -357,11 +358,17 @@ Registro di sola aggiunta delle decisioni e degli accessi (DSA art. 17, R-53, R-
 | `osm_id` | `text` | nullable, unico |
 | `google_place_id` | `text` | nullable, unico (unico dato di Google conservato, ADR-0008) |
 | `sito_web`, `instagram_username` | `text` | nullable |
+| `immagine_path` | `text` | nullable; percorso nel bucket `immagini-locali` (ADR-0018) |
+| `immagine_fonte` | `fonte_immagine_locale` | nullable; obbligatoria se `immagine_path` non è null |
+| `immagine_attribuzione` | `text` | nullable; obbligatoria con `licenza_libera`; mostrata nel dettaglio evento |
+| `immagine_riferimento` | `text` | nullable; obbligatorio con `autorizzazione_locale` (riferimento al documento di autorizzazione) |
+| `immagine_approvata_da` | `uuid` | nullable, FK → `profili(id)`; moderatore che ha caricato e approvato la foto (R-56) |
+| `immagine_approvata_il` | `timestamptz` | nullable |
 | `attivo` | `boolean` | default `true` |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
 - **S**: `authenticated` con `attivo = true`; moderatori: tutti.
-- **I/U**: `private.e_moderatore()`.
+- **I/U**: `private.e_moderatore()`. Un check impone fonte, approvazione e attribuzione o riferimento coerenti quando `immagine_path` è valorizzato (R-56); la modifica della foto produce una riga in `azioni_moderazione`.
 - Worker: `GRANT SELECT` a `noxa_worker`, policy `to noxa_worker using (true)`.
 
 #### `fonti`
@@ -851,6 +858,7 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 | `avatar` | no | `<utente_id>/<file>` | `private.puo_vedere_profilo(<utente_id dal percorso>)` | titolare, solo nella propria cartella; immagini fino a 2 MB |
 | `flyer-caricati` | no | `<utente_id>/<uuid>.<ext>` | titolare e moderatori; il worker con `service_role` (ADR-0003) | titolare, solo nella propria cartella; JPEG/PNG/WebP fino a 10 MB (R-54) |
 | `flyer-pubblicati` | no | `eventi/<evento_id>.webp` | `exists` sull'evento (soggetta alla RLS di `eventi`) | solo il worker con `service_role`, con il job `copia_immagine_flyer` accodato da `decidi_flyer` dopo l'approvazione |
+| `immagini-locali` | no | `<locale_id>.webp` | `authenticated` se il locale è attivo (`exists` su `locali` con la sua RLS); moderatori | solo moderatori; WebP fino a 1 MB, EXIF rimosso (ADR-0018, R-56) |
 | `mappe` | sì | `milano-brianza.pmtiles`, `assets/` (font e icone di Protomaps) | tutti | solo durante il deploy (ADR-0016) |
 
 ## 7. Realtime
