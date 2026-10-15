@@ -141,7 +141,7 @@ jobs:
       # Solo Postgres: migrazioni e seed, senza gli altri servizi di Supabase.
       - run: pnpm exec supabase db start
       - run: pnpm exec supabase test db
-      - run: pnpm exec supabase db lint --level warning --fail-on error
+      - run: pnpm exec supabase db lint --schema public,private --level warning --fail-on error
 
   dipendenze:
     name: Controllo delle dipendenze

@@ -21,7 +21,8 @@ export default defineConfig({
     { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    command: `pnpm build && pnpm exec serve out --listen ${porta} --no-clipboard`,
+    // In CI l'export è già stato generato dal passo di build.
+    command: `${ci ? '' : 'pnpm build && '}pnpm exec serve out --listen ${porta} --no-clipboard`,
     url: `http://127.0.0.1:${porta}`,
     reuseExistingServer: !ci,
     timeout: 180_000,
