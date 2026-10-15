@@ -140,7 +140,7 @@ In `tests/unit/fonti/test_<nome_adattatore>.py`:
 Esegui tutto:
 ```bash
 cd services/worker
-uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run pytest
+uv run ruff check . && uv run ruff format --check . && uv run mypy src tests && uv run pytest
 ```
 
 ## 6. Attivazione

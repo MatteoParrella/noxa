@@ -77,7 +77,7 @@ Ripeti il ciclo finché **tutti** i controlli sono superati, contando i cicli:
    python3 scripts/verifica_documentazione.py
    supabase db reset && supabase test db
    pnpm --filter web lint && pnpm --filter web typecheck && pnpm --filter web test && pnpm --filter web test:e2e
-   cd services/worker && uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run pytest
+   cd services/worker && uv run ruff check . && uv run ruff format --check . && uv run mypy src tests && uv run pytest
    ```
    Dall'iterazione 0 esegui solo i comandi già disponibili.
 2. Rileggi il diff dell'iterazione (`git diff main...HEAD`) come un revisore senior: errori,
