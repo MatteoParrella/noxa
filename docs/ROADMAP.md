@@ -203,7 +203,8 @@ Ogni iterazione ha:
   funzioni `private.*` per età e fascia (DATA_MODEL.md §4); trigger di registrazione (R-01,
   R-02); `000_supporto.test.sql` e seed con gli utenti per età (`001_rls_abilitata.test.sql`
   esiste dall'iterazione 0); schermate di accesso, registrazione con CAPTCHA, verifica email, onboarding di
-  sicurezza, consensi versionati; client tipizzato ed errori di dominio.
+  sicurezza, consensi versionati; client tipizzato ed errori di dominio; Content Security
+  Policy della PWA negli header di Vercel (ARCHITECTURE.md §9).
 - **Prerequisiti esterni**: chiave Cloudflare Turnstile.
 - **Criteri**: criteri della **Fase 0** (§Fase 0) verificati; test e2e che un utente di 13
   anni non può registrarsi né dall'app né dall'API.
@@ -257,7 +258,8 @@ Ogni iterazione ha:
   gruppo misto valido e rifiutato; aggiornamento in tempo reale tra due sessioni.
 
 ### Iterazione 8 — Tracker, privacy e beta
-- **Contenuto**: tabelle del tracker e trigger di R-40; offline con coda di scritture; Edge
+- **Contenuto**: tabelle del tracker e trigger di R-40; offline con coda di scritture e cache
+  delle tile della mappa già viste (richieste PMTiles a intervalli, ADR-0016); Edge
   Functions `esporta-dati` ed `elimina-account`; impostazioni di privacy;
   `applica_conservazione`; verifica completa di accessibilità; build interne TestFlight e
   Google Play.

@@ -27,7 +27,8 @@ tile pubbliche di openstreetmap.org non possono essere usate da un'app in produz
   Supabase). Nello stesso bucket stanno anche **font (glyphs) e icone (sprites)** di
   Protomaps (`basemaps-assets`), così nessuna richiesta della mappa va a server di terzi.
 - **Client**: MapLibre GL JS con il protocollo `pmtiles://` (libreria `pmtiles`). Le tile già
-  viste restano nella cache del service worker, quindi chi riapre la mappa non le riscarica.
+  viste restano nella cache del service worker, quindi chi riapre la mappa non le riscarica
+  (font e icone dall'iterazione 1, tile con l'offline dell'iterazione 8).
 - **Attribuzione**: "© OpenStreetMap contributors" e "Protomaps" sempre visibili.
 - **Soglia di crescita**: se il traffico delle mappe supera il traffico incluso nel piano
   Supabase (oggi circa 250 GB/mese, circa 10.000 utenti attivi al mese), il file si sposta su

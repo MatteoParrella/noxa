@@ -116,6 +116,9 @@ pnpm --filter web exec cap open android # oppure ios (solo macOS)
 
 ## Mappe
 
+In locale: `scripts/prepara_mappa.sh` scarica l'area e la carica nel bucket `mappe` di
+`supabase start` (serve la CLI `pmtiles`). La procedura manuale è questa:
+
 Mappe gratuite con la basemap Protomaps auto-ospitata (ADR-0016). Il file dell'area si
 estrae dalla build mondiale di Protomaps con la CLI `pmtiles`:
 

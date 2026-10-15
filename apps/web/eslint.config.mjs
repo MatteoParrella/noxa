@@ -9,12 +9,16 @@ const configurazione = [
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
       'no-console': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     },
   },
   {
     ignores: [
       '.next/',
       'out/',
+      'android/',
+      'ios/',
+      'public/vendor/',
       'next-env.d.ts',
       'playwright-report/',
       'test-results/',

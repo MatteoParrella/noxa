@@ -33,8 +33,20 @@ flowchart LR
 ## 2. Design token
 
 - Fonte di verità nel codice: `apps/web/src/styles/tokens.css` (variabili CSS), mappate nella
-  configurazione di Tailwind 4, che sta nel CSS (`@theme inline` in `src/app/globals.css`). Nessun valore di colore, spaziatura o raggio
-  scritto direttamente nei componenti.
+  configurazione di Tailwind 4, che sta nel CSS (`@theme inline` in `src/app/globals.css`).
+  Le palette predefinite di Tailwind sono azzerate: le utility disponibili sono solo quelle
+  dei token (`bg-superficie-1`, `text-testo-secondario`, `rounded-3`…). Nessun valore di
+  colore, spaziatura o raggio scritto direttamente nei componenti.
+- Origine: il foglio `design/sistema/noxa.css` del progetto Claude Design "Noxa — Design
+  system" (accento A, arancio "lampione al sodio"). Le classi dei componenti stanno in
+  `src/styles/componenti.css` e usano solo i token.
+- Temi: scuro su `:root`, chiaro con `data-tema="chiaro"` su `<html>`, scelto nel Profilo e
+  ricordato sul dispositivo; un elemento con `data-tema` applica il tema solo al suo
+  contenuto (catalogo dei componenti).
+- Font: Archivo (variabile, assi peso e larghezza) e IBM Plex Mono, serviti dall'app con
+  Fontsource, senza richieste a Google Fonts (R-62).
+- Token aggiunti nel codice e da riportare in Claude Design: `--colore-velo-foto` e
+  `--colore-testo-su-foto` per il testo sopra le foto dei locali (ADR-0018).
 - Categorie: `colore` (superfici, testo, accento, stato: successo, avviso, errore, info),
   `spazio` (scala di 4 px), `raggio`, `ombra`, `tipografia` (famiglie, scala, interlinea),
   `movimento` (durate e curve, con la versione ridotta).
@@ -49,12 +61,18 @@ flowchart LR
   il flyer approvato e poi il fondo tipografico (ADR-0018). L'accento del design system
   (arancio "lampione al sodio", esplorazione A) resta per azioni e stati attivi.
 
-- `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda, Avviso,
-  Foglio, Badge, Avatar, Interruttore, Schede, ElencoVuoto, Caricamento, ErroreConAzione,
-  PulsanteSegnala, Mappa). Ognuno ha i test unitari e una pagina di esempio nel catalogo
+- `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda,
+  SchedaEvento, Avviso, Foglio, Badge e Contatore, Avatar e GruppoAvatar, Interruttore,
+  Segmenti, Schede, ElencoVuoto, Caricamento, ErroreConAzione, StrisciaOffline,
+  PulsanteSegnala, Mappa). Foglio e modale usano `<dialog>`: il browser gestisce focus, Esc e
+  inerzia del resto della pagina. Le icone sono di Lucide, con tratto 1,75.
+- `src/components/guscio/`: barra di navigazione delle cinque aree (Scopri, Organizza, Vivi,
+  Ricorda, Profilo), link "Vai al contenuto", striscia offline, registrazione del service
+  worker. Ognuno ha i test unitari e una pagina di esempio nel catalogo
   `src/app/catalogo/page.dev.tsx`, inclusa solo in sviluppo: `next.config` aggiunge l'estensione
-  `dev.tsx` a `pageExtensions` solo quando `NODE_ENV=development`, quindi la pagina non entra
-  nella build di produzione.
+  `dev.tsx` a `pageExtensions` solo quando `NODE_ENV=development` o `NOXA_CATALOGO=1` (build
+  dei test e2e, che verificano il catalogo con axe), quindi la pagina non entra nella build di
+  produzione; la CI lo controlla.
 - `src/features/<area>/`: schermate e componenti specifici di una funzionalità.
 - Ogni schermata gestisce gli stati: caricamento, vuoto, errore (con un'azione per
   riprovare), offline, successo.

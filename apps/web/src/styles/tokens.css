@@ -1,0 +1,157 @@
+/*
+  Design token di Noxa, dal design system di Claude Design (design/sistema/noxa.css,
+  ADR-0011). Fonte di verità nel codice: una modifica si fa prima in Claude Design, poi qui,
+  nella stessa PR (DESIGN.md §2). Tema scuro predefinito; tema chiaro con
+  <html data-tema="chiaro">; data-tema su un elemento applica il tema solo a quella parte
+  (catalogo dei componenti). Accento A, "lampione al sodio" (design/sistema/brief.md).
+*/
+
+:root {
+  /* tipografia */
+  --tipo-famiglia-testo: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --tipo-famiglia-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --tipo-peso-normale: 400;
+  --tipo-peso-medio: 500;
+  --tipo-peso-forte: 700;
+  --tipo-larghezza-stretta: 75%; /* font-stretch per i titoli editoriali */
+  --tipo-larghezza-normale: 100%;
+  --tipo-display: 3rem; /* 48 / 48 */
+  --tipo-titolo-1: 2.125rem; /* 34 / 36 */
+  --tipo-titolo-2: 1.5rem; /* 24 / 28 */
+  --tipo-titolo-3: 1.1875rem; /* 19 / 24 */
+  --tipo-corpo: 1rem; /* 16 / 24 */
+  --tipo-corpo-piccolo: 0.875rem; /* 14 / 20 */
+  --tipo-didascalia: 0.75rem; /* 12 / 16 */
+  --tipo-etichetta: 0.6875rem; /* 11 / 16, maiuscolo +0.12em */
+  --tipo-mono-dato: 0.8125rem; /* 13 / 16 */
+  --tipo-mono-orario: 1.25rem; /* 20 / 24 */
+  --tipo-mono-statistica: 2.75rem; /* 44 / 44 */
+  /* spazio — scala di 4 px */
+  --spazio-0: 0;
+  --spazio-1: 4px;
+  --spazio-2: 8px;
+  --spazio-3: 12px;
+  --spazio-4: 16px;
+  --spazio-5: 20px;
+  --spazio-6: 24px;
+  --spazio-8: 32px;
+  --spazio-10: 40px;
+  --spazio-12: 48px;
+  --spazio-16: 64px;
+  --area-tocco: 44px;
+  /* raggio */
+  --raggio-0: 0;
+  --raggio-1: 2px; /* badge, etichette */
+  --raggio-2: 4px; /* pulsanti, campi, segmenti */
+  --raggio-3: 8px; /* schede, fogli, modali */
+  --raggio-tondo: 999px; /* solo avatar, interruttori, segnaposto */
+  /* movimento */
+  --movimento-veloce: 150ms;
+  --movimento-base: 200ms;
+  --movimento-lento: 250ms;
+  --curva-standard: cubic-bezier(0.2, 0, 0.2, 1);
+  --curva-entrata: cubic-bezier(0.2, 0, 0, 1);
+  --curva-uscita: cubic-bezier(0.4, 0, 1, 1);
+  --movimento-ridotto: 100ms; /* solo dissolvenza, nessuno spostamento */
+}
+
+/* ---------- Tema scuro (predefinito) ---------- */
+:root,
+[data-tema='scuro'] {
+  --colore-sfondo: #0e1116;
+  --colore-superficie-1: #151920;
+  --colore-superficie-2: #1c212a;
+  --colore-superficie-3: #242a35;
+  --colore-superficie-elevata: #2b3240;
+  --colore-linea: #2a303b; /* hairline decorativa */
+  --colore-linea-forte: #7a8394; /* bordo componenti ≥3:1 */
+  --colore-testo-primario: #edeae4;
+  --colore-testo-secondario: #b4afa6;
+  --colore-testo-terziario: #a09b92;
+  --colore-testo-su-accento: #0e1116;
+  --colore-accento: #f28c28; /* lampione al sodio */
+  --colore-accento-premuto: #d9761a;
+  --colore-accento-tenue: #3a2614;
+  --colore-accento-testo: #f5a04d;
+  --colore-focus: #8db8ff;
+  --colore-successo: #6cc793;
+  --colore-successo-tenue: #16301f;
+  --colore-avviso: #e9c46a;
+  --colore-avviso-tenue: #33290f;
+  --colore-errore: #ff8a7a;
+  --colore-errore-tenue: #3a1a17;
+  --colore-info: #86b4f2;
+  --colore-info-tenue: #16263d;
+  --colore-velo: rgba(5, 7, 10, 0.72);
+  --ombra-0: none;
+  --ombra-1: none;
+  --ombra-2: 0 0 0 1px var(--colore-linea);
+  --ombra-foglio: 0 -1px 0 var(--colore-linea), 0 -12px 32px rgba(0, 0, 0, 0.45);
+  /* mappa (Protomaps) */
+  --mappa-terra: #12161c;
+  --mappa-acqua: #0a1219;
+  --mappa-parchi: #141b19;
+  --mappa-edifici: #191e26;
+  --mappa-strade-secondarie: #1f252e;
+  --mappa-strade-principali: #2b323d;
+  --mappa-strade-scorrimento: #384150;
+  --mappa-binari: #2b323d;
+  --mappa-etichette: #8d95a2;
+  --mappa-alone: #0e1116;
+  color-scheme: dark;
+}
+
+/* ---------- Tema chiaro ---------- */
+:root[data-tema='chiaro'],
+[data-tema='chiaro'] {
+  --colore-sfondo: #ffffff;
+  --colore-superficie-1: #faf9f7;
+  --colore-superficie-2: #f2f0ec;
+  --colore-superficie-3: #e8e5df;
+  --colore-superficie-elevata: #ffffff;
+  --colore-linea: #e4e0d8;
+  --colore-linea-forte: #776f63;
+  --colore-testo-primario: #15181e;
+  --colore-testo-secondario: #474c55;
+  --colore-testo-terziario: #585d65;
+  --colore-testo-su-accento: #ffffff;
+  --colore-accento: #b5560a;
+  --colore-accento-premuto: #9a4706;
+  --colore-accento-tenue: #fbe6d0;
+  --colore-accento-testo: #924500;
+  --colore-focus: #1d5bd6;
+  --colore-successo: #1a6b3d;
+  --colore-successo-tenue: #ddf0e4;
+  --colore-avviso: #755300;
+  --colore-avviso-tenue: #f7ebcb;
+  --colore-errore: #aa2c21;
+  --colore-errore-tenue: #f9deda;
+  --colore-info: #2257aa;
+  --colore-info-tenue: #dee8f7;
+  --colore-velo: rgba(21, 24, 30, 0.48);
+  --ombra-0: none;
+  --ombra-1: 0 1px 2px rgba(21, 24, 30, 0.06);
+  --ombra-2: 0 4px 12px rgba(21, 24, 30, 0.08), 0 0 0 1px var(--colore-linea);
+  --ombra-foglio: 0 -8px 32px rgba(21, 24, 30, 0.14);
+  --mappa-terra: #eeeae2;
+  --mappa-acqua: #d5dce0;
+  --mappa-parchi: #e1e3d7;
+  --mappa-edifici: #e3ded4;
+  --mappa-strade-secondarie: #faf8f4;
+  --mappa-strade-principali: #ffffff;
+  --mappa-strade-scorrimento: #f7f2e8;
+  --mappa-binari: #c9c2b5;
+  --mappa-etichette: #5f646c;
+  --mappa-alone: #f3f0e9;
+  color-scheme: light;
+}
+
+/*
+  Token aggiunti con ADR-0018 (foto del locale come sfondo): uguali nei due temi, perché la
+  foto non cambia col tema. Bianco caldo su velatura al 78%: contrasto ≥ 7:1 anche su una
+  foto bianca. Da riportare nel progetto Claude Design.
+*/
+:root {
+  --colore-velo-foto: rgba(5, 7, 10, 0.78);
+  --colore-testo-su-foto: #f7f5f0;
+}

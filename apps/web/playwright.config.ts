@@ -21,10 +21,15 @@ export default defineConfig({
     { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    // In CI l'export è già stato generato dal passo di build.
-    command: `${ci ? '' : 'pnpm build && '}pnpm exec serve out --listen ${porta} --no-clipboard`,
+    // Build dedicata ai test: include il catalogo dei componenti e punta la mappa a un bucket
+    // simulato dai test (tests/e2e/supporto.ts). La build di produzione si verifica a parte.
+    command: `pnpm build && pnpm exec serve out --listen ${porta} --no-clipboard`,
+    env: {
+      NOXA_CATALOGO: '1',
+      NEXT_PUBLIC_MAPPA_PMTILES_URL: 'http://mappe.noxa.test/mappe/milano-brianza.pmtiles',
+    },
     url: `http://127.0.0.1:${porta}`,
-    reuseExistingServer: !ci,
+    reuseExistingServer: false,
     timeout: 180_000,
   },
 });

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Noxa</string>
+    <string name="title_activity_main">Noxa</string>
+    <string name="package_name">app.noxa</string>
+    <string name="custom_url_scheme">app.noxa</string>
+</resources>
