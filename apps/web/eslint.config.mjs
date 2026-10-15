@@ -16,6 +16,9 @@ const configurazione = [
     ignores: [
       '.next/',
       'out/',
+      'android/',
+      'ios/',
+      'public/vendor/',
       'next-env.d.ts',
       'playwright-report/',
       'test-results/',

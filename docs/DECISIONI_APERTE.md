@@ -10,7 +10,7 @@ sotto) e rimandano a questo file con l'ID `D-xx`. Quando una decisione viene pre
 
 | ID | Decisione | Scelta provvisoria | Chi decide | Entro |
 |---|---|---|---|---|
-| D-01 | Dominio del prodotto (il nome "Noxa" è deciso) | Dominio di lavoro `noxa.app`, usato in user agent dello scraper, email e app Meta; disponibilità del dominio e del marchio "Noxa" da verificare | Product owner | Fine Fase 0 |
+| D-01 | Dominio del prodotto (il nome "Noxa" è deciso) | Dominio di lavoro `noxa.app`, usato in user agent dello scraper, email, app Meta e identificativo delle app native (`app.noxa` in `capacitor.config.ts`, non più modificabile dopo la prima pubblicazione negli store); disponibilità del dominio e del marchio "Noxa" da verificare | Product owner | Fine Fase 0 |
 | D-03 | Modello Claude per l'estrazione dei flyer in produzione | `claude-opus-5-5` (ADR-0007). Valutare `claude-sonnet-5-5` o `claude-haiku-5-5` sul golden set confrontando qualità e costo per flyer | Product owner su dati della skill `flyer-parser` | Metà Fase 1 |
 | D-04 | Plugin Capacitor per la geolocalizzazione in background | `@capacitor-community/background-geolocation` (open source). Alternativa: plugin commerciale con licenza (maggiore affidabilità su iOS, costo annuo) | Tech lead dopo un prototipo su dispositivi reali | Inizio Fase 2 |
 | D-05 | Accordi con Resident Advisor, Xceed e Dice | Nessuna integrazione finché non c'è un accordo scritto o un'API ufficiale (ADR-0008) | Product owner | Fase 3 |

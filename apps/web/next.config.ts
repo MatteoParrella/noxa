@@ -1,4 +1,9 @@
+import path from 'node:path';
+import { loadEnvConfig } from '@next/env';
 import type { NextConfig } from 'next';
+
+// Le variabili stanno nel .env alla radice del monorepo (.env.example), condiviso con il worker.
+loadEnvConfig(path.resolve(process.cwd(), '../..'));
 
 // Export statico servito da Vercel e incluso nelle app Capacitor (ADR-0001).
 // Le pagine *.dev.tsx (catalogo dei componenti) esistono solo in sviluppo (DESIGN.md §3) e

@@ -7,6 +7,9 @@ import { EVENTO_TEMA, temaAttivo } from '@/lib/tema';
 import { Avviso } from './Avviso';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+/** Worker di MapLibre copiato tra i file statici (scripts/copia-maplibre-worker.mjs). */
+const URL_WORKER = '/vendor/maplibre/maplibre-gl-worker.mjs';
+
 /** Centro e zoom iniziali: Milano, con la Brianza a nord. */
 const CENTRO: [number, number] = [9.19, 45.5];
 const LIMITI: [[number, number], [number, number]] = [
@@ -43,6 +46,7 @@ export function Mappa({ urlPmtiles, etichetta = 'Mappa di Milano e Brianza' }: P
         import('pmtiles'),
       ]);
       if (annullato) return;
+      maplibre.setWorkerUrl(URL_WORKER);
       const protocollo = new Protocol();
       maplibre.addProtocol('pmtiles', protocollo.tile);
       const ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

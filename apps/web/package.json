@@ -13,7 +13,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "icone": "node scripts/genera-icone.mjs",
-    "cap:sync": "cap sync"
+    "cap:sync": "cap sync",
+    "predev": "node scripts/copia-maplibre-worker.mjs",
+    "prebuild": "node scripts/copia-maplibre-worker.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.5.3",
@@ -32,6 +34,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@capacitor/cli": "8.5.3",
+    "@next/env": "16.4.1",
     "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/jest-dom": "7.0.1",

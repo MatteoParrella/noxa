@@ -126,3 +126,5 @@ Formato: mobile 390 × 844 come riferimento, con una verifica a 360 px di larghe
 - Accento: **A, arancio "lampione al sodio"**. L'esplorazione B (giallo tram) è scartata.
 - Immagini: il blocco colorato della scheda evento è sostituito dalla **foto del locale**
   come sfondo, con velatura per il contrasto (ADR-0018).
+- Escluso dall'implementazione: il pulsante "Messaggi dei gruppi" della tavola Navigazione.
+  Noxa non ha chat libera (R-16, PRD §6); va tolto anche dal progetto Claude Design.

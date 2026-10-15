@@ -81,7 +81,12 @@ jobs:
       - run: pnpm --filter web typecheck
       - run: pnpm --filter web test
       - run: pnpm --filter web build
+      # Il catalogo dei componenti non entra mai nella build di produzione (DESIGN.md §3).
+      - run: test ! -e apps/web/out/catalogo
+      # I progetti iOS e Android ricevono lo stesso export statico (ADR-0001).
+      - run: pnpm --filter web exec cap sync
       - run: pnpm --filter web exec playwright install --with-deps chromium
+      # Build dedicata ai test (catalogo incluso, mappa simulata): playwright.config.ts.
       - run: pnpm --filter web test:e2e
       - if: failure()
         uses: actions/upload-artifact@v7

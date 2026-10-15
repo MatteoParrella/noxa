@@ -84,7 +84,10 @@ La CLI Supabase è una dipendenza di sviluppo del repository: si esegue con `pnp
 | App in sviluppo | `pnpm --filter web dev` |
 | Controlli app | `pnpm --filter web lint` · `pnpm --filter web typecheck` · `pnpm --filter web test` |
 | Test e2e | `pnpm --filter web test:e2e` |
-| Build ed app native | `pnpm --filter web build && pnpm --filter web exec cap sync` |
+| Build ed app native | `pnpm --filter web build && pnpm --filter web exec cap sync` (poi `cap open android` o `cap open ios`, con Android Studio o Xcode) |
+| Catalogo dei componenti | `pnpm --filter web dev`, poi http://localhost:3000/catalogo/ |
+| Mappa nel bucket `mappe` | `scripts/prepara_mappa.sh` (richiede la CLI `pmtiles`; locale o con `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`) |
+| Icone PNG dall'SVG | `pnpm --filter web icone` |
 | Worker (dipendenze) | `cd services/worker && uv sync` |
 | Controlli worker | `uv run ruff check .` · `uv run ruff format --check .` · `uv run mypy src tests` · `uv run pytest` |
 | Worker in Docker | `docker compose up --build worker` |

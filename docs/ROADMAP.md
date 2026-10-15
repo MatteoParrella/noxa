@@ -257,7 +257,8 @@ Ogni iterazione ha:
   gruppo misto valido e rifiutato; aggiornamento in tempo reale tra due sessioni.
 
 ### Iterazione 8 — Tracker, privacy e beta
-- **Contenuto**: tabelle del tracker e trigger di R-40; offline con coda di scritture; Edge
+- **Contenuto**: tabelle del tracker e trigger di R-40; offline con coda di scritture e cache
+  delle tile della mappa già viste (richieste PMTiles a intervalli, ADR-0016); Edge
   Functions `esporta-dati` ed `elimina-account`; impostazioni di privacy;
   `applica_conservazione`; verifica completa di accessibilità; build interne TestFlight e
   Google Play.
