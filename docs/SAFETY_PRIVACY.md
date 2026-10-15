@@ -102,6 +102,7 @@ non può essere rilasciata, indipendentemente da scadenze o richieste commercial
 | R-53 | Tempi massimi di gestione: segnalazioni con motivo `adescamento_o_rischio_minore` entro 4 ore nella fascia 08:00–02:00, entro le 10:00 per quelle ricevute di notte; le altre segnalazioni che coinvolgono minorenni entro 24 ore; tutte le altre entro 72 ore. Ogni decisione è motivata all'utente interessato, che può presentare reclamo. | DSA art. 17 (motivazione) e art. 20 (reclamo); priorità alla tutela dei minorenni. | Ordinamento della coda di moderazione; notifiche con motivazione; metriche nella dashboard di moderazione. |
 | R-54 | Limiti di caricamento: al massimo 10 flyer ogni 24 ore per utente, immagini JPEG, PNG o WebP fino a 10 MB. I metadati EXIF vengono rimossi. | Previene abusi; l'EXIF può contenere posizione e dati del dispositivo. | Policy del bucket `flyer-caricati`, trigger `private.limita_caricamenti_flyer`, rimozione EXIF sul client e di nuovo nel worker. |
 | R-55 | Contenuti pedopornografici, adescamento o minacce gravi: il contenuto viene reso inaccessibile subito, l'account sospeso e le prove conservate in modo protetto; si segnala alla Polizia Postale e delle Comunicazioni. Nessun moderatore scarica o inoltra il materiale fuori dalla procedura. | Obblighi di legge e tutela delle vittime. | Procedura operativa di moderazione (§11); azione `escalation_autorita` in `azioni_moderazione`. |
+| R-56 | Le foto dei locali mostrate come immagine degli eventi hanno una fonte lecita (autorizzazione scritta del locale, foto di Noxa o licenza libera con attribuzione), non ritraggono persone riconoscibili, non mettono in evidenza l'alcol e sono caricate e approvate solo da un moderatore. | Diritti d'autore e termini d'uso (ADR-0008); privacy delle persone fotografate, anche minorenni; le foto sono visibili ai minorenni (R-23, R-40). | ADR-0018; colonne `immagine_*` di `locali` con check; bucket `immagini-locali` scrivibile solo dai moderatori; tipo segnalabile `immagine_locale`. |
 
 ## 9. Privacy e dati
 
@@ -126,6 +127,7 @@ non può essere rilasciata, indipendentemente da scadenze o richieste commercial
 | `checkin`, `checkin_destinatari` | 24 ore dalla scadenza | come sopra |
 | Immagini in `flyer-caricati` | 30 giorni dalla decisione di moderazione | job del worker `pulizia_flyer` |
 | Immagini in `flyer-pubblicati` | finché l'evento esiste, al massimo 12 mesi dopo la data dell'evento | come sopra |
+| Foto in `immagini-locali` | Finché il locale è attivo; eliminata entro 7 giorni dalla revoca dell'autorizzazione o dalla disattivazione del locale | rimozione da parte dei moderatori; `private.applica_conservazione()` per i locali disattivati |
 | `eventi_grezzi` | 30 giorni | `private.applica_conservazione()` |
 | `coda_job` completati | 14 giorni | come sopra |
 | `notifiche` | 90 giorni | come sopra |

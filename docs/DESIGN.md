@@ -44,6 +44,11 @@ flowchart LR
 
 ## 3. Componenti e schermate
 
+- Immagini degli eventi: la scheda evento mostra come sfondo la foto del locale, con una
+  velatura definita nei token che garantisce il contrasto del testo; in mancanza della foto,
+  il flyer approvato e poi il fondo tipografico (ADR-0018). L'accento del design system
+  (arancio "lampione al sodio", esplorazione A) resta per azioni e stati attivi.
+
 - `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda, Avviso,
   Foglio, Badge, Avatar, Interruttore, Schede, ElencoVuoto, Caricamento, ErroreConAzione,
   PulsanteSegnala, Mappa). Ognuno ha i test unitari e una pagina di esempio nel catalogo

@@ -115,3 +115,14 @@ mappa) in entrambi i temi, per vedere il sistema all'opera. Usa eventi di esempi
 realistici a Milano e in Brianza, senza alcol e senza nomi di locali reali.
 
 Formato: mobile 390 × 844 come riferimento, con una verifica a 360 px di larghezza.
+  
+---
+
+## Esito
+
+- Progetto Claude Design: https://claude.ai/artifact/4MTnXgrpFWHsegaL47BcbT ("Noxa — Design
+  system", 12 tavole), esportato in questa cartella: `design-system.pdf`, `design-system.html` (riferimento) e le
+  immagini PNG in `immagini/`.
+- Accento: **A, arancio "lampione al sodio"**. L'esplorazione B (giallo tram) è scartata.
+- Immagini: il blocco colorato della scheda evento è sostituito dalla **foto del locale**
+  come sfondo, con velatura per il contrasto (ADR-0018).
