@@ -18,7 +18,7 @@
     "verbatimModuleSyntax": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "types": ["node", "vitest/globals", "@testing-library/jest-dom"],
+    "types": ["node"],
     "plugins": [
       {
         "name": "next"

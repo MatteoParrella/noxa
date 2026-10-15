@@ -153,7 +153,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      # Bloccante sulle dipendenze che finiscono nell'app pubblicata.
+      - run: pnpm audit --prod --audit-level high
+      # Solo informativo sugli strumenti di sviluppo (lint, test), che non vengono pubblicati.
       - run: pnpm audit --audit-level high
+        continue-on-error: true
       - uses: astral-sh/setup-uv@v10
       - name: pip-audit sulle dipendenze del worker
         working-directory: services/worker
