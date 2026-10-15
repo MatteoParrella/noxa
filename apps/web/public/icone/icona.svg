@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Noxa">
+  <rect width="512" height="512" fill="#0E1116"/>
+  <path d="M150 380V196h56v26c18-22 42-32 72-32 54 0 84 34 84 94v96h-58v-88c0-32-14-48-42-48-30 0-56 20-56 58v78z" fill="#EDEAE4"/>
+  <circle cx="392" cy="150" r="28" fill="#F28C28"/>
+</svg>

@@ -1,1 +1,96 @@
 @import 'tailwindcss';
+@import '../styles/tokens.css';
+@import '../styles/componenti.css';
+
+/*
+  Tailwind 4: le utility usano i token (DESIGN.md §2). Si azzerano le palette predefinite,
+  così nel codice sono disponibili solo i colori, gli spazi e i raggi del design system.
+*/
+@theme inline {
+  --color-*: initial;
+  --color-sfondo: var(--colore-sfondo);
+  --color-superficie-1: var(--colore-superficie-1);
+  --color-superficie-2: var(--colore-superficie-2);
+  --color-superficie-3: var(--colore-superficie-3);
+  --color-superficie-elevata: var(--colore-superficie-elevata);
+  --color-linea: var(--colore-linea);
+  --color-linea-forte: var(--colore-linea-forte);
+  --color-testo-primario: var(--colore-testo-primario);
+  --color-testo-secondario: var(--colore-testo-secondario);
+  --color-testo-terziario: var(--colore-testo-terziario);
+  --color-testo-su-accento: var(--colore-testo-su-accento);
+  --color-accento: var(--colore-accento);
+  --color-accento-premuto: var(--colore-accento-premuto);
+  --color-accento-tenue: var(--colore-accento-tenue);
+  --color-accento-testo: var(--colore-accento-testo);
+  --color-focus: var(--colore-focus);
+  --color-successo: var(--colore-successo);
+  --color-successo-tenue: var(--colore-successo-tenue);
+  --color-avviso: var(--colore-avviso);
+  --color-avviso-tenue: var(--colore-avviso-tenue);
+  --color-errore: var(--colore-errore);
+  --color-errore-tenue: var(--colore-errore-tenue);
+  --color-info: var(--colore-info);
+  --color-info-tenue: var(--colore-info-tenue);
+  --color-velo: var(--colore-velo);
+
+  --spacing: 4px;
+
+  --radius-*: initial;
+  --radius-1: var(--raggio-1);
+  --radius-2: var(--raggio-2);
+  --radius-3: var(--raggio-3);
+  --radius-tondo: var(--raggio-tondo);
+
+  --shadow-*: initial;
+  --shadow-1: var(--ombra-1);
+  --shadow-2: var(--ombra-2);
+  --shadow-foglio: var(--ombra-foglio);
+
+  --font-*: initial;
+  --font-testo: var(--tipo-famiglia-testo);
+  --font-mono: var(--tipo-famiglia-mono);
+
+  --text-*: initial;
+  --text-display: var(--tipo-display);
+  --text-titolo-1: var(--tipo-titolo-1);
+  --text-titolo-2: var(--tipo-titolo-2);
+  --text-titolo-3: var(--tipo-titolo-3);
+  --text-corpo: var(--tipo-corpo);
+  --text-corpo-piccolo: var(--tipo-corpo-piccolo);
+  --text-didascalia: var(--tipo-didascalia);
+  --text-etichetta: var(--tipo-etichetta);
+  --text-mono-dato: var(--tipo-mono-dato);
+
+  --ease-standard: var(--curva-standard);
+  --ease-entrata: var(--curva-entrata);
+  --ease-uscita: var(--curva-uscita);
+}
+
+@layer base {
+  html {
+    background: var(--colore-sfondo);
+    color: var(--colore-testo-primario);
+    font-family: var(--tipo-famiglia-testo);
+    font-size: 100%;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    font-size: var(--tipo-corpo);
+    line-height: 1.5;
+  }
+  a {
+    color: var(--colore-accento-testo);
+  }
+  .sr-only-focusable:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
