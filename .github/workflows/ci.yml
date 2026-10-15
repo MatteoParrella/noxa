@@ -101,7 +101,7 @@ jobs:
         working-directory: services/worker
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
           enable-cache: true
       - run: uv sync --frozen
@@ -158,7 +158,7 @@ jobs:
       # Solo informativo sugli strumenti di sviluppo (lint, test), che non vengono pubblicati.
       - run: pnpm audit --audit-level high
         continue-on-error: true
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.3.0
       - name: pip-audit sulle dipendenze del worker
         working-directory: services/worker
         run: |
