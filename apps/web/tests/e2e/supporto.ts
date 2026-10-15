@@ -14,8 +14,16 @@ export async function impostaTema(pagina: Page, tema: TemaProva) {
   }, tema);
 }
 
+/** Aspetta la fine delle animazioni di ingresso (ADR-0019), così axe misura lo stato finale. */
+export async function attendiAnimazioni(pagina: Page) {
+  await pagina.waitForFunction(() =>
+    document.getAnimations().every((animazione) => animazione.playState !== 'running'),
+  );
+}
+
 /** Nessuna violazione WCAG 2.2 AA (DESIGN.md §4). */
 export async function verificaAccessibilita(pagina: Page) {
+  await attendiAnimazioni(pagina);
   const risultato = await new AxeBuilder({ page: pagina })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .exclude('.maplibregl-canvas')

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { CSSProperties } from 'react';
 import { Icona } from '@/components/ui/Icona';
 import { classi } from '@/lib/classi';
 
@@ -30,16 +31,24 @@ function normalizza(percorso: string): string {
 
 export function BarraNavigazione() {
   const percorso = normalizza(usePathname());
+  const attiva = VOCI.findIndex((voce) => percorso.startsWith(voce.href));
   return (
     <nav className="barra-nav" aria-label="Principale">
-      {VOCI.map((voce) => {
-        const attiva = percorso.startsWith(voce.href);
+      {attiva >= 0 && (
+        <span
+          className="nav-indicatore"
+          aria-hidden="true"
+          style={{ '--indice': attiva } as CSSProperties}
+        />
+      )}
+      {VOCI.map((voce, indice) => {
+        const corrente = indice === attiva;
         return (
           <Link
             key={voce.href}
             href={voce.href}
-            className={classi('nav-voce', attiva && 'is-on')}
-            aria-current={attiva ? 'page' : undefined}
+            className={classi('nav-voce', corrente && 'is-on')}
+            aria-current={corrente ? 'page' : undefined}
           >
             <span className="nav-icona">
               <Icona icona={voce.icona} />

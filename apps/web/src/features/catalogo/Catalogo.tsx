@@ -9,6 +9,7 @@ import { Campo } from '@/components/ui/Campo';
 import { Foglio } from '@/components/ui/Foglio';
 import { Icona } from '@/components/ui/Icona';
 import { Interruttore } from '@/components/ui/Interruttore';
+import { Rivela } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { PulsanteSegnala } from '@/components/ui/PulsanteSegnala';
 import { SchedaEvento } from '@/components/ui/SchedaEvento';
@@ -27,12 +28,12 @@ const PERSONE = [
 
 function Sezione({ titolo, children }: { titolo: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-3">
+    <Rivela as="section" className="flex flex-col gap-3">
       <div className="etichetta-riga">
         <h3 className="etichetta m-0">{titolo}</h3>
       </div>
       {children}
-    </section>
+    </Rivela>
   );
 }
 

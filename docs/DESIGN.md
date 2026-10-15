@@ -52,6 +52,11 @@ flowchart LR
   `movimento` (durate e curve, con la versione ridotta).
 - **Tema scuro come predefinito** (uso notturno), con tema chiaro completo; entrambi
   rispettano i contrasti del §4.
+- Movimento: transizioni funzionali di 150–250 ms e ingressi espressivi di 700–900 ms con la
+  curva `cubic-bezier(.2,.7,.2,1)` (titoli che salgono, contenuti dal sfocato al nitido,
+  bagliore dell'intestazione, indicatore della barra che scorre). Nessuna animazione
+  infinita; con `prefers-reduced-motion` solo dissolvenze brevi (ADR-0019,
+  `src/styles/movimento.css`).
 - Una modifica ai token si fa prima in Claude Design, poi in `tokens.css`, nella stessa PR.
 
 ## 3. Componenti e schermate

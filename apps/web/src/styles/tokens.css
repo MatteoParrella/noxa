@@ -155,3 +155,19 @@
   --colore-velo-foto: rgba(5, 7, 10, 0.78);
   --colore-testo-su-foto: #f7f5f0;
 }
+
+/*
+  Movimento espressivo (ADR-0019): ingressi più lunghi e morbidi, ispirati ai siti di
+  riferimento del product owner. Solo transform, opacity e filter; mai animazioni infinite;
+  con prefers-reduced-motion restano solo dissolvenze brevi.
+*/
+:root {
+  --curva-espressiva: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --movimento-espressivo: 700ms;
+  --movimento-ingresso: 900ms;
+  --movimento-bagliore: 2400ms;
+  --ritardo-passo: 70ms;
+  --rivela-spostamento: 18px;
+  --rivela-sfocatura: 8px;
+  --bagliore-accento: color-mix(in srgb, var(--colore-accento) 26%, transparent);
+}

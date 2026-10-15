@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import '../styles/tokens.css';
 @import '../styles/componenti.css';
+@import '../styles/movimento.css';
 
 /*
   Tailwind 4: le utility usano i token (DESIGN.md §2). Si azzerano le palette predefinite,
