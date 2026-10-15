@@ -39,6 +39,9 @@ usata di notte, anche da persone sensibili al movimento, e deve restare WCAG 2.2
   licenza da valutare; CSS e IntersectionObserver bastano per questo repertorio.
 - **Fondi animati in loop** (aloni che si spostano di continuo, scritte che scorrono):
   scartati per WCAG 2.2.2, consumo di batteria di notte e distrazione.
+- **Effetti che seguono il mouse o il puntatore** (cursori personalizzati, parallasse,
+  elementi magnetici): esclusi dal product owner il 2026-10-15; su un'app da telefono non
+  servono.
 - **Restare al movimento discreto**: non corrisponde all'identità voluta dal product owner.
 
 ## Conseguenze
