@@ -1,0 +1,8 @@
+packages:
+  - apps/*
+
+# Solo i pacchetti elencati possono eseguire script di installazione.
+allowBuilds:
+  supabase: true
+  sharp: true
+  unrs-resolver: true

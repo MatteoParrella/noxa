@@ -39,20 +39,26 @@ services:
       - --host
       - 0.0.0.0
       - --port
-      - "8000"
+      - '8000'
       - --reload
       - --reload-dir
       - /app/src
     ports:
-      - "8000:8000"
+      - '8000:8000'
     volumes:
       # Codice montato in sola lettura per il ricaricamento automatico in sviluppo.
       - ./services/worker/src:/app/src:ro
     extra_hosts:
       # Necessario su Linux e WSL con Docker Engine; Docker Desktop lo risolve già.
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/salute', timeout=3).status == 200 else 1)"]
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/salute', timeout=3).status == 200 else 1)",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3

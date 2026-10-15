@@ -1,0 +1,13 @@
+pnpm-lock.yaml
+docs/
+design/
+.claude/
+supabase/
+services/
+packages/schemas/
+*.md
+apps/web/.next/
+apps/web/out/
+apps/web/src/lib/database.types.ts
+apps/web/playwright-report/
+apps/web/test-results/
