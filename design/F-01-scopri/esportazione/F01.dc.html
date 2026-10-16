@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Noxa · Scopri e dettaglio evento</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/6fa6353d716b68f787ff2702a9363d96">
+<link rel="stylesheet" href="/_blob/afc4088ee394ab1a58e9ba7651ca762e">
+<link rel="stylesheet" href="/_blob/dbab4423ee519d83500f0485a4806ddb">
+<link rel="stylesheet" href="/_blob/cdf778b603b9eec9b9e8c7c0cba7983e">
+<link rel="stylesheet" href="/_blob/75de66852ef3f7538a23c938780b4826">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="{{radice}}" style="width: {{larghezza}}px; height: {{altezza}}px; position: relative; overflow: hidden">
+  <div style="position: absolute; inset: 0; display: flex; flex-direction: column">
+
+    <!-- ===================== SCOPRI (elenco / mappa) ===================== -->
+    <sc-if value="{{is.scopri}}" hint-placeholder-val="{{ true }}">
+      <div style="height: 47px; flex: none"></div>
+      <sc-if value="{{offline}}" hint-placeholder-val="{{ false }}">
+        <div class="striscia-offline" role="status" style="flex: none"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h.01"></path><path d="M8.5 16.429a5 5 0 0 1 7 0"></path><path d="M5 12.859a10 10 0 0 1 5.17-2.69"></path><path d="M19 12.859a10 10 0 0 0-2.007-1.523"></path><path d="M2 8.82a15 15 0 0 1 4.177-2.643"></path><path d="M22 8.82a15 15 0 0 0-11.288-3.764"></path><path d="m2 2 20 20"></path></svg><span>Sei offline: vedi gli eventi salvati sul telefono.</span></div>
+      </sc-if>
+      <header style="flex: none; padding: 8px 20px 12px; display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+            <span class="etichetta">{{luogoEtichetta}}</span>
+            <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+              <h1 class="ax-titolo" aria-label="Scopri" style="font-size: 2.25rem"><sc-for list="{{paroleScopri}}" as="w" hint-placeholder-count="1"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+              <span class="t-mono-dato c-2">{{dataBreve}}</span>
+            </div>
+          </div>
+          <div class="segmenti" role="radiogroup" aria-label="Vista" style="flex: none">
+            <button class="{{vista.elencoCls}}" type="button" role="radio" aria-checked="{{vista.elencoOn}}" aria-label="Elenco" onClick="{{vista.aElenco}}" style="width: 44px; flex: none; padding: 0"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h.01"></path><path d="M3 18h.01"></path><path d="M3 6h.01"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M8 6h13"></path></svg></button>
+            <button class="{{vista.mappaCls}}" type="button" role="radio" aria-checked="{{vista.mappaOn}}" aria-label="Mappa" onClick="{{vista.aMappa}}" style="width: 44px; flex: none; padding: 0"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></svg></button>
+          </div>
+        </div>
+        <div class="scopri-barra">
+          <div class="segmenti" role="radiogroup" aria-label="Quando" style="flex: 1 1 auto; min-width: 0">
+            <sc-for list="{{giorni}}" as="g" hint-placeholder-count="3"><button class="{{g.cls}}" type="button" role="radio" aria-checked="{{g.on}}" onClick="{{g.pick}}">{{g.label}}</button></sc-for>
+          </div>
+          <button class="{{dataBtnCls}}" type="button" aria-label="Scegli data" onClick="{{apriCal}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px">
+          <button class="btn btn-s btn-secondario btn-filtri" type="button" onClick="{{apriFiltri}}" aria-label="Filtri, 2 attivi"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>Filtri<span class="contatore" aria-hidden="true">2</span></button>
+          <span class="t-corpo-s c-2" style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Monza · <span class="mono">10 km</span> · techno, house</span>
+        </div>
+      </header>
+
+      <!-- ELENCO -->
+      <sc-if value="{{isElenco}}" hint-placeholder-val="{{ true }}">
+        <main class="ax-corpo" style="padding-top: 0; border-top: 1px solid var(--colore-linea); animation: ax-dissolve 200ms linear both">
+          <sc-if value="{{elCarica}}" hint-placeholder-val="{{ false }}">
+            <div aria-busy="true" aria-label="Caricamento degli eventi" style="display: flex; flex-direction: column; gap: 16px; padding-top: 16px">
+              <span class="scheletro" style="height: 12px; width: 110px"></span>
+              <span class="scheletro" style="height: 210px; border-radius: 8px"></span>
+              <sc-for list="{{tre}}" as="k" hint-placeholder-count="3"><div style="display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 14px"><span class="scheletro" style="height: 84px; border-radius: 4px"></span><span style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px"><span class="scheletro" style="height: 16px; width: 75%"></span><span class="scheletro" style="height: 12px; width: 55%"></span><span class="scheletro" style="height: 12px; width: 40%"></span></span></div></sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{elVuoto}}" hint-placeholder-val="{{ false }}">
+            <div class="stato-vuoto" role="status" style="padding-top: 32px">
+              <span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg></span>
+              <span class="t-titolo-3">Nessun evento con questi filtri</span>
+              <span class="t-corpo-s c-2">Prova a togliere un genere o ad allargare la distanza.</span>
+              <button class="btn btn-s btn-secondario" type="button">Togli i filtri</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{elErrore}}" hint-placeholder-val="{{ false }}">
+            <div class="stato-vuoto" role="alert" style="padding-top: 32px">
+              <span class="cornice-icona" style="color: var(--colore-errore); border-color: var(--colore-errore)"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span>
+              <span class="t-titolo-3">Gli eventi non si sono caricati</span>
+              <span class="t-corpo-s c-2">Colpa nostra o della rete. Riprova tra un attimo.</span>
+              <button class="btn btn-s btn-secondario" type="button"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>Riprova</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{elLista}}" hint-placeholder-val="{{ true }}">
+            <sc-for list="{{sezioni}}" as="sz" hint-placeholder-count="1">
+              <section>
+                <div class="etichetta-riga" style="padding: 16px 0 10px"><h2 class="etichetta" style="margin: 0">{{sz.label}}</h2></div>
+                <div class="ax-pila" style="gap: 0">
+                  <sc-for list="{{sz.eventi}}" as="e" hint-placeholder-count="4">
+                    <div>
+                      <sc-if value="{{e.evid}}" hint-placeholder-val="{{ false }}">
+                        <a class="evidenza" href="#" onClick="{{e.apri}}" aria-label="{{e.aria}}" style="margin-bottom: 4px">
+                          <div class="{{e.copCls}}">
+                            <sc-if value="{{e.isFoto}}" hint-placeholder-val="{{ true }}">
+                              <svg class="foto" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="250" fill="{{e.foto.cielo}}"></rect><circle cx="{{e.foto.lx}}" cy="40" r="70" fill="#F28C28" opacity="0.10"></circle><circle cx="{{e.foto.lx}}" cy="40" r="5" fill="#F7B26A"></circle><path d="{{e.foto.tetto}}" fill="{{e.foto.corpo}}"></path><sc-for list="{{e.foto.finestre}}" as="f" hint-placeholder-count="6"><rect x="{{f.x}}" y="{{f.y}}" width="{{f.w}}" height="{{f.h}}" rx="{{f.r}}" fill="{{f.c}}"></rect></sc-for><rect y="220" width="400" height="30" fill="{{e.foto.suolo}}"></rect><path d="M0 236 H400 M0 244 H400" stroke="#2A2C31" stroke-width="2"></path></svg>
+                              <div class="velatura" aria-hidden="true"></div>
+                            </sc-if>
+                            <div class="badge-sopra"><span class="badge badge-eta">{{e.eta}}</span></div>
+                            <span class="t-mono-dato">{{e.quando}}</span>
+                            <h3 class="evidenza-titolo">{{e.titolo}}</h3>
+                            <span class="t-corpo-s">{{e.locale}} · {{e.comune}}</span>
+                          </div>
+                          <div class="evidenza-corpo">
+                            <div class="rc-tag"><sc-for list="{{e.generi}}" as="gn" hint-placeholder-count="2"><span class="genere">{{gn.t}}</span></sc-for></div>
+                            <div class="rc-meta" style="margin-top: 0"><sc-for list="{{e.meta}}" as="m" hint-placeholder-count="2"><span>{{m.t}}</span></sc-for></div>
+                            <sc-if value="{{e.haAmici}}" hint-placeholder-val="{{ true }}">
+                              <span class="riga-amici-part" style="min-height: 28px"><span class="avatar-gruppo" aria-hidden="true"><sc-for list="{{e.amici}}" as="a" hint-placeholder-count="2"><span class="{{a.cls}}">{{a.ini}}</span></sc-for></span><span>{{e.amiciTesto}}</span></span>
+                            </sc-if>
+                          </div>
+                        </a>
+                      </sc-if>
+                      <sc-if value="{{e.compatta}}" hint-placeholder-val="{{ true }}">
+                        <a class="riga-compatta" href="#" onClick="{{e.apri}}" aria-label="{{e.aria}}">
+                          <span class="miniatura" aria-hidden="true">
+                            <sc-if value="{{e.isFoto}}" hint-placeholder-val="{{ false }}"><svg viewBox="80 40 240 210" preserveAspectRatio="xMidYMid slice"><rect x="0" width="400" height="250" fill="{{e.foto.cielo}}"></rect><circle cx="{{e.foto.lx}}" cy="40" r="5" fill="#F7B26A"></circle><path d="{{e.foto.tetto}}" fill="{{e.foto.corpo}}"></path><sc-for list="{{e.foto.finestre}}" as="f" hint-placeholder-count="6"><rect x="{{f.x}}" y="{{f.y}}" width="{{f.w}}" height="{{f.h}}" rx="{{f.r}}" fill="{{f.c}}"></rect></sc-for><rect y="220" width="400" height="30" fill="{{e.foto.suolo}}"></rect></svg></sc-if>
+                            <sc-if value="{{e.isFlyer}}" hint-placeholder-val="{{ false }}"><span class="mini-tipo" style="background: var(--colore-testo-primario); color: var(--colore-sfondo)"><b>{{e.titolo}}</b><span>{{e.ora}}</span></span></sc-if>
+                            <sc-if value="{{e.isTipo}}" hint-placeholder-val="{{ true }}"><span class="mini-tipo" style="background: var(--colore-superficie-3); color: var(--colore-testo-primario)"><span>{{e.ora}}</span><b>{{e.titolo}}</b></span></sc-if>
+                          </span>
+                          <div style="min-width: 0">
+                            <h3 class="rc-titolo">{{e.titolo}}</h3>
+                            <p class="rc-luogo">{{e.locale}} · {{e.comune}}</p>
+                            <span class="rc-ora">{{e.ora}} → {{e.fine}}</span>
+                            <div class="rc-tag"><span class="badge badge-eta">{{e.eta}}</span><sc-for list="{{e.generi}}" as="gn" hint-placeholder-count="2"><span class="genere">{{gn.t}}</span></sc-for></div>
+                            <div class="rc-meta"><sc-for list="{{e.meta}}" as="m" hint-placeholder-count="2"><span>{{m.t}}</span></sc-for></div>
+                            <sc-if value="{{e.haAmici}}" hint-placeholder-val="{{ false }}">
+                              <span class="riga-amici-part" style="min-height: 32px; margin-top: 4px"><span class="avatar-gruppo" aria-hidden="true"><sc-for list="{{e.amici}}" as="a" hint-placeholder-count="2"><span class="{{a.cls}}">{{a.ini}}</span></sc-for></span><span>{{e.amiciTesto}}</span></span>
+                            </sc-if>
+                          </div>
+                        </a>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+            </sc-for>
+            <p class="t-didascalia" style="margin: 0; padding: 20px 0 8px; text-align: center">Vedi solo gli eventi a cui puoi entrare.</p>
+          </sc-if>
+        </main>
+      </sc-if>
+
+      <!-- MAPPA -->
+      <sc-if value="{{isMappa}}" hint-placeholder-val="{{ false }}">
+        <div style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; animation: ax-dissolve 200ms linear both">
+          <div class="mappa-area">
+            <svg width="420" height="620" viewBox="0 0 390 600" role="img" aria-label="Mappa degli eventi. L’elenco contiene gli stessi eventi." style="position: absolute; left: 0; top: 0; display: block">
+              <rect width="390" height="600" style="fill: var(--mappa-terra)"></rect>
+              <polygon points="214,52 344,30 378,158 246,184" style="fill: var(--mappa-parchi)"></polygon>
+              <polygon points="0,470 390,338 390,358 0,492" style="fill: var(--mappa-acqua)"></polygon>
+              <g style="fill: var(--mappa-edifici)"><rect x="20" y="28" width="52" height="40"></rect><rect x="84" y="24" width="40" height="56"></rect><rect x="20" y="84" width="104" height="30"></rect><rect x="176" y="208" width="58" height="38"></rect><rect x="250" y="214" width="46" height="30"></rect><rect x="312" y="200" width="60" height="48"></rect><rect x="20" y="164" width="44" height="58"></rect><rect x="76" y="176" width="52" height="46"></rect><rect x="20" y="276" width="108" height="34"></rect><rect x="176" y="282" width="60" height="44"></rect><rect x="250" y="284" width="60" height="30"></rect><rect x="40" y="520" width="70" height="44"></rect><rect x="250" y="470" width="62" height="40"></rect></g>
+              <g style="fill: none; stroke: var(--colore-linea); stroke-width: 9; stroke-linecap: round"><path d="M0 140 H390"></path><path d="M240 190 V600"></path><path d="M0 400 L180 380 L390 420"></path><path d="M60 600 L80 400"></path></g>
+              <g style="fill: none; stroke: var(--mappa-strade-secondarie); stroke-width: 7; stroke-linecap: round"><path d="M0 140 H390"></path><path d="M240 190 V600"></path><path d="M0 400 L180 380 L390 420"></path><path d="M60 600 L80 400"></path></g>
+              <g style="fill: none; stroke: var(--colore-linea); stroke-width: 13; stroke-linecap: round"><path d="M0 262 H390"></path><path d="M150 0 V600"></path></g>
+              <g style="fill: none; stroke: var(--mappa-strade-principali); stroke-width: 11; stroke-linecap: round"><path d="M0 262 H390"></path><path d="M150 0 V600"></path></g>
+              <path d="M0 252 H390" style="fill: none; stroke: var(--mappa-binari); stroke-width: 1.5; stroke-dasharray: 6 4"></path>
+              <g style="font-family: var(--tipo-famiglia-testo); font-size: 10px; font-weight: 500; letter-spacing: 0.12em; fill: var(--mappa-etichette); paint-order: stroke; stroke: var(--mappa-alone); stroke-width: 3px; stroke-linejoin: round"><text x="248" y="112">PARCO</text><text x="24" y="250">SAN ROCCO</text><text x="250" y="440">LAMBRO</text></g>
+            </svg>
+            <sc-if value="{{mappaPronta}}" hint-placeholder-val="{{ true }}">
+              <sc-for list="{{marker}}" as="mk" hint-placeholder-count="2">
+                <button class="{{mk.cls}}" type="button" aria-label="{{mk.aria}}" aria-pressed="{{mk.on}}" onClick="{{mk.pick}}" style="left: {{mk.x}}px; top: {{mk.y}}px"><span class="n">{{mk.n}}</span>{{mk.nome}}</button>
+              </sc-for>
+              <button class="pin-gruppo" type="button" aria-label="3 locali vicini a Vimercate e Desio, tocca per avvicinarti" style="left: 330px; top: 74px; cursor: pointer">3</button>
+              <span style="position: absolute; left: 282px; top: 210px; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--colore-testo-primario); box-shadow: 0 0 0 3px var(--colore-sfondo), 0 0 0 4px var(--colore-testo-primario)" role="img" aria-label="Monza, il comune che hai scelto"></span>
+            </sc-if>
+            <button class="btn btn-s btn-secondario mappa-fluttua" type="button" onClick="{{vista.aElenco}}"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h.01"></path><path d="M3 18h.01"></path><path d="M3 6h.01"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M8 6h13"></path></svg>Mostra elenco</button>
+            <sc-if value="{{mappaVuota}}" hint-placeholder-val="{{ false }}">
+              <div class="avviso avviso-info mappa-avviso" role="status"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span><span class="avviso-titolo">Nessun evento in quest’area</span>Sposta la mappa o allarga la distanza nei filtri.</span></div>
+            </sc-if>
+            <sc-if value="{{mappaCarica}}" hint-placeholder-val="{{ false }}">
+              <div class="mappa-spenta" aria-busy="true"><span class="scheletro" style="width: 160px; height: 14px"></span><span class="t-corpo-s c-2">Carico la mappa…</span></div>
+            </sc-if>
+            <sc-if value="{{mappaKo}}" hint-placeholder-val="{{ false }}">
+              <div class="mappa-spenta" role="alert">
+                <span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></svg></span>
+                <span class="t-titolo-3">{{mappaKoTitolo}}</span>
+                <span class="t-corpo-s c-2">{{mappaKoTesto}}</span>
+                <button class="btn btn-s btn-secondario" type="button" onClick="{{vista.aElenco}}">Vedi gli eventi in elenco</button>
+              </div>
+            </sc-if>
+            <span class="mappa-attribuzione" style="z-index: 6">© OpenStreetMap contributors · Protomaps</span>
+          </div>
+          <sc-if value="{{anteprima.on}}" hint-placeholder-val="{{ true }}">
+            <div class="anteprima-mappa" role="region" aria-label="Anteprima: {{anteprima.nome}}">
+              <span class="foglio-maniglia" aria-hidden="true" style="margin: 2px auto 6px"></span>
+              <sc-if value="{{anteprima.multi}}" hint-placeholder-val="{{ false }}"><span class="etichetta">{{anteprima.nome}} · 2 eventi</span></sc-if>
+              <sc-for list="{{anteprima.eventi}}" as="e" hint-placeholder-count="1">
+                <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; border-bottom: 1px solid var(--colore-linea)">
+                  <div class="riga-compatta" style="border-bottom: 0">
+                    <span class="miniatura" aria-hidden="true" style="background: var(--colore-superficie-3)"><span class="{{e.miniCls}}"><span>{{e.ora}}</span><b>{{e.titolo}}</b></span></span>
+                    <div style="min-width: 0"><h3 class="rc-titolo" style="font-size: 0.9375rem">{{e.titolo}}</h3><span class="rc-ora">{{e.ora}} → {{e.fine}}</span><div class="rc-tag" style="margin-top: 4px"><span class="badge badge-eta">{{e.eta}}</span><span class="genere">{{e.genere1}}</span></div></div>
+                  </div>
+                  <button class="btn btn-s btn-secondario" type="button" onClick="{{e.apri}}" aria-label="Apri {{e.titolo}}">Apri</button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <nav class="barra-nav" aria-label="Principale" style="flex: none">
+        <a class="nav-voce is-on" href="#" aria-current="page"><span class="nav-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg></span>Scopri</a>
+        <a class="nav-voce" href="#"><span class="nav-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>Organizza</a>
+        <a class="nav-voce" href="#"><span class="nav-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg></span>Vivi</a>
+        <a class="nav-voce" href="#"><span class="nav-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></span>Ricorda</a>
+        <a class="nav-voce" href="#"><span class="nav-icona"><span class="avatar avatar-t2" aria-hidden="true" style="width: 24px; height: 24px; font-size: 0.5625rem; border: 0; box-shadow: 0 0 0 1px var(--colore-linea-forte)">GR</span></span>Profilo</a>
+      </nav>
+    </sc-if>
+
+    <!-- ===================== DETTAGLIO EVENTO ===================== -->
+    <sc-if value="{{is.dettaglio}}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{dtOffline}}" hint-placeholder-val="{{ false }}">
+        <div style="height: 47px; flex: none"></div>
+        <div class="striscia-offline" role="status" style="flex: none"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h.01"></path><path d="M8.5 16.429a5 5 0 0 1 7 0"></path><path d="m2 2 20 20"></path></svg><span>Sei offline: vedi i dettagli salvati sul telefono.</span></div>
+      </sc-if>
+      <div class="ax-corpo" style="padding: 0">
+        <sc-if value="{{dt.ok}}" hint-placeholder-val="{{ true }}">
+          <div class="{{dt.copCls}}" style="height: 260px; display: flex; flex-direction: column; justify-content: flex-end; padding: 108px 20px 20px">
+            <sc-if value="{{dt.isFoto}}" hint-placeholder-val="{{ true }}">
+              <svg class="foto" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" role="img" aria-label="{{dt.altFoto}}"><rect width="400" height="250" fill="{{dt.foto.cielo}}"></rect><circle cx="{{dt.foto.lx}}" cy="40" r="80" fill="#F28C28" opacity="0.10"></circle><circle cx="{{dt.foto.lx}}" cy="40" r="5" fill="#F7B26A"></circle><path d="{{dt.foto.tetto}}" fill="{{dt.foto.corpo}}"></path><sc-for list="{{dt.foto.finestre}}" as="f" hint-placeholder-count="6"><rect x="{{f.x}}" y="{{f.y}}" width="{{f.w}}" height="{{f.h}}" rx="{{f.r}}" fill="{{f.c}}"></rect></sc-for><rect y="220" width="400" height="30" fill="{{dt.foto.suolo}}"></rect><path d="M0 236 H400 M0 244 H400" stroke="#2A2C31" stroke-width="2"></path></svg>
+              <div class="velatura" aria-hidden="true"></div>
+            </sc-if>
+            <sc-if value="{{dt.isFlyer}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 8px" role="img" aria-label="Flyer approvato: {{dt.titolo}}">
+                <span class="t-mono-dato">{{dt.giorno}} · {{dt.ora}}</span>
+                <p class="cop-titolo" style="font-size: 2.75rem; max-width: 90%">{{dt.titolo}}</p>
+                <div class="flyer-righe" style="color: inherit"><span>{{dt.locale}}</span><span>{{dt.comune}}</span></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{dt.isTipo}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px" aria-hidden="true">
+                <span class="etichetta">{{dt.giorno}} · {{dt.comune}}</span>
+                <span class="cop-ora">{{dt.ora}}</span>
+              </div>
+            </sc-if>
+            <button class="cop-btn" type="button" aria-label="Indietro" onClick="{{indietro}}" style="left: 12px; top: 55px"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+            <button class="cop-btn" type="button" aria-label="Altre azioni per {{dt.titolo}}" aria-haspopup="menu" aria-expanded="{{menuOn}}" onClick="{{toggleMenu}}" style="right: 12px; top: 55px"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+            <sc-if value="{{menuAperto}}" hint-placeholder-val="{{ false }}">
+              <div class="menu-azioni" role="menu" aria-label="Altre azioni per l’evento" style="top: 104px; right: 12px">
+                <button class="menu-voce" type="button" role="menuitem"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v13"></path><path d="m16 6-4-4-4 4"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path></svg>Condividi il link</button>
+                <div class="menu-sep" role="separator"></div>
+                <button class="menu-voce" type="button" role="menuitem" onClick="{{apriSegnala}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><path d="M4 22v-7"></path></svg>Segnala</button>
+              </div>
+            </sc-if>
+          </div>
+          <div style="padding: 12px 20px 32px">
+            <sc-if value="{{dt.haCredito}}" hint-placeholder-val="{{ true }}"><p class="cop-credito" style="margin: 0 0 12px">Foto: Laura Bassi, CC BY 4.0</p></sc-if>
+            <div class="rc-tag" style="margin: 0 0 10px">
+              <sc-if value="{{dt.annullato}}" hint-placeholder-val="{{ false }}"><span class="badge badge-annullato"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Annullato</span></sc-if>
+              <span class="badge badge-eta">{{dt.eta}}</span>
+              <sc-for list="{{dt.generi}}" as="gn" hint-placeholder-count="2"><span class="genere">{{gn.t}}</span></sc-for>
+            </div>
+            <h1 class="ax-titolo" aria-label="{{dt.titolo}}" style="margin: 0 0 18px"><sc-for list="{{dt.parole}}" as="w" hint-placeholder-count="2"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+            <div class="ax-pila" style="gap: 18px">
+              <sc-if value="{{dt.annullato}}" hint-placeholder-val="{{ false }}">
+                <div class="avviso avviso-avviso" role="note"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg><span><span class="avviso-titolo">Il locale ha annullato l’evento</span>Se avevi un biglietto, il rimborso lo gestisce chi l’ha venduto.</span></div>
+              </sc-if>
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <span class="mono" style="font-size: 1rem; font-weight: 500">{{dt.giorno}} · {{dt.ora}} → {{dt.fine}}</span>
+                <span class="t-corpo-s c-2">{{dt.locale}} · {{dt.comune}}</span>
+              </div>
+              <sc-if value="{{dt.nonDichiarata}}" hint-placeholder-val="{{ false }}">
+                <div class="avviso avviso-info" role="note"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span><span class="avviso-titolo">Età non dichiarata</span>Il locale non ha indicato un’età minima: la consideriamo 18+.</span></div>
+              </sc-if>
+              <sc-if value="{{dt.haAmici}}" hint-placeholder-val="{{ true }}">
+                <button class="riga-amici-part" type="button" style="border-top: 1px solid var(--colore-linea); border-bottom: 1px solid var(--colore-linea); min-height: 56px"><span class="avatar-gruppo" aria-hidden="true"><sc-for list="{{dt.amici}}" as="a" hint-placeholder-count="3"><span class="{{a.cls}}">{{a.ini}}</span></sc-for></span><span>{{dt.amiciTesto}}</span><span class="fine"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
+              </sc-if>
+              <sc-if value="{{dt.haAzioni}}" hint-placeholder-val="{{ true }}">
+                <div style="display: flex; flex-direction: column; gap: 6px">
+                  <div class="partecipa" role="group" aria-label="La tua partecipazione">
+                    <button class="{{part.intCls}}" type="button" aria-pressed="{{part.intOn}}" onClick="{{part.toggleInt}}" disabled="{{dtOffline}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path></svg>Mi interessa</button>
+                    <button class="{{part.parCls}}" type="button" aria-pressed="{{part.parOn}}" onClick="{{part.togglePar}}" disabled="{{dtOffline}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Partecipo</button>
+                  </div>
+                  <span class="t-didascalia" role="status">{{part.stato}}</span>
+                  <div class="visibilita">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span class="testo"><b>{{part.visTitolo}}</b><span>{{part.visTesto}}</span></span>
+                    <button class="{{part.switchCls}}" type="button" role="switch" aria-checked="{{part.visOn}}" aria-label="Visibile ai tuoi amici" onClick="{{part.toggleVis}}" disabled="{{dtOffline}}" style="border: 0; cursor: pointer"></button>
+                  </div>
+                  <sc-if value="{{dtOffline}}" hint-placeholder-val="{{ false }}"><p class="ax-piccolo" style="margin: 0">Partecipazione e link tornano attivi con la connessione.</p></sc-if>
+                </div>
+              </sc-if>
+              <dl class="dati" style="margin: 0; padding-top: 4px">
+                <dt>Dove</dt><dd><b>{{dt.locale}}</b><br><span class="c-2">{{dt.indirizzo}}</span><br><a class="link-in-testo" href="#">Apri in Mappe<svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a></dd>
+                <dt>Line-up</dt><dd>{{dt.artisti}}</dd>
+                <dt>Prezzo</dt><dd class="mono">{{dt.prezzo}}</dd>
+              </dl>
+              <div>
+                <a class="link-riga" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Fonte: sito del locale<span class="dest">binario7.example<svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></span></a>
+                <sc-if value="{{dt.haBiglietti}}" hint-placeholder-val="{{ true }}">
+                  <a class="link-riga" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path><path d="M13 5v2"></path><path d="M13 17v2"></path><path d="M13 11v2"></path></svg>Biglietti<span class="dest">sito esterno<svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></span></a>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{dt.carica}}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" aria-label="Caricamento dell’evento">
+            <span class="scheletro" style="display: block; height: 300px; border-radius: 0"></span>
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 12px"><span class="scheletro" style="height: 20px; width: 40%"></span><span class="scheletro" style="height: 36px; width: 80%"></span><span class="scheletro" style="height: 14px; width: 60%"></span><span class="scheletro" style="height: 14px; width: 70%"></span><span class="scheletro" style="height: 48px; margin-top: 12px"></span></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{dt.ko}}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 47px 20px 24px">
+            <button class="ico-btn" type="button" aria-label="Indietro" onClick="{{indietro}}" style="margin-left: -12px"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+            <div class="stato-vuoto" role="alert" style="padding-top: 24px">
+              <span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg></span>
+              <span class="t-titolo-2">{{dt.koTitolo}}</span>
+              <span class="t-corpo-s c-2">{{dt.koTesto}}</span>
+              <button class="btn btn-s btn-secondario" type="button" onClick="{{dt.koAzione}}">{{dt.koBtn}}</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ===================== FOGLI ===================== -->
+  <sc-if value="{{foglio.on}}" hint-placeholder-val="{{ false }}">
+    <div class="velo" style="position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; justify-content: flex-end">
+      <div class="foglio" role="dialog" aria-modal="true" aria-labelledby="fg-t" tabindex="-1" onKeyDown="{{esc}}" style="padding-bottom: 0; max-height: 92%; display: flex; flex-direction: column">
+        <span class="foglio-maniglia" aria-hidden="true"></span>
+
+        <sc-if value="{{foglio.filtri}}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; justify-content: space-between; align-items: center"><h2 id="fg-t" class="t-titolo-2" style="margin: 0">Filtri</h2><button class="ico-btn" type="button" aria-label="Chiudi i filtri" onClick="{{chiudi}}" style="margin-right: -10px"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+          <div style="overflow-y: auto; flex: 1 1 auto; min-height: 0; margin: 0 -20px; padding: 0 20px">
+            <div class="foglio-sezione">
+              <span class="etichetta">Quando</span>
+              <div class="scopri-barra"><div class="segmenti" role="radiogroup" aria-label="Quando" style="flex: 1 1 auto"><button class="segmento is-on" type="button" role="radio" aria-checked="true">Stasera</button><button class="segmento" type="button" role="radio" aria-checked="false">Domani</button><button class="segmento" type="button" role="radio" aria-checked="false">Weekend</button></div><button class="btn btn-s btn-secondario" type="button">Scegli data</button></div>
+            </div>
+            <div class="foglio-sezione">
+              <span class="etichetta">Dove</span>
+              <sc-if value="{{fl.negato}}" hint-placeholder-val="{{ false }}">
+                <div class="avviso avviso-info" role="note"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span><span class="avviso-titolo">Posizione non disponibile</span>Noxa non ha il permesso di usare la posizione. Va bene così: scegli un comune e calcoliamo le distanze da lì.</span></div>
+              </sc-if>
+              <div role="radiogroup" aria-label="Distanze calcolate da">
+                <button class="opz-riga" type="button" role="radio" aria-checked="{{fl.posOn}}" disabled="{{fl.negato}}"><span class="{{fl.posBox}}"></span><span><span style="display: block">Usa la mia posizione</span></span></button>
+                <button class="opz-riga" type="button" role="radio" aria-checked="{{fl.comOn}}"><span class="{{fl.comBox}}"></span>Scegli un comune</button>
+              </div>
+              <div class="campo">
+                <label class="sr" for="fl-c">Comune</label>
+                <div class="campo-box"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg><input id="fl-c" type="text" value="{{fl.comune}}" readonly></div>
+                <sc-if value="{{fl.suggerimenti}}" hint-placeholder-val="{{ false }}">
+                  <div class="suggerimenti" role="listbox" aria-label="Comuni"><button type="button" role="option">Monza</button><button type="button" role="option">Mombello · Limbiate</button><button type="button" role="option">Montevecchia</button></div>
+                </sc-if>
+              </div>
+              <p class="ax-piccolo" style="margin: 0">La posizione serve solo a calcolare le distanze e non viene salvata.</p>
+              <span class="campo-etichetta" style="margin-top: 4px">Distanza</span>
+              <div class="segmenti" role="radiogroup" aria-label="Distanza"><button class="segmento" type="button" role="radio" aria-checked="false"><span class="mono">5 km</span></button><button class="segmento is-on" type="button" role="radio" aria-checked="true"><span class="mono">10 km</span></button><button class="segmento" type="button" role="radio" aria-checked="false"><span class="mono">25 km</span></button><button class="segmento" type="button" role="radio" aria-checked="false">Tutte</button></div>
+            </div>
+            <div class="foglio-sezione">
+              <span class="etichetta">Generi musicali</span>
+              <div class="chips-avvolte" role="group" aria-label="Generi musicali">
+                <sc-for list="{{generiFiltro}}" as="g" hint-placeholder-count="7"><button class="{{g.cls}}" type="button" aria-pressed="{{g.on}}" onClick="{{g.toggle}}">{{g.t}}</button></sc-for>
+              </div>
+            </div>
+            <div class="foglio-sezione">
+              <span class="etichetta">Età minima</span>
+              <div role="radiogroup" aria-label="Età minima">
+                <button class="opz-riga" type="button" role="radio" aria-checked="true"><span class="opzione is-on"></span>Tutti quelli che puoi vedere</button>
+                <button class="opz-riga" type="button" role="radio" aria-checked="false"><span class="opzione"></span>Solo eventi fino a 16+</button>
+                <button class="opz-riga" type="button" role="radio" aria-checked="false"><span class="opzione"></span>Solo eventi fino a 14+</button>
+              </div>
+              <p class="ax-piccolo" style="margin: 0">Utile se esci con amici più piccoli. Non mostra eventi che non puoi già vedere.</p>
+            </div>
+            <div class="foglio-sezione">
+              <div class="scelta" style="justify-content: space-between"><span>Solo eventi con amici</span><span class="interruttore" role="switch" aria-checked="false"></span></div>
+            </div>
+          </div>
+          <div class="azioni-doppie" style="padding: 12px 0 34px; border-top: 1px solid var(--colore-linea)">
+            <button class="btn btn-secondario" type="button">Azzera</button>
+            <button class="btn btn-secondario" type="button" onClick="{{chiudi}}">Mostra <span class="mono">5</span> eventi</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{foglio.calendario}}" hint-placeholder-val="{{ false }}">
+          <div style="padding-bottom: 34px">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px"><h2 id="fg-t" class="t-titolo-3" style="margin: 0">Scegli una data</h2><span class="t-mono-dato c-2">sab 17.10.2026</span></div>
+            <div class="cal-selettori"><button class="cal-sel" type="button">Ottobre<svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button class="cal-sel mono" type="button">2026<svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div>
+            <div class="cal-griglia" role="grid" aria-label="Ottobre 2026">
+              <span class="gs">Lu</span><span class="gs">Ma</span><span class="gs">Me</span><span class="gs">Gi</span><span class="gs">Ve</span><span class="gs">Sa</span><span class="gs">Do</span>
+              <sc-for list="{{giorniCal}}" as="g" hint-placeholder-count="35"><button class="{{g.c}}" type="button" aria-label="{{g.a}}" disabled="{{g.passato}}">{{g.n}}</button></sc-for>
+            </div>
+            <div class="azioni-doppie" style="margin-top: 16px"><button class="btn btn-secondario" type="button" onClick="{{chiudi}}">Annulla</button><button class="btn btn-principale" type="button" onClick="{{chiudi}}">Mostra sab 17.10</button></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{foglio.segnala}}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 34px">
+            <h2 id="fg-t" class="t-titolo-2" style="margin: 0">Segnala l’evento</h2>
+            <p class="t-corpo-s c-2" style="margin: 0">Tocca un motivo: la segnalazione parte subito. Resta anonima.</p>
+            <div role="group" aria-label="Motivo">
+              <sc-for list="{{motivi}}" as="m" hint-placeholder-count="5"><button class="motivo" type="button" onClick="{{chiudi}}"><span>{{m.t}}</span><span class="fine"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button></sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{toast.on}}" hint-placeholder-val="{{ false }}">
+    <div class="toast toast-basso" role="status" style="bottom: 24px">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-successo)"><path d="M20 6 9 17l-5-5"></path></svg>
+      <span class="toast-testo">{{toast.testo}}</span>
+      <button class="btn btn-s btn-testo" type="button" onClick="{{toast.annulla}}">Annulla</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tema":{"editor":"enum","options":["scuro","chiaro"],"default":"scuro"},"schermata":{"editor":"enum","options":["elenco","mappa","filtri","dettaglio"],"default":"elenco"},"stato":{"editor":"text","default":"normale"},"giorno":{"editor":"enum","options":["stasera","domani","weekend"],"default":"stasera"},"evento":{"editor":"enum","options":["e1","e2","e3","e4","e5"],"default":"e1"},"copertina":{"editor":"enum","options":["auto","foto","flyer","tipo"],"default":"auto"},"partecipazione":{"editor":"enum","options":["nessuno","interessa","partecipo"],"default":"nessuno"},"visibilita":{"editor":"enum","options":["amici","solo"],"default":"amici"},"larghezza":{"editor":"int","default":390,"min":320,"max":430,"unit":"px"},"altezza":{"editor":"int","default":844,"min":640,"max":932,"unit":"px"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const P = this.props;
+    const tema = P.tema ?? 'scuro';
+    const sch = st.s ?? (P.schermata ?? 'elenco');
+    const stato = st.st ?? (P.stato ?? 'normale');
+    const giorno = st.g ?? (P.giorno ?? 'stasera');
+    const evId = st.ev ?? (P.evento ?? 'e1');
+    const part = st.part ?? (P.partecipazione ?? 'nessuno');
+    const vis = st.vis ?? (P.visibilita ?? 'amici');
+    const copProp = P.copertina ?? 'auto';
+    const base = sch === 'filtri' ? 'elenco' : sch;
+    const go = (s, x) => () => this.setState(Object.assign({ s, st: 'normale', menu: false, foglio: null, toast: false }, x || {}));
+
+    // "foto" del locale: illustrazione segnaposto parametrica (nessuna persona, nessuna bottiglia)
+    const win = (x0, y0, cols, rows, w, h, gx, gy, r, lit) => { const a = []; for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) a.push({ x: x0 + i * (w + gx), y: y0 + j * (h + gy), w, h, r, c: ((i * 7 + j * 3) % 5 < lit) ? '#E3A25A' : '#2B2D33' }); return a; };
+    const FOTO = {
+      binario: { cielo: '#0C0F14', corpo: '#1E1E22', suolo: '#141518', lx: 330, tetto: 'M20 220 V110 Q200 40 380 110 V220 Z', finestre: win(52, 120, 5, 2, 46, 36, 18, 14, 4, 3) },
+      officina: { cielo: '#0D1015', corpo: '#202126', suolo: '#121316', lx: 70, tetto: 'M30 220 V100 L120 70 L210 100 L300 70 L370 100 V220 Z', finestre: win(56, 112, 6, 2, 34, 30, 12, 16, 2, 2) },
+      cascina: { cielo: '#0E1013', corpo: '#2A251F', suolo: '#17150F', lx: 200, tetto: 'M0 220 V120 L60 95 H340 L400 120 V220 Z', finestre: win(28, 140, 7, 1, 36, 66, 18, 0, 6, 4) }
+    };
+    const GR = { ini: 'GR', cls: 'avatar avatar-s avatar-t1' };
+    const MB = { ini: 'MB', cls: 'avatar avatar-s avatar-t2' };
+    const SC = { ini: 'SC', cls: 'avatar avatar-s avatar-t3' };
+    const LF = { ini: 'LF', cls: 'avatar avatar-s avatar-t1' };
+    const piu = (n) => ({ ini: '+' + n, cls: 'avatar avatar-s avatar-piu' });
+    const EV = {
+      e1: { titolo: 'Notte Ferrovia', locale: 'Club Binario 7', comune: 'Monza', indirizzo: 'Via dei Cantieri 12, Monza', giorno: 'gio 15.10', ora: '23:00', fine: '05:00', eta: '18+', generi: ['techno', 'house'], km: '2,1 km', prezzo: 'da 15 €', amici: [MB, SC, piu(2)], amiciTesto: 'Marco, Sara e altri 2 ci vanno', cop: 'foto', foto: 'binario', artisti: 'Nera Vale · Corrado B. · Otto Fili', biglietti: true, x: 200, y: 230 },
+      e2: { titolo: 'Open Decks', locale: 'Officina Lambro', comune: 'Monza', indirizzo: 'Via del Lavatoio 3, Monza', giorno: 'gio 15.10', ora: '21:30', fine: '00:30', eta: '14+', generi: ['house'], km: '1,4 km', prezzo: 'Ingresso libero', amici: [LF], amiciTesto: 'Luca ci va', cop: 'foto', foto: 'officina', artisti: 'Consolle aperta, iscrizioni sul posto', biglietti: false, x: 120, y: 330 },
+      e3: { titolo: 'Bassi Lunghi', locale: 'Officina Lambro', comune: 'Monza', indirizzo: 'Via del Lavatoio 3, Monza', giorno: 'gio 15.10', ora: '22:30', fine: '04:00', eta: '18+ · non dichiarata', nonDich: true, generi: ['hip hop', 'reggaeton'], km: '1,4 km', prezzo: 'Prezzo non indicato', amici: [], amiciTesto: '', cop: 'flyer', artisti: 'Selva Mc · Duo Brina', biglietti: false, x: 120, y: 330 },
+      e4: { titolo: 'Cortile Live', locale: 'Cascina Torretta', comune: 'Vimercate', indirizzo: 'Strada della Torretta 8, Vimercate', giorno: 'gio 15.10', ora: '21:00', fine: '01:00', eta: '16+', generi: ['indie', 'live'], km: '6,4 km', prezzo: 'da 8 €', amici: [], amiciTesto: '', cop: 'foto', foto: 'cascina', artisti: 'I Fili Scoperti · Mare di Brughiera · Lanterna', biglietti: true, x: 318, y: 96 },
+      e5: { titolo: 'Anni Zero', locale: 'Sala Ventuno', comune: 'Desio', indirizzo: 'Corso del Mobile 21, Desio', giorno: 'gio 15.10', ora: '22:00', fine: '03:00', eta: '16+', generi: ['commerciale'], km: '7,9 km', prezzo: 'da 10 €', amici: [], amiciTesto: '', cop: 'tipo', artisti: 'Dj Gemma Tre', biglietti: true, x: 318, y: 96 },
+      w1: { titolo: 'Indie al Binario', locale: 'Club Binario 7', comune: 'Monza', giorno: 'ven 16.10', ora: '21:30', fine: '02:00', eta: '16+', generi: ['indie', 'live'], km: '2,1 km', prezzo: 'da 12 €', amici: [SC], amiciTesto: 'Sara ci va', cop: 'foto', foto: 'binario' },
+      w2: { titolo: 'Reggaeton Night', locale: 'Sala Ventuno', comune: 'Desio', giorno: 'ven 16.10', ora: '23:00', fine: '04:00', eta: '18+', generi: ['reggaeton', 'commerciale'], km: '7,9 km', prezzo: 'da 15 €', amici: [], amiciTesto: '', cop: 'tipo' },
+      w3: { titolo: 'Techno Lunga', locale: 'Club Binario 7', comune: 'Monza', giorno: 'sab 17.10', ora: '23:30', fine: '06:00', eta: '18+', generi: ['techno'], km: '2,1 km', prezzo: 'da 20 €', amici: [MB, GR, piu(1)], amiciTesto: 'Marco, Giulia e un’altra persona ci vanno', cop: 'foto', foto: 'binario' },
+      w4: { titolo: 'Live in Cascina', locale: 'Cascina Torretta', comune: 'Vimercate', giorno: 'sab 17.10', ora: '20:30', fine: '00:30', eta: '14+', generi: ['live'], km: '6,4 km', prezzo: 'Ingresso libero', amici: [], amiciTesto: '', cop: 'foto', foto: 'cascina' }
+    };
+    const prep = (id, evid) => {
+      const e = EV[id];
+      return Object.assign({}, e, {
+        evid: !!evid, compatta: !evid,
+        isFoto: e.cop === 'foto', isFlyer: e.cop === 'flyer', isTipo: e.cop === 'tipo',
+        foto: FOTO[e.foto || 'binario'],
+        copCls: 'copertina' + (e.cop === 'foto' ? ' su-velatura' : e.cop === 'flyer' ? ' copertina-flyer' : ' copertina-tipo'),
+        quando: e.giorno + ' · ' + e.ora + ' → ' + e.fine,
+        generi: e.generi.slice(0, 2).map((t) => ({ t })),
+        meta: [e.km, e.prezzo].filter(Boolean).map((t) => ({ t })),
+        haAmici: e.amici.length > 0,
+        aria: e.titolo + ', ' + e.locale + ', ' + e.comune + ', ' + e.giorno + ' dalle ' + e.ora + ', età ' + e.eta,
+        apri: go('dettaglio', { ev: EV[id].x ? id : 'e1' })
+      });
+    };
+    const sezioni = giorno === 'weekend'
+      ? [{ label: 'Venerdì 16.10', eventi: [prep('w1', true), prep('w2')] }, { label: 'Sabato 17.10', eventi: [prep('w3'), prep('w4')] }]
+      : giorno === 'domani'
+        ? [{ label: 'Domani · ven 16.10', eventi: [prep('w1', true), prep('w2')] }]
+        : [{ label: 'Stasera · gio 15.10', eventi: [prep('e1', true), prep('e2'), prep('e3'), prep('e4'), prep('e5')] }];
+
+    // mappa
+    const selLoc = st.loc ?? (stato === 'multi' ? 'officina' : 'binario');
+    const marker = [
+      { k: 'binario', nome: 'Binario 7', full: 'Club Binario 7', n: 1, x: 236, y: 132 },
+      { k: 'officina', nome: 'Officina Lambro', full: 'Officina Lambro', n: 2, x: 104, y: 196 }
+    ].map((m) => ({
+      nome: m.nome, n: m.n, x: m.x, y: m.y, on: m.k === selLoc ? 'true' : 'false',
+      cls: 'marker-locale' + (m.k === selLoc ? ' is-on' : ''),
+      aria: m.full + ', ' + m.n + (m.n === 1 ? ' evento' : ' eventi'),
+      pick: () => this.setState({ loc: m.k, s: 'mappa', st: 'normale' })
+    }));
+    const mini = (id) => { const e = EV[id]; return { titolo: e.titolo, ora: e.ora, fine: e.fine, eta: e.eta, genere1: e.generi[0], miniCls: 'mini-tipo', apri: go('dettaglio', { ev: id }) }; };
+    const mappaOkStati = ['normale', 'multi'];
+    const anteprima = {
+      on: base === 'mappa' && mappaOkStati.indexOf(stato) >= 0,
+      multi: selLoc === 'officina',
+      nome: selLoc === 'officina' ? 'Officina Lambro' : 'Club Binario 7',
+      eventi: (selLoc === 'officina' ? ['e2', 'e3'] : ['e1']).map(mini)
+    };
+
+    // dettaglio
+    const evD = EV[evId] || EV.e1;
+    const cop = copProp === 'auto' ? evD.cop : copProp;
+    const annullato = stato === 'annullato';
+    const dtOk = base === 'dettaglio' && ['caricamento', 'nondisponibile', 'errore'].indexOf(stato) < 0;
+    const parti = { nessuno: 'Non hai ancora scelto.', interessa: 'Segnato: ti interessa.', partecipo: 'Segnato: partecipi.' };
+    const toastTesto = st.toastTesto || (stato === 'toast' ? 'Segnato: partecipi' : '');
+    const setPart = (v) => this.setState({ part: v, toast: true, toastTesto: v === 'partecipo' ? 'Segnato: partecipi' : v === 'interessa' ? 'Segnato: ti interessa' : 'Tolto dai tuoi eventi', prevPart: part });
+
+    const giorniCal = [];
+    for (let i = 0; i < 3; i++) giorniCal.push({ n: '', c: 'cal-g vuoto', a: '', passato: true });
+    for (let d = 1; d <= 31; d++) giorniCal.push({ n: String(d), c: d === 17 ? 'cal-g sel' : 'cal-g', a: d + ' ottobre 2026', passato: d < 15 });
+
+    const generiT = ['techno', 'house', 'hip hop', 'reggaeton', 'commerciale', 'indie', 'live'];
+    const gSel = st.gen || { techno: true, house: true };
+    const foglioTipo = st.foglio || (sch === 'filtri' ? 'filtri' : (base === 'elenco' && stato === 'calendario') ? 'calendario' : (base === 'dettaglio' && stato === 'segnala') ? 'segnala' : null);
+    const menuAperto = !!st.menu || (base === 'dettaglio' && stato === 'menu');
+    const offline = stato === 'offline';
+    const dtOffline = base === 'dettaglio' && offline;
+
+    return {
+      radice: 'nx nx-' + tema,
+      larghezza: P.larghezza ?? 390, altezza: P.altezza ?? 844,
+      is: { scopri: base === 'elenco' || base === 'mappa', dettaglio: base === 'dettaglio' },
+      offline: offline && base !== 'dettaglio', dtOffline,
+      luogoEtichetta: 'Monza · entro 10 km',
+      paroleScopri: [{ t: 'Scopri' }],
+      dataBreve: giorno === 'weekend' ? '16–18.10' : giorno === 'domani' ? 'ven 16.10' : 'gio 15.10',
+      giorni: [['stasera', 'Stasera'], ['domani', 'Domani'], ['weekend', 'Weekend']].map(([id, label]) => ({ label, on: id === giorno ? 'true' : 'false', cls: id === giorno ? 'segmento is-on' : 'segmento', pick: () => this.setState({ g: id }) })),
+      dataBtnCls: 'btn btn-icona btn-secondario',
+      apriCal: () => this.setState({ foglio: 'calendario' }),
+      apriFiltri: () => this.setState({ foglio: 'filtri' }),
+      vista: {
+        elencoCls: base === 'mappa' ? 'segmento' : 'segmento is-on', mappaCls: base === 'mappa' ? 'segmento is-on' : 'segmento',
+        elencoOn: base === 'mappa' ? 'false' : 'true', mappaOn: base === 'mappa' ? 'true' : 'false',
+        aElenco: go('elenco'), aMappa: go('mappa')
+      },
+      isElenco: base === 'elenco', isMappa: base === 'mappa',
+      elCarica: stato === 'caricamento', elVuoto: stato === 'vuoto', elErrore: stato === 'errore',
+      elLista: ['caricamento', 'vuoto', 'errore'].indexOf(stato) < 0,
+      tre: [1, 2, 3].map((k) => ({ k })),
+      sezioni,
+      // mappa
+      marker, anteprima,
+      mappaPronta: ['caricamento', 'nondisponibile', 'offline', 'vuoto'].indexOf(stato) < 0,
+      mappaVuota: base === 'mappa' && stato === 'vuoto',
+      mappaCarica: base === 'mappa' && stato === 'caricamento',
+      mappaKo: base === 'mappa' && (stato === 'nondisponibile' || stato === 'offline'),
+      mappaKoTitolo: stato === 'offline' ? 'La mappa non è disponibile offline' : 'La mappa non si è caricata',
+      mappaKoTesto: stato === 'offline' ? 'Gli eventi salvati sul telefono sono nell’elenco.' : 'Vedi gli eventi in elenco: sono gli stessi.',
+      // dettaglio
+      dt: {
+        ok: dtOk, carica: base === 'dettaglio' && stato === 'caricamento', ko: base === 'dettaglio' && (stato === 'nondisponibile' || stato === 'errore'),
+        koTitolo: stato === 'errore' ? 'L’evento non si è caricato' : 'Questo evento non c’è più o non è adatto alla tua età',
+        koTesto: stato === 'errore' ? 'Colpa nostra o della rete. Riprova tra un attimo.' : 'Trovi altri eventi in Scopri.',
+        koBtn: stato === 'errore' ? 'Riprova' : 'Torna a Scopri',
+        koAzione: go('elenco'),
+        koIcoCls: 'cornice-icona',
+        koIcoStile: stato === 'errore' ? 'color: var(--colore-errore); border-color: var(--colore-errore)' : '',
+        titolo: evD.titolo, parole: evD.titolo.split(' ').map((t) => ({ t })),
+        isFoto: cop === 'foto', isFlyer: cop === 'flyer', isTipo: cop === 'tipo',
+        copCls: 'copertina' + (cop === 'foto' ? ' su-velatura' : cop === 'flyer' ? ' copertina-flyer' : ' copertina-tipo'),
+        foto: FOTO[evD.foto || 'binario'],
+        altFoto: 'Foto del locale ' + evD.locale + ', esterno di sera',
+        haCredito: cop === 'foto',
+        giorno: evD.giorno, ora: evD.ora, fine: evD.fine, locale: evD.locale, comune: evD.comune, indirizzo: evD.indirizzo,
+        eta: evD.eta, generi: evD.generi.map((t) => ({ t })), artisti: evD.artisti, prezzo: evD.prezzo,
+        nonDichiarata: !!evD.nonDich,
+        haAmici: evD.amici.length > 0, amici: evD.amici, amiciTesto: evD.amiciTesto,
+        annullato, haAzioni: !annullato, haBiglietti: !!evD.biglietti && !annullato
+      },
+      part: {
+        intCls: 'partecipa-opz' + (part === 'interessa' ? ' is-on' : ''),
+        parCls: 'partecipa-opz' + (part === 'partecipo' ? ' is-on forte' : ''),
+        intOn: part === 'interessa' ? 'true' : 'false', parOn: part === 'partecipo' ? 'true' : 'false',
+        toggleInt: () => setPart(part === 'interessa' ? 'nessuno' : 'interessa'),
+        togglePar: () => setPart(part === 'partecipo' ? 'nessuno' : 'partecipo'),
+        stato: parti[part] + (part !== 'nessuno' ? ' Tocca di nuovo per togliere.' : ''),
+        visOn: vis === 'amici' ? 'true' : 'false',
+        visTitolo: vis === 'amici' ? 'Visibile ai tuoi amici' : 'Solo per te',
+        visTesto: vis === 'amici' ? 'Gli amici vedono la tua scelta per questo evento.' : 'Gli amici non vedono la tua scelta per questo evento.',
+        switchCls: 'interruttore' + (vis === 'amici' ? ' is-on' : ''),
+        toggleVis: () => this.setState({ vis: vis === 'amici' ? 'solo' : 'amici' })
+      },
+      menuOn: menuAperto ? 'true' : 'false', menuAperto,
+      toggleMenu: () => this.setState({ menu: !menuAperto }),
+      apriSegnala: () => this.setState({ foglio: 'segnala', menu: false }),
+      indietro: go('elenco'),
+      // fogli
+      foglio: { on: !!foglioTipo, filtri: foglioTipo === 'filtri', calendario: foglioTipo === 'calendario', segnala: foglioTipo === 'segnala' },
+      fl: {
+        negato: stato === 'negato',
+        posOn: stato === 'normale' ? 'false' : 'false', comOn: 'true',
+        posBox: 'opzione', comBox: 'opzione is-on',
+        comune: stato === 'comune' ? 'Mo' : 'Monza',
+        suggerimenti: stato === 'comune'
+      },
+      generiFiltro: generiT.map((t) => ({ t, on: gSel[t] ? 'true' : 'false', cls: gSel[t] ? 'chip is-on' : 'chip', toggle: () => this.setState({ gen: Object.assign({}, gSel, { [t]: !gSel[t] }) }) })),
+      giorniCal,
+      motivi: ['Evento falso', 'Dati sbagliati (orari, luogo, età)', 'Contenuto inappropriato', 'Riferimenti all’alcol non segnalati', 'Altro'].map((t) => ({ t })),
+      chiudi: () => this.setState({ foglio: null, s: base, st: 'normale' }),
+      esc: (e) => { if (e && e.key === 'Escape') this.setState({ foglio: null, s: base, st: 'normale' }); },
+      toast: {
+        on: base === 'dettaglio' && (!!st.toast || stato === 'toast'),
+        testo: toastTesto || 'Segnato: partecipi',
+        annulla: () => this.setState({ part: st.prevPart ?? 'nessuno', toast: false })
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

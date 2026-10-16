@@ -126,3 +126,18 @@ servono componenti nuovi (scheda in evidenza, riga evento compatta, pillole dei 
 marker raggruppato, anteprima sulla mappa, selettore Mi interessa / Partecipo, riga
 "amici che partecipano"), aggiungili alla tavola dei componenti del design system. Esporta
 l'HTML come `scopri.html` e le tavole in `immagini/`.
+
+## Esito
+
+- Progetto Claude Design: https://claude.ai/artifact/4MTnXgrpFWHsegaL47BcbT (riga "F-01 · Scopri").
+- Esportazione in `esportazione/`: il prototipo `F01.dc.html` (tutte le schermate e gli
+  stati, con i parametri `tema`, `schermata`, `stato`, `giorno`, `evento`, `copertina`,
+  `partecipazione`, `visibilita`), le tavole `F01-01`…`F01-07` (elenco; filtri e scegli
+  data; mappa; dettaglio con copertine, età non dichiarata, annullato, menu ⋯ e segnala;
+  stati del dettaglio; partecipazione e visibilità; verifica a 360 px), i componenti nuovi
+  (`Componenti-scopri.dc.html`: scheda in evidenza, riga compatta, badge d'età e generi,
+  marker e gruppo, anteprima sulla mappa, selettore Mi interessa / Partecipo, visibilità,
+  amici che partecipano, link esterno) e il foglio `noxa-scopri.css` (layer "scopri", solo
+  token di noxa.css).
+- Le tavole si vedono nel progetto Claude Design; le schermate di confronto si catturano
+  durante l'iterazione 4 (skill `implement-design`).
