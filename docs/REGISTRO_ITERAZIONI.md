@@ -16,14 +16,14 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 3 su 15.
+Iterazioni completate: 4 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
 | 0 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-00-fondamenta` | CI verificata su GitHub (PR #4); mancano i progetti di staging, produzione e deploy |
 | 1 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-01-design-system` | Mancano la prova su emulatore Android e simulatore iOS, gli account degli store e la mappa nei bucket di staging e produzione |
 | 2 | completata con attese esterne | 2026-10-16 | 2026-10-16 | 2 | `iterazione-02-account` | Mancano Auth di staging e produzione (hook, Turnstile, email), D-01 e App Review Meta per chiudere la Fase 0 |
-| 3 | in corso | 2026-10-16 | — | 0 | `iterazione-03-amicizie` | — |
+| 3 | completata | 2026-10-16 | 2026-10-16 | 3 | `iterazione-03-amicizie` | Notifiche delle richieste e reclamo nell'iterazione 6, gruppi nella 7 (ROADMAP) |
 | 4 | da iniziare | — | — | 0 | — | — |
 | 5 | da iniziare | — | — | 0 | — | — |
 | 6 | da iniziare | — | — | 0 | — | — |
@@ -332,4 +332,70 @@ dati, dietro limiti di frequenza e CAPTCHA.
   invariante R-15 (iterazione 7), decisioni dei moderatori e reclamo (iterazione 6).
 - Criteri: test pgTAP di R-10…R-14 e R-17 per tutte le età, compreso il tentativo di elencare
   `profili`; e2e amicizia per ricerca e per codice con l'avviso al minorenne.
+
+**Cicli di revisione**
+- Durante lo sviluppo: il menu ⋯ dell'ultima riga si apriva sotto la barra di navigazione
+  fissa → si apre verso l'alto vicino al fondo; il toast "Persona bloccata" spariva con la
+  riga della persona → fornitore unico dei toast nell'app; "Valido ancora 16 min" per lo
+  scarto tra gli orologi → limitato a 15.
+- Ciclo 1: tutti i controlli verdi; dalla rilettura del diff, un link d'invito aperto senza
+  sessione si perdeva dopo l'accesso → la pagina richiesta si ricorda e si riapre (e2e).
+- Ciclo 2: il test con Supabase reale ha trovato una regressione della correzione: dopo
+  "Esci dall'account" il nuovo accesso riapriva il Profilo → si ricorda la pagina solo se la
+  sessione mancava fin dall'apertura.
+- Ciclo 3: tutti i controlli verdi, nessun problema nuovo.
+
+**Esito dei test**
+- pgTAP 234/234 (9 file, nuovi `014_amicizie_blocchi`, `015_codici_invito`,
+  `016_segnalazioni`; `011_profili` aggiornato con le relazioni del seed); `supabase db
+  lint` senza errori; `verifica_documentazione.py` e `verifica_migrazioni.py` verdi.
+- Vitest 43/43; ESLint, TypeScript e Prettier verdi.
+- Playwright con Supabase simulato 180/180 (axe nei due temi su profilo, amici, ricerca,
+  codice, anteprima con avviso, menu ⋯, bloccati, segnalazioni); con Supabase reale 5/5,
+  compreso adulto e minorenne che non si trovano con la ricerca ma diventano amici con il
+  codice, con l'avviso al minorenne, e il blocco che li nasconde a vicenda.
+- Worker invariato: Ruff, mypy, pytest 29/29.
+- Un test del reinvio dell'email è fallito una volta su 178 con la macchina carica e passa
+  6 volte su 6 da solo: instabilità di tempi, la CI ha 2 tentativi.
+
+**Criteri di completamento**
+| Criterio | Esito | Evidenza |
+|---|---|---|
+| Test pgTAP di R-10…R-14 e R-17 per tutte le età, compreso il tentativo di elencare `profili` | SÌ | `011_profili` (elenco di `profili` per ogni utente del seed), `014_amicizie_blocchi`, `015_codici_invito` |
+| e2e amicizia per ricerca e per codice con l'avviso al minorenne | SÌ | `tests/e2e/amici.spec.ts`, `tests/e2e/integrazione/amici.spec.ts` |
+| PRD F-11, F-12, F-42 | SÌ | e2e `amici.spec.ts` (ricerca, codice, anteprima, richieste, rimozione, segnala, blocca, bloccati, segnalazioni, modifica) |
+
+**Safety review — Iterazione 3 (F-11, F-12, F-42)**
+Esito: SUPERATA
+
+Dati coinvolti: amicizie e richieste (solo le due persone); codici invito (solo il titolare,
+cancellati 24 ore dopo la scadenza); blocchi (solo chi blocca; il bloccato non li vede);
+segnalazioni con testo facoltativo di massimo 1000 caratteri (chi segnala e i moderatori con
+due fattori); registro della moderazione (solo moderatori). Superfici di contatto: ricerca
+solo nella propria fascia, per prefisso, 20 risultati; codice invito monouso di 15 minuti,
+che mostra username e nome del titolare solo a chi lo usa; profilo visibile solo agli amici
+e a chi ha una richiesta in attesa; nessun messaggio libero.
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | RLS e policy per operazione sulle 5 nuove tabelle; RPC `security definer` con `search_path` vuoto e controllo del chiamante; test per 14, 15, 16, 17, 18, 20, 21 anni, `moderatore` e `moderatore_senza_mfa` |
+| B. Contatti tra utenti | SÌ | Adulti e minorenni non si trovano (`014`, e2e reale); tra fasce solo con codice e avviso (`015`, e2e); blocco reciproco e invisibile, con lo stesso errore di un account non disponibile; nessun messaggio libero; nessuna notifica con testi di altri |
+| C. Eventi e contenuti | SÌ | Nessun evento; contatori neutri, nessun suggerimento di persone né pressione sociale (R-43) |
+| D. Posizione | N/A | Nessuna posizione; la fotocamera legge il QR sul dispositivo e niente viene salvato |
+| E. Contenuti caricati | SÌ | Profili segnalabili in due tocchi (R-50), priorità secondo R-53, 20 segnalazioni al giorno, azioni dei moderatori registrate (R-69) |
+| F. Privacy | SÌ | Nessun dato nuovo oltre a relazioni e segnalazioni; conservazione in §10 (codici 24 ore, segnalazioni 12 mesi, il resto con l'account); nessun SDK nuovo; libreria QR locale |
+| G. Documentazione | SÌ | PRD F-11 F-12, DATA_MODEL §4 §5.2 §5.10 §8, SAFETY_PRIVACY R-50 e §10, DESIGN, ROADMAP (iterazioni 6 e 7), brief F-11 |
+
+**Scelte fatte durante l'iterazione**
+- `puo_vedere_profilo` senza la condizione sui gruppi fino all'iterazione 7.
+- Tabella `notifiche`, notifiche delle richieste ed esiti di moderazione con il reclamo
+  spostati nell'iterazione 6 (ROADMAP); la R-15 sui gruppi nell'iterazione 7.
+- Le richieste arrivate con il codice si accettano dal profilo, dove compare l'avviso.
+- Una pagina aperta senza sessione (link d'invito) si riapre dopo l'accesso.
+- QR generato in locale con `uqr`; scansione con BarcodeDetector dove il browser lo offre,
+  altrimenti codice scritto.
+
+**Attese esterne**: nessuna nuova (restano quelle delle iterazioni 0–2).
+
+**Commit**: `148cb2e` … commit finale di chiusura sul branch `iterazione-03-amicizie`.
 
