@@ -136,7 +136,7 @@ non può essere rilasciata, indipendentemente da scadenze o richieste commercial
 | Account mai confermato con il link dell'email | 24 ore dalla registrazione | `private.elimina_account_non_confermati()` ogni ora |
 | Account eliminato | Cancellazione immediata dei dati nel database e nello storage; scomparsa dai backup alla fine della finestra di backup del piano Supabase (al massimo 30 giorni) | Edge Function `elimina-account` |
 | Log applicativi (worker, Edge Functions) | 30 giorni | impostazione del fornitore di hosting |
-| Dati dell'account (profilo, amicizie, blocchi, gruppi, serate, partecipazioni, tracker, badge, riepiloghi, consensi, dispositivi) | Fino all'eliminazione dell'account. Un account senza accessi da 24 mesi riceve un avviso via email ed è eliminato dopo altri 30 giorni senza accessi | `private.applica_conservazione()` su `auth.users.last_sign_in_at`; eliminazione con la stessa procedura di `elimina-account` |
+| Dati dell'account (profilo e foto profilo, amicizie, blocchi, gruppi, serate, partecipazioni, tracker, badge, riepiloghi, consensi, dispositivi) | Fino all'eliminazione dell'account. Un account senza accessi da 24 mesi riceve un avviso via email ed è eliminato dopo altri 30 giorni senza accessi | `private.applica_conservazione()` su `auth.users.last_sign_in_at`; eliminazione con la stessa procedura di `elimina-account` |
 | Eventi (`eventi` e tabelle collegate) | Indefinita: sono informazioni pubbliche sugli eventi, non dati personali | — |
 
 ## 11. Procedura operativa di moderazione (sintesi)

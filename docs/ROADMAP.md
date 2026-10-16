@@ -164,7 +164,7 @@ Ogni iterazione ha:
 | 3 | 1 | Amicizie, blocchi e segnalazioni | F-11, F-12, F-42 (bloccati) | Amici, profilo, segnala e blocca |
 | 4 | 1 | Catalogo eventi e scoperta | F-01, F-02, F-03, F-04, F-05 | Scopri: elenco, filtri, mappa, dettaglio |
 | 5 | 1 | Raccolta automatica degli eventi | F-44, F-40 (locali e fonti) | Moderazione: locali e fonti |
-| 6 | 1 | Flyer e moderazione | F-06, F-40 | Carica flyer, stato flyer, code di moderazione |
+| 6 | 1 | Flyer e moderazione | F-06, F-40, F-10 (foto profilo) | Carica flyer, stato flyer, code di moderazione, foto profilo |
 | 7 | 1 | Gruppi e serate di gruppo | F-13, F-14, F-15, F-16 | Gruppi, dettaglio gruppo, serata di gruppo |
 | 8 | 1 | Tracker, privacy e beta | F-30, F-41, F-42, F-45, F-43 (build interne) | Tracker, impostazioni di privacy, esporta ed elimina account |
 | 9 | 2 | Notifiche e check-in | F-22, F-20 | Centro notifiche, permessi, check-in |
@@ -248,10 +248,15 @@ Ogni iterazione ha:
   estrattore con Claude API, prompt versionato, golden set di almeno 50 flyer, comando
   `valuta`; RPC `coda_flyer`, `decidi_flyer`, `dettaglio_segnalazione`,
   `decidi_segnalazione`; job `copia_immagine_flyer` e `pulizia_flyer`; schermate di
-  caricamento, stato dei flyer e code di moderazione con MFA.
+  caricamento, stato dei flyer e code di moderazione con MFA. Foto profilo (F-10): bucket
+  `avatar` con le policy di DATA_MODEL.md §6, caricamento con ritaglio, conversione in WebP
+  e rimozione dei dati EXIF sul dispositivo, sostituzione e rimozione, segnalazione e
+  rimozione da parte dei moderatori (R-52).
 - **Prerequisiti esterni**: chiave Claude API con limite di spesa; accordo sul trattamento
   dei dati (D-12).
-- **Criteri**: soglie della skill `flyer-parser`; test pgTAP di R-51, R-54, R-69.
+- **Criteri**: soglie della skill `flyer-parser`; test pgTAP di R-51, R-54, R-69 e delle
+  policy del bucket `avatar` (lettura solo con `private.puo_vedere_profilo`, scrittura solo
+  nella propria cartella) per tutte le età del seed.
 
 ### Iterazione 7 — Gruppi e serate di gruppo
 - **Contenuto**: `gruppi`, `membri_gruppo`, `serate_gruppo`, `partecipazioni_serata`;
