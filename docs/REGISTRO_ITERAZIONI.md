@@ -23,7 +23,7 @@ Iterazioni completate: 3 su 15.
 | 0 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-00-fondamenta` | CI verificata su GitHub (PR #4); mancano i progetti di staging, produzione e deploy |
 | 1 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-01-design-system` | Mancano la prova su emulatore Android e simulatore iOS, gli account degli store e la mappa nei bucket di staging e produzione |
 | 2 | completata con attese esterne | 2026-10-16 | 2026-10-16 | 2 | `iterazione-02-account` | Mancano Auth di staging e produzione (hook, Turnstile, email), D-01 e App Review Meta per chiudere la Fase 0 |
-| 3 | da iniziare | — | — | 0 | — | — |
+| 3 | in corso | 2026-10-16 | — | 0 | `iterazione-03-amicizie` | — |
 | 4 | da iniziare | — | — | 0 | — | — |
 | 5 | da iniziare | — | — | 0 | — | — |
 | 6 | da iniziare | — | — | 0 | — | — |
@@ -308,4 +308,28 @@ dati, dietro limiti di frequenza e CAPTCHA.
   Android, account degli store. Per chiudere la Fase 0: D-01 e App Review Meta.
 
 **Commit**: `e8283e9` … commit finale di chiusura sul branch `iterazione-02-account`.
+
+### Iterazione 3 — Amicizie, blocchi e segnalazioni
+
+**Piano**
+- Funzionalità: F-11 (amicizie per ricerca e per codice invito), F-12 (blocco e
+  segnalazione), F-42 (elenco dei bloccati), profilo e modifica di nome e username (F-10).
+  Regole: R-10…R-14, R-17, R-43, R-50, R-52, R-53, R-69.
+- Design: `design/F-11-amici/` (amici, ricerca, codice e scansione, anteprima e richiesta
+  con l'avviso per chi ha 14–17 anni, profili, segnala, blocca, bloccati, le mie
+  segnalazioni).
+- Database: enum `stato_amicizia`, `canale_amicizia`, `tipo_oggetto_segnalabile`,
+  `motivo_segnalazione`, `stato_segnalazione`, `azione_moderazione`; tabelle `amicizie`,
+  `codici_invito`, `blocchi`, `segnalazioni`, `azioni_moderazione`; funzioni `c_e_blocco`,
+  `sono_amici`, `puo_vedere_profilo` estesa; trigger `limita_richieste_amicizia` (R-14),
+  `applica_blocco` (R-17), priorità delle segnalazioni (R-53); RPC `cerca_utenti`,
+  `crea_codice_invito`, `anteprima_codice_invito`, `usa_codice_invito`, `avviso_richiesta`,
+  `miei_bloccati`, `mie_segnalazioni`; pulizia dei codici scaduti; test pgTAP per tutte le età.
+- App: schermate del design nelle aree (Profilo, Amici, persona), QR, scansione con
+  BarcodeDetector e codice scritto, link d'invito, menu ⋯, segnala in due tocchi, blocca con
+  "Annulla", persone bloccate, le mie segnalazioni.
+- Fuori da questa iterazione (ROADMAP): notifiche delle richieste (iterazione 9), gruppi e
+  invariante R-15 (iterazione 7), decisioni dei moderatori e reclamo (iterazione 6).
+- Criteri: test pgTAP di R-10…R-14 e R-17 per tutte le età, compreso il tentativo di elencare
+  `profili`; e2e amicizia per ricerca e per codice con l'avviso al minorenne.
 
