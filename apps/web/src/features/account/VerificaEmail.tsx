@@ -11,7 +11,7 @@ import { mascheraEmail } from '@/lib/email';
 import { ErroreLimite, type ErroreDominio } from '@/lib/errori';
 import { messaggi } from '@/lib/messaggi/it';
 import { reinviaVerifica } from './api';
-import { salvaVerificaInAttesa, useVerificaInAttesa } from './archivio';
+import { cancellaVerificaInAttesa, salvaVerificaInAttesa, useVerificaInAttesa } from './archivio';
 import { PERCORSI } from './documenti';
 import { IllustrazioneBusta } from './Illustrazioni';
 import { Schermata } from './Schermata';
@@ -57,6 +57,7 @@ export function VerificaEmail({ scaduto = false }: Props) {
   const [adesso, setAdesso] = useState(() => Date.now());
   const [reinviataAlle, setReinviataAlle] = useState<string | null>(null);
   const [erroreInvio, setErroreInvio] = useState<'rete' | 'limite' | null>(null);
+  const [verificaInCorso, setVerificaInCorso] = useState(false);
   const [emailDigitata, setEmailDigitata] = useState('');
   const [erroreEmail, setErroreEmail] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -101,7 +102,11 @@ export function VerificaEmail({ scaduto = false }: Props) {
       setErroreEmail(messaggi.registrazione.credenziali.emailNonValida);
       return;
     }
-    if (verificaUmanaRichiesta() && !token) return;
+    if (verificaUmanaRichiesta() && !token) {
+      setVerificaInCorso(true);
+      return;
+    }
+    setVerificaInCorso(false);
     reinvio.mutate(email);
   };
 
@@ -151,7 +156,10 @@ export function VerificaEmail({ scaduto = false }: Props) {
           <Pulsante
             variante="testo"
             className="self-center"
-            onClick={() => router.push(PERCORSI.registrazione)}
+            onClick={() => {
+              cancellaVerificaInAttesa();
+              router.push(PERCORSI.registrazione);
+            }}
           >
             {testi.hoSbagliato}
           </Pulsante>
@@ -190,6 +198,7 @@ export function VerificaEmail({ scaduto = false }: Props) {
         {emailNota && scaduto && (
           <form id="modulo-nuovo-link" noValidate onSubmit={chiediNuovoLink} />
         )}
+        {verificaInCorso && <Avviso tipo="info">{messaggi.comune.verificaUmanaInCorso}</Avviso>}
         {reinviataAlle && (
           <Avviso tipo="successo" titolo={testi.reinviata.titolo}>
             {testi.reinviata.testo(reinviataAlle)}

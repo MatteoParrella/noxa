@@ -32,6 +32,7 @@ type Esito =
   | { tipo: 'limite' }
   | { tipo: 'rete' }
   | { tipo: 'verifica_umana' }
+  | { tipo: 'verifica_in_corso' }
   | { tipo: 'sconosciuto' }
   | null;
 
@@ -110,7 +111,10 @@ export function Accesso() {
       setMancanti(true);
       return;
     }
-    if (verificaUmanaRichiesta() && !token) return;
+    if (verificaUmanaRichiesta() && !token) {
+      setEsito({ tipo: 'verifica_in_corso' });
+      return;
+    }
     setEsito(null);
     accesso.mutate();
   };
@@ -210,6 +214,9 @@ export function Accesso() {
           )}
           {esito?.tipo === 'verifica_umana' && (
             <Avviso tipo="errore">{messaggi.registrazione.consensi.verificaUmanaFallita}</Avviso>
+          )}
+          {esito?.tipo === 'verifica_in_corso' && (
+            <Avviso tipo="info">{messaggi.comune.verificaUmanaInCorso}</Avviso>
           )}
           {esito?.tipo === 'sconosciuto' && (
             <Avviso tipo="errore" titolo={messaggi.comune.erroreSconosciuto.titolo}>

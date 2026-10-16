@@ -15,7 +15,7 @@ import { Schermata } from './Schermata';
 import { SchemaEmail } from './schemi';
 import { VerificaUmana, verificaUmanaRichiesta, type ComandiVerificaUmana } from './VerificaUmana';
 
-type Esito = 'inviato' | 'rete' | 'limite' | null;
+type Esito = 'inviato' | 'rete' | 'limite' | 'verifica_in_corso' | null;
 
 const testi = messaggi.recupero;
 
@@ -49,7 +49,10 @@ export function RecuperoPassword() {
       setErroreEmail(messaggi.registrazione.credenziali.emailNonValida);
       return;
     }
-    if (verificaUmanaRichiesta() && !token) return;
+    if (verificaUmanaRichiesta() && !token) {
+      setEsito('verifica_in_corso');
+      return;
+    }
     richiesta.mutate();
   };
 
@@ -110,6 +113,9 @@ export function RecuperoPassword() {
             <Avviso tipo="errore" titolo={messaggi.comune.erroreRete.titolo}>
               {messaggi.comune.erroreRete.testo}
             </Avviso>
+          )}
+          {esito === 'verifica_in_corso' && (
+            <Avviso tipo="info">{messaggi.comune.verificaUmanaInCorso}</Avviso>
           )}
           {esito === 'limite' && (
             <Avviso tipo="avviso" titolo={messaggi.comune.limite.titolo}>

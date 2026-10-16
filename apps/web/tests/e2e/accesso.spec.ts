@@ -72,6 +72,16 @@ test.describe('verifica dell’email', () => {
     });
   });
 
+  test('un link arrivato alla home (indirizzo non ammesso) passa comunque dalla verifica', async ({
+    page,
+    supabase,
+  }) => {
+    supabase.account = { ...ACCOUNT_DI_PROVA, onboarding_completato: false };
+    await page.goto('/?token_hash=abc123&type=email');
+    await expect(page).toHaveURL(/\/sicurezza\/$/);
+    expect(supabase.chiamate('verify')).toHaveLength(1);
+  });
+
   test('un link scaduto chiede un nuovo link, anche da un altro dispositivo', async ({
     page,
     supabase,

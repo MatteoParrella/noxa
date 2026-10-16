@@ -34,9 +34,12 @@ export function OnboardingSicurezza() {
   const [schermata, setSchermata] = useState(1);
   const testi = messaggi.onboarding;
 
+  const giaCompletato = account.data?.onboarding_completato === true;
   useEffect(() => {
     if (sessione.stato === 'assente') router.replace(PERCORSI.benvenuto);
-  }, [sessione, router]);
+    // Una sola volta: chi l'ha già visto (o lo ha appena finito) va nell'app.
+    else if (giaCompletato) router.replace(PERCORSI.home);
+  }, [sessione, giaCompletato, router]);
 
   const fine = useMutation({
     mutationFn: async () => {

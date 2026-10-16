@@ -53,6 +53,11 @@ test.describe('onboarding di sicurezza', () => {
   });
 });
 
+test('l’onboarding si vede una sola volta: chi l’ha completato va in Scopri', async ({ page }) => {
+  await page.goto('/sicurezza/');
+  await expect(page).toHaveURL(/\/scopri\/$/);
+});
+
 test.describe('onboarding per chi è maggiorenne', () => {
   test.use({ account: { ...ACCOUNT_DI_PROVA, minorenne: false, onboarding_completato: false } });
 

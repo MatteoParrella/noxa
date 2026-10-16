@@ -23,6 +23,7 @@ export const messaggi = {
       titolo: 'Troppi tentativi',
       testo: 'Riprova tra qualche minuto.',
     },
+    verificaUmanaInCorso: 'Stiamo completando la verifica di sicurezza: riprova tra un attimo.',
   },
 
   benvenuto: {
