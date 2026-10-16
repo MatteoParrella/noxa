@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Noxa · F-11 · Profili</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/6fa6353d716b68f787ff2702a9363d96">
+<link rel="stylesheet" href="/_blob/afc4088ee394ab1a58e9ba7651ca762e">
+<link rel="stylesheet" href="/_blob/dbab4423ee519d83500f0485a4806ddb">
+<link rel="stylesheet" href="/_blob/cdf778b603b9eec9b9e8c7c0cba7983e">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="nx nx-scuro" style="width: 3060px; height: 2080px; padding: 64px; display: flex; flex-direction: column; gap: 40px; overflow: hidden">
+  <header style="display: flex; flex-direction: column; gap: 10px; max-width: 1200px">
+    <span class="etichetta">F-11 · Amici · 05</span>
+    <h1 class="t-titolo-1" style="margin: 0">Profilo di un’altra persona · Il mio profilo</h1>
+    <p class="t-corpo-s c-2" style="margin: 0">Un profilo mostra solo avatar, nome e @username, più le azioni del rapporto. Nessun numero di amici, nessuna data, nessuna età o fascia. «Profilo non disponibile» è uguale per account sospeso, bloccato o non visibile. Segnala e Blocca stanno nel menu ⋯ in alto.</p>
+  </header>
+  <sc-for list="{{righe}}" as="r" hint-placeholder-count="2">
+    <div style="display: flex; gap: 32px">
+      <sc-for list="{{colonne}}" as="c" hint-placeholder-count="7">
+        <div style="display: flex; flex-direction: column; gap: 12px; width: 390px; flex: none">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><span style="font-weight: 700">{{c.nome}}</span><span class="t-mono-dato c-2">{{r.tema}} · {{c.tag}}</span></div>
+          <div style="width: 390px; height: 844px; border-radius: 28px; overflow: hidden; box-shadow: 0 0 0 1px var(--colore-linea)">
+            <dc-import name="Amici" tema="{{r.tema}}" schermata="{{c.s}}" stato="{{c.st}}" fascia="minore" hint-size="390px,844px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":3060,"height":2080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      righe: [{ tema: 'scuro' }, { tema: 'chiaro' }],
+      colonne: [
+        { nome: 'Profilo · amici', tag: 'amici', s: 'profilo', st: 'amici' },
+        { nome: 'Profilo · richiesta inviata', tag: 'in attesa', s: 'profilo', st: 'inattesa' },
+        { nome: 'Profilo · richiesta ricevuta', tag: 'da accettare', s: 'profilo', st: 'ricevuta' },
+        { nome: 'Profilo · menu ⋯', tag: 'segnala, blocca', s: 'profilo', st: 'menu' },
+        { nome: 'Profilo non disponibile', tag: 'stesso testo', s: 'profilo', st: 'nondisponibile' },
+        { nome: 'Il mio profilo', tag: 'area Profilo', s: 'mio', st: 'normale' },
+        { nome: 'Modifica', tag: 'nome e username', s: 'modifica', st: 'normale' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

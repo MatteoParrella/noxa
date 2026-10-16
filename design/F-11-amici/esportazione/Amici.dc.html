@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Noxa · Amici, profilo, segnala e blocca</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/6fa6353d716b68f787ff2702a9363d96">
+<link rel="stylesheet" href="/_blob/afc4088ee394ab1a58e9ba7651ca762e">
+<link rel="stylesheet" href="/_blob/dbab4423ee519d83500f0485a4806ddb">
+<link rel="stylesheet" href="/_blob/cdf778b603b9eec9b9e8c7c0cba7983e">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="{{radice}}" style="width: {{larghezza}}px; height: {{altezza}}px; position: relative; overflow: hidden">
+  <div style="position: absolute; inset: 0; display: flex; flex-direction: column">
+    <div style="height: 47px; flex: none"></div>
+
+    <sc-if value="{{offline}}" hint-placeholder-val="{{ false }}">
+      <div class="striscia-offline" role="status" style="flex: none"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h.01"></path><path d="M8.5 16.429a5 5 0 0 1 7 0"></path><path d="M5 12.859a10 10 0 0 1 5.17-2.69"></path><path d="M19 12.859a10 10 0 0 0-2.007-1.523"></path><path d="M2 8.82a15 15 0 0 1 4.177-2.643"></path><path d="M22 8.82a15 15 0 0 0-11.288-3.764"></path><path d="m2 2 20 20"></path></svg><span>Sei offline. Vedi i dati delle <span class="mono">22:31</span>.</span></div>
+    </sc-if>
+
+    <sc-if value="{{haTesta}}" hint-placeholder-val="{{ true }}">
+      <div class="ax-testa" style="position: relative; z-index: 6">
+        <sc-if value="{{haBack}}" hint-placeholder-val="{{ true }}">
+          <button class="ico-btn" type="button" aria-label="Indietro" onClick="{{indietro}}"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+        </sc-if>
+        <span style="flex: 1 1 auto"></span>
+        <sc-if value="{{haMenuProfilo}}" hint-placeholder-val="{{ false }}">
+          <button class="ico-btn" type="button" aria-label="Altre azioni per @{{altro.user}}" aria-haspopup="menu" aria-expanded="{{menuProfiloOn}}" onClick="{{toggleMenuProfilo}}"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+          <sc-if value="{{menuProfiloAperto}}" hint-placeholder-val="{{ false }}">
+            <div class="menu-azioni" role="menu" aria-label="Altre azioni per @{{altro.user}}" style="top: 50px">
+              <span class="menu-titolo">@{{altro.user}}</span>
+              <button class="menu-voce" type="button" role="menuitem" onClick="{{apriSegnala}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><path d="M4 22v-7"></path></svg>Segnala</button>
+              <button class="menu-voce pericolo" type="button" role="menuitem" onClick="{{apriBlocca}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>Blocca</button>
+            </div>
+          </sc-if>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <div class="{{corpoCls}}">
+
+      <!-- ================= IL MIO PROFILO ================= -->
+      <sc-if value="{{is.mio}}" hint-placeholder-val="{{ true }}">
+        <span class="etichetta">Profilo</span>
+        <div class="ax-pila" style="gap: 0; margin-top: 16px">
+          <div style="display: grid; grid-template-columns: 72px minmax(0, 1fr); column-gap: 16px; align-items: center; padding-bottom: 20px">
+            <span class="avatar avatar-t2" aria-hidden="true" style="width: 72px; height: 72px; font-size: 1.5rem; border: 0">GR</span>
+            <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+              <h1 class="ax-titolo" aria-label="Giulia" style="font-size: 2rem"><sc-for list="{{parole}}" as="w" hint-placeholder-count="1"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+              <span class="rp-user" style="font-size: 0.9375rem">@giulia.rota</span>
+            </div>
+          </div>
+          <button class="btn btn-secondario btn-pieno" type="button" onClick="{{vai.modifica}}" style="margin-bottom: 16px">Modifica nome e username</button>
+          <button class="voce-profilo" type="button" onClick="{{vai.amici}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Amici<span class="valore"><span class="contatore" aria-hidden="true">2</span><span class="sr">2 richieste</span><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
+          <button class="voce-profilo" type="button" onClick="{{vai.bloccati}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>Persone bloccate<span class="valore"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
+          <button class="voce-profilo" type="button" onClick="{{vai.segnalazioni}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><path d="M4 22v-7"></path></svg>Le mie segnalazioni<span class="valore"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
+          <button class="voce-profilo" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 18a6 6 0 0 0 0-12v12z"></path></svg>Aspetto<span class="valore">{{temaNome}}<svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
+          <button class="voce-profilo esci" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg>Esci dall’account</button>
+        </div>
+      </sc-if>
+
+      <!-- ================= MODIFICA PROFILO ================= -->
+      <sc-if value="{{is.modifica}}" hint-placeholder-val="{{ false }}">
+        <span class="etichetta">Profilo</span>
+        <h1 class="ax-titolo" aria-label="{{titolo}}" style="margin: 8px 0 20px"><sc-for list="{{parole}}" as="w" hint-placeholder-count="2"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+        <div class="ax-pila">
+          <div class="campo">
+            <span class="campo-riga"><label class="campo-etichetta" for="mn">Nome visualizzato</label><span class="campo-conta">6/40</span></span>
+            <div class="campo-box"><input id="mn" type="text" value="Giulia" readonly></div>
+            <span class="campo-aiuto">Fino a 40 caratteri. Non serve il tuo nome vero.</span>
+          </div>
+          <div class="campo">
+            <span class="campo-riga"><label class="campo-etichetta" for="mu">Username</label><span class="campo-conta">11/20</span></span>
+            <div class="campo-box is-ok"><span class="prefisso" aria-hidden="true">@</span><input id="mu" type="text" value="giulia.rota" readonly></div>
+            <span class="campo-ok" role="status"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span>È il tuo username attuale</span></span>
+            <span class="campo-aiuto">Da 3 a 20 caratteri: lettere minuscole, numeri, punto e trattino basso.</span>
+          </div>
+          <button class="btn btn-l btn-principale btn-pieno" type="button" onClick="{{vai.mio}}">Salva</button>
+        </div>
+      </sc-if>
+
+      <!-- ================= AMICI ================= -->
+      <sc-if value="{{is.amici}}" hint-placeholder-val="{{ false }}">
+        <span class="etichetta">Profilo</span>
+        <h1 class="ax-titolo" aria-label="Amici" style="margin: 8px 0 20px"><sc-for list="{{parole}}" as="w" hint-placeholder-count="1"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+        <div class="azioni-doppie">
+          <button class="{{btnAzione}}" type="button" onClick="{{vai.cerca}}" disabled="{{spento}}" aria-describedby="az-nota"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>Cerca per username</button>
+          <button class="{{btnAzione}}" type="button" onClick="{{vai.codice}}" disabled="{{spento}}" aria-describedby="az-nota"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-3a2 2 0 0 0-2 2v3"></path><path d="M21 21v.01"></path><path d="M12 7v3a2 2 0 0 1-2 2H7"></path><path d="M3 12h.01"></path><path d="M12 3h.01"></path><path d="M12 16v.01"></path><path d="M16 12h1"></path><path d="M21 12v.01"></path><path d="M12 21v-1"></path></svg>Il mio codice</button>
+        </div>
+        <sc-if value="{{offline}}" hint-placeholder-val="{{ false }}">
+          <p class="ax-piccolo" id="az-nota" style="margin: 8px 0 0">Servono la connessione per cercare, creare codici e rispondere alle richieste. Si riattivano da sole.</p>
+        </sc-if>
+
+        <sc-if value="{{amiciCarica}}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" aria-label="Caricamento degli amici">
+            <div class="sezione-testa"><span class="scheletro" style="width: 90px; height: 12px"></span></div>
+            <sc-for list="{{tre}}" as="k" hint-placeholder-count="3">
+              <div class="riga-persona"><span class="scheletro" style="width: 40px; height: 40px; border-radius: 50%"></span><span style="display: flex; flex-direction: column; gap: 6px"><span class="scheletro" style="width: 60%; height: 14px"></span><span class="scheletro" style="width: 40%; height: 11px"></span></span><span></span></div>
+            </sc-for>
+            <div class="sezione-testa"><span class="scheletro" style="width: 70px; height: 12px"></span></div>
+            <sc-for list="{{tre}}" as="k" hint-placeholder-count="3">
+              <div class="riga-persona"><span class="scheletro" style="width: 40px; height: 40px; border-radius: 50%"></span><span style="display: flex; flex-direction: column; gap: 6px"><span class="scheletro" style="width: 50%; height: 14px"></span><span class="scheletro" style="width: 35%; height: 11px"></span></span><span></span></div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{amiciErrore}}" hint-placeholder-val="{{ false }}">
+          <div class="stato-vuoto" role="alert" style="padding-top: 32px">
+            <span class="cornice-icona" style="color: var(--colore-errore); border-color: var(--colore-errore)"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span>
+            <span class="t-titolo-3">L’elenco non si è caricato</span>
+            <span class="t-corpo-s c-2">Colpa nostra o della rete. Riprova tra un attimo.</span>
+            <button class="btn btn-s btn-secondario" type="button"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>Riprova</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{amiciVuoto}}" hint-placeholder-val="{{ false }}">
+          <div class="stato-vuoto" style="padding-top: 32px">
+            <span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+            <span class="t-titolo-3">Non hai ancora amici su Noxa</span>
+            <span class="t-corpo-s c-2">Cercali per username o mostra il tuo codice a chi è con te.</span>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{amiciLista}}" hint-placeholder-val="{{ true }}">
+          <div class="sezione-testa"><h2 class="etichetta" style="margin: 0">Richieste</h2><span class="contatore" aria-label="2 ricevute">2</span></div>
+          <div class="ax-pila" style="gap: 0">
+            <sc-for list="{{ricevute}}" as="p" hint-placeholder-count="2">
+              <div class="riga-persona">
+                <span class="{{p.av}}" aria-hidden="true">{{p.ini}}</span>
+                <button class="rp-testo" type="button" onClick="{{p.apri}}"><span class="rp-nome">{{p.nome}}</span><span class="rp-user">@{{p.user}}</span><sc-if value="{{p.haNota}}" hint-placeholder-val="{{ false }}"><span class="rp-nota">{{p.nota}}</span></sc-if></button>
+                <span></span>
+                <div class="rp-azioni sotto">
+                  <button class="{{btnS}}" type="button" disabled="{{spento}}" onClick="{{p.apri}}">Accetta</button>
+                  <button class="{{btnS}}" type="button" disabled="{{spento}}">Rifiuta</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div class="sotto-testa"><h3 class="etichetta" style="margin: 0">Inviate da te</h3></div>
+          <div class="ax-pila" style="gap: 0">
+            <sc-for list="{{inviate}}" as="p" hint-placeholder-count="1">
+              <div class="riga-persona">
+                <span class="{{p.av}}" aria-hidden="true">{{p.ini}}</span>
+                <span class="rp-testo"><span class="rp-nome">{{p.nome}}</span><span class="rp-user">@{{p.user}}</span></span>
+                <div class="rp-azioni"><span class="inviata"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>In attesa</span><button class="btn btn-s btn-testo" type="button" disabled="{{spento}}" aria-label="Annulla la richiesta a @{{p.user}}">Annulla</button></div>
+              </div>
+            </sc-for>
+          </div>
+          <div class="sezione-testa"><h2 class="etichetta" style="margin: 0">Amici</h2></div>
+          <div class="ax-pila" style="gap: 0">
+            <sc-for list="{{amici}}" as="p" hint-placeholder-count="4">
+              <div class="riga-persona" style="position: relative">
+                <span class="{{p.av}}" aria-hidden="true">{{p.ini}}</span>
+                <button class="rp-testo" type="button" onClick="{{p.apri}}"><span class="rp-nome">{{p.nome}}</span><span class="rp-user">@{{p.user}}</span></button>
+                <button class="ico-btn" type="button" aria-label="Altre azioni per @{{p.user}}" aria-haspopup="menu" aria-expanded="{{p.menuOn}}" onClick="{{p.menu}}"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+                <sc-if value="{{p.menuAperto}}" hint-placeholder-val="{{ false }}">
+                  <div class="menu-azioni" role="menu" aria-label="Altre azioni per @{{p.user}}" style="bottom: 56px; right: 0">
+                    <span class="menu-titolo">@{{p.user}}</span>
+                    <button class="menu-voce" type="button" role="menuitem" onClick="{{apriRimuovi}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 11h-6"></path></svg>Rimuovi dall’elenco</button>
+                    <div class="menu-sep" role="separator"></div>
+                    <button class="menu-voce" type="button" role="menuitem" onClick="{{apriSegnala}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><path d="M4 22v-7"></path></svg>Segnala</button>
+                    <button class="menu-voce pericolo" type="button" role="menuitem" onClick="{{apriBlocca}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>Blocca</button>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ================= CERCA ================= -->
+      <sc-if value="{{is.cerca}}" hint-placeholder-val="{{ false }}">
+        <span class="etichetta">Amici</span>
+        <h1 class="ax-titolo" aria-label="Cerca per username" style="margin: 8px 0 20px"><sc-for list="{{parole}}" as="w" hint-placeholder-count="3"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+        <div class="campo">
+          <label class="sr" for="cq">Username</label>
+          <div class="{{cercaBox}}">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <span class="prefisso" aria-hidden="true">@</span>
+            <input id="cq" type="search" value="{{q}}" autocapitalize="none" aria-describedby="cq-aiuto" disabled="{{spento}}" readonly>
+            <button class="ico-btn" type="button" aria-label="Cancella" style="width: 40px; height: 40px; margin-right: -6px"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+          </div>
+          <span class="ax-piccolo" id="cq-aiuto">Trovi solo persone della tua fascia d’età. Per aggiungere qualcun altro usate il codice, di persona.</span>
+        </div>
+
+        <sc-if value="{{cercaCorto}}" hint-placeholder-val="{{ false }}">
+          <p class="t-corpo-s c-2" role="status" style="display: flex; gap: 8px; align-items: center; margin: 20px 0 0"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>Scrivi almeno 3 lettere.</p>
+        </sc-if>
+        <sc-if value="{{cercaNessuno}}" hint-placeholder-val="{{ false }}">
+          <div class="stato-vuoto" role="status" style="padding-top: 28px">
+            <span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
+            <span class="t-titolo-3">Nessuno con questo username nella tua fascia</span>
+            <span class="t-corpo-s c-2">Se è con te, mostragli il tuo codice.</span>
+            <button class="btn btn-s btn-secondario" type="button" onClick="{{vai.codice}}">Il mio codice</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{cercaErrore}}" hint-placeholder-val="{{ false }}">
+          <div class="avviso avviso-errore" role="alert" style="margin-top: 20px"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg><span><span class="avviso-titolo">La ricerca non ha funzionato</span>Riprova tra un attimo.<span class="avviso-azioni"><button class="btn btn-s btn-secondario" type="button">Riprova</button></span></span></div>
+        </sc-if>
+        <sc-if value="{{cercaOffline}}" hint-placeholder-val="{{ false }}">
+          <p class="t-corpo-s c-2" style="margin: 20px 0 0">La ricerca torna disponibile appena sei di nuovo online.</p>
+        </sc-if>
+        <sc-if value="{{cercaLimite}}" hint-placeholder-val="{{ false }}">
+          <div class="avviso avviso-avviso" role="status" style="margin-top: 20px"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span><span class="avviso-titolo">Hai inviato molte richieste oggi</span>Riprova domani. Il limite è di <span class="mono">20</span> al giorno e <span class="mono">50</span> in attesa.</span></div>
+        </sc-if>
+        <sc-if value="{{cercaRisultati}}" hint-placeholder-val="{{ true }}">
+          <div class="ax-pila" style="gap: 0; margin-top: 12px" role="list" aria-label="Risultati">
+            <sc-for list="{{risultati}}" as="p" hint-placeholder-count="3">
+              <div class="riga-persona" role="listitem">
+                <span class="{{p.av}}" aria-hidden="true">{{p.ini}}</span>
+                <span class="rp-testo"><span class="rp-nome">{{p.nome}}</span><span class="rp-user">@{{p.user}}</span></span>
+                <div class="rp-azioni">
+                  <sc-if value="{{p.isAmico}}" hint-placeholder-val="{{ false }}"><span class="inviata"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Amici</span></sc-if>
+                  <sc-if value="{{p.isInviata}}" hint-placeholder-val="{{ false }}"><span class="inviata"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Richiesta inviata</span><button class="btn btn-s btn-testo" type="button" onClick="{{p.toggle}}" aria-label="Annulla la richiesta a @{{p.user}}">Annulla</button></sc-if>
+                  <sc-if value="{{p.isAggiungi}}" hint-placeholder-val="{{ true }}"><button class="{{p.btnCls}}" type="button" onClick="{{p.toggle}}" disabled="{{p.spento}}" aria-label="Aggiungi @{{p.user}}">Aggiungi</button></sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ================= IL MIO CODICE ================= -->
+      <sc-if value="{{is.codice}}" hint-placeholder-val="{{ false }}">
+        <span class="etichetta">Amici</span>
+        <h1 class="ax-titolo" aria-label="Il mio codice" style="margin: 8px 0 12px"><sc-for list="{{parole}}" as="w" hint-placeholder-count="3"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+        <div class="ax-pila" style="gap: 16px">
+          <p class="ax-sotto" style="max-width: none">Mostralo a chi è con te. Vale 15 minuti e funziona una volta sola.</p>
+          <sc-if value="{{codErrore}}" hint-placeholder-val="{{ false }}">
+            <div class="stato-vuoto" role="alert" style="align-items: center; text-align: center; padding: 24px 0">
+              <span class="cornice-icona" style="color: var(--colore-errore); border-color: var(--colore-errore)"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span>
+              <span class="t-titolo-3">Non siamo riusciti a creare il codice</span>
+              <button class="btn btn-s btn-secondario" type="button"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>Riprova</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{codMostra}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 12px">
+              <div class="{{qrCls}}">
+                <svg viewBox="0 0 29 29" role="img" aria-label="Codice QR. Il codice scritto è sotto." shape-rendering="crispEdges"><path d="{{qrPath}}" fill="#15181E"></path></svg>
+                <sc-if value="{{qrVeloOn}}" hint-placeholder-val="{{ false }}">
+                  <div class="qr-velo" role="status"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>{{qrVelo}}</span></div>
+                </sc-if>
+              </div>
+              <p class="{{codiceCls}}" aria-label="Codice: {{codiceSpell}}">K7Q4-M2XP-9H</p>
+              <span class="ax-piccolo">{{codTempo}}</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{codLimite}}" hint-placeholder-val="{{ false }}">
+            <div class="avviso avviso-avviso" role="status"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span><span class="avviso-titolo">Hai creato 10 codici oggi</span>Puoi crearne uno nuovo domani.</span></div>
+          </sc-if>
+          <sc-if value="{{offline}}" hint-placeholder-val="{{ false }}">
+            <p class="ax-piccolo" style="margin: 0; text-align: center">Per creare un codice e per usarne uno serve la connessione.</p>
+          </sc-if>
+          <div class="azioni-doppie">
+            <button class="{{btnAzione}}" type="button" disabled="{{codCondSpento}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v13"></path><path d="m16 6-4-4-4 4"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path></svg>Condividi link</button>
+            <button class="{{codNuovoCls}}" type="button" disabled="{{codNuovoSpento}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>Nuovo codice</button>
+          </div>
+          <button class="{{btnScansiona}}" type="button" onClick="{{vai.scansiona}}" disabled="{{spento}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>Scansiona un codice</button>
+        </div>
+      </sc-if>
+
+      <!-- ================= SCANSIONA ================= -->
+      <sc-if value="{{is.scansiona}}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{camOk}}" hint-placeholder-val="{{ true }}">
+          <div class="mirino" role="img" aria-label="Inquadratura della fotocamera">
+            <svg class="mirino-scena" viewBox="0 0 390 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="390" height="560" fill="#0B0D10"></rect><rect x="-20" y="330" width="250" height="300" rx="20" fill="#14171C"></rect><rect x="210" y="380" width="220" height="220" rx="16" fill="#111418"></rect><circle cx="300" cy="90" r="70" fill="#12151A"></circle><rect x="110" y="150" width="170" height="170" rx="6" fill="#D9D6CF" opacity="0.12"></rect></svg>
+            <button class="ico-btn" type="button" aria-label="Indietro" onClick="{{indietro}}" style="position: absolute; left: 8px; top: 4px"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+            <div class="mirino-riquadro" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <p class="mirino-testo">Inquadra il QR di chi è con te</p>
+          </div>
+        </sc-if>
+        <sc-if value="{{camNo}}" hint-placeholder-val="{{ false }}">
+          <div style="flex: 1 1 auto; display: flex; flex-direction: column; padding: 0 20px">
+            <div class="ax-testa" style="padding: 0; margin-left: -12px"><button class="ico-btn" type="button" aria-label="Indietro" onClick="{{indietro}}"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button></div>
+            <span class="etichetta">Scansiona un codice</span>
+            <h1 class="ax-titolo" aria-label="Fotocamera spenta" style="margin: 8px 0 16px"><sc-for list="{{parole}}" as="w" hint-placeholder-count="2"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+            <div class="ax-pila" style="gap: 12px">
+              <span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.564 14.558a3 3 0 1 1-4.122-4.121"></path><path d="m2 2 20 20"></path><path d="M20 20H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 .819-.175"></path><path d="M9.695 4.024A2 2 0 0 1 10.004 4h3.993a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v7.344"></path></svg></span>
+              <p class="ax-sotto">Noxa non ha il permesso di usare la fotocamera. Va bene così: puoi scrivere il codice qui sotto. Se cambi idea, il permesso si attiva dalle impostazioni del telefono.</p>
+            </div>
+          </div>
+        </sc-if>
+        <div class="pannello-basso">
+          <label class="campo-etichetta" for="sc">Scrivi il codice</label>
+          <div class="campo-box campo-codice"><input id="sc" type="text" value="{{codiceScritto}}" placeholder="XXXX-XXXX-XX" autocapitalize="characters" readonly></div>
+          <button class="btn btn-principale btn-pieno" type="button" onClick="{{vai.anteprima}}">Continua</button>
+        </div>
+      </sc-if>
+
+      <!-- ================= ANTEPRIMA DEL CODICE / RICHIESTA RICEVUTA ================= -->
+      <sc-if value="{{is.persona}}" hint-placeholder-val="{{ false }}">
+        <span class="etichetta">{{etichetta}}</span>
+        <sc-if value="{{personaOk}}" hint-placeholder-val="{{ true }}">
+          <div class="ax-pila" style="gap: 16px; margin-top: 8px">
+            <div class="persona-grande">
+              <span class="{{altro.avXl}}" aria-hidden="true">{{altro.ini}}</span>
+              <h1 class="ax-titolo pg-nome" aria-label="{{altro.nome}}" style="font-size: 2rem"><sc-for list="{{parole}}" as="w" hint-placeholder-count="1"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+              <span class="pg-user">@{{altro.user}}</span>
+              <sc-if value="{{haNotaCodice}}" hint-placeholder-val="{{ false }}"><span class="rp-nota" style="margin-top: 6px">Richiesta arrivata con il tuo codice</span></sc-if>
+            </div>
+            <sc-if value="{{giaAmici}}" hint-placeholder-val="{{ false }}">
+              <p class="t-corpo-s" role="status" style="margin: 0; display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--colore-successo)"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Siete già amici</p>
+            </sc-if>
+            <sc-if value="{{avvisoMaggiorenne}}" hint-placeholder-val="{{ false }}">
+              <div class="avviso avviso-avviso" role="note"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span><span class="avviso-titolo">Persona maggiorenne</span>Stai aggiungendo una persona maggiorenne: aggiungi solo persone che conosci di persona.</span></div>
+            </sc-if>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px">
+              <sc-if value="{{az.invia}}" hint-placeholder-val="{{ true }}">
+                <button class="btn btn-l btn-principale btn-pieno" type="button" onClick="{{vai.amici}}">Invia richiesta</button>
+                <button class="btn btn-l btn-secondario btn-pieno" type="button" onClick="{{indietro}}">Annulla</button>
+              </sc-if>
+              <sc-if value="{{az.inviaAvviso}}" hint-placeholder-val="{{ false }}">
+                <div class="azioni-doppie">
+                  <button class="btn btn-l btn-secondario" type="button" onClick="{{indietro}}">Annulla</button>
+                  <button class="btn btn-l btn-secondario" type="button" onClick="{{vai.amici}}">Ho capito, invia</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{az.accetta}}" hint-placeholder-val="{{ false }}">
+                <div class="azioni-doppie">
+                  <button class="btn btn-l btn-secondario" type="button" onClick="{{vai.amici}}">Rifiuta</button>
+                  <button class="btn btn-l btn-secondario" type="button" onClick="{{vai.amici}}">Accetta</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{az.vedi}}" hint-placeholder-val="{{ false }}">
+                <button class="btn btn-l btn-secondario btn-pieno" type="button" onClick="{{vai.profilo}}">Vedi il profilo</button>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{personaKo}}" hint-placeholder-val="{{ false }}">
+          <h1 class="ax-titolo" aria-label="{{titolo}}" style="margin: 8px 0 16px"><sc-for list="{{parole}}" as="w" hint-placeholder-count="3"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+          <div class="ax-pila" style="gap: 16px">
+            <p class="ax-sotto">{{koTesto}}</p>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <button class="btn btn-l btn-secondario btn-pieno" type="button" onClick="{{vai.scansiona}}">Scansiona un altro codice</button>
+              <button class="btn btn-testo" type="button" onClick="{{vai.amici}}" style="align-self: center">Torna agli amici</button>
+            </div>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ================= PROFILO DI UN'ALTRA PERSONA ================= -->
+      <sc-if value="{{is.profilo}}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{profiloOk}}" hint-placeholder-val="{{ true }}">
+          <div class="ax-pila" style="gap: 20px; margin-top: 8px">
+            <div class="persona-grande">
+              <span class="{{altro.avXl}}" aria-hidden="true">{{altro.ini}}</span>
+              <h1 class="ax-titolo pg-nome" aria-label="{{altro.nome}}" style="font-size: 2.25rem"><sc-for list="{{parole}}" as="w" hint-placeholder-count="1"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+              <span class="pg-user">@{{altro.user}}</span>
+            </div>
+            <sc-if value="{{rap.amici}}" hint-placeholder-val="{{ true }}">
+              <button class="btn btn-secondario btn-pieno" type="button" aria-haspopup="menu" onClick="{{apriRimuovi}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Amici<svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            </sc-if>
+            <sc-if value="{{rap.inattesa}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; justify-content: center; align-items: center; gap: 12px"><span class="inviata"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Richiesta inviata</span><button class="btn btn-s btn-secondario" type="button">Annulla</button></div>
+            </sc-if>
+            <sc-if value="{{rap.ricevuta}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <span class="t-corpo-s c-2" style="text-align: center">Vuole aggiungerti agli amici.</span>
+                <div class="azioni-doppie"><button class="btn btn-secondario" type="button">Rifiuta</button><button class="btn btn-secondario" type="button">Accetta</button></div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{profiloKo}}" hint-placeholder-val="{{ false }}">
+          <span class="etichetta">Profilo</span>
+          <h1 class="ax-titolo" aria-label="Profilo non disponibile" style="margin: 8px 0 16px"><sc-for list="{{parole}}" as="w" hint-placeholder-count="3"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+          <div class="ax-pila" style="gap: 16px">
+            <span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg></span>
+            <p class="ax-sotto">Questo profilo non si può vedere.</p>
+            <button class="btn btn-secondario" type="button" onClick="{{indietro}}" style="align-self: flex-start">Torna indietro</button>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ================= PERSONE BLOCCATE ================= -->
+      <sc-if value="{{is.bloccati}}" hint-placeholder-val="{{ false }}">
+        <span class="etichetta">Profilo</span>
+        <h1 class="ax-titolo" aria-label="Persone bloccate" style="margin: 8px 0 12px"><sc-for list="{{parole}}" as="w" hint-placeholder-count="2"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+        <sc-if value="{{bloccatiVuoto}}" hint-placeholder-val="{{ false }}">
+          <div class="stato-vuoto" style="padding-top: 20px">
+            <span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg></span>
+            <span class="t-titolo-3">Non hai bloccato nessuno.</span>
+            <span class="t-corpo-s c-2">Puoi bloccare qualcuno dal menu ⋯ del suo profilo.</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{bloccatiLista}}" hint-placeholder-val="{{ true }}">
+          <p class="t-corpo-s c-2" style="margin: 0 0 8px">Non vedono te e tu non vedi loro. Non sanno di essere bloccati.</p>
+          <div class="ax-pila" style="gap: 0">
+            <sc-for list="{{bloccati}}" as="p" hint-placeholder-count="2">
+              <div class="riga-persona">
+                <span class="{{p.av}}" aria-hidden="true">{{p.ini}}</span>
+                <span class="rp-testo"><span class="rp-nome">{{p.nome}}</span><span class="rp-user">@{{p.user}}</span></span>
+                <button class="btn btn-s btn-secondario" type="button" onClick="{{apriSblocca}}" aria-label="Sblocca @{{p.user}}">Sblocca</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ================= LE MIE SEGNALAZIONI ================= -->
+      <sc-if value="{{is.segnalazioni}}" hint-placeholder-val="{{ false }}">
+        <span class="etichetta">Profilo</span>
+        <h1 class="ax-titolo" aria-label="Le mie segnalazioni" style="margin: 8px 0 12px"><sc-for list="{{parole}}" as="w" hint-placeholder-count="3"><span class="ax-p" aria-hidden="true"><span class="ax-parola">{{w.t}}</span></span></sc-for></h1>
+        <sc-if value="{{segnVuoto}}" hint-placeholder-val="{{ false }}">
+          <div class="stato-vuoto" style="padding-top: 20px">
+            <span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><path d="M4 22v-7"></path></svg></span>
+            <span class="t-titolo-3">Non hai fatto segnalazioni.</span>
+            <span class="t-corpo-s c-2">Profili, eventi e flyer si segnalano dal menu ⋯.</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{segnLista}}" hint-placeholder-val="{{ true }}">
+          <div class="ax-pila" style="gap: 0">
+            <div class="segn">
+              <div class="segn-testa"><span class="segn-cosa">Profilo @utente.anonimo</span><span class="badge badge-info"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path></svg>Inviata</span></div>
+              <span class="segn-meta">Età falsa · 15.10.2026</span>
+            </div>
+            <div class="segn">
+              <div class="segn-testa"><span class="segn-cosa">Profilo @nome.utente</span><span class="badge badge-avviso"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>In lavorazione</span></div>
+              <span class="segn-meta">Molestie · 14.10.2026</span>
+            </div>
+            <div class="segn">
+              <div class="segn-testa"><span class="segn-cosa">Flyer «Notte italo-disco»</span><span class="badge badge-tenue" style="font-family: var(--tipo-famiglia-testo)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Chiusa</span></div>
+              <span class="segn-meta">Spam o truffa · 02.10.2026</span>
+              <div class="decisione">
+                <span class="etichetta">Decisione del <span class="mono">05.10.2026</span> · art. 17 DSA</span>
+                <span>Il flyer resta visibile. Abbiamo controllato: l’evento esiste e i dati del locale sono corretti. Non viola i Termini, sezione [X].</span>
+                <span class="ax-piccolo">Decisione presa da una persona del team, non da un sistema automatico. Puoi contestarla entro 6 mesi.</span>
+                <button class="btn btn-s btn-secondario" type="button" style="align-self: flex-start">Non sono d’accordo</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{haNav}}" hint-placeholder-val="{{ false }}">
+      <nav class="barra-nav" aria-label="Principale" style="flex: none">
+        <a class="nav-voce" href="#"><span class="nav-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg></span>Scopri</a>
+        <a class="nav-voce" href="#"><span class="nav-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>Organizza</a>
+        <a class="nav-voce" href="#"><span class="nav-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg></span>Vivi</a>
+        <a class="nav-voce" href="#"><span class="nav-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></span>Ricorda</a>
+        <a class="nav-voce is-on" href="#" aria-current="page" aria-label="Profilo, 2 richieste"><span class="nav-icona"><span class="avatar avatar-t2" aria-hidden="true" style="width: 24px; height: 24px; font-size: 0.5625rem; border: 0; box-shadow: 0 0 0 1px var(--colore-linea-forte)">GR</span><span class="contatore" aria-hidden="true" style="left: 12px">2</span></span>Profilo</a>
+      </nav>
+    </sc-if>
+  </div>
+
+  <!-- ================= FOGLI ================= -->
+  <sc-if value="{{foglio.on}}" hint-placeholder-val="{{ false }}">
+    <div class="velo" style="position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; justify-content: flex-end">
+      <div class="foglio" role="dialog" aria-modal="true" aria-labelledby="fg-t" tabindex="-1" onKeyDown="{{esc}}" style="padding-bottom: 34px; max-height: 92%; overflow-y: auto">
+        <span class="foglio-maniglia" aria-hidden="true"></span>
+
+        <sc-if value="{{foglio.rimuovi}}" hint-placeholder-val="{{ false }}">
+          <div class="ax-pila" style="gap: 14px">
+            <h2 id="fg-t" class="t-titolo-2" style="margin: 0">Rimuovere @{{altro.user}} dagli amici?</h2>
+            <p class="t-corpo-s c-2" style="margin: 0">Non vedrà più le tue serate e non saprà di essere stata rimossa o rimosso.</p>
+            <div class="azioni-doppie"><button class="btn btn-secondario" type="button" onClick="{{chiudi}}">Annulla</button><button class="btn btn-pericolo" type="button" onClick="{{chiudi}}">Rimuovi</button></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{foglio.blocca}}" hint-placeholder-val="{{ false }}">
+          <div class="ax-pila" style="gap: 14px">
+            <span class="cornice-icona" style="color: var(--colore-errore); border-color: var(--colore-errore)"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg></span>
+            <h2 id="fg-t" class="t-titolo-2" style="margin: 0">Bloccare @{{altro.user}}?</h2>
+            <p class="t-corpo-s c-2" style="margin: 0">Non vedrà più il tuo profilo, le tue serate e i tuoi check-in, e tu non vedrai i suoi. Non riceverà nessun avviso.</p>
+            <div class="azioni-doppie"><button class="btn btn-secondario" type="button" onClick="{{chiudi}}">Annulla</button><button class="btn btn-pericolo" type="button" onClick="{{confermaBlocco}}">Blocca</button></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{foglio.sblocca}}" hint-placeholder-val="{{ false }}">
+          <div class="ax-pila" style="gap: 14px">
+            <h2 id="fg-t" class="t-titolo-2" style="margin: 0">Sbloccare @luca.vitali?</h2>
+            <p class="t-corpo-s c-2" style="margin: 0">Potrà di nuovo trovarti e mandarti richieste. Non tornerete amici da soli.</p>
+            <div class="azioni-doppie"><button class="btn btn-secondario" type="button" onClick="{{chiudi}}">Annulla</button><button class="btn btn-secondario" type="button" onClick="{{chiudi}}">Sblocca</button></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{foglio.segnala}}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{segn.scelta}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 12px">
+              <sc-if value="{{segn.offline}}" hint-placeholder-val="{{ false }}">
+                <div class="striscia-offline" role="status" style="border-radius: 4px"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 2 20 20"></path><path d="M8.5 16.429a5 5 0 0 1 7 0"></path><path d="M12 20h.01"></path></svg><span>Sei offline: la segnalazione parte appena torna la connessione. Puoi già scrivere.</span></div>
+              </sc-if>
+              <h2 id="fg-t" class="t-titolo-2" style="margin: 0">Segnala @{{altro.user}}</h2>
+              <p class="t-corpo-s c-2" style="margin: 0">Tocca un motivo: la segnalazione parte subito. Resta anonima.</p>
+              <sc-if value="{{segn.errore}}" hint-placeholder-val="{{ false }}">
+                <div class="avviso avviso-errore" role="alert"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg><span><span class="avviso-titolo">La segnalazione non è partita</span>Non hai perso niente.<span class="avviso-azioni"><button class="btn btn-s btn-secondario" type="button">Riprova</button></span></span></div>
+              </sc-if>
+              <div role="group" aria-label="Motivo">
+                <sc-for list="{{motivi}}" as="m" hint-placeholder-count="6">
+                  <button class="{{m.cls}}" type="button" onClick="{{m.invia}}" disabled="{{m.spento}}" aria-busy="{{m.busy}}"><span>{{m.t}}</span><span class="fine"><sc-if value="{{m.invio}}" hint-placeholder-val="{{ false }}"><span class="carico" aria-hidden="true" style="display: inline-flex; gap: 4px"><i style="width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .45"></i><i style="width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .7"></i><i style="width: 4px; height: 4px; border-radius: 50%; background: currentColor"></i></span>Invio</sc-if><sc-if value="{{m.freccia}}" hint-placeholder-val="{{ true }}"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></sc-if></span></button>
+                </sc-for>
+              </div>
+              <div class="campo" style="margin-top: 4px">
+                <span class="campo-riga"><label class="campo-etichetta" for="sg-t">Vuoi aggiungere qualcosa? <span class="campo-opz">(facoltativo)</span></label><span class="campo-conta">0/1000</span></span>
+                <div class="campo-box area"><textarea id="sg-t" rows="2" maxlength="1000" placeholder="Scrivilo prima di scegliere il motivo" readonly></textarea></div>
+              </div>
+              <button class="casella-lunga" type="button" role="checkbox" aria-checked="{{bloccaAncheOn}}" onClick="{{toggleBloccaAnche}}"><span class="{{bloccaAncheBox}}"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 2.5"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Blocca anche questa persona</span></button>
+            </div>
+          </sc-if>
+          <sc-if value="{{segn.fatta}}" hint-placeholder-val="{{ false }}">
+            <div class="ax-pila" style="gap: 14px" role="status">
+              <span class="cornice-icona" style="color: var(--colore-successo); border-color: var(--colore-successo)"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              <h2 id="fg-t" class="t-titolo-2" style="margin: 0">Grazie, ce ne occupiamo noi.</h2>
+              <p class="t-corpo-s c-2" style="margin: 0">Chi hai segnalato non lo saprà. Trovi lo stato in Profilo › Le mie segnalazioni.</p>
+              <sc-if value="{{segn.minore}}" hint-placeholder-val="{{ false }}">
+                <div class="avviso avviso-info"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span><span class="avviso-titolo">Lo guardiamo entro 4 ore</span>Se c’è un pericolo immediato chiama il 112.</span></div>
+                <a class="btn btn-secondario btn-pieno" href="tel:112"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"></path></svg>Chiama il 112</a>
+              </sc-if>
+              <button class="btn btn-secondario btn-pieno" type="button" onClick="{{chiudi}}">Chiudi</button>
+            </div>
+          </sc-if>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{toast}}" hint-placeholder-val="{{ false }}">
+    <div class="toast toast-basso" role="status">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>
+      <span class="toast-testo">Persona bloccata</span>
+      <button class="btn btn-s btn-testo" type="button" onClick="{{annullaBlocco}}">Annulla</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tema":{"editor":"enum","options":["scuro","chiaro"],"default":"scuro"},"schermata":{"editor":"enum","options":["mio","modifica","amici","cerca","codice","scansiona","anteprima","richiesta","profilo","segnala","blocca","bloccati","segnalazioni"],"default":"mio"},"stato":{"editor":"text","default":"normale"},"fascia":{"editor":"enum","options":["minore","maggiore"],"default":"minore"},"larghezza":{"editor":"int","default":390,"min":320,"max":430,"unit":"px"},"altezza":{"editor":"int","default":844,"min":640,"max":932,"unit":"px"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const P = this.props;
+    const tema = P.tema ?? 'scuro';
+    const fascia = P.fascia ?? 'minore';
+    const s = st.s ?? (P.schermata ?? 'mio');
+    const stato = st.st ?? (P.stato ?? 'normale');
+    const go = (ns, nst) => () => this.setState({ s: ns, st: nst || 'normale', menu: null, foglio: null, toast: false });
+    const P2 = (user, nome, ini, t, extra) => Object.assign({ user, nome, ini, av: 'avatar avatar-' + t, avXl: 'avatar avatar-xl avatar-' + t }, extra || {});
+
+    // base screen for overlays
+    const base = (s === 'segnala' || s === 'blocca') ? 'profilo' : s;
+    const offline = stato === 'offline' || (s === 'segnala' && stato === 'offline');
+    const segStato = s === 'segnala' ? stato : (st.foglio === 'segnala' ? (st.segSt || 'normale') : null);
+    let foglioTipo = st.foglio || null;
+    if (!foglioTipo) {
+      if (s === 'segnala') foglioTipo = 'segnala';
+      else if (s === 'blocca') foglioTipo = 'blocca';
+      else if (s === 'amici' && stato === 'rimuovi') foglioTipo = 'rimuovi';
+      else if (s === 'bloccati' && stato === 'sblocca') foglioTipo = 'sblocca';
+    }
+
+    // persona "altra"
+    const MAG = P2('tommaso.riva', 'Tommaso', 'TR', 't3');
+    const altro = (base === 'anteprima' || base === 'richiesta') && (stato === 'avviso') ? MAG
+      : base === 'anteprima' ? P2('luca.ferri', 'Luca', 'LF', 't1')
+      : base === 'richiesta' ? P2('davide.sala', 'Davide', 'DS', 't1')
+      : P2('marco.brivio', 'Marco', 'MB', 't2');
+
+    const titoli = {
+      mio: 'Giulia', modifica: 'Modifica profilo', amici: 'Amici', cerca: 'Cerca per username', codice: 'Il mio codice',
+      scansiona: 'Fotocamera spenta', bloccati: 'Persone bloccate', segnalazioni: 'Le mie segnalazioni', profilo: altro.nome,
+      anteprima: altro.nome, richiesta: altro.nome
+    };
+    const ko = {
+      scaduto: ['Questo codice è scaduto', 'I codici valgono 15 minuti. Chiedi a chi è con te di crearne uno nuovo.'],
+      usato: ['Questo codice è già stato usato', 'Ogni codice funziona una volta sola. Chiedine uno nuovo.'],
+      nonvalido: ['Codice non valido', 'Controlla di averlo scritto bene, oppure chiedine uno nuovo.'],
+      nondisponibile: ['Codice non valido', 'Controlla di averlo scritto bene, oppure chiedine uno nuovo.']
+    };
+    const personaKo = base === 'anteprima' && !!ko[stato];
+    let titolo = titoli[base] || '';
+    if (personaKo) titolo = ko[stato][0];
+    if (base === 'profilo' && stato === 'nondisponibile') titolo = 'Profilo non disponibile';
+
+    // menu
+    const menuAmico = st.menu ?? (s === 'amici' && stato === 'menu' ? 'marco.brivio' : null);
+    const menuProfilo = st.menu === 'profilo' || (s === 'profilo' && stato === 'menu');
+    const bloccatoTmp = st.toast || (s === 'amici' && stato === 'bloccato');
+
+    const amiciTutti = [
+      P2('marco.brivio', 'Marco', 'MB', 't2'), P2('sara.colombo', 'Sara', 'SC', 't3'), P2('luca.ferri', 'Luca', 'LF', 't1'), P2('ele.parma', 'Ele', 'EP', 't3')
+    ].filter((p) => !(bloccatoTmp && p.user === 'marco.brivio'));
+    const amici = amiciTutti.map((p) => Object.assign(p, {
+      menuOn: menuAmico === p.user ? 'true' : 'false',
+      menuAperto: menuAmico === p.user,
+      menu: () => this.setState({ menu: menuAmico === p.user ? null : p.user }),
+      apri: go('profilo', 'amici')
+    }));
+    const ricevute = [
+      P2('davide.sala', 'Davide', 'DS', 't1', { haNota: false, nota: '', apri: go('richiesta', 'normale') }),
+      P2('tommaso.riva', 'Tommaso', 'TR', 't3', { haNota: true, nota: 'Arrivata con il tuo codice', apri: go('richiesta', fascia === 'minore' ? 'avviso' : 'normale') })
+    ];
+    const inviate = [P2('anna.villa', 'Anna', 'AV', 't2')];
+    const bloccati = [P2('luca.vitali', 'Luca', 'LV', 't1'), P2('nome.utente', 'Profilo', 'NU', 't3')];
+
+    // cerca
+    const qMap = { corto: 'ma', nessuno: 'tommaso.riva', errore: 'mar', offline: 'mar' };
+    const q = qMap[stato] || 'mar';
+    const inviateQ = st.inv || { 'marta.re': true };
+    const risultati = [
+      P2('marco.brivio', 'Marco', 'MB', 't2', { amico: true }),
+      P2('martina.sala', 'Martina', 'MS', 't1', {}),
+      P2('marta.re', 'Marta', 'MR', 't3', {}),
+      P2('mario.pozzi', 'Mario', 'MP', 't1', {})
+    ].map((p) => {
+      const inv = !p.amico && !!inviateQ[p.user];
+      const lim = stato === 'limite';
+      return Object.assign(p, {
+        isAmico: !!p.amico, isInviata: inv, isAggiungi: !p.amico && !inv,
+        btnCls: lim ? 'btn btn-s btn-secondario is-disabilitato' : 'btn btn-s btn-secondario',
+        spento: lim,
+        toggle: () => this.setState({ inv: Object.assign({}, inviateQ, { [p.user]: !inv }) })
+      });
+    });
+
+    // QR deterministico 29x29
+    const N = 29; const grid = [];
+    let seed = 7349;
+    const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+    for (let y = 0; y < N; y++) { grid.push([]); for (let x = 0; x < N; x++) grid[y].push(rnd() > 0.52); }
+    const finder = (ox, oy) => { for (let y = -1; y < 8; y++) for (let x = -1; x < 8; x++) { const X = ox + x, Y = oy + y; if (X < 0 || Y < 0 || X >= N || Y >= N) continue; const d = Math.max(Math.abs(x - 3), Math.abs(y - 3)); grid[Y][X] = d === 3 || d <= 1; } };
+    finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
+    for (let i = 8; i < N - 8; i++) { grid[6][i] = i % 2 === 0; grid[i][6] = i % 2 === 0; }
+    for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) { const d = Math.max(Math.abs(x), Math.abs(y)); grid[N - 9 + y][N - 9 + x] = d !== 1; }
+    let qrPath = '';
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (grid[y][x]) qrPath += 'M' + x + ' ' + y + 'h1v1h-1z';
+
+    const codSpento = ['scaduto', 'usato', 'limite', 'offline'].indexOf(stato) >= 0;
+    const qrVelo = { scaduto: 'Questo codice è scaduto', usato: 'Questo codice è già stato usato', limite: 'Questo codice è scaduto', offline: 'Serve la connessione' }[stato] || '';
+    const c = (cond, on, off) => cond ? on : off;
+    const bloccaAnche = !!st.bloccaAnche;
+    const segnErr = segStato === 'errore';
+    const segnOff = segStato === 'offline';
+    const segnInvio = segStato === 'invio';
+    const motiviT = ['Contenuto inappropriato', 'Molestie', 'Mi sembra che metta a rischio una persona minorenne', 'Spam o truffa', 'Età falsa', 'Altro'];
+    const motivi = motiviT.map((t, i) => {
+      const inv = segnInvio && i === 1;
+      return {
+        t, invio: inv, freccia: !inv,
+        cls: 'motivo' + (inv ? ' is-invio' : '') + ((segnOff || (segnInvio && !inv)) ? ' is-spento' : ''),
+        spento: segnOff || segnInvio, busy: inv ? 'true' : 'false',
+        invia: () => this.setState({ s: 'segnala', st: i === 2 ? 'minore' : 'inviata', foglio: null })
+      };
+    });
+
+    return {
+      radice: 'nx nx-' + tema,
+      larghezza: P.larghezza ?? 390, altezza: P.altezza ?? 844,
+      temaNome: tema === 'scuro' ? 'Scuro' : 'Chiaro',
+      is: {
+        mio: base === 'mio', modifica: base === 'modifica', amici: base === 'amici', cerca: base === 'cerca', codice: base === 'codice',
+        scansiona: base === 'scansiona', persona: base === 'anteprima' || base === 'richiesta', profilo: base === 'profilo',
+        bloccati: base === 'bloccati', segnalazioni: base === 'segnalazioni'
+      },
+      offline,
+      haTesta: base !== 'scansiona',
+      haBack: base !== 'mio',
+      haNav: base === 'mio' || base === 'amici',
+      haMenuProfilo: base === 'profilo' && stato !== 'nondisponibile',
+      menuProfiloAperto: menuProfilo, menuProfiloOn: menuProfilo ? 'true' : 'false',
+      toggleMenuProfilo: () => this.setState({ menu: menuProfilo ? null : 'profilo' }),
+      corpoCls: 'ax-corpo am-lista' + (base === 'scansiona' ? ' am-pieno' : ''),
+      etichetta: base === 'anteprima' ? 'Codice invito' : base === 'richiesta' ? 'Richiesta di amicizia' : 'Amici',
+      titolo,
+      parole: titolo.split(' ').filter(Boolean).map((t) => ({ t })),
+      altro,
+      indietro: go({ modifica: 'mio', amici: 'mio', cerca: 'amici', codice: 'amici', scansiona: 'codice', anteprima: 'scansiona', richiesta: 'amici', profilo: 'amici', bloccati: 'mio', segnalazioni: 'mio' }[base] || 'mio'),
+      vai: {
+        mio: go('mio'), modifica: go('modifica'), amici: go('amici'), cerca: go('cerca'), codice: go('codice'), scansiona: go('scansiona'),
+        anteprima: go('anteprima', fascia === 'minore' ? 'avviso' : 'normale'), profilo: go('profilo', 'amici'), bloccati: go('bloccati'), segnalazioni: go('segnalazioni')
+      },
+      // amici
+      spento: offline,
+      btnAzione: c(offline, 'btn btn-secondario is-disabilitato', 'btn btn-secondario'),
+      btnS: c(offline, 'btn btn-s btn-secondario is-disabilitato', 'btn btn-s btn-secondario'),
+      amiciCarica: base === 'amici' && stato === 'caricamento',
+      amiciErrore: base === 'amici' && stato === 'errore',
+      amiciVuoto: base === 'amici' && stato === 'vuoto',
+      amiciLista: base === 'amici' && ['caricamento', 'errore', 'vuoto'].indexOf(stato) < 0,
+      tre: [1, 2, 3].map((k) => ({ k })),
+      ricevute, inviate, amici,
+      apriRimuovi: () => this.setState({ foglio: 'rimuovi', menu: null }),
+      apriSegnala: () => this.setState({ foglio: 'segnala', segSt: 'normale', menu: null }),
+      apriBlocca: () => this.setState({ foglio: 'blocca', menu: null }),
+      apriSblocca: () => this.setState({ foglio: 'sblocca' }),
+      // cerca
+      q,
+      cercaBox: 'campo-box campo-ricerca' + (offline ? ' is-disabilitato' : ''),
+      cercaCorto: base === 'cerca' && stato === 'corto',
+      cercaNessuno: base === 'cerca' && stato === 'nessuno',
+      cercaErrore: base === 'cerca' && stato === 'errore',
+      cercaOffline: base === 'cerca' && stato === 'offline',
+      cercaLimite: base === 'cerca' && stato === 'limite',
+      cercaRisultati: base === 'cerca' && (stato === 'normale' || stato === 'limite'),
+      risultati,
+      // codice
+      codErrore: base === 'codice' && stato === 'errore',
+      codMostra: base === 'codice' && stato !== 'errore',
+      codLimite: base === 'codice' && stato === 'limite',
+      qrPath, qrCls: 'qr-box' + (codSpento ? ' is-spento' : ''), qrVeloOn: codSpento, qrVelo,
+      codiceCls: 'codice' + (codSpento ? ' is-spento' : ''),
+      codiceSpell: 'K 7 Q 4, M 2 X P, 9 H',
+      codTempo: { scaduto: 'Scaduto alle 22:41', usato: 'Usato alle 22:38', limite: 'Scaduto alle 22:41', offline: 'Non disponibile offline' }[stato] || 'Valido ancora 14 min',
+      codCondSpento: codSpento || stato === 'errore',
+      codNuovoSpento: stato === 'limite' || offline,
+      codNuovoCls: c(stato === 'limite' || offline, 'btn btn-secondario is-disabilitato', 'btn btn-secondario'),
+      btnScansiona: c(offline, 'btn btn-secondario btn-pieno is-disabilitato', 'btn btn-secondario btn-pieno'),
+      // scansiona
+      camOk: base === 'scansiona' && stato !== 'permesso',
+      camNo: base === 'scansiona' && stato === 'permesso',
+      codiceScritto: stato === 'permesso' ? 'K7Q4-M2XP-9H' : '',
+      // persona
+      personaOk: !personaKo, personaKo, koTesto: personaKo ? ko[stato][1] : '',
+      haNotaCodice: base === 'richiesta' && stato === 'avviso',
+      giaAmici: base === 'anteprima' && stato === 'giaamici',
+      avvisoMaggiorenne: (base === 'anteprima' || base === 'richiesta') && stato === 'avviso' && fascia === 'minore',
+      az: {
+        invia: base === 'anteprima' && stato === 'normale',
+        inviaAvviso: base === 'anteprima' && stato === 'avviso',
+        accetta: base === 'richiesta',
+        vedi: base === 'anteprima' && stato === 'giaamici'
+      },
+      // profilo
+      profiloOk: base === 'profilo' && stato !== 'nondisponibile',
+      profiloKo: base === 'profilo' && stato === 'nondisponibile',
+      rap: {
+        amici: ['amici', 'menu', 'segnala', 'blocca', 'normale', 'scelta', 'invio', 'errore', 'offline', 'inviata', 'minore'].indexOf(stato) >= 0 || s === 'segnala' || s === 'blocca',
+        inattesa: stato === 'inattesa', ricevuta: stato === 'ricevuta'
+      },
+      // bloccati, segnalazioni
+      bloccatiVuoto: stato === 'vuoto', bloccatiLista: stato !== 'vuoto', bloccati,
+      segnVuoto: stato === 'vuoto', segnLista: stato !== 'vuoto',
+      // fogli
+      foglio: { on: !!foglioTipo, rimuovi: foglioTipo === 'rimuovi', blocca: foglioTipo === 'blocca', sblocca: foglioTipo === 'sblocca', segnala: foglioTipo === 'segnala' },
+      segn: {
+        scelta: ['inviata', 'minore'].indexOf(segStato) < 0, fatta: segStato === 'inviata' || segStato === 'minore', minore: segStato === 'minore',
+        errore: segnErr, offline: segnOff
+      },
+      motivi,
+      bloccaAncheOn: bloccaAnche ? 'true' : 'false',
+      bloccaAncheBox: bloccaAnche ? 'casella is-on' : 'casella',
+      toggleBloccaAnche: () => this.setState({ bloccaAnche: !bloccaAnche }),
+      chiudi: () => this.setState({ foglio: null, s: base, st: base === 'profilo' ? 'amici' : 'normale' }),
+      esc: (e) => { if (e && e.key === 'Escape') this.setState({ foglio: null, s: base, st: base === 'profilo' ? 'amici' : 'normale' }); },
+      confermaBlocco: () => this.setState({ s: 'amici', st: 'normale', foglio: null, toast: true, menu: null }),
+      annullaBlocco: () => this.setState({ toast: false, st: 'normale', s: 'amici' }),
+      toast: bloccatoTmp && base === 'amici'
+    };
+  }
+}
+</script>
+</body>
+</html>
