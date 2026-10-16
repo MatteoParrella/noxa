@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Noxa · F-11 · Anteprima del codice e richiesta ricevuta</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/6fa6353d716b68f787ff2702a9363d96">
+<link rel="stylesheet" href="/_blob/afc4088ee394ab1a58e9ba7651ca762e">
+<link rel="stylesheet" href="/_blob/dbab4423ee519d83500f0485a4806ddb">
+<link rel="stylesheet" href="/_blob/cdf778b603b9eec9b9e8c7c0cba7983e">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="nx nx-scuro" style="width: 3480px; height: 2080px; padding: 64px; display: flex; flex-direction: column; gap: 40px; overflow: hidden">
+  <header style="display: flex; flex-direction: column; gap: 10px; max-width: 1200px">
+    <span class="etichetta">F-11 · Amici · 04</span>
+    <h1 class="t-titolo-1" style="margin: 0">Anteprima del codice · Richiesta ricevuta</h1>
+    <p class="t-corpo-s c-2" style="margin: 0">Le colonne «14–17 anni» mostrano l’avviso R-12 prima dei pulsanti: icona, titolo e testo, non solo colore. In quella variante «Ho capito, invia» e «Annulla» (e Accetta / Rifiuta) hanno lo stesso peso. Un utente bloccato o sospeso vede lo stesso messaggio di «Codice non valido».</p>
+  </header>
+  <sc-for list="{{righe}}" as="r" hint-placeholder-count="2">
+    <div style="display: flex; gap: 32px">
+      <sc-for list="{{colonne}}" as="c" hint-placeholder-count="8">
+        <div style="display: flex; flex-direction: column; gap: 12px; width: 390px; flex: none">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><span style="font-weight: 700">{{c.nome}}</span><span class="t-mono-dato c-2">{{r.tema}} · {{c.tag}}</span></div>
+          <div style="width: 390px; height: 844px; border-radius: 28px; overflow: hidden; box-shadow: 0 0 0 1px var(--colore-linea)">
+            <dc-import name="Amici" tema="{{r.tema}}" schermata="{{c.s}}" stato="{{c.st}}" fascia="{{c.f}}" hint-size="390px,844px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":3480,"height":2080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      righe: [{ tema: 'scuro' }, { tema: 'chiaro' }],
+      colonne: [
+        { nome: 'Anteprima', tag: 'stessa fascia', s: 'anteprima', st: 'normale', f: 'minore' },
+        { nome: 'Anteprima · maggiorenne', tag: '14–17 anni', s: 'anteprima', st: 'avviso', f: 'minore' },
+        { nome: 'Codice scaduto', tag: 'scaduto', s: 'anteprima', st: 'scaduto', f: 'minore' },
+        { nome: 'Codice già usato', tag: 'usato', s: 'anteprima', st: 'usato', f: 'minore' },
+        { nome: 'Non valido / non disponibile', tag: 'stesso testo', s: 'anteprima', st: 'nonvalido', f: 'minore' },
+        { nome: 'Siete già amici', tag: 'già amici', s: 'anteprima', st: 'giaamici', f: 'minore' },
+        { nome: 'Richiesta ricevuta', tag: 'stessa fascia', s: 'richiesta', st: 'normale', f: 'minore' },
+        { nome: 'Richiesta · maggiorenne', tag: '14–17 anni', s: 'richiesta', st: 'avviso', f: 'minore' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
