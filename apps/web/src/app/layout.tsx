@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import '@fontsource-variable/archivo/wdth.css';
 import '@fontsource/ibm-plex-mono/latin-400.css';
 import '@fontsource/ibm-plex-mono/latin-500.css';
+import { Fornitori } from '@/components/guscio/Fornitori';
 import { RegistraServiceWorker } from '@/components/guscio/RegistraServiceWorker';
 import { SCRIPT_TEMA } from '@/lib/tema';
 import './globals.css';
@@ -31,7 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
       </head>
       <body>
-        {children}
+        <Fornitori>{children}</Fornitori>
         <RegistraServiceWorker />
       </body>
     </html>

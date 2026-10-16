@@ -10,6 +10,9 @@ const { count, size, warnings } = await generateSW({
   swDest: 'out/sw.js',
   maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
   navigateFallback: '/404.html',
+  // Export statico: i parametri (?id=…, ?token_hash=…) non cambiano l'HTML della pagina, quindi
+  // si ignorano tutti nel cercare la pagina in cache (ARCHITECTURE.md §3.1, routing).
+  ignoreURLParametersMatching: [/.*/],
   navigateFallbackDenylist: [/^\/sw\.js$/],
   cleanupOutdatedCaches: true,
   clientsClaim: true,

@@ -17,16 +17,22 @@ type Props = {
   titolo?: string;
   children: ReactNode;
   azioni?: ReactNode;
+  /** Porta l'avviso nello schermo quando compare (errori sotto un piede fisso). */
+  portaInVista?: boolean;
 };
 
 /**
  * Avviso in linea. Errori e avvisi sono annunciati subito (role="alert"), info e successi
  * con cortesia (role="status"). L'icona e il titolo rendono lo stato leggibile senza colore.
  */
-export function Avviso({ tipo, titolo, children, azioni }: Props) {
+export function Avviso({ tipo, titolo, children, azioni, portaInVista = false }: Props) {
   const urgente = tipo === 'errore' || tipo === 'avviso';
   return (
-    <div className={classi('avviso', `avviso-${tipo}`)} role={urgente ? 'alert' : 'status'}>
+    <div
+      className={classi('avviso', `avviso-${tipo}`)}
+      role={urgente ? 'alert' : 'status'}
+      ref={portaInVista ? (elemento) => elemento?.scrollIntoView({ block: 'nearest' }) : undefined}
+    >
       <Icona icona={ICONE[tipo]} />
       <div>
         {titolo && <strong className="avviso-titolo">{titolo}</strong>}

@@ -171,3 +171,15 @@
   --rivela-sfocatura: 8px;
   --bagliore-accento: color-mix(in srgb, var(--colore-accento) 26%, transparent);
 }
+
+/*
+  Schermate di accesso (design/F-10-accesso, layer "accesso" del progetto Claude Design):
+  titoli più grandi, marchio del Benvenuto e passaggio orizzontale tra i passi.
+*/
+:root {
+  --tipo-titolo-accesso: 2.5rem; /* 40 / 41 */
+  --tipo-marchio: 7rem; /* 112 / 101 */
+  --tipo-larghezza-marchio: 68%;
+  --movimento-passo: 240ms;
+  --spostamento-passo: 32px;
+}

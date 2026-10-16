@@ -15,6 +15,12 @@ type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> & {
   prefisso?: ReactNode;
   /** Elemento dopo il testo, per esempio un pulsante per cancellare. */
   suffisso?: ReactNode;
+  /** Caratteri scritti sul massimo, mostrati accanto all'etichetta (es. 11/20). */
+  conteggio?: { attuale: number; massimo: number };
+  /** Id di altri elementi che descrivono il campo, per esempio un elenco di requisiti. */
+  descrittoDa?: string;
+  /** Contenuto sotto il campo, dopo errore e aiuto (es. requisiti, azioni). */
+  dopo?: ReactNode;
 };
 
 export function Campo({
@@ -24,6 +30,9 @@ export function Campo({
   facoltativo = false,
   prefisso,
   suffisso,
+  conteggio,
+  descrittoDa,
+  dopo,
   disabled,
   className,
   type = 'text',
@@ -32,14 +41,23 @@ export function Campo({
   const id = useId();
   const idAiuto = `${id}-aiuto`;
   const idErrore = `${id}-errore`;
-  const descrittori = [errore ? idErrore : null, aiuto ? idAiuto : null].filter(Boolean).join(' ');
+  const descrittori = [errore ? idErrore : null, aiuto ? idAiuto : null, descrittoDa ?? null]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={classi('campo', className)}>
-      <label className="campo-etichetta" htmlFor={id}>
-        {etichetta}
-        {facoltativo && <span className="campo-opz"> (facoltativo)</span>}
-      </label>
+      <div className="campo-riga">
+        <label className="campo-etichetta" htmlFor={id}>
+          {etichetta}
+          {facoltativo && <span className="campo-opz"> (facoltativo)</span>}
+        </label>
+        {conteggio && (
+          <span className="campo-conta" aria-hidden="true">
+            {conteggio.attuale}/{conteggio.massimo}
+          </span>
+        )}
+      </div>
       <div
         className={classi(
           'campo-box',
@@ -70,6 +88,7 @@ export function Campo({
           {aiuto}
         </span>
       )}
+      {dopo}
     </div>
   );
 }

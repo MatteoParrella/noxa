@@ -1,23 +1,11 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
 import { StrisciaOffline } from '@/components/ui/Stati';
-
-function iscrivi(avvisa: () => void) {
-  window.addEventListener('online', avvisa);
-  window.addEventListener('offline', avvisa);
-  return () => {
-    window.removeEventListener('online', avvisa);
-    window.removeEventListener('offline', avvisa);
-  };
-}
+import { useOnline } from '@/lib/connessione';
 
 /** Mostra la striscia offline quando il dispositivo perde la connessione. */
-export function StatoConnessione() {
-  const online = useSyncExternalStore(
-    iscrivi,
-    () => navigator.onLine,
-    () => true,
-  );
-  return online ? null : <StrisciaOffline />;
+export function StatoConnessione({ testo }: { testo?: string }) {
+  const online = useOnline();
+  if (online) return null;
+  return testo ? <StrisciaOffline testo={testo} /> : <StrisciaOffline />;
 }

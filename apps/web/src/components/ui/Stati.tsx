@@ -79,14 +79,15 @@ export function ErroreConAzione({
   );
 }
 
+const TESTO_OFFLINE =
+  'Sei offline: vedi i dati salvati sul telefono. Le modifiche partono quando torna la rete.';
+
 /** Striscia mostrata quando il dispositivo è offline. */
-export function StrisciaOffline() {
+export function StrisciaOffline({ testo = TESTO_OFFLINE }: { testo?: string }) {
   return (
     <div className="striscia-offline" role="status">
       <Icona icona={CloudOff} dimensione="s" />
-      <span>
-        Sei offline: vedi i dati salvati sul telefono. Le modifiche partono quando torna la rete.
-      </span>
+      <span>{testo}</span>
     </div>
   );
 }

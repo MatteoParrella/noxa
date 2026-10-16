@@ -1,0 +1,505 @@
+/*
+  Schermate di accesso, registrazione e onboarding (design/F-10-accesso). Riscritto dal layer
+  "accesso" del progetto Claude Design con i soli token di tokens.css. Il movimento usa le
+  classi di movimento.css (titolo che sale, blocchi che entrano a fuoco); qui ci sono solo il
+  passaggio orizzontale tra i passi e il bagliore del Benvenuto.
+*/
+
+/* ---------- impaginazione ---------- */
+.schermo-accesso {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 560px;
+  margin: 0 auto;
+  overflow-x: clip;
+  padding-top: env(safe-area-inset-top);
+}
+.schermo-testa {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spazio-2);
+  min-height: 52px;
+  padding: 0 var(--spazio-3) 0 var(--spazio-2);
+}
+.schermo-corpo {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spazio-2) var(--spazio-5) var(--spazio-6);
+}
+.schermo-corpo.in-fondo {
+  justify-content: flex-end;
+  padding-bottom: var(--spazio-8);
+}
+.schermo-piede {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spazio-2);
+  padding: var(--spazio-3) var(--spazio-5) calc(var(--spazio-5) + env(safe-area-inset-bottom));
+  background: var(--colore-sfondo);
+  border-top: 1px solid var(--colore-linea);
+}
+.schermo-piede.senza-filo {
+  border-top: 0;
+}
+.schermo-pila {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spazio-5);
+}
+.titolo-accesso {
+  margin: var(--spazio-2) 0 var(--spazio-6);
+  font-size: var(--tipo-titolo-accesso);
+  line-height: 1.02;
+  font-weight: var(--tipo-peso-forte);
+  font-stretch: var(--tipo-larghezza-stretta);
+  letter-spacing: -0.01em;
+}
+.testo-accesso {
+  margin: 0;
+  font-size: var(--tipo-corpo);
+  line-height: 1.5;
+  color: var(--colore-testo-secondario);
+  max-width: 34ch;
+}
+.testo-accesso.is-primario {
+  color: var(--colore-testo-primario);
+}
+.link-accesso {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--area-tocco);
+  color: var(--colore-accento-testo);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  font-weight: var(--tipo-peso-medio);
+}
+.link-accesso.is-in-linea {
+  display: inline;
+  min-height: 0;
+}
+/* Gli errori restano visibili sopra il piede fisso quando il browser li porta nello schermo. */
+.schermo-corpo .campo-errore,
+.schermo-corpo .avviso {
+  scroll-margin-bottom: 160px;
+}
+.frase-benvenuto {
+  margin: 0;
+  max-width: 30ch;
+  font-size: var(--tipo-titolo-3);
+  line-height: 1.4;
+  color: var(--colore-testo-primario);
+}
+.testo-piccolo {
+  margin: 0;
+  font-size: var(--tipo-didascalia);
+  line-height: 1.45;
+  color: var(--colore-testo-secondario);
+}
+
+/* ---------- Benvenuto ---------- */
+.marchio-benvenuto {
+  display: flex;
+  align-items: baseline;
+  margin: 0;
+  font-size: var(--tipo-marchio);
+  line-height: 0.9;
+  font-weight: var(--tipo-peso-forte);
+  font-stretch: var(--tipo-larghezza-marchio);
+  letter-spacing: -0.03em;
+}
+.marchio-punto {
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-left: var(--spazio-1);
+  border-radius: 50%;
+  background: var(--colore-accento);
+}
+.bagliore-benvenuto {
+  position: absolute;
+  z-index: 0;
+  top: -180px;
+  left: -20%;
+  right: -20%;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--bagliore-accento), transparent 100%);
+  pointer-events: none;
+  animation: bagliore var(--movimento-ingresso) var(--curva-espressiva) 150ms both;
+}
+
+/* ---------- indicatore dei passi ---------- */
+.passi {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spazio-3);
+}
+.passi-testo {
+  flex: none;
+  font-family: var(--tipo-famiglia-mono);
+  font-size: var(--tipo-mono-dato);
+  font-weight: var(--tipo-peso-medio);
+  color: var(--colore-testo-secondario);
+  font-variant-numeric: tabular-nums;
+}
+.passi-barre {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spazio-1);
+}
+.passi-barre i {
+  display: block;
+  height: 3px;
+  border-radius: 1px;
+  background: var(--colore-linea);
+}
+.passi-barre i.fatto {
+  background: var(--colore-testo-primario);
+}
+.passi-barre i.ora {
+  height: 5px;
+  margin-top: -1px;
+  background: var(--colore-accento);
+}
+
+/* ---------- indicatore a punti ---------- */
+.punti {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spazio-2);
+  min-height: var(--spazio-6);
+}
+.punti i {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--colore-linea-forte);
+  transition: width var(--movimento-base) var(--curva-standard);
+}
+.punti i.ora {
+  width: 24px;
+  background: var(--colore-accento);
+}
+
+/* ---------- campo password ---------- */
+.campo-password .campo-box {
+  padding-right: var(--spazio-1);
+}
+.mostra-password {
+  flex: none;
+  min-width: 72px;
+  min-height: var(--area-tocco);
+  padding: 0 var(--spazio-2);
+  border: 0;
+  border-radius: var(--raggio-2);
+  background: transparent;
+  color: var(--colore-testo-primario);
+  font: inherit;
+  font-size: var(--tipo-corpo-piccolo);
+  font-weight: var(--tipo-peso-medio);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.mostra-password:hover {
+  background: var(--colore-superficie-2);
+}
+.requisiti {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spazio-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--tipo-mono-dato);
+  line-height: 1.4;
+}
+.requisiti li {
+  display: flex;
+  align-items: center;
+  gap: var(--spazio-2);
+  color: var(--colore-testo-secondario);
+}
+.requisiti li.ok {
+  color: var(--colore-successo);
+}
+
+/* ---------- conteggio e prefisso dei campi ---------- */
+.campo-riga {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spazio-2);
+}
+.campo-conta {
+  margin-left: auto;
+  font-family: var(--tipo-famiglia-mono);
+  font-size: var(--tipo-didascalia);
+  color: var(--colore-testo-secondario);
+}
+.prefisso {
+  font-family: var(--tipo-famiglia-mono);
+  color: var(--colore-testo-secondario);
+}
+
+/* ---------- campo data e calendario ---------- */
+.campo-data input {
+  font-family: var(--tipo-famiglia-mono);
+  font-size: var(--tipo-corpo);
+  letter-spacing: 0.02em;
+}
+.calendario-selettori {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spazio-2);
+  margin-bottom: var(--spazio-3);
+}
+.calendario-selettore {
+  min-height: var(--area-tocco);
+  padding: 0 var(--spazio-3);
+  border: 1px solid var(--colore-linea-forte);
+  border-radius: var(--raggio-2);
+  background: var(--colore-superficie-1);
+  color: var(--colore-testo-primario);
+  font: inherit;
+  font-size: var(--tipo-corpo);
+  font-weight: var(--tipo-peso-medio);
+  cursor: pointer;
+}
+.calendario-griglia {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+  text-align: center;
+}
+.calendario-griglia .giorno-settimana {
+  padding: var(--spazio-1) 0;
+  font-size: var(--tipo-etichetta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--colore-testo-secondario);
+}
+.calendario-giorno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--area-tocco);
+  border: 0;
+  border-radius: var(--raggio-2);
+  background: transparent;
+  color: var(--colore-testo-primario);
+  font-family: var(--tipo-famiglia-mono);
+  font-size: var(--tipo-corpo);
+  cursor: pointer;
+}
+.calendario-giorno:hover {
+  background: var(--colore-superficie-2);
+}
+.calendario-giorno[aria-pressed='true'] {
+  background: var(--colore-accento);
+  color: var(--colore-testo-su-accento);
+  font-weight: var(--tipo-peso-medio);
+}
+.calendario-giorno:disabled {
+  color: var(--colore-testo-terziario);
+  cursor: not-allowed;
+  background: transparent;
+}
+
+/* ---------- casella con testo lungo ---------- */
+.casella-lunga {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  column-gap: var(--spazio-3);
+  align-items: start;
+  min-height: var(--area-tocco);
+  padding: 11px 0;
+  font-size: var(--tipo-corpo);
+  line-height: 1.45;
+  cursor: pointer;
+}
+.casella-lunga + .casella-lunga {
+  border-top: 1px solid var(--colore-linea);
+}
+.casella-lunga .casella {
+  margin-top: 1px;
+}
+.casella-lunga input {
+  position: absolute;
+  opacity: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+}
+.casella-lunga input:focus-visible + .casella {
+  outline: 2px solid var(--colore-focus);
+  outline-offset: 2px;
+}
+.casella-lunga.is-errore .casella {
+  border-color: var(--colore-errore);
+  border-width: 2px;
+}
+.casella .ico {
+  visibility: hidden;
+}
+.casella.is-on .ico {
+  visibility: visible;
+}
+
+/* ---------- riquadro della verifica umana (Cloudflare Turnstile) ---------- */
+.verifica-umana {
+  min-height: 65px;
+}
+.verifica-umana.is-invisibile {
+  min-height: 0;
+}
+
+/* ---------- riassunto dell'informativa ---------- */
+.riassunto {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--colore-linea);
+}
+.riassunto-voce {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  column-gap: var(--spazio-3);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--colore-linea);
+}
+.riassunto-voce b {
+  display: block;
+  margin-bottom: 2px;
+  font-size: var(--tipo-corpo);
+  line-height: 1.3;
+}
+.riassunto-voce span {
+  font-size: var(--tipo-corpo-piccolo);
+  line-height: 1.45;
+  color: var(--colore-testo-secondario);
+}
+.riassunto-voce .ico {
+  margin-top: 1px;
+  color: var(--colore-testo-secondario);
+}
+
+/* ---------- illustrazioni astratte ---------- */
+.illustrazione {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+  color: var(--colore-testo-primario);
+}
+.illustrazione.is-bassa {
+  max-height: 180px;
+}
+.illustrazione .tenue {
+  stroke: var(--colore-linea-forte);
+}
+.illustrazione .filo {
+  stroke: var(--colore-linea);
+}
+.illustrazione .acc {
+  stroke: var(--colore-accento);
+  fill: none;
+}
+.illustrazione .acc-pieno {
+  fill: var(--colore-accento);
+}
+.illustrazione .pieno {
+  fill: var(--colore-testo-primario);
+}
+.illustrazione .sup {
+  fill: var(--colore-superficie-2);
+}
+.illustrazione text {
+  font-family: var(--tipo-famiglia-mono);
+  font-size: 12px;
+  fill: var(--colore-testo-primario);
+}
+
+/* ---------- testi lunghi (termini e informativa) ---------- */
+.documento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spazio-4);
+  padding-bottom: var(--spazio-12);
+  font-size: var(--tipo-corpo);
+  line-height: 1.6;
+}
+.documento h2 {
+  margin: var(--spazio-4) 0 0;
+  font-size: var(--tipo-titolo-3);
+  line-height: 1.3;
+}
+.documento p,
+.documento ul {
+  margin: 0;
+}
+.documento ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spazio-1);
+  padding-left: var(--spazio-5);
+}
+.elenco-novita {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spazio-1);
+  margin: 0;
+  padding-left: var(--spazio-5);
+}
+
+/* ---------- passaggio tra i passi della registrazione (ADR-0019) ---------- */
+.scorre-passo {
+  animation: scorre-passo var(--movimento-passo) var(--curva-espressiva) both;
+}
+@keyframes scorre-passo {
+  from {
+    opacity: 0;
+    transform: translateX(var(--spostamento-passo));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scorre-passo {
+    animation: dissolvenza var(--movimento-ridotto) linear both;
+  }
+  .bagliore-benvenuto {
+    animation: dissolvenza var(--movimento-ridotto) linear both;
+  }
+}
+@keyframes dissolvenza {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
