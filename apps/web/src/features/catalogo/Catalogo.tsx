@@ -12,7 +12,10 @@ import { CasellaLunga } from '@/components/ui/CasellaLunga';
 import { Foglio } from '@/components/ui/Foglio';
 import { Icona } from '@/components/ui/Icona';
 import { IndicatorePassi, IndicatorePunti } from '@/components/ui/Indicatori';
+import { CodiceQr } from '@/components/ui/CodiceQr';
 import { Interruttore } from '@/components/ui/Interruttore';
+import { MenuAzioni } from '@/components/ui/MenuAzioni';
+import { RigaPersona } from '@/components/ui/RigaPersona';
 import { Rivela } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { PulsanteSegnala } from '@/components/ui/PulsanteSegnala';
@@ -135,6 +138,45 @@ export function Catalogo({ tema }: { tema: Tema }) {
           Accetto i Termini di servizio
         </CasellaLunga>
         <IndicatorePunti attuale={1} totale={3} etichetta="Schermata 1 di 3" />
+      </Sezione>
+
+      <Sezione titolo="Amici e sicurezza">
+        <ul className="m-0 list-none p-0">
+          <RigaPersona
+            nome="Marco"
+            username="marco.brivio"
+            azioni={
+              <MenuAzioni
+                etichetta="Altre azioni per @marco.brivio"
+                titolo="@marco.brivio"
+                voci={[
+                  { etichetta: 'Segnala', icona: null, onScegli: () => undefined },
+                  { etichetta: 'Blocca', icona: null, onScegli: () => undefined, pericolo: true },
+                ]}
+              />
+            }
+          />
+          <RigaPersona
+            nome="Davide"
+            username="davide.sala"
+            azioniSotto
+            azioni={
+              <>
+                <Pulsante variante="secondario" dimensione="s">
+                  Accetta
+                </Pulsante>
+                <Pulsante variante="secondario" dimensione="s">
+                  Rifiuta
+                </Pulsante>
+              </>
+            }
+          />
+        </ul>
+        <CodiceQr
+          valore="https://noxa.app/amici/invito/?c=K7Q4M2XP9H"
+          etichetta="Codice QR di esempio"
+        />
+        <p className="codice">K7Q4-M2XP-9H</p>
       </Sezione>
 
       <Sezione titolo="Badge e contatore">
