@@ -120,7 +120,8 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `stessa_fascia(a uuid, b uuid)` | `boolean` | `e_minorenne(a) = e_minorenne(b)`. |
 | `c_e_blocco(a uuid, b uuid)` | `boolean` | Esiste una riga in `blocchi` in una delle due direzioni. |
 | `sono_amici(a uuid, b uuid)` | `boolean` | Esiste una riga in `amicizie` con stato `accettata` tra `a` e `b` e `not c_e_blocco(a, b)`. |
-| `puo_vedere_profilo(target uuid)` | `boolean` | Fino all'iterazione 3 solo `target = auth.uid()`; la migrazione di `amicizie`, `blocchi` e `membri_gruppo` la estende così: `target = auth.uid()` oppure (`not c_e_blocco(auth.uid(), target)` e il profilo è `attivo` e (`sono_amici(auth.uid(), target)` oppure esiste una richiesta di amicizia `in_attesa` tra i due oppure i due sono membri dello stesso gruppo)). Non esiste visibilità per "stessa fascia": la tabella `profili` non è elencabile e la ricerca passa solo da `cerca_utenti`. Grazie all'invariante R-15, due membri dello stesso gruppo di fasce diverse sono sempre amici. Applica R-10, R-13, R-17. |
+| `c_e_richiesta(a uuid, b uuid)` | `boolean` | Esiste una richiesta `in_attesa` tra `a` e `b`, in una delle due direzioni. |
+| `puo_vedere_profilo(target uuid)` | `boolean` | Dall'iterazione 3 (la condizione sui gruppi arriva con `membri_gruppo`, iterazione 7): `target = auth.uid()` oppure (`not c_e_blocco(auth.uid(), target)` e il profilo è `attivo` e (`sono_amici(auth.uid(), target)` oppure esiste una richiesta di amicizia `in_attesa` tra i due oppure i due sono membri dello stesso gruppo)). Non esiste visibilità per "stessa fascia": la tabella `profili` non è elencabile e la ricerca passa solo da `cerca_utenti`. Grazie all'invariante R-15, due membri dello stesso gruppo di fasce diverse sono sempre amici. Applica R-10, R-13, R-17. |
 | `e_membro_attivo(gruppo uuid)` | `boolean` | `auth.uid()` è in `membri_gruppo` del gruppo con stato `attivo`. |
 | `e_membro(gruppo uuid)` | `boolean` | Come sopra, con stato `invitato` oppure `attivo`. |
 | `e_admin_gruppo(gruppo uuid)` | `boolean` | `auth.uid()` è membro attivo con ruolo `admin`. |
@@ -143,11 +144,12 @@ policy".
 
 Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `verifica_dati_registrazione`, `prima_della_creazione_utente`, `rimuovi_dati_registrazione`,
-`rimuovi_dati_registrazione_identita`, `blocca_modifica_data_nascita`, `limita_richieste_amicizia`, `applica_blocco`,
+`rimuovi_dati_registrazione_identita`, `blocca_modifica_data_nascita`, `imposta_accettata_il`,
+`prepara_segnalazione`, `nuovo_codice_invito`, `normalizza_codice`, `limita_richieste_amicizia`, `applica_blocco`,
 `verifica_invariante_gruppi`, `verifica_trasporto`, `verifica_categoria_spesa`,
 `limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `calcola_data_serata`,
 `imposta_aggiornato_il`) sono descritte insieme alle tabelle a cui si applicano; quelle
-pianificate (`elimina_account_non_confermati`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`,
+pianificate (`elimina_account_non_confermati`, `elimina_codici_invito_scaduti`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`,
 `assegna_badge`, `genera_riepiloghi`) nel §8.
 
 ## 5. Tabelle
@@ -278,17 +280,20 @@ Unico su (`utente_id`, `tipo`, `versione`).
 Indice unico su `(least(richiedente_id, destinatario_id), greatest(richiedente_id, destinatario_id))`.
 
 - **S**: `auth.uid() in (richiedente_id, destinatario_id)`.
-- **I**: `richiedente_id = auth.uid()` e `canale = 'ricerca'` e `stato = 'in_attesa'` e `private.stessa_fascia(richiedente_id, destinatario_id)` e `not private.c_e_blocco(...)` (R-10, R-11). Il canale `codice_invito` si usa solo con la RPC `usa_codice_invito` (R-12).
-- **U**: `destinatario_id = auth.uid()` e `stato = 'in_attesa'` (using), nuovo stato `accettata` (with check) (R-11).
+Vincolo: `accettata_il` è valorizzata se e solo se `stato = 'accettata'`.
+
+- **S**: `auth.uid() in (richiedente_id, destinatario_id)`.
+- **I**: `richiedente_id = auth.uid()` e `canale = 'ricerca'` e `stato = 'in_attesa'` e `private.stessa_fascia(richiedente_id, destinatario_id)` e `not private.c_e_blocco(...)` (R-10, R-11); `GRANT INSERT (richiedente_id, destinatario_id, canale)`. Il canale `codice_invito` si usa solo con la RPC `usa_codice_invito` (R-12).
+- **U**: `destinatario_id = auth.uid()` e `stato = 'in_attesa'` (using), nuovo stato `accettata` (with check) (R-11); `GRANT UPDATE (stato)`.
 - **D**: `auth.uid() in (richiedente_id, destinatario_id)` (rifiuto, annullamento, rimozione).
-- Trigger: `private.limita_richieste_amicizia` (R-14); `after delete` controlla l'invariante dei gruppi (R-15); crea le notifiche `richiesta_amicizia` e `amicizia_accettata`.
+- Trigger: `private.limita_richieste_amicizia` (`before insert`): destinatario sospeso o bloccato `NX016`, coppia già in contatto `NX014`, 20 richieste in 24 ore `NX008`, 50 in attesa `NX009` (R-14); `private.imposta_accettata_il`. Dall'iterazione 7 un trigger `after delete` controlla l'invariante dei gruppi (R-15); dall'iterazione 6 si creano le notifiche `richiesta_amicizia` e `amicizia_accettata`.
 
 #### `codici_invito`
 *Funzionalità: F-11.*
 
 | Colonna | Tipo | Vincoli |
 |---|---|---|
-| `codice` | `text` | PK, 10 caratteri casuali senza caratteri ambigui |
+| `codice` | `text` | PK, 10 caratteri da `gen_random_bytes` senza caratteri ambigui (`0 O 1 I L`) |
 | `creato_da` | `uuid` | FK → `profili(id)` `on delete cascade` |
 | `creato_il` | `timestamptz` | |
 | `scade_il` | `timestamptz` | `creato_il + interval '15 minutes'` |
@@ -296,7 +301,8 @@ Indice unico su `(least(richiedente_id, destinatario_id), greatest(richiedente_i
 | `usato_il` | `timestamptz` | nullable |
 
 - **S**: `creato_da = auth.uid()`.
-- **I/U/D**: nessuna. RPC `public.crea_codice_invito()` (al massimo 10 ogni 24 ore) e `public.usa_codice_invito(codice)`. La seconda verifica: codice valido, non usato, non scaduto, nessun blocco, nessuna amicizia esistente; poi crea un'amicizia `in_attesa` con canale `codice_invito`, con il **titolare del codice come destinatario**, che quindi deve accettarla (R-12).
+- **I/U/D**: nessuna. RPC `public.crea_codice_invito()` (al massimo 10 ogni 24 ore, `NX010`) e `public.usa_codice_invito(codice)`. La seconda verifica: codice valido (`NX011`, anche per blocchi e account sospesi), nessuna amicizia o richiesta esistente (`NX014`), non usato (`NX013`), non scaduto (`NX012`); poi segna il codice come usato e crea un'amicizia `in_attesa` con canale `codice_invito`, con il **titolare del codice come destinatario**, che quindi deve accettarla (R-12). Il codice si accetta scritto a mano in minuscolo e con i trattini (`private.normalizza_codice`).
+- Conservazione: `private.elimina_codici_invito_scaduti()` ogni ora, 24 ore dopo la scadenza.
 
 #### `blocchi`
 *Funzionalità: F-12, F-42.*
@@ -308,7 +314,8 @@ Indice unico su `(least(richiedente_id, destinatario_id), greatest(richiedente_i
 | `creato_il` | `timestamptz` | PK (`bloccante_id`, `bloccato_id`) |
 
 - **S/I/D**: `bloccante_id = auth.uid()`. Il bloccato non vede il blocco (R-17).
-- Trigger `private.applica_blocco` (`after insert`): elimina l'amicizia, le richieste e gli inviti a gruppi in attesa tra i due e applica R-15.
+- Trigger `private.applica_blocco` (`after insert`): elimina l'amicizia e le richieste tra i due; dall'iterazione 7 anche gli inviti a gruppi in attesa e l'invariante R-15.
+- RPC `public.miei_bloccati()`: username e nome dei propri bloccati, il cui profilo non è più visibile dalla tabella (F-42).
 
 #### `segnalazioni`
 *Funzionalità: F-12, F-40.*
@@ -328,8 +335,10 @@ Indice unico su `(least(richiedente_id, destinatario_id), greatest(richiedente_i
 | `creata_il`, `chiusa_il` | `timestamptz` | |
 
 - **S**: `segnalante_id = auth.uid()` (stato della propria segnalazione) oppure `private.e_moderatore()`.
-- **I**: `segnalante_id = auth.uid()`.
-- **U**: `private.e_moderatore()`.
+- **I**: `segnalante_id = auth.uid()` e, per `tipo_oggetto = 'profilo'`, un profilo diverso dal proprio che si può vedere o che si è bloccato; `GRANT INSERT (segnalante_id, tipo_oggetto, oggetto_id, motivo, dettagli)`. Gli altri tipi si aggiungono con le loro tabelle (eventi, flyer, gruppi).
+- **U**: `private.e_moderatore()`; `GRANT UPDATE (stato, gestita_da, conservazione_legale, chiusa_il)`.
+- Trigger `private.prepara_segnalazione` (`before insert`): priorità 1 per `adescamento_o_rischio_minore`, 2 se il segnalante o il profilo segnalato è minorenne, 3 per le altre (R-53); al massimo 20 segnalazioni ogni 24 ore per utente (`NX015`).
+- RPC `public.mie_segnalazioni()`: le proprie segnalazioni con stato, oggetto (per i profili l'username) e l'ultima decisione motivata da `azioni_moderazione` (DSA art. 17).
 - **D**: nessuna.
 
 #### `azioni_moderazione`
@@ -845,9 +854,11 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 |---|---|---|---|
 | `mio_account()` | definer | utenti | Stato dell'account del chiamante: username, nome, `stato_account`, `minorenne` (solo per i testi dell'onboarding, R-05), `onboarding_completato`, documenti in vigore non ancora accettati con le novità (R-63); nessuna data di nascita |
 | `cerca_eventi(...)` | invoker | utenti | Ricerca degli eventi (F-01, F-02, F-04), §5.3 `eventi` |
-| `cerca_utenti(testo text)` | definer | utenti | Ricerca per prefisso di username nella propria fascia, esclusi bloccati e sospesi; al massimo 20 risultati con solo username e nome visualizzato, senza avatar (R-10) |
+| `cerca_utenti(testo text)` | definer | utenti | Ricerca per prefisso di username (almeno 3 caratteri, la `@` iniziale si ignora, nessun carattere jolly) nella propria fascia, esclusi sé stessi, bloccati e sospesi; al massimo 20 risultati con identificativo (per la richiesta), username, nome visualizzato e rapporto (`nessuna`, `amici`, `inviata`, `ricevuta`), senza avatar (R-10) |
 | `crea_codice_invito()` | definer | utenti | Codice monouso di 15 minuti (R-12, R-14) |
-| `anteprima_codice_invito(codice text)` | definer | utenti | Username e nome del titolare; `avviso_fasce = true` solo se chi chiama è minorenne e il titolare è maggiorenne |
+| `anteprima_codice_invito(codice text)` | definer | utenti | Stato del codice (`valido`, `scaduto`, `usato`, `non_valido`, `gia_amici`, `in_attesa`); identificativo, username e nome del titolare solo se il codice è utilizzabile o se siete già in contatto; blocchi, account sospesi e il proprio codice danno `non_valido`; `avviso_fasce = true` solo se chi chiama è minorenne e il titolare è maggiorenne |
+| `miei_bloccati()` | definer | utenti | Persone bloccate da chi chiama (F-42) |
+| `mie_segnalazioni()` | definer | utenti | Proprie segnalazioni con stato e decisione motivata |
 | `usa_codice_invito(codice text)` | definer | utenti | Crea la richiesta di amicizia verso il titolare (R-12) |
 | `avviso_richiesta(amicizia uuid)` | definer | destinatario della richiesta | `avviso_fasce = true` solo se il destinatario è minorenne e il richiedente maggiorenne, per mostrare l'avviso prima dell'accettazione (R-12) |
 | `rigenera_mio_riepilogo()` | definer | utenti | Rigenera il proprio riepilogo annuale (F-33) |
@@ -885,6 +896,7 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 
 | Job | Frequenza | Funzione |
 |---|---|---|
+| Codici invito scaduti | ogni ora, al minuto 23 | `private.elimina_codici_invito_scaduti()`: elimina i codici scaduti da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Account non confermati | ogni ora, al minuto 17 | `private.elimina_account_non_confermati()`: elimina gli account senza email confermata creati da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Ritorni scaduti | ogni minuto | `private.verifica_ritorni_scaduti()` |
 | Conservazione | ogni ora | `private.applica_conservazione()`: applica tutte le scadenze di SAFETY_PRIVACY.md §10, compresi gli account inattivi |

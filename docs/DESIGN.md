@@ -51,6 +51,10 @@ flowchart LR
   (design/F-10-accesso): `--tipo-titolo-accesso`, `--tipo-marchio`,
   `--tipo-larghezza-marchio`, `--movimento-passo`, `--spostamento-passo`. Le classi stanno in
   `src/styles/accesso.css`.
+- Token delle schermate degli amici, dal layer "amici" (design/F-11-amici): `--qr-sfondo`,
+  `--qr-moduli`, `--qr-velo-testo` (il QR resta nero su bianco in entrambi i temi, per la
+  lettura delle fotocamere), `--mirino-sfondo`, `--mirino-testo` (il mirino è l'immagine
+  della fotocamera, sempre scuro), `--avatar-grande`. Classi in `src/styles/amici.css`.
 - Categorie: `colore` (superfici, testo, accento, stato: successo, avviso, errore, info),
   `spazio` (scala di 4 px), `raggio`, `ombra`, `tipografia` (famiglie, scala, interlinea),
   `movimento` (durate e curve, con la versione ridotta).
@@ -74,7 +78,9 @@ flowchart LR
   SchedaEvento, Avviso, Foglio, Badge e Contatore, Avatar e GruppoAvatar, Interruttore,
   Segmenti, Schede, ElencoVuoto, Caricamento, ErroreConAzione, StrisciaOffline,
   PulsanteSegnala, Mappa, CampoPassword con i requisiti, CampoData con il calendario in un
-  foglio, CasellaLunga per i consensi, IndicatorePassi e IndicatorePunti). Foglio e modale usano `<dialog>`: il browser gestisce focus, Esc e
+  foglio, CasellaLunga per i consensi, IndicatorePassi e IndicatorePunti, RigaPersona,
+  MenuAzioni (menu ⋯ con le frecce e Esc, che si apre verso l'alto vicino al fondo), Toast con
+  azione e il suo fornitore unico, CodiceQr). Foglio e modale usano `<dialog>`: il browser gestisce focus, Esc e
   inerzia del resto della pagina. Le icone sono di Lucide, con tratto 1,75.
 - `src/components/guscio/`: barra di navigazione delle cinque aree (Scopri, Organizza, Vivi,
   Ricorda, Profilo), link "Vai al contenuto", striscia offline, registrazione del service

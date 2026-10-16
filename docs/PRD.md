@@ -62,8 +62,8 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 | ID | Funzionalità | Priorità | Fase | Criteri di accettazione |
 |---|---|---|---|---|
 | F-10 | Registrazione e profilo | P0 | 1 | Email e password (almeno 10 caratteri) con verifica dell'email tramite link valido un'ora; CAPTCHA (ADR-0020); data di nascita obbligatoria e immutabile, chiesta per prima (R-01, R-02); username e nome visualizzato, con lo username verificato all'invio; consenso a termini e informativa con versione, riassunto in una schermata (R-63); senza account si vedono solo Benvenuto, termini e informativa (R-07); onboarding che spiega le regole di sicurezza in 3 schermate, una sola volta e senza "Salta"; account non confermati eliminati dopo 24 ore; foto profilo facoltativa (JPEG, PNG o WebP fino a 2 MB, ritagliata e convertita in WebP senza dati EXIF), visibile solo a chi può vedere il profilo, segnalabile e rimovibile dai moderatori (R-52); senza foto, le iniziali. |
-| F-11 | Amicizie | P0 | 1 | Ricerca per username nella propria fascia (R-10); richiesta e accettazione (R-11); codice invito QR o link per qualsiasi amicizia, unico canale tra fasce diverse (R-12); elenco amici; rimozione. |
-| F-12 | Blocco e segnalazione | P0 | 1 | Blocco da profilo, gruppo e serata (R-17); segnalazione di ogni contenuto in al massimo due tocchi (R-50); stato delle proprie segnalazioni. |
+| F-11 | Amicizie | P0 | 1 | Ricerca per username nella propria fascia, dopo 3 caratteri e con al massimo 20 risultati, senza suggerimenti (R-10); richiesta e accettazione esplicita (R-11); codice invito QR o link di 15 minuti, monouso, per qualsiasi amicizia e unico canale tra fasce diverse, con scansione dalla fotocamera o codice scritto (R-12); avviso a chi ha 14–17 anni prima di aggiungere o accettare una persona maggiorenne (R-12); limiti di 20 richieste al giorno, 50 in attesa, 10 codici al giorno (R-14); elenco di amici, richieste ricevute e inviate; rimozione; profilo con solo avatar, nome e username; modifica di nome e username. |
+| F-12 | Blocco e segnalazione | P0 | 1 | Blocco da profilo, gruppo e serata con conferma e «Annulla» (R-17); segnalazione di ogni contenuto in al massimo due tocchi, con testo facoltativo e «Blocca anche» (R-50), priorità secondo R-53 e il 112 ricordato per il rischio a un minorenne; stato delle proprie segnalazioni con la decisione motivata. |
 | F-13 | Gruppi | P0 | 1 | Creazione, invito di amici confermati, accettazione, uscita, ruoli admin e membro; massimo 30 membri; invariante delle fasce (R-15). |
 | F-14 | Serata di gruppo con conferme | P0 | 1 | Proposta legata a un evento adatto a tutti i membri (R-24) oppure libera; risposte sì, forse, no aggiornate in tempo reale; riepilogo "chi c'è". |
 | F-15 | Prevendite e liste | P0 | 1 | Link esterni a prevendita e lista sulla serata; stato del biglietto per ogni membro (nessuno, prevendita, lista, alla cassa). Nessun pagamento nell'app. |
@@ -141,8 +141,8 @@ fase della roadmap. La matrice va aggiornata insieme alla funzionalità (skill `
 | F-06 | App · Storage · Worker (flyer) · Claude API | `caricamenti_flyer`, `eventi_grezzi`, `coda_job`, bucket `flyer-caricati` e `flyer-pubblicati` | R-51, R-54, R-66 | 1 |
 | F-07 | Worker (adattatori aggregatori) | `fonti`, `eventi_grezzi` | ADR-0008 | 3 |
 | F-10 | App · Supabase Auth (hook dell'età, Turnstile) | `profili`, `profili_privati`, `consensi`, bucket `avatar` | R-01, R-02, R-05, R-07, R-60, R-63 | 1 |
-| F-11 | App · RPC `cerca_utenti`, `crea_codice_invito`, `usa_codice_invito` | `amicizie`, `codici_invito` | R-10…R-14 | 1 |
-| F-12 | App · area di moderazione | `blocchi`, `segnalazioni` | R-17, R-50 | 1 |
+| F-11 | App · RPC `cerca_utenti`, `crea_codice_invito`, `anteprima_codice_invito`, `usa_codice_invito`, `avviso_richiesta` | `amicizie`, `codici_invito` | R-10…R-14 | 1 |
+| F-12 | App · area di moderazione · RPC `mie_segnalazioni` | `blocchi`, `segnalazioni`, `azioni_moderazione` | R-17, R-50, R-53 | 1 |
 | F-13 | App | `gruppi`, `membri_gruppo` | R-15 | 1 |
 | F-14 | App · Realtime | `serate_gruppo`, `partecipazioni_serata` | R-16, R-24 | 1 |
 | F-15 | App | `serate_gruppo`, `partecipazioni_serata` | — | 1 |
