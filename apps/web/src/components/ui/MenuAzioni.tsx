@@ -6,6 +6,9 @@ import { classi } from '@/lib/classi';
 import { Icona } from './Icona';
 import { Pulsante } from './Pulsante';
 
+/** Altezza del menu più la barra di navigazione: sotto questo spazio si apre verso l'alto. */
+const SPAZIO_MENU = 320;
+
 export type VoceMenu = {
   etichetta: string;
   icona: ReactNode;
@@ -29,6 +32,7 @@ type Props = {
  */
 export function MenuAzioni({ etichetta, titolo, voci }: Props) {
   const [aperto, setAperto] = useState(false);
+  const [sopra, setSopra] = useState(false);
   const id = useId();
   const contenitore = useRef<HTMLDivElement>(null);
   const pulsante = useRef<HTMLButtonElement>(null);
@@ -74,13 +78,23 @@ export function MenuAzioni({ etichetta, titolo, voci }: Props) {
         aria-haspopup="menu"
         aria-expanded={aperto}
         aria-controls={aperto ? id : undefined}
-        onClick={() => setAperto((valore) => !valore)}
+        onClick={() => {
+          // Vicino al fondo (barra di navigazione fissa) il menu si apre verso l'alto.
+          const riquadro = pulsante.current?.getBoundingClientRect();
+          setSopra(Boolean(riquadro && window.innerHeight - riquadro.bottom < SPAZIO_MENU));
+          setAperto((valore) => !valore);
+        }}
         ref={pulsante}
       >
         <Icona icona={Ellipsis} dimensione="l" />
       </Pulsante>
       {aperto && (
-        <div className="menu-azioni" role="menu" id={id} aria-label={etichetta}>
+        <div
+          className={classi('menu-azioni', sopra && 'sopra')}
+          role="menu"
+          id={id}
+          aria-label={etichetta}
+        >
           {titolo && (
             <span className="menu-titolo" aria-hidden="true">
               {titolo}

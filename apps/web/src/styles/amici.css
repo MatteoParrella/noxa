@@ -97,6 +97,10 @@
   border-radius: var(--raggio-3);
   box-shadow: var(--ombra-2);
 }
+.menu-azioni.sopra {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
 .menu-titolo {
   display: block;
   padding: var(--spazio-2) var(--spazio-3) 6px;

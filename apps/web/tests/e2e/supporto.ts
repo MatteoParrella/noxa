@@ -76,7 +76,24 @@ export type Endpoint =
   | 'logout'
   | 'mio_account'
   | 'profili_privati'
-  | 'consensi';
+  | 'consensi'
+  | 'amicizie_leggi'
+  | 'amicizie_crea'
+  | 'amicizie_aggiorna'
+  | 'amicizie_elimina'
+  | 'cerca_utenti'
+  | 'crea_codice_invito'
+  | 'anteprima_codice_invito'
+  | 'usa_codice_invito'
+  | 'avviso_richiesta'
+  | 'miei_bloccati'
+  | 'mie_segnalazioni'
+  | 'blocchi_crea'
+  | 'blocchi_elimina'
+  | 'segnalazioni_crea'
+  | 'profili_leggi'
+  | 'profili_aggiorna'
+  | 'codici_invito_leggi';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
@@ -136,10 +153,73 @@ export function erroreAuth(
   return { stato, corpo: { code: stato, error_code: codice, msg: messaggio, ...extra } };
 }
 
+/** Persone di prova delle schermate degli amici. */
+export const PERSONE = {
+  marco: {
+    id: '00000000-0000-4000-8000-0000000000f1',
+    username: 'marco.brivio',
+    nome_visualizzato: 'Marco',
+  },
+  davide: {
+    id: '00000000-0000-4000-8000-0000000000f2',
+    username: 'davide.sala',
+    nome_visualizzato: 'Davide',
+  },
+  marta: {
+    id: '00000000-0000-4000-8000-0000000000f3',
+    username: 'marta.re',
+    nome_visualizzato: 'Marta',
+  },
+  sara: {
+    id: '00000000-0000-4000-8000-0000000000f4',
+    username: 'sara.colombo',
+    nome_visualizzato: 'Sara',
+  },
+};
+type PersonaProva = (typeof PERSONE)[keyof typeof PERSONE];
+const IO = { id: UTENTE_DI_PROVA, username: 'giulia.rota', nome_visualizzato: 'Giulia' };
+
+/** Riga di `amicizie` con i profili incorporati, come la restituisce PostgREST. */
+export function amicizia(
+  id: string,
+  altro: PersonaProva,
+  stato: 'in_attesa' | 'accettata',
+  verso: 'inviata' | 'ricevuta',
+  canale: 'ricerca' | 'codice_invito' = 'ricerca',
+) {
+  const [richiedente, destinatario] = verso === 'inviata' ? [IO, altro] : [altro, IO];
+  return {
+    id,
+    stato,
+    canale,
+    creata_il: '2026-10-16T10:00:00Z',
+    richiedente_id: richiedente.id,
+    destinatario_id: destinatario.id,
+    richiedente,
+    destinatario,
+  };
+}
+
+/** Amici, una richiesta ricevuta da codice e una inviata. */
+export const AMICIZIE_DI_PROVA = [
+  amicizia('00000000-0000-4000-8000-00000000a001', PERSONE.marco, 'accettata', 'inviata'),
+  amicizia(
+    '00000000-0000-4000-8000-00000000a002',
+    PERSONE.davide,
+    'in_attesa',
+    'ricevuta',
+    'codice_invito',
+  ),
+  amicizia('00000000-0000-4000-8000-00000000a003', PERSONE.marta, 'in_attesa', 'inviata'),
+];
+
 export class SupabaseSimulato {
   readonly richieste: Array<{ endpoint: Endpoint; corpo: unknown; url: string }> = [];
   private readonly risposte = new Map<Endpoint, Risposta>();
   account: AccountSimulato | null;
+  amicizie: unknown[] = AMICIZIE_DI_PROVA;
+  /** Profili visibili per `profili_leggi` (la RLS reale decide chi si vede). */
+  profiliVisibili: PersonaProva[] = Object.values(PERSONE);
 
   constructor(account: AccountSimulato | null) {
     this.account = account;
@@ -168,15 +248,151 @@ export class SupabaseSimulato {
       case 'profili_privati':
         return { stato: 204 };
       case 'consensi':
+      case 'amicizie_crea':
+      case 'blocchi_crea':
+      case 'segnalazioni_crea':
         return { stato: 201 };
+      case 'amicizie_leggi':
+        return { stato: 200, corpo: this.amicizie };
+      case 'amicizie_aggiorna':
+      case 'amicizie_elimina':
+      case 'blocchi_elimina':
+      case 'profili_aggiorna':
+        return { stato: 204 };
+      case 'cerca_utenti':
+        return {
+          stato: 200,
+          corpo: [
+            { ...PERSONE.marco, relazione: 'amici' },
+            { ...PERSONE.marta, relazione: 'inviata' },
+            { ...PERSONE.sara, relazione: 'nessuna' },
+          ],
+        };
+      case 'crea_codice_invito':
+        return {
+          stato: 200,
+          corpo: [
+            { codice: 'K7Q4M2XP9H', scade_il: new Date(Date.now() + 14 * 60_000).toISOString() },
+          ],
+        };
+      case 'codici_invito_leggi':
+        return { stato: 200, corpo: { usato_il: null } };
+      case 'anteprima_codice_invito':
+        return {
+          stato: 200,
+          corpo: [
+            {
+              stato: 'valido',
+              titolare_id: PERSONE.sara.id,
+              username: PERSONE.sara.username,
+              nome_visualizzato: PERSONE.sara.nome_visualizzato,
+              avviso_fasce: false,
+            },
+          ],
+        };
+      case 'usa_codice_invito':
+        return { stato: 200, corpo: '00000000-0000-4000-8000-00000000a009' };
+      case 'avviso_richiesta':
+        return { stato: 200, corpo: false };
+      case 'miei_bloccati':
+        return {
+          stato: 200,
+          corpo: [{ ...PERSONE.sara, bloccato_il: '2026-10-15T20:00:00Z' }],
+        };
+      case 'mie_segnalazioni':
+        return {
+          stato: 200,
+          corpo: [
+            {
+              id: '00000000-0000-4000-8000-00000000b001',
+              tipo_oggetto: 'profilo',
+              descrizione: '@nome.utente',
+              motivo: 'molestie',
+              stato: 'in_lavorazione',
+              creata_il: '2026-10-14T20:00:00Z',
+              chiusa_il: null,
+              decisione: null,
+              decisa_il: null,
+            },
+            {
+              id: '00000000-0000-4000-8000-00000000b002',
+              tipo_oggetto: 'profilo',
+              descrizione: '@utente.anonimo',
+              motivo: 'spam',
+              stato: 'chiusa',
+              creata_il: '2026-10-02T20:00:00Z',
+              chiusa_il: '2026-10-05T09:00:00Z',
+              decisione: 'Abbiamo controllato: il profilo non viola i Termini.',
+              decisa_il: '2026-10-05T09:00:00Z',
+            },
+          ],
+        };
       default:
         return { stato: 200, corpo: {} };
     }
   }
 
+  /** GET su amicizie, con il filtro `or=(richiedente_id.eq.X,destinatario_id.eq.X)` del profilo. */
+  private amicizieFiltrate(richiesta: Request): Risposta {
+    const filtro = new URL(richiesta.url()).searchParams.get('or');
+    const id = filtro ? /eq\.([0-9a-f-]{36})/.exec(filtro)?.[1] : undefined;
+    const righe = (
+      this.amicizie as Array<{ richiedente_id: string; destinatario_id: string }>
+    ).filter((riga) => !id || riga.richiedente_id === id || riga.destinatario_id === id);
+    return { stato: 200, corpo: righe };
+  }
+
+  /** GET su profili con `id=eq.…`: un oggetto se visibile, come `maybeSingle()` lo chiede. */
+  private profilo(richiesta: Request): Risposta {
+    const filtro = new URL(richiesta.url()).searchParams.get('id') ?? '';
+    const id = filtro.replace(/^eq\./, '');
+    const trovato = this.profiliVisibili.find((persona) => persona.id === id);
+    const singolo = (richiesta.headers()['accept'] ?? '').includes('vnd.pgrst.object');
+    if (singolo) {
+      return trovato
+        ? { stato: 200, corpo: trovato }
+        : {
+            stato: 406,
+            corpo: {
+              code: 'PGRST116',
+              message: 'JSON object requested, multiple (or no) rows returned',
+              details: 'The result contains 0 rows',
+              hint: null,
+            },
+          };
+    }
+    return { stato: 200, corpo: trovato ? [trovato] : [] };
+  }
+
   private static endpoint(richiesta: Request): Endpoint | null {
     const url = new URL(richiesta.url());
     const percorso = url.pathname;
+    const metodo = richiesta.method();
+    const tabelle: Record<string, Partial<Record<string, Endpoint>>> = {
+      '/rest/v1/amicizie': {
+        GET: 'amicizie_leggi',
+        POST: 'amicizie_crea',
+        PATCH: 'amicizie_aggiorna',
+        DELETE: 'amicizie_elimina',
+      },
+      '/rest/v1/blocchi': { POST: 'blocchi_crea', DELETE: 'blocchi_elimina' },
+      '/rest/v1/segnalazioni': { POST: 'segnalazioni_crea' },
+      '/rest/v1/profili': { GET: 'profili_leggi', PATCH: 'profili_aggiorna' },
+      '/rest/v1/codici_invito': { GET: 'codici_invito_leggi' },
+    };
+    const daTabella = tabelle[percorso]?.[metodo];
+    if (daTabella) return daTabella;
+    const rpc = /^\/rest\/v1\/rpc\/(\w+)$/.exec(percorso)?.[1];
+    const rpcSimulate: readonly string[] = [
+      'cerca_utenti',
+      'crea_codice_invito',
+      'anteprima_codice_invito',
+      'usa_codice_invito',
+      'avviso_richiesta',
+      'miei_bloccati',
+      'mie_segnalazioni',
+    ];
+    if (rpc && rpcSimulate.includes(rpc)) return rpc as Endpoint;
     if (percorso === '/auth/v1/signup') return 'signup';
     if (percorso === '/auth/v1/resend') return 'resend';
     if (percorso === '/auth/v1/verify') return 'verify';
@@ -218,7 +434,13 @@ export class SupabaseSimulato {
         corpo = richiesta.postData();
       }
       this.richieste.push({ endpoint, corpo, url: richiesta.url() });
-      const risposta = this.risposte.get(endpoint) ?? this.predefinita(endpoint);
+      const risposta =
+        this.risposte.get(endpoint) ??
+        (endpoint === 'profili_leggi'
+          ? this.profilo(richiesta)
+          : endpoint === 'amicizie_leggi'
+            ? this.amicizieFiltrate(richiesta)
+            : this.predefinita(endpoint));
       if (risposta === 'rete') {
         await route.abort('internetdisconnected');
         return;
