@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { classi } from '@/lib/classi';
 
 export type VariantePulsante = 'principale' | 'secondario' | 'testo' | 'neutro' | 'pericolo';
@@ -11,6 +11,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   soloIcona?: boolean;
   caricamento?: boolean;
   children: ReactNode;
+  ref?: Ref<HTMLButtonElement>;
 };
 
 export function Pulsante({

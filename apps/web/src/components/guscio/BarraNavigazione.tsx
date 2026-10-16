@@ -14,7 +14,13 @@ import type { CSSProperties } from 'react';
 import { Icona } from '@/components/ui/Icona';
 import { classi } from '@/lib/classi';
 
-type Voce = { href: string; etichetta: string; icona: LucideIcon };
+type Voce = {
+  href: string;
+  etichetta: string;
+  icona: LucideIcon;
+  /** Altre pagine che appartengono all'area. */
+  anche?: readonly string[];
+};
 
 /** Le cinque aree dell'app (PRD: scopri → organizza → vivi → ricorda, più il profilo). */
 export const VOCI: readonly Voce[] = [
@@ -22,7 +28,12 @@ export const VOCI: readonly Voce[] = [
   { href: '/organizza/', etichetta: 'Organizza', icona: Users },
   { href: '/vivi/', etichetta: 'Vivi', icona: ShieldCheck },
   { href: '/ricorda/', etichetta: 'Ricorda', icona: BookOpen },
-  { href: '/profilo/', etichetta: 'Profilo', icona: CircleUserRound },
+  {
+    href: '/profilo/',
+    etichetta: 'Profilo',
+    icona: CircleUserRound,
+    anche: ['/amici/', '/persona/'],
+  },
 ];
 
 function normalizza(percorso: string): string {
@@ -31,7 +42,10 @@ function normalizza(percorso: string): string {
 
 export function BarraNavigazione() {
   const percorso = normalizza(usePathname());
-  const attiva = VOCI.findIndex((voce) => percorso.startsWith(voce.href));
+  const attiva = VOCI.findIndex(
+    (voce) =>
+      percorso.startsWith(voce.href) || voce.anche?.some((altro) => percorso.startsWith(altro)),
+  );
   return (
     <nav className="barra-nav" aria-label="Principale">
       {attiva >= 0 && (
