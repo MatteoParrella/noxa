@@ -22,7 +22,7 @@ Iterazioni completate: 2 su 15.
 |---|---|---|---|---|---|---|
 | 0 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-00-fondamenta` | CI verificata su GitHub (PR #4); mancano i progetti di staging, produzione e deploy |
 | 1 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-01-design-system` | Mancano la prova su emulatore Android e simulatore iOS, gli account degli store e la mappa nei bucket di staging e produzione |
-| 2 | da iniziare | — | — | 0 | — | — |
+| 2 | in corso | 2026-10-16 | — | 0 | `iterazione-02-account` | — |
 | 3 | da iniziare | — | — | 0 | — | — |
 | 4 | da iniziare | — | — | 0 | — | — |
 | 5 | da iniziare | — | — | 0 | — | — |
@@ -201,3 +201,27 @@ Esito: SUPERATA
 - Account Apple Developer e Google Play Console per firmare le build.
 - Mappa nei bucket `mappe` di staging e produzione: workflow `Aggiornamento mappa` con i
   segreti `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` degli ambienti GitHub.
+
+### Iterazione 2 — Account e sicurezza di base
+
+**Piano**
+- Funzionalità: F-10 (registrazione, accesso, verifica dell'email, onboarding di sicurezza),
+  F-41 (consensi versionati). Regole: R-01, R-02, R-04, R-05, R-06, R-07, R-60, R-63, R-68.
+- Design: `design/F-10-accesso/` (benvenuto, età non sufficiente, registrazione in 4 passi,
+  verifica dell'email, accesso, recupero della password, onboarding, nuovi termini).
+- Database: enum `stato_account`, `ruolo_utente`, `tipo_consenso`; tabelle `profili`,
+  `profili_privati`, `ruoli_utente`, `consensi`; funzioni `private.eta_di`, `e_minorenne`,
+  `stessa_fascia`, `puo_vedere_profilo` (per ora solo il titolare), `e_moderatore`,
+  `e_amministratore`, `imposta_aggiornato_il`; hook di Supabase Auth prima della creazione
+  dell'utente e trigger `private.gestisci_nuovo_utente` (R-01) che crea profilo, dati privati e
+  consensi; trigger `private.blocca_modifica_data_nascita` (R-02); versioni dei documenti e RPC
+  `mio_account`; seed con gli utenti per età; `000_supporto.test.sql` e test pgTAP.
+- App: client Supabase tipizzato, errori di dominio, messaggi, TanStack Query e Zod; schermate
+  del design; protezione delle aree per gli utenti senza sessione (R-07); CAPTCHA Turnstile;
+  Content Security Policy (meta con gli hash degli script e header di Vercel).
+- Test: pgTAP per tutte le età del seed; Vitest; Playwright con axe sulle schermate (Supabase
+  simulato) e percorso completo con Supabase locale, compreso il tredicenne rifiutato dall'app
+  e dall'API.
+- Criteri: criteri della Fase 0; test e2e che un utente di 13 anni non può registrarsi né
+  dall'app né dall'API.
+
