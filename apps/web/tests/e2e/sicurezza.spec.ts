@@ -123,6 +123,21 @@ test.describe('nuova versione dei termini (R-63)', () => {
   });
 });
 
+test.describe('link aperto senza sessione', () => {
+  test.use({ account: null });
+
+  test('un link d’invito si riapre dopo l’accesso', async ({ page, supabase }) => {
+    supabase.account = ACCOUNT_DI_PROVA;
+    await page.goto('/amici/invito/?c=K7Q4M2XP9H');
+    await expect(page).toHaveURL(/\/benvenuto\/$/);
+    await page.getByRole('link', { name: 'Ho già un account' }).click();
+    await page.getByLabel('Email').fill('giulia.rota@example.com');
+    await page.getByLabel('Password', { exact: true }).fill('notte.sul.tram7');
+    await page.getByRole('button', { name: 'Accedi' }).click();
+    await expect(page).toHaveURL(/\/amici\/invito\/\?c=K7Q4M2XP9H$/);
+  });
+});
+
 test('dal profilo si esce dall’account', async ({ page, supabase }) => {
   await page.goto('/profilo/');
   await page.getByRole('button', { name: 'Esci dall’account' }).click();

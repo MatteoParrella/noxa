@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 import { Caricamento } from '@/components/ui/Stati';
 import { messaggi } from '@/lib/messaggi/it';
+import { ricordaPaginaDopoAccesso } from './dopoAccesso';
 import { PERCORSI } from './documenti';
 import { FoglioNuoviTermini } from './FoglioNuoviTermini';
 import { useMioAccount, useSessione } from './sessione';
@@ -19,8 +20,11 @@ export function ProtezioneAccount({ children }: { children: ReactNode }) {
 
   const daOnboarding = account.data?.onboarding_completato === false;
   useEffect(() => {
-    if (sessione.stato === 'assente') router.replace(PERCORSI.benvenuto);
-    else if (daOnboarding) router.replace(PERCORSI.sicurezza);
+    if (sessione.stato === 'assente') {
+      // Un link aperto senza sessione (per esempio un invito) si riapre dopo l'accesso.
+      ricordaPaginaDopoAccesso(window.location.pathname + window.location.search);
+      router.replace(PERCORSI.benvenuto);
+    } else if (daOnboarding) router.replace(PERCORSI.sicurezza);
   }, [sessione.stato, daOnboarding, router]);
 
   if (sessione.stato !== 'presente' || (account.isPending && account.fetchStatus !== 'idle')) {
