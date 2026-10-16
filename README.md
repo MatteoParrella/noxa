@@ -102,7 +102,8 @@ python3 scripts/verifica_documentazione.py   # coerenza della documentazione
 python3 scripts/verifica_migrazioni.py       # ogni tabella ha RLS e test
 supabase test db                    # policy RLS e regole di sicurezza (pgTAP)
 pnpm --filter web test              # unitari app
-pnpm --filter web test:e2e          # percorsi end-to-end con verifica di accessibilità
+pnpm --filter web test:e2e          # percorsi end-to-end con verifica di accessibilità (Supabase simulato)
+pnpm --filter web test:e2e:integrazione  # registrazione e accesso con Supabase locale (supabase start)
 cd services/worker && uv run pytest # worker, adattatori, deduplicazione
 ```
 

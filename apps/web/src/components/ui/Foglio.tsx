@@ -13,13 +13,28 @@ type Props = {
   children: ReactNode;
   /** `foglio` sale dal basso (mobile), `modale` è centrata. */
   forma?: 'foglio' | 'modale';
+  /**
+   * Falso per le scelte obbligatorie (nuovi termini): niente pulsante Chiudi, Esc e tocco sul
+   * velo non chiudono. Le azioni del contenuto offrono sempre una via d'uscita.
+   */
+  chiudibile?: boolean;
+  /** Elemento accanto al titolo al posto del pulsante Chiudi (es. la data scelta). */
+  accessorio?: ReactNode;
 };
 
 /**
  * Foglio dal basso o finestra modale su <dialog>: il browser gestisce il focus (nessuna
  * trappola, Esc chiude) e rende inerte il resto della pagina.
  */
-export function Foglio({ aperto, onChiudi, titolo, children, forma = 'foglio' }: Props) {
+export function Foglio({
+  aperto,
+  onChiudi,
+  titolo,
+  children,
+  forma = 'foglio',
+  chiudibile = true,
+  accessorio,
+}: Props) {
   const riferimento = useRef<HTMLDialogElement>(null);
   const idTitolo = useId();
 
@@ -35,9 +50,12 @@ export function Foglio({ aperto, onChiudi, titolo, children, forma = 'foglio' }:
       ref={riferimento}
       aria-labelledby={idTitolo}
       onClose={onChiudi}
+      onCancel={(evento) => {
+        if (!chiudibile) evento.preventDefault();
+      }}
       onClick={(evento) => {
         // Il tocco sul velo (fuori dal contenuto) chiude.
-        if (evento.target === riferimento.current) onChiudi();
+        if (chiudibile && evento.target === riferimento.current) onChiudi();
       }}
       className={classi(
         'dialogo',
@@ -49,9 +67,12 @@ export function Foglio({ aperto, onChiudi, titolo, children, forma = 'foglio' }:
         <h2 id={idTitolo} className="t-titolo-3 m-0">
           {titolo}
         </h2>
-        <Pulsante variante="neutro" soloIcona aria-label="Chiudi" onClick={onChiudi}>
-          <Icona icona={X} />
-        </Pulsante>
+        {accessorio}
+        {chiudibile && !accessorio && (
+          <Pulsante variante="neutro" soloIcona aria-label="Chiudi" onClick={onChiudi}>
+            <Icona icona={X} />
+          </Pulsante>
+        )}
       </div>
       {children}
     </dialog>

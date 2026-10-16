@@ -6,8 +6,12 @@ import { Avatar, GruppoAvatar } from '@/components/ui/Avatar';
 import { Avviso } from '@/components/ui/Avviso';
 import { Badge, Contatore } from '@/components/ui/Badge';
 import { Campo } from '@/components/ui/Campo';
+import { CampoData } from '@/components/ui/CampoData';
+import { CampoPassword } from '@/components/ui/CampoPassword';
+import { CasellaLunga } from '@/components/ui/CasellaLunga';
 import { Foglio } from '@/components/ui/Foglio';
 import { Icona } from '@/components/ui/Icona';
+import { IndicatorePassi, IndicatorePunti } from '@/components/ui/Indicatori';
 import { Interruttore } from '@/components/ui/Interruttore';
 import { Rivela } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
@@ -42,6 +46,8 @@ export function Catalogo({ tema }: { tema: Tema }) {
   const [quando, setQuando] = useState<'stasera' | 'domani' | 'weekend'>('stasera');
   const [tab, setTab] = useState<'prossime' | 'passate'>('prossime');
   const [foglio, setFoglio] = useState(false);
+  const [data, setData] = useState('14.03.2009');
+  const [termini, setTermini] = useState(false);
   const nomeTema = tema === 'scuro' ? 'Tema scuro' : 'Tema chiaro';
 
   return (
@@ -105,6 +111,30 @@ export function Catalogo({ tema }: { tema: Tema }) {
             </Pulsante>
           }
         />
+      </Sezione>
+
+      <Sezione titolo="Campi e controlli dell'accesso">
+        <IndicatorePassi passo={2} totale={4} testo="2 di 4" etichetta="Passo 2 di 4" />
+        <CampoData
+          etichetta="Data di nascita"
+          valore={data}
+          onCambia={setData}
+          dataIniziale={{ anno: 2009, mese: 3, giorno: 14 }}
+          aiuto="Non potrai cambiarla e nessuno la vedrà."
+        />
+        <CampoPassword
+          etichetta="Password"
+          defaultValue="notte.sul.tram7"
+          autoComplete="off"
+          requisiti={[
+            { testo: 'Almeno 10 caratteri', soddisfatto: true },
+            { testo: 'Diversa da email e username', soddisfatto: true },
+          ]}
+        />
+        <CasellaLunga selezionata={termini} onCambia={setTermini}>
+          Accetto i Termini di servizio
+        </CasellaLunga>
+        <IndicatorePunti attuale={1} totale={3} etichetta="Schermata 1 di 3" />
       </Sezione>
 
       <Sezione titolo="Badge e contatore">

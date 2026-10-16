@@ -83,7 +83,7 @@ La CLI Supabase è una dipendenza di sviluppo del repository: si esegue con `pnp
 | Tipi TypeScript dal DB | `supabase gen types typescript --local > apps/web/src/lib/database.types.ts` |
 | App in sviluppo | `pnpm --filter web dev` |
 | Controlli app | `pnpm --filter web lint` · `pnpm --filter web typecheck` · `pnpm --filter web test` |
-| Test e2e | `pnpm --filter web test:e2e` |
+| Test e2e | `pnpm --filter web test:e2e` (Supabase simulato) · `pnpm --filter web test:e2e:integrazione` (Supabase locale avviato) |
 | Build ed app native | `pnpm --filter web build && pnpm --filter web exec cap sync` (poi `cap open android` o `cap open ios`, con Android Studio o Xcode) |
 | Catalogo dei componenti | `pnpm --filter web dev`, poi http://localhost:3000/catalogo/ |
 | Mappa nel bucket `mappe` | `scripts/prepara_mappa.sh` (richiede la CLI `pmtiles`; locale o con `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`) |

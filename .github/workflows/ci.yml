@@ -95,6 +95,38 @@ jobs:
           path: apps/web/playwright-report/
           retention-days: 7
 
+  integrazione:
+    name: App con Supabase locale (e2e)
+    needs: modifiche
+    if: needs.modifiche.outputs.web == 'true' || needs.modifiche.outputs.database == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Auth (con l'hook dell'età), Postgres, PostgREST e Mailpit; senza i servizi non usati.
+      - run: pnpm exec supabase start -x studio,imgproxy,vector,logflare,edge-runtime,supavisor
+      - name: Variabili di Supabase locale
+        run: |
+          pnpm exec supabase status -o json | jq -r '
+            "NEXT_PUBLIC_SUPABASE_URL=\(.API_URL)",
+            "NEXT_PUBLIC_SUPABASE_ANON_KEY=\(.ANON_KEY)",
+            "MAILPIT_URL=\(.MAILPIT_URL // .INBUCKET_URL)"' >> "$GITHUB_ENV"
+      - run: pnpm --filter web exec playwright install --with-deps chromium
+      # Registrazione reale, email da Mailpit e tredicenne rifiutato dall'app e dall'API (R-01).
+      - run: pnpm --filter web test:e2e:integrazione
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rapporto-playwright-integrazione
+          path: apps/web/playwright-report-integrazione/
+          retention-days: 7
+
   worker:
     name: Worker
     needs: modifiche

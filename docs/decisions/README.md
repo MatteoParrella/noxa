@@ -28,3 +28,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0017](0017-fascia-unica-minorenni.md) | Un'unica fascia per i minorenni dai 14 ai 17 anni | Accettato |
 | [0018](0018-foto-dei-locali.md) | Foto dei locali come immagine degli eventi | Accettato |
 | [0019](0019-movimento-espressivo.md) | Movimento espressivo | Accettato |
+| [0020](0020-captcha-cloudflare-turnstile.md) | CAPTCHA con Cloudflare Turnstile | Accettato |

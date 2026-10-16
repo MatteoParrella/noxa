@@ -162,7 +162,13 @@ site_url = "http://127.0.0.1:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# Noxa: indirizzi delle pagine che ricevono i link delle email (app in sviluppo e build dei test
+# e2e). In staging e produzione si impostano dalla dashboard con il dominio dell'app.
+additional_redirect_urls = [
+  "http://127.0.0.1:3000/**",
+  "http://localhost:3000/**",
+  "http://127.0.0.1:4173/**",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -181,7 +187,8 @@ enable_anonymous_sign_ins = false
 # Allow/disallow testing manual linking of accounts
 enable_manual_linking = false
 # Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
-minimum_password_length = 6
+# Noxa: almeno 10 caratteri (design/F-10-accesso).
+minimum_password_length = 10
 # Passwords that do not meet the following requirements will be rejected as weak. Supported values
 # are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
 password_requirements = ""
@@ -213,10 +220,13 @@ token_verifications = 30
 web3 = 30
 
 # Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
+# Noxa: Cloudflare Turnstile è attivo solo in staging e produzione, con la chiave segreta
+# impostata dalla dashboard (Authentication → Attack Protection). In locale resta spento, così
+# lo sviluppo e i test e2e non dipendono da Cloudflare (supabase/README.md).
 # [auth.captcha]
 # enabled = true
-# provider = "hcaptcha"
-# secret = ""
+# provider = "turnstile"
+# secret = "env(SUPABASE_AUTH_CAPTCHA_SECRET)"
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.
@@ -225,11 +235,12 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
-max_frequency = "1s"
+# Noxa: «Reinvia l'email» resta spento per 60 secondi (design/F-10-accesso).
+max_frequency = "60s"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
@@ -245,10 +256,15 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Noxa: email in italiano con il link alla pagina dell'app che verifica il token
+# (/accesso/conferma/), così il link funziona anche se si apre su un altro dispositivo.
+[auth.email.template.confirmation]
+subject = "Conferma la tua email per Noxa"
+content_path = "./supabase/templates/conferma.html"
+
+[auth.email.template.recovery]
+subject = "Scegli una nuova password per Noxa"
+content_path = "./supabase/templates/recupero.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
@@ -278,9 +294,10 @@ max_frequency = "5s"
 # inactivity_timeout = "8h"
 
 # This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
-# [auth.hook.before_user_created]
-# enabled = true
-# uri = "pg-functions://postgres/auth/before-user-created-hook"
+# Noxa: controllo dell'età e dei dati di registrazione prima di creare l'utente (R-01).
+[auth.hook.before_user_created]
+enabled = true
+uri = "pg-functions://postgres/private/prima_della_creazione_utente"
 
 # This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
 # [auth.hook.custom_access_token]

@@ -1,6 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { expect, test } from '@playwright/test';
-import { ORIGINE_MAPPE, verificaAccessibilita } from './supporto';
+import { expect, ORIGINE_MAPPE, ORIGINE_SUPABASE, test, verificaAccessibilita } from './supporto';
 
 const FIXTURE = new URL('./fixture/', import.meta.url);
 
@@ -51,6 +50,7 @@ test('la mappa si apre senza richieste a domini esterni (ADR-0016)', async ({ pa
   await expect(page.getByText(/OpenStreetMap/)).toBeVisible();
   await verificaAccessibilita(page);
 
-  const consentite = new Set([new URL(baseURL ?? '').origin, ORIGINE_MAPPE]);
+  // Supabase è il backend dell'app (simulato nei test): nessun altro dominio.
+  const consentite = new Set([new URL(baseURL ?? '').origin, ORIGINE_MAPPE, ORIGINE_SUPABASE]);
   expect([...origini].filter((origine) => !consentite.has(origine))).toEqual([]);
 });

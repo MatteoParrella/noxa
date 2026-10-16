@@ -81,7 +81,7 @@ flowchart LR
 | Aspetto | Scelta |
 |---|---|
 | Framework | Next.js (App Router) con `output: 'export'`: niente rendering lato server, Route Handlers o Server Actions (ADR-0001). |
-| Routing | Route statiche; i dettagli usano parametri di query (`/evento?id=…`, `/gruppo?id=…`) perché l'export statico non genera pagine per identificativi dinamici. |
+| Routing | Route statiche; i dettagli usano parametri di query (`/evento?id=…`, `/gruppo?id=…`) perché l'export statico non genera pagine per identificativi dinamici. Il service worker ignora i parametri quando cerca una pagina nella cache. Le aree richiedono un account: senza sessione l'app porta al Benvenuto (R-07). |
 | Dati | `@supabase/supabase-js` con tipi generati (`src/lib/database.types.ts`); TanStack Query per cache, retry e stato offline; validazione dei dati in ingresso e uscita con Zod. |
 | Stile | Tailwind con design token generati da Claude Design (ADR-0011, [DESIGN.md](DESIGN.md)). |
 | Mappe | MapLibre GL JS con la basemap Protomaps (stili `dark` e `light` personalizzati con i design token) in un file PMTiles servito, insieme a font e icone, dal bucket `mappe`: nessuna richiesta a servizi di mappe esterni (ADR-0016). |
@@ -94,7 +94,7 @@ flowchart LR
 | Servizio | Uso |
 |---|---|
 | Postgres + PostGIS | Tutte le tabelle di [DATA_MODEL.md](DATA_MODEL.md) e le RPC elencate in DATA_MODEL.md §5.10 (ricerca eventi e utenti, codici invito, moderazione, metriche). |
-| Auth | Email e password con verifica, CAPTCHA (Cloudflare Turnstile), protezione dalle password compromesse, MFA TOTP obbligatoria per i moderatori (R-06). |
+| Auth | Email e password (almeno 10 caratteri) con verifica, CAPTCHA (Cloudflare Turnstile, ADR-0020), protezione dalle password compromesse, MFA TOTP obbligatoria per i moderatori (R-06); hook "before user created" per il controllo dell'età (§4.1); modelli delle email in italiano. |
 | Storage | Bucket `avatar`, `flyer-caricati`, `flyer-pubblicati`, `immagini-locali` (foto dei locali, ADR-0018), `mappe` (DATA_MODEL.md §6). |
 | Realtime | Postgres Changes per serate di gruppo e notifiche; Broadcast privato per le posizioni del ritorno sicuro. |
 | Edge Functions (Deno) | `invia-push` (FCM HTTP v1 per Android e iOS, Web Push VAPID), `esporta-dati`, `elimina-account`. |
@@ -127,22 +127,39 @@ sequenceDiagram
     participant A as App
     participant AU as Supabase Auth
     participant DB as Postgres
-    U->>A: email, password, username, data di nascita, consensi
-    A->>A: validazione Zod (età >= 14, solo esperienza d'uso)
-    A->>AU: signUp(options.data = {username, nome_visualizzato, data_nascita}) + token CAPTCHA
-    AU->>DB: insert auth.users
-    DB->>DB: trigger gestisci_nuovo_utente: verifica età >= 14 (R-01)
-    alt età < 14 o dati non validi
-        DB-->>AU: eccezione, transazione annullata
-        AU-->>A: errore
-        A-->>U: messaggio "Noxa è per chi ha almeno 14 anni"
+    U->>A: data di nascita, email, password, username, nome, consensi
+    A->>A: validazione (età >= 14, formato), solo per l'esperienza d'uso
+    A->>AU: signUp(data = {username, nome_visualizzato, data_nascita, consensi}) + token Turnstile
+    AU->>DB: hook private.prima_della_creazione_utente: età >= 14 (R-01), username, versioni dei consensi
+    alt dati non validi
+        DB-->>AU: errore NX0nn
+        AU-->>A: 400 con il codice
+        A-->>U: schermata dell'età o errore sul campo
     else valido
-        DB->>DB: crea profili e profili_privati, rimuove data_nascita dai metadati
-        AU-->>A: email di verifica inviata
-        U->>A: conferma email e accesso
-        A->>DB: insert consensi (termini, privacy, versione)
+        AU->>DB: insert auth.users
+        DB->>DB: trigger gestisci_nuovo_utente: ripete la verifica, crea profili, profili_privati e consensi, toglie i dati dai metadati (R-05)
+        AU-->>U: email con il link /accesso/conferma/?token_hash=…
+        U->>A: apre il link (anche su un altro dispositivo)
+        A->>AU: verifyOtp(token_hash) → sessione
+        A->>DB: rpc mio_account → onboarding di sicurezza
     end
 ```
+
+- Il codice di errore dell'hook (`NX001`…`NX006`) arriva all'app nel messaggio della risposta
+  e diventa un errore di dominio (`src/lib/errori.ts`). Il trigger ripete la verifica per gli
+  utenti creati con `service_role` o se l'hook non fosse configurato.
+- Un'email già registrata riceve la stessa risposta di una registrazione riuscita ("Controlla la
+  posta") e nessun secondo account viene creato: come il recupero della password, la
+  registrazione non rivela chi ha un account.
+- Lo username si verifica all'invio, non mentre si scrive: senza account non esiste un modo
+  per interrogare i profili (R-07, R-10). Se è già in uso, l'app torna al passo 3 con una
+  proposta.
+- Le email usano modelli in italiano (`supabase/templates/`) con il link alla pagina dell'app
+  che verifica il `token_hash`: la sessione nasce sul dispositivo che apre il link.
+- Gli account mai confermati sono eliminati dopo 24 ore (`private.elimina_account_non_confermati`,
+  DATA_MODEL.md §8), così lo username torna libero.
+- Accesso, recupero e reinvio dell'email passano dallo stesso Turnstile (ADR-0020); dopo il
+  recupero della password l'app chiude le sessioni sugli altri dispositivi.
 
 ### 4.2 Ricerca eventi
 
@@ -322,7 +339,14 @@ flowchart LR
 
 ## 9. Sicurezza applicativa
 
-- Content Security Policy rigorosa per la PWA; nessuno script di terze parti tranne Sentry.
+- Content Security Policy rigorosa per la PWA e le app native: dopo la build
+  `scripts/applica-csp.mjs` inserisce in ogni pagina un `<meta http-equiv>` con gli hash
+  SHA-256 degli script inline (niente `'unsafe-inline'` né `'unsafe-eval'` per gli script);
+  le connessioni sono ammesse solo verso l'app e Supabase, script e iframe esterni solo da
+  Cloudflare Turnstile (ADR-0020). Gli attributi `style` di React richiedono
+  `'unsafe-inline'` negli stili. `apps/web/vercel.json` aggiunge gli header che un meta non
+  può esprimere (`frame-ancestors`, HSTS, `X-Content-Type-Options`, `Permissions-Policy`).
+  Sentry, quando arriverà (ADR-0014), sarà l'unica altra origine esterna.
 - Dipendenze controllate con Dependabot e `pnpm audit` / `pip-audit` in CI.
 - Le chiavi pubbliche (`anon`) sono le uniche nel client; tutto il resto sta solo nel worker e
   nelle Edge Functions.
