@@ -61,7 +61,7 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 
 | ID | Funzionalità | Priorità | Fase | Criteri di accettazione |
 |---|---|---|---|---|
-| F-10 | Registrazione e profilo | P0 | 1 | Email e password con verifica dell'email; CAPTCHA; data di nascita obbligatoria e immutabile (R-01, R-02); username e nome visualizzato; consenso a termini e informativa con versione (R-63); onboarding che spiega le regole di sicurezza in 3 schermate. |
+| F-10 | Registrazione e profilo | P0 | 1 | Email e password (almeno 10 caratteri) con verifica dell'email tramite link valido un'ora; CAPTCHA (ADR-0020); data di nascita obbligatoria e immutabile, chiesta per prima (R-01, R-02); username e nome visualizzato, con lo username verificato all'invio; consenso a termini e informativa con versione, riassunto in una schermata (R-63); senza account si vedono solo Benvenuto, termini e informativa (R-07); onboarding che spiega le regole di sicurezza in 3 schermate, una sola volta e senza "Salta"; account non confermati eliminati dopo 24 ore. |
 | F-11 | Amicizie | P0 | 1 | Ricerca per username nella propria fascia (R-10); richiesta e accettazione (R-11); codice invito QR o link per qualsiasi amicizia, unico canale tra fasce diverse (R-12); elenco amici; rimozione. |
 | F-12 | Blocco e segnalazione | P0 | 1 | Blocco da profilo, gruppo e serata (R-17); segnalazione di ogni contenuto in al massimo due tocchi (R-50); stato delle proprie segnalazioni. |
 | F-13 | Gruppi | P0 | 1 | Creazione, invito di amici confermati, accettazione, uscita, ruoli admin e membro; massimo 30 membri; invariante delle fasce (R-15). |
@@ -140,7 +140,7 @@ fase della roadmap. La matrice va aggiornata insieme alla funzionalità (skill `
 | F-05 | App | `partecipazioni_evento` | R-67 | 1 |
 | F-06 | App · Storage · Worker (flyer) · Claude API | `caricamenti_flyer`, `eventi_grezzi`, `coda_job`, bucket `flyer-caricati` e `flyer-pubblicati` | R-51, R-54, R-66 | 1 |
 | F-07 | Worker (adattatori aggregatori) | `fonti`, `eventi_grezzi` | ADR-0008 | 3 |
-| F-10 | App · Supabase Auth | `profili`, `profili_privati`, `consensi` | R-01, R-02, R-05, R-60, R-63 | 1 |
+| F-10 | App · Supabase Auth (hook dell'età, Turnstile) | `profili`, `profili_privati`, `consensi` | R-01, R-02, R-05, R-07, R-60, R-63 | 1 |
 | F-11 | App · RPC `cerca_utenti`, `crea_codice_invito`, `usa_codice_invito` | `amicizie`, `codici_invito` | R-10…R-14 | 1 |
 | F-12 | App · area di moderazione | `blocchi`, `segnalazioni` | R-17, R-50 | 1 |
 | F-13 | App | `gruppi`, `membri_gruppo` | R-15 | 1 |

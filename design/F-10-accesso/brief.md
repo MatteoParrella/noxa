@@ -120,3 +120,23 @@ casella con testo lungo), aggiungili anche alla tavola dei componenti del design
 - Esportazione: `accesso.html` (riferimento) e le tavole PNG in `immagini/`: benvenuto, età e
   nuovi termini; registrazione passi 1–3 e passo 4; verifica dell'email; accesso e recupero;
   onboarding di sicurezza; movimento (ADR-0019); verifica a 360 px.
+
+## Implementazione (iterazione 2)
+
+Schermate in `apps/web/src/features/account/`, route `/benvenuto`, `/registrazione`,
+`/registrazione/verifica`, `/accesso`, `/accesso/conferma`, `/accesso/password`,
+`/accesso/nuova-password`, `/sicurezza`, `/termini`, `/privacy`. Differenze volute rispetto
+alle tavole:
+
+- **Username "Disponibile"**: lo username si verifica all'invio, non mentre si scrive. Senza
+  account non esiste un modo per interrogare i profili (R-07, R-10); se è già in uso l'app
+  torna al passo 3 con "Già in uso, prova …" e il pulsante "Usa …", come nella tavola.
+- **Riquadro del CAPTCHA**: è il widget vero di Cloudflare Turnstile (ADR-0020), nel tema
+  dell'app; nelle altre schermate compare solo se Cloudflare chiede un'azione.
+- **"Cancelliamo tutto entro [N] giorni"**: il testo dice "Cancelliamo tutto subito; dalle
+  copie di sicurezza sparisce entro 30 giorni" (SAFETY_PRIVACY.md §10).
+- **Calendario**: mese e anno si scelgono con due menu nativi, più accessibili da tastiera e
+  con i lettori di schermo; i giorni si spostano con le frecce.
+- **Movimento**: i blocchi entrano con le durate dei token esistenti (`--movimento-ingresso`);
+  con `prefers-reduced-motion` le animazioni sono spente (componenti.css) invece della
+  dissolvenza da 150 ms.

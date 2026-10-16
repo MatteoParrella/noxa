@@ -47,6 +47,10 @@ flowchart LR
   Fontsource, senza richieste a Google Fonts (R-62).
 - Token aggiunti nel codice e da riportare in Claude Design: `--colore-velo-foto` e
   `--colore-testo-su-foto` per il testo sopra le foto dei locali (ADR-0018).
+- Token delle schermate di accesso, dal layer "accesso" del progetto Claude Design
+  (design/F-10-accesso): `--tipo-titolo-accesso`, `--tipo-marchio`,
+  `--tipo-larghezza-marchio`, `--movimento-passo`, `--spostamento-passo`. Le classi stanno in
+  `src/styles/accesso.css`.
 - Categorie: `colore` (superfici, testo, accento, stato: successo, avviso, errore, info),
   `spazio` (scala di 4 px), `raggio`, `ombra`, `tipografia` (famiglie, scala, interlinea),
   `movimento` (durate e curve, con la versione ridotta).
@@ -69,7 +73,8 @@ flowchart LR
 - `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda,
   SchedaEvento, Avviso, Foglio, Badge e Contatore, Avatar e GruppoAvatar, Interruttore,
   Segmenti, Schede, ElencoVuoto, Caricamento, ErroreConAzione, StrisciaOffline,
-  PulsanteSegnala, Mappa). Foglio e modale usano `<dialog>`: il browser gestisce focus, Esc e
+  PulsanteSegnala, Mappa, CampoPassword con i requisiti, CampoData con il calendario in un
+  foglio, CasellaLunga per i consensi, IndicatorePassi e IndicatorePunti). Foglio e modale usano `<dialog>`: il browser gestisce focus, Esc e
   inerzia del resto della pagina. Le icone sono di Lucide, con tratto 1,75.
 - `src/components/guscio/`: barra di navigazione delle cinque aree (Scopri, Organizza, Vivi,
   Ricorda, Profilo), link "Vai al contenuto", striscia offline, registrazione del service
@@ -78,7 +83,10 @@ flowchart LR
   `dev.tsx` a `pageExtensions` solo quando `NODE_ENV=development` o `NOXA_CATALOGO=1` (build
   dei test e2e, che verificano il catalogo con axe), quindi la pagina non entra nella build di
   produzione; la CI lo controlla.
-- `src/features/<area>/`: schermate e componenti specifici di una funzionalità.
+- `src/features/<area>/`: schermate e componenti specifici di una funzionalità. Le schermate
+  di accesso (`src/features/account/`) condividono l'impaginazione `Schermata` (testa con
+  "Indietro", titolo che sale parola per parola, piede fisso) e fanno entrare i blocchi
+  all'apertura con `Entra`, non allo scorrimento: sono schermate brevi, già tutte in vista.
 - Ogni schermata gestisce gli stati: caricamento, vuoto, errore (con un'azione per
   riprovare), offline, successo.
 

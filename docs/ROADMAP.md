@@ -262,7 +262,9 @@ Ogni iterazione ha:
   delle tile della mappa già viste (richieste PMTiles a intervalli, ADR-0016); Edge
   Functions `esporta-dati` ed `elimina-account`; impostazioni di privacy;
   `applica_conservazione`; verifica completa di accessibilità; build interne TestFlight e
-  Google Play.
+  Google Play; Sentry nell'app e nel worker con `beforeSend` (ADR-0014, R-62); link delle
+  email di conferma e di recupero aperti nell'app nativa con App Links e Universal Links sul
+  dominio di D-01.
 - **Criteri**: criteri della **Fase 1** (§Fase 1) verificati per la parte tecnica; la beta
   con utenti reali si avvia alla chiusura di questa iterazione.
 

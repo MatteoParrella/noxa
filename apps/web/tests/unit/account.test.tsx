@@ -1,4 +1,8 @@
-import { AuthApiError, AuthRetryableFetchError, AuthWeakPasswordError } from '@supabase/supabase-js';
+import {
+  AuthApiError,
+  AuthRetryableFetchError,
+  AuthWeakPasswordError,
+} from '@supabase/supabase-js';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -6,13 +10,7 @@ import { CampoData } from '@/components/ui/CampoData';
 import { CampoPassword } from '@/components/ui/CampoPassword';
 import { CasellaLunga } from '@/components/ui/CasellaLunga';
 import { IndicatorePassi, IndicatorePunti } from '@/components/ui/Indicatori';
-import {
-  analizzaDataNascita,
-  dataIso,
-  etaA,
-  formattaDigitazione,
-  oggiARoma,
-} from '@/lib/date';
+import { analizzaDataNascita, dataIso, etaA, formattaDigitazione, oggiARoma } from '@/lib/date';
 import { mascheraEmail } from '@/lib/email';
 import {
   converti,
@@ -155,7 +153,10 @@ describe('componenti dell’accesso', () => {
     expect(mostra).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(mostra);
     expect(campo).toHaveAttribute('type', 'text');
-    expect(screen.getByRole('button', { name: 'Nascondi' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Nascondi' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
   });
 
   it('CasellaLunga è una casella vera, con il testo come etichetta e non preselezionata', () => {

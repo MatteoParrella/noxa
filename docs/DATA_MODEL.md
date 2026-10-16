@@ -120,13 +120,14 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `stessa_fascia(a uuid, b uuid)` | `boolean` | `e_minorenne(a) = e_minorenne(b)`. |
 | `c_e_blocco(a uuid, b uuid)` | `boolean` | Esiste una riga in `blocchi` in una delle due direzioni. |
 | `sono_amici(a uuid, b uuid)` | `boolean` | Esiste una riga in `amicizie` con stato `accettata` tra `a` e `b` e `not c_e_blocco(a, b)`. |
-| `puo_vedere_profilo(target uuid)` | `boolean` | `target = auth.uid()` oppure (`not c_e_blocco(auth.uid(), target)` e il profilo è `attivo` e (`sono_amici(auth.uid(), target)` oppure esiste una richiesta di amicizia `in_attesa` tra i due oppure i due sono membri dello stesso gruppo)). Non esiste visibilità per "stessa fascia": la tabella `profili` non è elencabile e la ricerca passa solo da `cerca_utenti`. Grazie all'invariante R-15, due membri dello stesso gruppo di fasce diverse sono sempre amici. Applica R-10, R-13, R-17. |
+| `puo_vedere_profilo(target uuid)` | `boolean` | Fino all'iterazione 3 solo `target = auth.uid()`; la migrazione di `amicizie`, `blocchi` e `membri_gruppo` la estende così: `target = auth.uid()` oppure (`not c_e_blocco(auth.uid(), target)` e il profilo è `attivo` e (`sono_amici(auth.uid(), target)` oppure esiste una richiesta di amicizia `in_attesa` tra i due oppure i due sono membri dello stesso gruppo)). Non esiste visibilità per "stessa fascia": la tabella `profili` non è elencabile e la ricerca passa solo da `cerca_utenti`. Grazie all'invariante R-15, due membri dello stesso gruppo di fasce diverse sono sempre amici. Applica R-10, R-13, R-17. |
 | `e_membro_attivo(gruppo uuid)` | `boolean` | `auth.uid()` è in `membri_gruppo` del gruppo con stato `attivo`. |
 | `e_membro(gruppo uuid)` | `boolean` | Come sopra, con stato `invitato` oppure `attivo`. |
 | `e_admin_gruppo(gruppo uuid)` | `boolean` | `auth.uid()` è membro attivo con ruolo `admin`. |
 | `puo_entrare_nel_gruppo(gruppo uuid, utente uuid)` | `boolean` | Per ogni membro `m` (invitato o attivo) diverso da `utente`: `not c_e_blocco(m, utente)` e (`stessa_fascia(m, utente)` oppure `sono_amici(m, utente)`); il gruppo ha meno di 30 membri. Applica R-15. |
 | `evento_visibile_a(evento uuid, utente uuid)` | `boolean` | L'evento è `pubblicato`, `eta_di(utente) >= eta_minima` e (`not riferimenti_alcol` oppure `not e_minorenne(utente)`). Applica R-20 e R-23. |
 | `evento_adatto_al_gruppo(evento uuid, gruppo uuid)` | `boolean` | `evento_visibile_a(evento, m)` per ogni membro attivo `m`. Applica R-24. |
+| `versione_corrente(tipo tipo_consenso)` | `text` | Versione in vigore oggi di termini o informativa, da `private.versioni_documenti` (R-63). |
 | `e_moderatore()` | `boolean` | `auth.uid()` ha ruolo `moderatore` o `amministratore` in `ruoli_utente` **e** il claim `aal` del JWT vale `aal2` (R-06). |
 | `e_amministratore()` | `boolean` | Come sopra, solo con ruolo `amministratore`. |
 | `e_titolare_checkin(checkin uuid)` | `boolean` | `auth.uid()` è l'autore del check-in. |
@@ -141,11 +142,12 @@ RLS che a sua volta interroga la prima causerebbe l'errore "infinite recursion d
 policy".
 
 Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
-`blocca_modifica_data_nascita`, `limita_richieste_amicizia`, `applica_blocco`,
+`verifica_dati_registrazione`, `prima_della_creazione_utente`, `rimuovi_dati_registrazione`,
+`rimuovi_dati_registrazione_identita`, `blocca_modifica_data_nascita`, `limita_richieste_amicizia`, `applica_blocco`,
 `verifica_invariante_gruppi`, `verifica_trasporto`, `verifica_categoria_spesa`,
 `limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `calcola_data_serata`,
 `imposta_aggiornato_il`) sono descritte insieme alle tabelle a cui si applicano; quelle
-pianificate (`verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`,
+pianificate (`elimina_account_non_confermati`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`,
 `assegna_badge`, `genera_riepiloghi`) nel §8.
 
 ## 5. Tabelle
@@ -162,9 +164,9 @@ Dati pubblici minimi dell'utente. Non contiene informazioni sull'età (R-05).
 
 | Colonna | Tipo | Vincoli |
 |---|---|---|
-| `id` | `uuid` | PK, FK → `auth.users(id)` `on delete cascade` |
-| `username` | `citext` | unico, `^[a-z0-9_.]{3,20}$` |
-| `nome_visualizzato` | `text` | 1–40 caratteri |
+| `id` | `uuid` | PK, FK → `auth.users(id)` `on delete cascade`, differita (il trigger di registrazione crea il profilo prima della riga di `auth.users`) |
+| `username` | `citext` | unico, `^[a-z0-9_.]{3,20}$` (solo minuscole) |
+| `nome_visualizzato` | `text` | 1–40 caratteri, senza spazi iniziali o finali |
 | `avatar_path` | `text` | nullable, percorso nel bucket `avatar` |
 | `stato_account` | `stato_account` | default `attivo` |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
@@ -172,6 +174,7 @@ Dati pubblici minimi dell'utente. Non contiene informazioni sull'età (R-05).
 - **S**: `private.puo_vedere_profilo(id)`; moderatori tramite RPC (R-69).
 - **I**: nessuna. Il trigger `private.gestisci_nuovo_utente` su `auth.users` crea il profilo.
 - **U**: `id = auth.uid()`. Permessi di colonna: `GRANT UPDATE (username, nome_visualizzato, avatar_path)`. `stato_account` è modificabile solo dalla RPC di moderazione.
+- Nessun privilegio per `anon` (R-07).
 - **D**: nessuna. L'eliminazione avviene con l'Edge Function `elimina-account` (cascata da `auth.users`).
 - Test: visibilità per tutte le combinazioni di fascia, con e senza amicizia, con blocco, con account sospeso.
 
@@ -185,12 +188,16 @@ Dati pubblici minimi dell'utente. Non contiene informazioni sull'età (R-05).
 | `checkin_abilitato` | `boolean` | default `false` (R-30) |
 | `partecipazioni_visibili` | `boolean` | default `true` (R-67) |
 | `notifiche_push_abilitate` | `boolean` | default `false` |
+| `onboarding_completato_il` | `timestamptz` | nullable; impostata alla fine dell'onboarding di sicurezza (F-10) |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
 - **S**: `utente_id = auth.uid()`.
-- **U**: `utente_id = auth.uid()`; `GRANT UPDATE (checkin_abilitato, partecipazioni_visibili, notifiche_push_abilitate)`. Il trigger `private.blocca_modifica_data_nascita` rifiuta qualsiasi modifica di `data_nascita` che non arrivi dalla RPC `public.correggi_data_nascita` (riservata agli amministratori e registrata in `azioni_moderazione`) (R-02).
+- **U**: `utente_id = auth.uid()`; `GRANT UPDATE (checkin_abilitato, partecipazioni_visibili, notifiche_push_abilitate, onboarding_completato_il)`. Il trigger `private.blocca_modifica_data_nascita` rifiuta qualsiasi modifica di `data_nascita` che non arrivi dalla RPC `public.correggi_data_nascita` (riservata agli amministratori e registrata in `azioni_moderazione`, che arriva con quella tabella): la RPC imposta per la propria transazione `noxa.correzione_data_nascita = 'consentita'`; ogni altra modifica fallisce con `NX007` (R-02).
 - **I/D**: nessuna (creazione da trigger, eliminazione a cascata).
-- Trigger `private.gestisci_nuovo_utente` (`after insert on auth.users`): legge `username`, `nome_visualizzato` e `data_nascita` da `raw_user_meta_data`, verifica età ≥ 14 (R-01) e sintassi, crea `profili` e `profili_privati`, poi rimuove `data_nascita` dai metadati. Se una verifica fallisce lancia un'eccezione e la registrazione viene annullata.
+- Registrazione (ARCHITECTURE.md §4.1). `private.verifica_dati_registrazione(metadati)` controlla `username`, `nome_visualizzato`, `data_nascita` (età ≥ 14 a Roma, R-01) e `consensi` (versioni in vigore, R-63) e restituisce il primo codice d'errore (`NX001` età, `NX002` username non valido, `NX003` username in uso, `NX004` nome, `NX005` data, `NX006` consensi) o null. La usano:
+  - l'hook di Supabase Auth `private.prima_della_creazione_utente(evento jsonb)` ("before user created", eseguito da `supabase_auth_admin`), che rifiuta la richiesta con `http_code 400` e il codice come messaggio;
+  - il trigger `private.gestisci_nuovo_utente` (`before insert on auth.users`), che ripete la verifica (eccezione con il codice come SQLSTATE), crea `profili`, `profili_privati` e le due righe di `consensi`, poi toglie `data_nascita`, `username`, `nome_visualizzato` e `consensi` dai metadati.
+- I trigger `private.rimuovi_dati_registrazione` (`before update of raw_user_meta_data on auth.users`) e `private.rimuovi_dati_registrazione_identita` (`before insert or update of identity_data on auth.identities`) tolgono gli stessi campi anche dalle copie che Supabase Auth scrive dopo la creazione: la data di nascita non arriva mai nel JWT (R-05).
 
 #### `ruoli_utente`
 *Funzionalità: F-40.*
@@ -213,11 +220,15 @@ Dati pubblici minimi dell'utente. Non contiene informazioni sull'età (R-05).
 | `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade` |
 | `tipo` | `tipo_consenso` | |
 | `versione` | `text` | es. `2026-10` |
-| `accettato_il` | `timestamptz` | default `now()` |
+| `accettato_il` | `timestamptz` | default `now()`, non scrivibile dal client |
+
+Unico su (`utente_id`, `tipo`, `versione`).
 
 - **S**: `utente_id = auth.uid()`.
-- **I**: `utente_id = auth.uid()`.
+- **I**: `utente_id = auth.uid()` e `versione = private.versione_corrente(tipo)`; `GRANT INSERT (utente_id, tipo, versione)`. Il primo consenso lo registra il trigger di registrazione.
 - **U/D**: nessuna (registro di sola aggiunta, R-63).
+
+**`private.versioni_documenti`** (schema non esposto, nessun permesso per `authenticated`): `tipo`, `versione` (`AAAA-MM`), `in_vigore_dal`, `novita text[]` (riassunto mostrato nel foglio "Nuova versione dei termini"). Una nuova versione si pubblica con una migrazione che inserisce una riga, insieme ai nuovi testi in `/termini` e `/privacy` e a `VERSIONI_DOCUMENTI` in `apps/web/src/features/account/documenti.ts`.
 
 #### `dispositivi_push`
 *Funzionalità: F-22.*
@@ -832,6 +843,7 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 
 | RPC | Sicurezza | Chi | Scopo |
 |---|---|---|---|
+| `mio_account()` | definer | utenti | Stato dell'account del chiamante: username, nome, `stato_account`, `minorenne` (solo per i testi dell'onboarding, R-05), `onboarding_completato`, documenti in vigore non ancora accettati con le novità (R-63); nessuna data di nascita |
 | `cerca_eventi(...)` | invoker | utenti | Ricerca degli eventi (F-01, F-02, F-04), §5.3 `eventi` |
 | `cerca_utenti(testo text)` | definer | utenti | Ricerca per prefisso di username nella propria fascia, esclusi bloccati e sospesi; al massimo 20 risultati con solo username e nome visualizzato, senza avatar (R-10) |
 | `crea_codice_invito()` | definer | utenti | Codice monouso di 15 minuti (R-12, R-14) |
@@ -873,6 +885,7 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 
 | Job | Frequenza | Funzione |
 |---|---|---|
+| Account non confermati | ogni ora, al minuto 17 | `private.elimina_account_non_confermati()`: elimina gli account senza email confermata creati da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Ritorni scaduti | ogni minuto | `private.verifica_ritorni_scaduti()` |
 | Conservazione | ogni ora | `private.applica_conservazione()`: applica tutte le scadenze di SAFETY_PRIVACY.md §10, compresi gli account inattivi |
 | Invariante dei gruppi | ogni giorno alle 04:00 | `private.verifica_invariante_gruppi()` |
@@ -901,4 +914,6 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
   `set local request.jwt.claims`).
 - Utenti del seed: `minore_14`, `minore_15`, `minore_16`, `minore_17`, `adulto_18`,
   `adulto_20`, `adulto_21`, `moderatore` (con `aal2`), `moderatore_senza_mfa` (con `aal1`).
+  Le date di nascita sono calcolate da oggi (compleanno 40 giorni fa), così le età restano
+  quelle dei nomi; in locale ognuno accede con `<username>@example.com` e `password-di-prova`.
 - La procedura per scrivere questi test è nella skill `db-migration`.
