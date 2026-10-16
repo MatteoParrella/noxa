@@ -867,7 +867,7 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 
 | Bucket | Pubblico | Percorso | Lettura | Scrittura |
 |---|---|---|---|---|
-| `avatar` | no | `<utente_id>/<file>` | `private.puo_vedere_profilo(<utente_id dal percorso>)` | titolare, solo nella propria cartella; immagini fino a 2 MB |
+| `avatar` | no | `<utente_id>/<file>` | `private.puo_vedere_profilo(<utente_id dal percorso>)` | titolare, solo nella propria cartella; WebP fino a 2 MB, ritagliata e senza dati EXIF (rimossi sul dispositivo); un solo file per utente, quello precedente si elimina alla sostituzione; i moderatori lo rimuovono con `decidi_segnalazione` (R-52) |
 | `flyer-caricati` | no | `<utente_id>/<uuid>.<ext>` | titolare e moderatori; il worker con `service_role` (ADR-0003) | titolare, solo nella propria cartella; JPEG/PNG/WebP fino a 10 MB (R-54) |
 | `flyer-pubblicati` | no | `eventi/<evento_id>.webp` | `exists` sull'evento (soggetta alla RLS di `eventi`) | solo il worker con `service_role`, con il job `copia_immagine_flyer` accodato da `decidi_flyer` dopo l'approvazione |
 | `immagini-locali` | no | `<locale_id>.webp` | `authenticated` se il locale è attivo (`exists` su `locali` con la sua RLS); moderatori | solo moderatori; WebP fino a 1 MB, EXIF rimosso (ADR-0018, R-56) |

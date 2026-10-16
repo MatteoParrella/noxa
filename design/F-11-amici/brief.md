@@ -37,8 +37,9 @@ Stesso linguaggio delle schermate già fatte (Scopri, Accesso): titoli Archivo s
 etichette da pensilina in maiuscoletto, un solo accento. Movimento ADR-0019: titolo che sale
 parola per parola, righe degli elenchi che entrano dal sfocato al nitido con sfasamento di
 70 ms. Nessun effetto che segue il dito, nessuna animazione infinita (il QR non pulsa).
-L'avatar è il cerchio con le iniziali del design system: la foto del profilo non fa parte di
-questa iterazione.
+L'avatar è il cerchio con le iniziali del design system: la foto del profilo arriva
+nell'iterazione 6 (brief a parte), quindi qui basta che l'avatar possa un giorno mostrare una
+foto al posto delle iniziali.
 
 ## Schermate e stati
 
