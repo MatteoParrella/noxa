@@ -183,3 +183,16 @@
   --movimento-passo: 240ms;
   --spostamento-passo: 32px;
 }
+
+/*
+  Amici (design/F-11-amici, layer "amici"): il QR resta nero su bianco in entrambi i temi,
+  perché le fotocamere lo leggano; il mirino è sempre scuro, è l'immagine della fotocamera.
+*/
+:root {
+  --qr-sfondo: #ffffff;
+  --qr-moduli: #15181e;
+  --qr-velo-testo: #15181e;
+  --mirino-sfondo: #0b0d10;
+  --mirino-testo: #edeae4;
+  --avatar-grande: 96px;
+}

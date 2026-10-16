@@ -251,7 +251,9 @@ Ogni iterazione ha:
   caricamento, stato dei flyer e code di moderazione con MFA. Foto profilo (F-10): bucket
   `avatar` con le policy di DATA_MODEL.md §6, caricamento con ritaglio, conversione in WebP
   e rimozione dei dati EXIF sul dispositivo, sostituzione e rimozione, segnalazione e
-  rimozione da parte dei moderatori (R-52).
+  rimozione da parte dei moderatori (R-52). Tabella `notifiche` mostrata nell'app con Realtime
+  (richieste di amicizia, amicizie accettate, esiti della moderazione con la motivazione,
+  R-53) e reclamo sulle decisioni dalla schermata "Le mie segnalazioni" (DSA art. 20).
 - **Prerequisiti esterni**: chiave Claude API con limite di spesa; accordo sul trattamento
   dei dati (D-12).
 - **Criteri**: soglie della skill `flyer-parser`; test pgTAP di R-51, R-54, R-69 e delle
@@ -260,8 +262,9 @@ Ogni iterazione ha:
 
 ### Iterazione 7 — Gruppi e serate di gruppo
 - **Contenuto**: `gruppi`, `membri_gruppo`, `serate_gruppo`, `partecipazioni_serata`;
-  invariante delle fasce e job giornaliero; Realtime; schermate di gruppi, inviti, serata
-  con conferme, biglietti e trasporto.
+  invariante delle fasce e job giornaliero, con i trigger su `amicizie` e `blocchi` (R-15);
+  `private.puo_vedere_profilo` estesa ai membri dello stesso gruppo; Realtime; schermate di
+  gruppi, inviti, serata con conferme, biglietti e trasporto.
 - **Criteri**: test pgTAP di R-15, R-16, R-24 e del trigger `verifica_trasporto`; e2e di
   gruppo misto valido e rifiutato; aggiornamento in tempo reale tra due sessioni.
 

@@ -18,6 +18,7 @@ import {
 } from '@/lib/errori';
 import { messaggi } from '@/lib/messaggi/it';
 import { accedi, reinviaVerifica } from './api';
+import { prendiPaginaDopoAccesso } from './dopoAccesso';
 import { PERCORSI } from './documenti';
 import { Schermata } from './Schermata';
 import { CHIAVE_ACCOUNT, useSessione } from './sessione';
@@ -54,8 +55,10 @@ export function Accesso() {
   const [token, setToken] = useState<string | null>(null);
   const verifica = useRef<ComandiVerificaUmana>(null);
 
+  // Con la sessione (appena aperta o già presente) si va alla pagina richiesta prima
+  // dell'accesso, oppure in Scopri.
   useEffect(() => {
-    if (sessione.stato === 'presente') router.replace(PERCORSI.home);
+    if (sessione.stato === 'presente') router.replace(prendiPaginaDopoAccesso() ?? PERCORSI.home);
   }, [sessione, router]);
 
   useEffect(() => {
@@ -66,10 +69,7 @@ export function Accesso() {
 
   const accesso = useMutation({
     mutationFn: () => accedi(email.trim(), password, token),
-    onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: [CHIAVE_ACCOUNT] });
-      router.replace(PERCORSI.home);
-    },
+    onSuccess: () => client.invalidateQueries({ queryKey: [CHIAVE_ACCOUNT] }),
     onError: (errore: ErroreDominio) => {
       verifica.current?.azzera();
       if (errore instanceof ErroreAutorizzazione) {

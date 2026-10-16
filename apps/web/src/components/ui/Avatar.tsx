@@ -20,7 +20,7 @@ export function tinta(nome: string): (typeof TINTE)[number] {
 }
 
 type Props = Persona & {
-  dimensione?: 's' | 'm' | 'l';
+  dimensione?: 's' | 'm' | 'l' | 'xl';
   /** Se l'avatar accompagna il nome scritto accanto, resta decorativo. */
   decorativo?: boolean;
 };
@@ -33,6 +33,7 @@ export function Avatar({ nome, dimensione = 'm', decorativo = false }: Props) {
         tinta(nome),
         dimensione === 's' && 'avatar-s',
         dimensione === 'l' && 'avatar-l',
+        dimensione === 'xl' && 'avatar-xl',
       )}
       role={decorativo ? undefined : 'img'}
       aria-label={decorativo ? undefined : nome}

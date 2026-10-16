@@ -65,3 +65,12 @@ begin
          ('00000000-0000-4000-8000-000000000091', 'moderatore');
 end
 $$;
+
+-- Relazioni di esempio (iterazione 3): amici nella stessa fascia, un'amicizia tra fasce
+-- diverse nata da un codice invito (R-12) e una richiesta in attesa.
+insert into public.amicizie (richiedente_id, destinatario_id, canale, stato, accettata_il)
+values
+  ('00000000-0000-4000-8000-000000000015', '00000000-0000-4000-8000-000000000016', 'ricerca', 'accettata', now()),
+  ('00000000-0000-4000-8000-000000000020', '00000000-0000-4000-8000-000000000021', 'ricerca', 'accettata', now()),
+  ('00000000-0000-4000-8000-000000000018', '00000000-0000-4000-8000-000000000017', 'codice_invito', 'accettata', now()),
+  ('00000000-0000-4000-8000-000000000014', '00000000-0000-4000-8000-000000000015', 'ricerca', 'in_attesa', null);

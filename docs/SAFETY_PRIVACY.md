@@ -96,7 +96,7 @@ non può essere rilasciata, indipendentemente da scadenze o richieste commercial
 
 | ID | Regola | Motivo | Applicazione |
 |---|---|---|---|
-| R-50 | Ogni contenuto caricato e ogni profilo visibile può essere segnalato con un massimo di due tocchi. | DSA art. 16 (meccanismo di segnalazione) e linee guida degli store sui contenuti generati dagli utenti. | Tabella `segnalazioni`; componente di segnalazione unico nell'interfaccia. |
+| R-50 | Ogni contenuto caricato e ogni profilo visibile può essere segnalato con un massimo di due tocchi. | DSA art. 16 (meccanismo di segnalazione) e linee guida degli store sui contenuti generati dagli utenti. | Tabella `segnalazioni` (al massimo 20 segnalazioni ogni 24 ore per utente, priorità calcolata dal database); menu ⋯ con «Segnala» e motivo che invia subito (`FoglioSegnala`). Test pgTAP `016_segnalazioni` ed e2e. |
 | R-51 | Gli eventi estratti dai flyer **non sono pubblicati senza una revisione umana**, salvo quando corrispondono a un evento già pubblicato da una fonte verificata (in quel caso il flyer aggiunge solo la fonte e non modifica i campi). | I flyer possono contenere errori, eventi falsi o immagini inadatte; la revisione protegge gli utenti e la qualità del catalogo. | Stato `in_revisione` su `eventi` e `caricamenti_flyer`; coda di moderazione. |
 | R-52 | Avatar, nomi e testi sono visibili solo a chi può vedere il profilo o il gruppo; sono segnalabili e rimovibili dai moderatori. | Limita la diffusione di eventuali contenuti inadatti. | Policy sui bucket e sulle tabelle; azioni in `azioni_moderazione`. |
 | R-53 | Tempi massimi di gestione: segnalazioni con motivo `adescamento_o_rischio_minore` entro 4 ore nella fascia 08:00–02:00, entro le 10:00 per quelle ricevute di notte; le altre segnalazioni che coinvolgono minorenni entro 24 ore; tutte le altre entro 72 ore. Ogni decisione è motivata all'utente interessato, che può presentare reclamo. | DSA art. 17 (motivazione) e art. 20 (reclamo); priorità alla tutela dei minorenni. | Ordinamento della coda di moderazione; notifiche con motivazione; metriche nella dashboard di moderazione. |
@@ -132,7 +132,7 @@ non può essere rilasciata, indipendentemente da scadenze o richieste commercial
 | `coda_job` completati | 14 giorni | come sopra |
 | `notifiche` | 90 giorni | come sopra |
 | `segnalazioni`, `azioni_moderazione` | 12 mesi dalla chiusura; più a lungo se serve per un procedimento in corso (escalation R-55) | come sopra, escluse le righe con `conservazione_legale = true` |
-| `codici_invito` | 24 ore dalla scadenza | come sopra |
+| `codici_invito` | 24 ore dalla scadenza | `private.elimina_codici_invito_scaduti()` ogni ora |
 | Account mai confermato con il link dell'email | 24 ore dalla registrazione | `private.elimina_account_non_confermati()` ogni ora |
 | Account eliminato | Cancellazione immediata dei dati nel database e nello storage; scomparsa dai backup alla fine della finestra di backup del piano Supabase (al massimo 30 giorni) | Edge Function `elimina-account` |
 | Log applicativi (worker, Edge Functions) | 30 giorni | impostazione del fornitore di hosting |

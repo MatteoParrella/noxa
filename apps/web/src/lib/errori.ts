@@ -15,6 +15,15 @@ export const CODICI_DATABASE = {
   NX005: 'data_nascita_non_valida',
   NX006: 'consensi_non_validi',
   NX007: 'data_nascita_immutabile',
+  NX008: 'troppe_richieste_oggi',
+  NX009: 'troppe_richieste_in_attesa',
+  NX010: 'troppi_codici_oggi',
+  NX011: 'codice_non_valido',
+  NX012: 'codice_scaduto',
+  NX013: 'codice_usato',
+  NX014: 'gia_in_contatto',
+  NX015: 'troppe_segnalazioni_oggi',
+  NX016: 'persona_non_disponibile',
 } as const;
 
 export type CodiceDatabase = (typeof CODICI_DATABASE)[keyof typeof CODICI_DATABASE];
@@ -26,7 +35,9 @@ export type CodiceValidazione =
   | 'password_uguale'
   | 'email_non_valida'
   | 'link_scaduto'
-  | 'verifica_umana_fallita';
+  | 'verifica_umana_fallita'
+  | 'valore_duplicato'
+  | 'valore_non_ammesso';
 
 export type CodiceAutorizzazione = 'credenziali_non_valide' | 'email_non_confermata' | 'negato';
 
@@ -141,6 +152,9 @@ export function converti(errore: unknown): ErroreDominio {
     if (daDatabase) return new ErroreValidazione(daDatabase, errore);
     if (codice === '42501' || codice === 'PGRST301')
       return new ErroreAutorizzazione('negato', errore);
+    // Vincolo di unicità (per esempio uno username già preso) e vincoli di formato.
+    if (codice === '23505') return new ErroreValidazione('valore_duplicato', errore);
+    if (codice === '23514') return new ErroreValidazione('valore_non_ammesso', errore);
   }
 
   return new ErroreSconosciuto('sconosciuto', errore);

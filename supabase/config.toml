@@ -162,12 +162,14 @@ site_url = "http://127.0.0.1:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-# Noxa: indirizzi delle pagine che ricevono i link delle email (app in sviluppo e build dei test
-# e2e). In staging e produzione si impostano dalla dashboard con il dominio dell'app.
+# Noxa: indirizzi delle pagine che ricevono i link delle email (app in sviluppo sulla 3000 o sulla
+# 3100, build dei test e2e sulla 4173). In staging e produzione si impostano dalla dashboard con il dominio dell'app.
 additional_redirect_urls = [
   "http://127.0.0.1:3000/**",
   "http://localhost:3000/**",
   "http://127.0.0.1:4173/**",
+  "http://127.0.0.1:3100/**",
+  "http://localhost:3100/**",
 ]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
