@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Noxa · F-01 · Scopri, elenco</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/6fa6353d716b68f787ff2702a9363d96">
+<link rel="stylesheet" href="/_blob/afc4088ee394ab1a58e9ba7651ca762e">
+<link rel="stylesheet" href="/_blob/dbab4423ee519d83500f0485a4806ddb">
+<link rel="stylesheet" href="/_blob/cdf778b603b9eec9b9e8c7c0cba7983e">
+<link rel="stylesheet" href="/_blob/75de66852ef3f7538a23c938780b4826">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="nx nx-scuro" style="width: 2640px; height: 2080px; padding: 64px; display: flex; flex-direction: column; gap: 40px; overflow: hidden">
+  <header style="display: flex; flex-direction: column; gap: 10px; max-width: 1200px">
+    <span class="etichetta">F-01 · Scopri · 01</span>
+    <h1 class="t-titolo-1" style="margin: 0">Scopri · elenco</h1>
+    <p class="t-corpo-s c-2" style="margin: 0">Una scheda in evidenza, poi righe compatte. Ogni evento ha il badge d’età scritto, al massimo due generi, distanza e prezzo minimo solo se noti, e gli amici che hanno reso visibile la partecipazione. Gli eventi a cui non si può entrare semplicemente non ci sono: nessun filtro da attivare, nessun lucchetto.</p>
+  </header>
+  <sc-for list="{{righe}}" as="r" hint-placeholder-count="2">
+    <div style="display: flex; gap: 32px">
+      <sc-for list="{{colonne}}" as="c" hint-placeholder-count="6">
+        <div style="display: flex; flex-direction: column; gap: 12px; width: 390px; flex: none">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><span style="font-weight: 700">{{c.nome}}</span><span class="t-mono-dato c-2">{{r.tema}} · {{c.tag}}</span></div>
+          <div style="width: 390px; height: 844px; border-radius: 28px; overflow: hidden; box-shadow: 0 0 0 1px var(--colore-linea)">
+            <dc-import name="F01" tema="{{r.tema}}" schermata="{{c.s}}" stato="{{c.st}}" giorno="{{c.g}}" evento="{{c.ev}}" copertina="{{c.cop}}" partecipazione="{{c.part}}" visibilita="{{c.vis}}" hint-size="390px,844px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2640,"height":2080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const C = (nome, tag, s, st, x) => Object.assign({ nome, tag, s, st, g: 'stasera', ev: 'e1', cop: 'auto', part: 'nessuno', vis: 'amici' }, x || {});
+    return {
+      righe: [{ tema: 'scuro' }, { tema: 'chiaro' }],
+      colonne: [
+        C('Stasera', 'in evidenza + righe', 'elenco', 'normale'),
+        C('Weekend', 'sezioni per serata', 'elenco', 'normale', { g: 'weekend' }),
+        C('Caricamento', 'scheletri', 'elenco', 'caricamento'),
+        C('Nessun evento', 'togli i filtri', 'elenco', 'vuoto'),
+        C('Errore', 'riprova', 'elenco', 'errore'),
+        C('Offline', 'eventi salvati', 'elenco', 'offline')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

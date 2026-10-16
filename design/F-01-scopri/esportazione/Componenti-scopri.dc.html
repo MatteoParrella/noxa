@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Noxa · Componenti per Scopri ed evento</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/6fa6353d716b68f787ff2702a9363d96">
+<link rel="stylesheet" href="/_blob/afc4088ee394ab1a58e9ba7651ca762e">
+<link rel="stylesheet" href="/_blob/dbab4423ee519d83500f0485a4806ddb">
+<link rel="stylesheet" href="/_blob/cdf778b603b9eec9b9e8c7c0cba7983e">
+<link rel="stylesheet" href="/_blob/75de66852ef3f7538a23c938780b4826">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="nx nx-scuro" style="width: 1440px; height: 2100px; padding: 72px 64px; display: flex; flex-direction: column; gap: 40px; overflow: hidden">
+  <header style="display: flex; justify-content: space-between; align-items: end; gap: 48px">
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span class="etichetta">03d · Componenti · aggiunti con F-01</span>
+      <h1 class="t-display" style="margin: 0">Scopri ed evento</h1>
+    </div>
+    <p class="t-corpo-s c-2" style="margin: 0; max-width: 620px">Scheda in evidenza, riga evento compatta, pillole dei generi, marker del locale e raggruppato, anteprima sulla mappa, selettore Mi interessa / Partecipo, riga «amici che partecipano», riga di link esterno. Velatura delle foto costruita con il token dello sfondo. Classi in noxa-scopri.css.</p>
+  </header>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px">
+    <sc-for list="{{temi}}" as="t" hint-placeholder-count="2">
+      <section class="{{t.cls}}" style="display: flex; flex-direction: column; gap: 26px; padding: 32px; border: 1px solid var(--colore-linea); border-radius: 8px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline">
+          <h2 class="t-titolo-1" style="margin: 0">{{t.nome}}</h2>
+          <span class="t-mono-dato c-2">.{{t.cls}}</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div class="etichetta-riga"><span class="etichetta">Scheda in evidenza</span></div>
+            <a class="evidenza" href="#" aria-label="Notte Ferrovia, Club Binario 7, Monza, gio 15.10 dalle 23:00, età 18+">
+              <div class="copertina su-velatura">
+                <svg class="foto" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="250" fill="#0C0F14"></rect><circle cx="330" cy="40" r="70" fill="#F28C28" opacity="0.10"></circle><circle cx="330" cy="40" r="5" fill="#F7B26A"></circle><path d="M20 220 V110 Q200 40 380 110 V220 Z" fill="#1E1E22"></path><rect x="52" y="120" width="46" height="36" rx="4" fill="#E3A25A"></rect><rect x="116" y="120" width="46" height="36" rx="4" fill="#2B2D33"></rect><rect x="180" y="120" width="46" height="36" rx="4" fill="#E3A25A"></rect><rect x="244" y="120" width="46" height="36" rx="4" fill="#E3A25A"></rect><rect x="308" y="120" width="46" height="36" rx="4" fill="#2B2D33"></rect><rect y="220" width="400" height="30" fill="#141518"></rect></svg>
+                <div class="velatura" aria-hidden="true"></div>
+                <div class="badge-sopra"><span class="badge badge-eta">18+</span></div>
+                <span class="t-mono-dato">gio 15.10 · 23:00 → 05:00</span>
+                <h3 class="evidenza-titolo">Notte Ferrovia</h3>
+                <span class="t-corpo-s">Club Binario 7 · Monza</span>
+              </div>
+              <div class="evidenza-corpo">
+                <div class="rc-tag"><span class="genere">techno</span><span class="genere">house</span></div>
+                <div class="rc-meta" style="margin-top: 0"><span>2,1 km</span><span>da 15 €</span></div>
+                <span class="riga-amici-part" style="min-height: 28px"><span class="avatar-gruppo" aria-hidden="true"><span class="avatar avatar-s avatar-t2">MB</span><span class="avatar avatar-s avatar-t3">SC</span><span class="avatar avatar-s avatar-piu">+2</span></span><span>Marco, Sara e altri 2 ci vanno</span></span>
+              </div>
+            </a>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div class="etichetta-riga"><span class="etichetta">Riga evento compatta</span></div>
+            <a class="riga-compatta" href="#">
+              <span class="miniatura" aria-hidden="true"><span class="mini-tipo" style="background: var(--colore-superficie-3)"><span>22:00</span><b>Anni Zero</b></span></span>
+              <div style="min-width: 0"><h3 class="rc-titolo">Anni Zero</h3><p class="rc-luogo">Sala Ventuno · Desio</p><span class="rc-ora">22:00 → 03:00</span><div class="rc-tag"><span class="badge badge-eta">16+</span><span class="genere">commerciale</span></div><div class="rc-meta"><span>7,9 km</span><span>da 10 €</span></div></div>
+            </a>
+            <div class="etichetta-riga" style="margin-top: 10px"><span class="etichetta">Badge d’età e generi</span></div>
+            <div class="rc-tag" style="margin: 0"><span class="badge badge-eta">14+</span><span class="badge badge-eta">16+</span><span class="badge badge-eta">18+</span><span class="badge badge-eta">21+</span><span class="badge badge-eta">18+ · non dichiarata</span><span class="badge badge-annullato"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Annullato</span></div>
+            <div class="rc-tag" style="margin: 0"><span class="genere">techno</span><span class="genere">hip hop</span><span class="genere">live</span></div>
+            <span class="t-didascalia">Il badge d’età è sempre scritto per intero; i generi sono al massimo due per evento nelle schede.</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div class="etichetta-riga"><span class="etichetta">Marker · normale, selezionato, gruppo</span></div>
+            <div style="position: relative; height: 120px; border-radius: 4px; background: var(--mappa-terra); border: 1px solid var(--colore-linea)">
+              <span class="marker-locale" style="left: 80px; top: 70px"><span class="n">2</span>Officina Lambro</span>
+              <span class="marker-locale is-on" style="left: 200px; top: 70px"><span class="n">1</span>Binario 7</span>
+              <span class="pin-gruppo" style="left: 290px; top: 60px">3</span>
+            </div>
+            <span class="t-didascalia">Nome accessibile: «Officina Lambro, 2 eventi». Il gruppo si apre avvicinando la mappa.</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div class="etichetta-riga"><span class="etichetta">Anteprima sulla mappa</span></div>
+            <div class="anteprima-mappa" style="margin: 0; border-radius: 8px; box-shadow: none; border: 1px solid var(--colore-linea)">
+              <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px">
+                <div class="riga-compatta" style="border-bottom: 0"><span class="miniatura" aria-hidden="true" style="background: var(--colore-superficie-3)"><span class="mini-tipo"><span>23:00</span><b>Notte Ferrovia</b></span></span><div style="min-width: 0"><h3 class="rc-titolo" style="font-size: 0.9375rem">Notte Ferrovia</h3><span class="rc-ora">23:00 → 05:00</span><div class="rc-tag" style="margin-top: 4px"><span class="badge badge-eta">18+</span></div></div></div>
+                <button class="btn btn-s btn-secondario" type="button">Apri</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start">
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div class="etichetta-riga"><span class="etichetta">Mi interessa / Partecipo</span></div>
+            <div class="partecipa"><button class="partecipa-opz" type="button" aria-pressed="false">Mi interessa</button><button class="partecipa-opz" type="button" aria-pressed="false">Partecipo</button></div>
+            <span class="t-didascalia">Nessuna scelta</span>
+            <div class="partecipa"><button class="partecipa-opz is-on" type="button" aria-pressed="true">Mi interessa</button><button class="partecipa-opz" type="button" aria-pressed="false">Partecipo</button></div>
+            <span class="t-didascalia">Mi interessa · in negativo</span>
+            <div class="partecipa"><button class="partecipa-opz" type="button" aria-pressed="false">Mi interessa</button><button class="partecipa-opz is-on forte" type="button" aria-pressed="true">Partecipo</button></div>
+            <span class="t-didascalia">Partecipo · l’unico arancio della schermata. Un secondo tocco toglie la scelta.</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div class="etichetta-riga"><span class="etichetta">Visibilità per l’evento</span></div>
+            <div class="visibilita"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg><span class="testo"><b>Visibile ai tuoi amici</b><span>Gli amici vedono la tua scelta.</span></span><span class="interruttore is-on" role="switch" aria-checked="true"></span></div>
+            <div class="visibilita"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg><span class="testo"><b>Solo per te</b><span>Gli amici non la vedono.</span></span><span class="interruttore" role="switch" aria-checked="false"></span></div>
+            <div class="etichetta-riga" style="margin-top: 8px"><span class="etichetta">Amici che partecipano</span></div>
+            <button class="riga-amici-part" type="button" style="border-top: 1px solid var(--colore-linea); border-bottom: 1px solid var(--colore-linea); min-height: 56px"><span class="avatar-gruppo" aria-hidden="true"><span class="avatar avatar-s avatar-t2">MB</span><span class="avatar avatar-s avatar-t3">SC</span><span class="avatar avatar-s avatar-piu">+2</span></span><span>Marco, Sara e altri 2 ci vanno</span><span class="fine"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
+            <span class="t-didascalia">Solo amici confermati che hanno reso visibile la partecipazione. Mai sconosciuti, mai contatori di persone.</span>
+            <div class="etichetta-riga" style="margin-top: 8px"><span class="etichetta">Link esterno</span></div>
+            <a class="link-riga" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path></svg>Biglietti<span class="dest">sito esterno<svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></span></a>
+          </div>
+        </div>
+      </section>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { temi: [{ cls: 'nx-scuro', nome: 'Tema scuro' }, { cls: 'nx-chiaro', nome: 'Tema chiaro' }] };
+  }
+}
+</script>
+</body>
+</html>
