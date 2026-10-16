@@ -16,13 +16,13 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 2 su 15.
+Iterazioni completate: 3 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
 | 0 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-00-fondamenta` | CI verificata su GitHub (PR #4); mancano i progetti di staging, produzione e deploy |
 | 1 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-01-design-system` | Mancano la prova su emulatore Android e simulatore iOS, gli account degli store e la mappa nei bucket di staging e produzione |
-| 2 | in corso | 2026-10-16 | — | 0 | `iterazione-02-account` | — |
+| 2 | completata con attese esterne | 2026-10-16 | 2026-10-16 | 2 | `iterazione-02-account` | Mancano Auth di staging e produzione (hook, Turnstile, email), D-01 e App Review Meta per chiudere la Fase 0 |
 | 3 | da iniziare | — | — | 0 | — | — |
 | 4 | da iniziare | — | — | 0 | — | — |
 | 5 | da iniziare | — | — | 0 | — | — |
@@ -224,4 +224,88 @@ Esito: SUPERATA
   e dall'API.
 - Criteri: criteri della Fase 0; test e2e che un utente di 13 anni non può registrarsi né
   dall'app né dall'API.
+
+**Cicli di revisione**
+- Ciclo 1: tutti i controlli verdi; dalla rilettura del diff, cinque problemi. Senza token di
+  Turnstile accesso, recupero e reinvio non davano risposta → avviso "Stiamo completando la
+  verifica di sicurezza". Un link delle email rimandato al Site URL (app nativa, indirizzo non
+  ammesso) arrivava alla home e perdeva il token → la home inoltra `token_hash` alla pagina
+  di verifica. `/sicurezza/` ripeteva l'onboarding già completato → porta in Scopri.
+  `interest-cohort` in `Permissions-Policy` è obsoleto → rimosso. "Ho sbagliato email"
+  lasciava la verifica in attesa sul dispositivo → la cancella. Aggiunti i test e2e.
+- Ciclo 2: tutti i controlli verdi, nessun problema nuovo.
+- Durante lo sviluppo (prima dei cicli) i test hanno trovato: dati di registrazione rimasti
+  in `auth.users` e in `auth.identities` perché Supabase Auth riscrive i metadati dopo il
+  trigger → pulizia in `before insert`/`before update` su entrambe le tabelle (R-05, test
+  pgTAP e e2e con Supabase reale); service worker che serviva la 404 per le pagine con
+  parametri (`?token_hash=`, in futuro `?id=`) → parametri ignorati nella cache; `.env`
+  della radice non letto da Next (cache di `loadEnvConfig`) → lettura forzata.
+
+**Esito dei test**
+- pgTAP 127/127 (6 file: `000_supporto`, `001_rls_abilitata`, `010_storage_mappe`,
+  `011_profili`, `012_registrazione`, `013_account_non_confermati`); `supabase db lint`
+  senza errori; `verifica_documentazione.py` e `verifica_migrazioni.py` verdi.
+- Vitest 37/37; ESLint, TypeScript e Prettier verdi.
+- Playwright con Supabase simulato 132/132 (mobile e desktop, axe nei due temi su tutte le
+  schermate e gli stati); Playwright con Supabase locale reale 3/3.
+- Worker invariato: Ruff, mypy, pytest 29/29.
+
+**Criteri di completamento**
+| Criterio | Esito | Evidenza |
+|---|---|---|
+| Fase 0.1: migrazione senza RLS o test fa fallire la CI | SÌ | PR #4 (iterazione 0) |
+| Fase 0.2: `supabase test db` con R-01, R-02, R-04, R-05 per tutti gli utenti del seed | SÌ | `011_profili`, `012_registrazione` |
+| Fase 0.3: chi ha meno di 14 anni non si registra né dall'app né dall'API (e2e) | SÌ | `tests/e2e/integrazione/registrazione.spec.ts` (Supabase reale), job CI `integrazione` |
+| Fase 0.4: export statico su browser, simulatore iOS, emulatore Android | Parziale | Browser SÌ; simulatori: attesa esterna dall'iterazione 1 |
+| Fase 0.5: token del design system | SÌ | iterazione 1 |
+| Fase 0.6: D-01 (dominio) chiusa | NO | Decisione del product owner |
+| Fase 0.7: richiesta di App Review Meta inviata | NO | Attesa esterna |
+| PRD F-10: dati minimi, data immutabile, CAPTCHA, consensi versionati, onboarding in 3 schermate | SÌ | e2e `registrazione`, `accesso`, `sicurezza`; pgTAP |
+| Content Security Policy (ARCHITECTURE.md §9) | SÌ | `scripts/applica-csp.mjs`, `vercel.json`, e2e "Content Security Policy" |
+
+**Safety review — Iterazione 2 (F-10, F-41 consensi)**
+Esito: SUPERATA
+
+Dati coinvolti: email e password (Supabase Auth, solo il titolare); username e nome
+(`profili`, solo il titolare finché non esistono amicizie); data di nascita
+(`profili_privati`, solo il titolare, immutabile, fuori da metadati e JWT); consensi (solo il
+titolare, sola aggiunta); onboarding completato (solo il titolare); fascia d'età (solo al
+titolare tramite `mio_account`); email della verifica in attesa (solo `localStorage` del
+dispositivo, cancellata alla prima sessione). Superfici di contatto: nessuna; l'hook rivela a
+chi tenta di registrarsi solo se uno username esiste già (codice `NX003`), senza età né altri
+dati, dietro limiti di frequenza e CAPTCHA.
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | RLS e policy per operazione su 4 tabelle; età solo nel DB (`private.eta_di`, test per 14–21 anni e compleanno a Roma); funzioni `security definer` in `private` con `search_path` vuoto; test positivi e negativi per tutti gli utenti del seed, `moderatore` e `moderatore_senza_mfa`; nessun `service_role` in `apps/web` |
+| B. Contatti tra utenti | SÌ | `profili` visibile solo al titolare (`puo_vedere_profilo`), nessun elenco possibile, nessun accesso anonimo; nessun messaggio libero |
+| C. Eventi e contenuti | SÌ | Nessun evento; testi senza alcol, senza urgenza (attesa di 60 s scritta in piccolo), opzioni del foglio dei termini con lo stesso peso (R-43) |
+| D. Posizione | N/A | Nessun dato di posizione |
+| E. Contenuti caricati | SÌ | Username e nome con vincoli di formato e lunghezza; la segnalazione dei profili arriva con `segnalazioni` (iterazione 3) |
+| F. Privacy | SÌ | Solo i dati di R-60; account non confermati eliminati dopo 24 ore (§10, `013_account_non_confermati`); Turnstile documentato (ADR-0020, R-66, D-07, informativa); nessun tracciamento; check-in e notifiche spenti di default (test); testi per quattordicenni |
+| G. Documentazione | SÌ | PRD, ARCHITECTURE §3.1 §3.2 §4.1 §9, DATA_MODEL §4 §5.1 §5.10 §8 §9, SAFETY_PRIVACY R-01 R-02 R-05 R-63 R-66 §10, ADR-0020, DESIGN, ROADMAP (iterazione 8), DECISIONI_APERTE D-07, supabase/README |
+
+**Scelte fatte durante l'iterazione**
+- Controllo dell'età nell'hook "before user created" di Supabase Auth (errore leggibile
+  dall'app) e di nuovo nel trigger su `auth.users`; i consensi iniziali li registra il
+  trigger, insieme al profilo.
+- Username verificato all'invio e non mentre si scrive: senza account non si interrogano i
+  profili (R-07, R-10).
+- Link delle email con `token_hash` verso pagine dell'app: funzionano su qualsiasi
+  dispositivo. Account non confermati eliminati dopo 24 ore (nuova riga in §10).
+- CSP come meta con gli hash degli script, calcolata dopo la build, valida anche nelle app
+  native; header di Vercel per il resto.
+- Test e2e in due livelli: Supabase simulato per schermate e stati, Supabase reale per il
+  percorso completo e R-01 (nuovo job CI).
+- Sentry e i link delle email nell'app nativa spostati nell'iterazione 8 (ROADMAP).
+
+**Attese esterne**
+- Supabase Auth di staging e produzione: hook dell'età, Turnstile con la chiave segreta,
+  modelli delle email, URL, password di 10 caratteri e protezione dalle password compromesse
+  (supabase/README.md); chiave del sito in Vercel.
+- Revisione legale di termini e informativa 2026-10 e identità del titolare (D-07).
+- Dalle iterazioni precedenti: progetti di staging e produzione, deploy, simulatori iOS e
+  Android, account degli store. Per chiudere la Fase 0: D-01 e App Review Meta.
+
+**Commit**: `e8283e9` … commit finale di chiusura sul branch `iterazione-02-account`.
 
