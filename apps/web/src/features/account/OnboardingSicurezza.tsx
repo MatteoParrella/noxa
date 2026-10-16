@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Avviso } from '@/components/ui/Avviso';
 import { IndicatorePunti } from '@/components/ui/Indicatori';
-import { Rivela } from '@/components/ui/Movimento';
+import { Entra } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { Caricamento, ErroreConAzione } from '@/components/ui/Stati';
 import { messaggi } from '@/lib/messaggi/it';
@@ -108,7 +108,7 @@ export function OnboardingSicurezza() {
         </div>
       }
     >
-      <Rivela className="flex flex-col gap-3" indice={2}>
+      <Entra className="flex flex-col gap-3" indice={2}>
         {frasi.map((frase) => (
           <p key={frase} className="testo-accesso is-primario t-corpo">
             {frase}
@@ -119,7 +119,7 @@ export function OnboardingSicurezza() {
             {messaggi.comune.erroreRete.testo}
           </Avviso>
         )}
-      </Rivela>
+      </Entra>
     </Schermata>
   );
 }

@@ -12,6 +12,7 @@ apps/web/next-env.d.ts
 *.tsbuildinfo
 coverage/
 playwright-report/
+playwright-report-integrazione/
 test-results/
 
 # Capacitor (artefatti di build; i progetti ios/ e android/ sono versionati)

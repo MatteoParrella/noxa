@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test';
-import { attendiAnimazioni, verificaAccessibilita } from './supporto';
+import { attendiAnimazioni, expect, test, verificaAccessibilita } from './supporto';
 
 test.describe('movimento espressivo (ADR-0019)', () => {
   test('titolo, contenuto e indicatore si animano e arrivano allo stato finale', async ({

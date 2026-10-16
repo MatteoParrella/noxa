@@ -472,7 +472,8 @@
   padding-left: var(--spazio-5);
 }
 
-/* ---------- passaggio tra i passi della registrazione (ADR-0019) ---------- */
+/* ---------- passaggio tra i passi della registrazione (ADR-0019) ----------
+   Con prefers-reduced-motion le animazioni sono spente da componenti.css. */
 .scorre-passo {
   animation: scorre-passo var(--movimento-passo) var(--curva-espressiva) both;
 }
@@ -484,22 +485,5 @@
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scorre-passo {
-    animation: dissolvenza var(--movimento-ridotto) linear both;
-  }
-  .bagliore-benvenuto {
-    animation: dissolvenza var(--movimento-ridotto) linear both;
-  }
-}
-@keyframes dissolvenza {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }

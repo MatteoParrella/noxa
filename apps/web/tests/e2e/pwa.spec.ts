@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './supporto';
 
 test('l’app è installabile: manifest, icone e service worker', async ({ page, request }) => {
   await page.goto('/scopri/');

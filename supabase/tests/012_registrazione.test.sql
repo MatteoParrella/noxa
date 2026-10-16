@@ -1,7 +1,7 @@
 -- Registrazione (hook e trigger), consensi versionati e RPC mio_account.
 -- Regole: R-01, R-05, R-60, R-63. DATA_MODEL.md §5.1, §5.10; ARCHITECTURE.md §4.1.
 begin;
-select plan(43);
+select plan(44);
 
 -- Dati di registrazione validi di riferimento: ogni caso ne cambia uno.
 create temporary table dati_validi as
@@ -148,6 +148,17 @@ select is(
    where id = '00000000-0000-4000-8000-0000000000b1'),
   false,
   'R-05: la data di nascita non torna nei metadati con un aggiornamento'
+);
+
+insert into auth.identities (id, user_id, provider_id, provider, identity_data)
+values (gen_random_uuid(), '00000000-0000-4000-8000-0000000000b1',
+        '00000000-0000-4000-8000-0000000000b1', 'email',
+        (select dati || '{"sub": "00000000-0000-4000-8000-0000000000b1"}' from dati_validi));
+select is(
+  (select identity_data ?| array['data_nascita', 'username', 'nome_visualizzato', 'consensi']
+   from auth.identities where user_id = '00000000-0000-4000-8000-0000000000b1'),
+  false,
+  'R-05: i dati di registrazione non restano nell''identità email'
 );
 
 -- ---------------------------------------------------------------------------------------------

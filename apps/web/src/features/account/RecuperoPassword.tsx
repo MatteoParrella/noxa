@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState, type FormEvent } from 'react';
 import { Avviso } from '@/components/ui/Avviso';
 import { Campo } from '@/components/ui/Campo';
-import { Rivela } from '@/components/ui/Movimento';
+import { Entra } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { ErroreLimite, ErroreRete, type ErroreDominio } from '@/lib/errori';
 import { messaggi } from '@/lib/messaggi/it';
@@ -83,7 +83,7 @@ export function RecuperoPassword() {
         )
       }
     >
-      <Rivela indice={2}>
+      <Entra indice={2}>
         <form id="modulo-recupero" noValidate onSubmit={invia} className="schermo-pila">
           <p className="testo-accesso">{testi.testo}</p>
           <Campo
@@ -123,7 +123,7 @@ export function RecuperoPassword() {
             onToken={setToken}
           />
         </form>
-      </Rivela>
+      </Entra>
     </Schermata>
   );
 }

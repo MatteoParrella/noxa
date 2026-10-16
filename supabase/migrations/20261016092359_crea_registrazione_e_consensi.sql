@@ -234,6 +234,25 @@ create trigger rimuovi_dati_registrazione
   before update of raw_user_meta_data on auth.users
   for each row execute function private.rimuovi_dati_registrazione();
 
+-- Supabase Auth copia i metadati anche nell'identità email (auth.identities.identity_data):
+-- anche lì non restano (R-05).
+create or replace function private.rimuovi_dati_registrazione_identita()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.identity_data := coalesce(new.identity_data, '{}'::jsonb)
+                       - 'data_nascita' - 'username' - 'nome_visualizzato' - 'consensi';
+  return new;
+end;
+$$;
+revoke all on function private.rimuovi_dati_registrazione_identita() from public;
+
+create trigger rimuovi_dati_registrazione
+  before insert or update of identity_data on auth.identities
+  for each row execute function private.rimuovi_dati_registrazione_identita();
+
 -- ---------------------------------------------------------------------------------------------
 -- RPC public.mio_account: stato dell'account per l'app
 -- ---------------------------------------------------------------------------------------------

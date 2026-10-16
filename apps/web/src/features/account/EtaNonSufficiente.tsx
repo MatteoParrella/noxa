@@ -1,6 +1,6 @@
 'use client';
 
-import { Rivela } from '@/components/ui/Movimento';
+import { Entra } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { messaggi } from '@/lib/messaggi/it';
 import { IllustrazioneOrizzonte } from './Illustrazioni';
@@ -23,10 +23,10 @@ export function EtaNonSufficiente({ onHoCapito }: { onHoCapito: () => void }) {
         </Pulsante>
       }
     >
-      <Rivela className="schermo-pila" indice={2}>
+      <Entra className="schermo-pila" indice={2}>
         <p className="testo-accesso is-primario">{testi.testo}</p>
         <p className="testo-accesso">{testi.nienteSalvato}</p>
-      </Rivela>
+      </Entra>
     </Schermata>
   );
 }

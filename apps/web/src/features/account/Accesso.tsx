@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Avviso } from '@/components/ui/Avviso';
 import { Campo } from '@/components/ui/Campo';
 import { CampoPassword } from '@/components/ui/CampoPassword';
-import { Rivela } from '@/components/ui/Movimento';
+import { Entra } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { mascheraEmail } from '@/lib/email';
 import {
@@ -146,7 +146,7 @@ export function Accesso() {
         </>
       }
     >
-      <Rivela indice={2}>
+      <Entra indice={2}>
         <form id="modulo-accesso" noValidate onSubmit={invia} className="schermo-pila">
           <Campo
             etichetta={testi.email}
@@ -230,7 +230,7 @@ export function Accesso() {
             {testi.passwordDimenticata}
           </Pulsante>
         </form>
-      </Rivela>
+      </Entra>
     </Schermata>
   );
 }

@@ -72,3 +72,25 @@ export function Rivela({ children, indice = 0, className, as = 'div' }: PropsRiv
     children,
   );
 }
+
+type PropsEntra = {
+  children: ReactNode;
+  /** Posizione nella sequenza: ogni passo ritarda l'ingresso di --ritardo-passo. */
+  indice?: number;
+  className?: string;
+};
+
+/**
+ * Blocco che entra dal sfocato al nitido all'apertura della schermata (ADR-0019), senza
+ * aspettare lo scorrimento: per le schermate brevi come l'accesso, dove tutto è già in vista.
+ */
+export function Entra({ children, indice = 0, className }: PropsEntra) {
+  return (
+    <div
+      className={classi('a-fuoco', className)}
+      style={{ '--ritardo': `calc(${indice} * var(--ritardo-passo) + 200ms)` } as CSSProperties}
+    >
+      {children}
+    </div>
+  );
+}

@@ -21,6 +21,7 @@ const configurazione = [
       'public/vendor/',
       'next-env.d.ts',
       'playwright-report/',
+      'playwright-report-integrazione/',
       'test-results/',
       'src/lib/database.types.ts',
     ],

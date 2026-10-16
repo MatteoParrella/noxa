@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Avviso } from '@/components/ui/Avviso';
 import { Campo } from '@/components/ui/Campo';
-import { Rivela } from '@/components/ui/Movimento';
+import { Entra } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { mascheraEmail } from '@/lib/email';
 import { ErroreLimite, type ErroreDominio } from '@/lib/errori';
@@ -158,7 +158,7 @@ export function VerificaEmail({ scaduto = false }: Props) {
         </>
       }
     >
-      <Rivela className="schermo-pila" indice={2}>
+      <Entra className="schermo-pila" indice={2}>
         {emailNota ? (
           <p className="testo-accesso">
             {testi.abbiamoMandato}{' '}
@@ -211,7 +211,7 @@ export function VerificaEmail({ scaduto = false }: Props) {
           riferimento={verifica}
           onToken={setToken}
         />
-      </Rivela>
+      </Entra>
     </Schermata>
   );
 }

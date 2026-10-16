@@ -12,7 +12,7 @@ import { CampoPassword } from '@/components/ui/CampoPassword';
 import { CasellaLunga } from '@/components/ui/CasellaLunga';
 import { Icona } from '@/components/ui/Icona';
 import { IndicatorePassi } from '@/components/ui/Indicatori';
-import { Rivela } from '@/components/ui/Movimento';
+import { Entra } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { useOnline } from '@/lib/connessione';
 import { analizzaDataNascita, dataIso, oggiARoma } from '@/lib/date';
@@ -346,7 +346,7 @@ export function Registrazione() {
         )}
 
         {passo === 1 && (
-          <Rivela className="schermo-pila" indice={spostato ? 0 : 3}>
+          <Entra className="schermo-pila" indice={spostato ? 0 : 3}>
             <CampoData
               etichetta={testi.data.campo}
               valore={dati.data}
@@ -356,11 +356,11 @@ export function Registrazione() {
               aiuto={testi.data.aiuto}
               errore={errori.data}
             />
-          </Rivela>
+          </Entra>
         )}
 
         {passo === 2 && (
-          <Rivela className="schermo-pila" indice={0}>
+          <Entra className="schermo-pila" indice={0}>
             <Campo
               etichetta={testi.credenziali.email}
               type="email"
@@ -394,11 +394,11 @@ export function Registrazione() {
                 },
               ]}
             />
-          </Rivela>
+          </Entra>
         )}
 
         {passo === 3 && (
-          <Rivela className="schermo-pila" indice={0}>
+          <Entra className="schermo-pila" indice={0}>
             <Campo
               etichetta={testi.profilo.username}
               autoComplete="username"
@@ -444,11 +444,11 @@ export function Registrazione() {
               aiuto={testi.profilo.nomeAiuto}
               {...(errori.nome ? { errore: errori.nome } : {})}
             />
-          </Rivela>
+          </Entra>
         )}
 
         {passo === 4 && (
-          <Rivela className="schermo-pila gap-4" indice={0}>
+          <Entra className="schermo-pila gap-4" indice={0}>
             <ul className="riassunto">
               {testi.consensi.riassunto.map((voce, indice) => (
                 <li key={voce.titolo} className="riassunto-voce">
@@ -516,7 +516,7 @@ export function Registrazione() {
                 {erroreGenerale.testo}
               </Avviso>
             )}
-          </Rivela>
+          </Entra>
         )}
       </form>
     </Schermata>

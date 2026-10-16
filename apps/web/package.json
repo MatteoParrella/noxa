@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:integrazione": "playwright test --config playwright.integrazione.config.ts",
     "icone": "node scripts/genera-icone.mjs",
     "cap:sync": "cap sync",
     "predev": "node scripts/copia-maplibre-worker.mjs",

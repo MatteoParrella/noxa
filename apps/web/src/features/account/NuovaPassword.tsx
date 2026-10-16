@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Avviso } from '@/components/ui/Avviso';
 import { CampoPassword } from '@/components/ui/CampoPassword';
-import { Rivela } from '@/components/ui/Movimento';
+import { Entra } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { Caricamento, ErroreConAzione } from '@/components/ui/Stati';
 import { ErroreRete, ErroreValidazione, converti, type ErroreDominio } from '@/lib/errori';
@@ -132,7 +132,7 @@ export function NuovaPassword() {
         </Pulsante>
       }
     >
-      <Rivela indice={2}>
+      <Entra indice={2}>
         <form id="modulo-nuova-password" noValidate onSubmit={invia} className="schermo-pila">
           <CampoPassword
             etichetta={testi.campo}
@@ -157,7 +157,7 @@ export function NuovaPassword() {
             <Avviso tipo="errore">{messaggi.comune.erroreSconosciuto.testo}</Avviso>
           )}
         </form>
-      </Rivela>
+      </Entra>
     </Schermata>
   );
 }

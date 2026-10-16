@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test';
-import { impostaTema, TEMI, verificaAccessibilita } from './supporto';
+import { expect, impostaTema, TEMI, test, verificaAccessibilita } from './supporto';
 
 // Il catalogo esiste solo in sviluppo e nella build dei test (NOXA_CATALOGO=1).
 for (const tema of TEMI) {

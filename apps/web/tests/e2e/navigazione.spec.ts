@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test';
-import { impostaTema, TEMI, verificaAccessibilita } from './supporto';
+import { expect, impostaTema, TEMI, test, verificaAccessibilita } from './supporto';
 
 const AREE = [
   { percorso: '/scopri/', nome: 'Scopri' },

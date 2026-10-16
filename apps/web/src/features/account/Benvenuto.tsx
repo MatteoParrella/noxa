@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, type CSSProperties } from 'react';
-import { Rivela } from '@/components/ui/Movimento';
+import { Entra } from '@/components/ui/Movimento';
 import { messaggi } from '@/lib/messaggi/it';
 import { PERCORSI } from './documenti';
 import { Schermata } from './Schermata';
@@ -55,14 +55,14 @@ export function Benvenuto() {
         </span>
         <span className="marchio-punto" aria-hidden="true" />
       </h1>
-      <Rivela className="mt-5 flex flex-col gap-5" indice={2}>
+      <Entra className="mt-5 flex flex-col gap-5" indice={2}>
         <p className="frase-benvenuto">{testi.frase}</p>
         <p className="t-mono-dato c-2 m-0 flex flex-wrap gap-x-3.5 gap-y-1">
           {testi.aree.map((area) => (
             <span key={area}>{area}</span>
           ))}
         </p>
-      </Rivela>
+      </Entra>
     </Schermata>
   );
 }
