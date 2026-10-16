@@ -50,9 +50,10 @@ completa solo se rispetta la definizione di completato del §6.
 4. L'app si compila in export statico e gira su simulatore iOS, emulatore Android e browser.
 5. I token del design system sono in `apps/web/src/styles/tokens.css`, usati dalla
    configurazione di Tailwind e documentati in DESIGN.md.
-6. La decisione D-01 (dominio) è chiusa e gli ADR e i documenti che la citano sono
-   aggiornati (DECISIONI_APERTE.md).
-7. La richiesta di App Review Meta è stata inviata.
+6. La richiesta di App Review Meta è stata inviata.
+
+La decisione sul dominio (D-01) è spostata ai criteri della Fase 2: fino ad allora si usa
+l'ipotesi di lavoro `noxa.app`.
 
 ## Fase 1 — Beta chiusa Milano e Brianza
 
@@ -121,6 +122,8 @@ il consolidamento di tutte le funzionalità della Fase 1.
 7. Crash-free sessions ≥ 99,5% nell'ultima settimana di beta.
 8. Wrapped (F-33) e badge (F-32), se presenti nel rilascio, verificati con `safety-review`
    (R-41, R-42); se in ritardo, il lancio procede senza (sono P1).
+9. La decisione D-01 (dominio) è chiusa prima della pubblicazione negli store e gli ADR e i
+   documenti che citano `noxa.app` sono aggiornati (DECISIONI_APERTE.md).
 
 ## Fase 3 — Crescita
 
