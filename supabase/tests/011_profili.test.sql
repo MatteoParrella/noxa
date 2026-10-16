@@ -41,26 +41,26 @@ select ok(not private.e_minorenne('00000000-0000-4000-8000-0000000000a1'),
 -- profili: ognuno vede solo il proprio profilo (R-10, R-13), per tutte le età del seed
 -- ---------------------------------------------------------------------------------------------
 select tests.autentica_come('minore_14');
-select results_eq($$ select username::text from public.profili $$, array['minore_14'],
-                  'R-10: minore_14 vede solo il proprio profilo');
+select results_eq($$ select username::text from public.profili order by 1 $$, array['minore_14', 'minore_15'],
+                  'R-10: minore_14 vede sé e chi ha una richiesta in attesa con lei, nessun altro');
 select tests.autentica_come('minore_15');
-select results_eq($$ select username::text from public.profili $$, array['minore_15'],
-                  'R-10: minore_15 vede solo il proprio profilo');
+select results_eq($$ select username::text from public.profili order by 1 $$, array['minore_14', 'minore_15', 'minore_16'],
+                  'R-10: minore_15 vede sé, la richiesta in attesa e l''amica');
 select tests.autentica_come('minore_16');
-select results_eq($$ select username::text from public.profili $$, array['minore_16'],
-                  'R-10: minore_16 vede solo il proprio profilo');
+select results_eq($$ select username::text from public.profili order by 1 $$, array['minore_15', 'minore_16'],
+                  'R-10: minore_16 vede sé e l''amico, non gli altri minorenni');
 select tests.autentica_come('minore_17');
-select results_eq($$ select username::text from public.profili $$, array['minore_17'],
-                  'R-10: minore_17 vede solo il proprio profilo');
+select results_eq($$ select username::text from public.profili order by 1 $$, array['adulto_18', 'minore_17'],
+                  'R-13: minore_17 vede l''adulto solo perché è un amico confermato');
 select tests.autentica_come('adulto_18');
-select results_eq($$ select username::text from public.profili $$, array['adulto_18'],
-                  'R-13: adulto_18 non vede profili di minorenni né di sconosciuti');
+select results_eq($$ select username::text from public.profili order by 1 $$, array['adulto_18', 'minore_17'],
+                  'R-13: adulto_18 vede solo il minorenne amico confermato, nessun altro');
 select tests.autentica_come('adulto_20');
-select results_eq($$ select username::text from public.profili $$, array['adulto_20'],
-                  'R-13: adulto_20 vede solo il proprio profilo');
+select results_eq($$ select username::text from public.profili order by 1 $$, array['adulto_20', 'adulto_21'],
+                  'R-13: adulto_20 vede sé e l''amico, nessun minorenne');
 select tests.autentica_come('adulto_21');
-select results_eq($$ select username::text from public.profili $$, array['adulto_21'],
-                  'R-13: adulto_21 vede solo il proprio profilo');
+select results_eq($$ select username::text from public.profili order by 1 $$, array['adulto_20', 'adulto_21'],
+                  'R-13: adulto_21 vede sé e l''amico, nessun minorenne');
 select tests.autentica_come('moderatore');
 select results_eq($$ select username::text from public.profili $$, array['moderatore'],
                   'R-69: anche il moderatore non elenca i profili');
