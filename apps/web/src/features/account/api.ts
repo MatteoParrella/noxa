@@ -27,9 +27,15 @@ export type DatiRegistrazione = {
   tokenVerificaUmana: string | null;
 };
 
+/** Codici di Supabase Auth per un'email già registrata. */
+const EMAIL_GIA_REGISTRATA = new Set(['user_already_exists', 'email_exists']);
+
 /**
  * Registrazione: i dati del profilo viaggiano nei metadati e il database li verifica
  * (hook e trigger, R-01), crea profilo e consensi e li toglie dai metadati (R-05).
+ * Un'email già registrata riceve la stessa risposta di una registrazione riuscita: la
+ * schermata non rivela chi ha un account (come il recupero della password). Nessun secondo
+ * account viene creato.
  */
 export async function registra(dati: DatiRegistrazione): Promise<void> {
   const { error } = await supabase().auth.signUp({
@@ -46,7 +52,7 @@ export async function registra(dati: DatiRegistrazione): Promise<void> {
       ...captcha(dati.tokenVerificaUmana),
     },
   });
-  if (error) throw converti(error);
+  if (error && !(error.code && EMAIL_GIA_REGISTRATA.has(error.code))) throw converti(error);
 }
 
 export async function reinviaVerifica(email: string, token: string | null): Promise<void> {

@@ -148,6 +148,9 @@ sequenceDiagram
 - Il codice di errore dell'hook (`NX001`…`NX006`) arriva all'app nel messaggio della risposta
   e diventa un errore di dominio (`src/lib/errori.ts`). Il trigger ripete la verifica per gli
   utenti creati con `service_role` o se l'hook non fosse configurato.
+- Un'email già registrata riceve la stessa risposta di una registrazione riuscita ("Controlla la
+  posta") e nessun secondo account viene creato: come il recupero della password, la
+  registrazione non rivela chi ha un account.
 - Lo username si verifica all'invio, non mentre si scrive: senza account non esiste un modo
   per interrogare i profili (R-07, R-10). Se è già in uso, l'app torna al passo 3 con una
   proposta.

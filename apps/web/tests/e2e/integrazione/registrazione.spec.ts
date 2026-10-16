@@ -95,6 +95,26 @@ test('R-01: un tredicenne non si registra nemmeno chiamando direttamente l’API
   await linkDallEmail(email);
 });
 
+test('un’email già registrata non crea un secondo account e non lo rivela', async ({ page }) => {
+  await page.goto('/registrazione/');
+  await page.getByLabel('Data di nascita').fill(nascita(16, 'app'));
+  await page.getByRole('button', { name: 'Avanti' }).click();
+  // Utente del seed, già confermato.
+  await page.getByLabel('Email').fill('minore_16@example.com');
+  await page.getByLabel('Password', { exact: true }).fill('notte.sul.tram7');
+  await page.getByRole('button', { name: 'Avanti' }).click();
+  await page.getByLabel('Username').fill(unico('doppio').username);
+  await page.getByLabel('Nome visualizzato').fill('Doppio');
+  await page.getByRole('button', { name: 'Avanti' }).click();
+  await page.getByLabel(/Accetto i/).check();
+  await page.getByLabel(/Ho letto l/).check();
+  await page.getByRole('button', { name: 'Crea l’account' }).click();
+  await expect(page).toHaveURL(/\/registrazione\/verifica\/$/);
+  // Il vecchio account funziona come prima: la password non è cambiata.
+  await accedi(page, 'minore_16@example.com', 'password-di-prova');
+  await expect(page).toHaveURL(/\/scopri\/$/);
+});
+
 test('registrazione, verifica dell’email, onboarding, uscita e nuovo accesso', async ({ page }) => {
   test.slow();
   const { email, username } = unico('giulia');

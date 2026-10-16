@@ -178,6 +178,17 @@ test('registrazione completa: i dati arrivano al database e si passa a "Controll
   expect(dati.gotrue_meta_security?.captcha_token).toBe('token-turnstile-di-prova');
 });
 
+test('un’email già registrata riceve la stessa risposta di una nuova', async ({
+  page,
+  supabase,
+}) => {
+  supabase.rispondi('signup', erroreAuth(422, 'user_already_exists', 'User already registered'));
+  await compilaFinoAlConsenso(page);
+  await accettaEInvia(page);
+  await expect(page).toHaveURL(/\/registrazione\/verifica\/$/);
+  await expect(page.getByText('g•••@example.com')).toBeVisible();
+});
+
 test('username già in uso: si torna al passo 3 con una proposta', async ({ page, supabase }) => {
   supabase.rispondi('signup', erroreAuth(400, 'unknown', 'NX003'));
   await compilaFinoAlConsenso(page);
