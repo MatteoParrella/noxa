@@ -3,6 +3,13 @@
 begin;
 select plan(43);
 
+-- I dati di esempio della raccolta nel seed non entrano nei conteggi dei test (rollback finale).
+update public.eventi_fonti set fonte_id = null where fonte_id is not null;
+delete from public.eventi_grezzi;
+delete from public.esecuzioni_fonte;
+delete from public.fonti;
+delete from public.candidati_locali;
+
 create function tests.f(n text) returns uuid language sql immutable as $$
   select ('00000000-0000-4000-8000-00000000f' || n)::uuid;
 $$;

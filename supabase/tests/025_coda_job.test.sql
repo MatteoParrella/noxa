@@ -3,6 +3,13 @@
 begin;
 select plan(13);
 
+-- I dati di esempio della raccolta nel seed non entrano nei conteggi dei test (rollback finale).
+update public.eventi_fonti set fonte_id = null where fonte_id is not null;
+delete from public.eventi_grezzi;
+delete from public.esecuzioni_fonte;
+delete from public.fonti;
+delete from public.candidati_locali;
+
 select tests.autentica_come('minore_14');
 select throws_ok($$ select 1 from public.coda_job $$, '42501', null, 'Chi ha 14 anni non legge la coda');
 select tests.autentica_come('adulto_21');
