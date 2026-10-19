@@ -750,13 +750,16 @@ export async function impostaSessione(pagina: Page) {
   }, JSON.stringify(sessione()));
 }
 
-/** Cloudflare Turnstile finto: rende un riquadro e consegna subito un token. */
+/**
+ * Cloudflare Turnstile finto: consegna il token e poi scrive "Verifica completata", così i
+ * test che aspettano il testo hanno già il token (in CI la macchina è più lenta).
+ */
 export async function simulaTurnstile(pagina: Page) {
   await pagina.route('https://challenges.cloudflare.com/**', (route) =>
     route.fulfill({
       contentType: 'application/javascript',
       body: `window.turnstile = {
-        render(el, o) { const s = document.createElement('p'); s.textContent = 'Verifica completata'; el.append(s); setTimeout(() => o.callback('token-turnstile-di-prova'), 50); return 'w1'; },
+        render(el, o) { setTimeout(() => { o.callback('token-turnstile-di-prova'); const s = document.createElement('p'); s.textContent = 'Verifica completata'; el.append(s); }, 50); return 'w1'; },
         reset() {}, remove() {}
       };`,
     }),

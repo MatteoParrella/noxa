@@ -57,6 +57,7 @@ test.describe('verifica dell’email', () => {
     supabase.rispondi('resend', 'rete');
     await verificaInAttesa(page, Date.now() - 120_000);
     await page.goto('/registrazione/verifica/');
+    await expect(page.getByText('Verifica completata')).toBeVisible();
     await page.getByRole('button', { name: 'Reinvia l’email' }).click();
     await expect(page.getByText('L’email non è partita')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Reinvia l’email' })).toBeEnabled();
