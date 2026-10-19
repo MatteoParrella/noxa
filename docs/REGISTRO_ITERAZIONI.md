@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 4 su 15.
+Iterazioni completate: 5 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ Iterazioni completate: 4 su 15.
 | 1 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-01-design-system` | Mancano la prova su emulatore Android e simulatore iOS, gli account degli store e la mappa nei bucket di staging e produzione |
 | 2 | completata con attese esterne | 2026-10-16 | 2026-10-16 | 2 | `iterazione-02-account` | Mancano Auth di staging e produzione (hook, Turnstile, email), D-01 e App Review Meta per chiudere la Fase 0 |
 | 3 | completata | 2026-10-16 | 2026-10-16 | 3 | `iterazione-03-amicizie` | Notifiche delle richieste e reclamo nell'iterazione 6, gruppi nella 7 (ROADMAP) |
-| 4 | in corso | 2026-10-19 | — | 0 | `iterazione-04-catalogo-eventi` | — |
+| 4 | completata | 2026-10-19 | 2026-10-19 | 2 | `iterazione-04-catalogo-eventi` | Eventi reali dall'iterazione 5; foto dei locali caricate dai moderatori nell'iterazione 5; flyer nell'iterazione 6 |
 | 5 | da iniziare | — | — | 0 | — | — |
 | 6 | da iniziare | — | — | 0 | — | — |
 | 7 | da iniziare | — | — | 0 | — | — |
@@ -426,4 +426,104 @@ e a chi ha una richiesta in attesa; nessun messaggio libero.
   Condividi e Segnala; stati di caricamento, vuoto, errore e offline.
 - Criteri: test pgTAP di R-20…R-23, R-56 e R-67 per tutte le età; `cerca_eventi` < 800 ms al
   95° percentile con 5.000 eventi; criteri di accettazione di F-01…F-05.
+
+**Cicli di revisione**
+- Durante lo sviluppo: `cerca_eventi` calcolava amici e generi per tutti gli eventi
+  dell'intervallo prima del limite (450 ms al 95° percentile con 5.000 eventi) → si scelgono
+  prima i 300 eventi, poi si calcolano i dati solo per quelli (140 ms); la tela della mappa
+  era alta 0 perché `.maplibregl-map` imponeva `position: relative` (difetto presente
+  dall'iterazione 1, i test controllavano solo lo stato "pronta") → selettore più specifico,
+  e i test ora toccano i segnaposto; l'anteprima della mappa copriva l'attribuzione
+  OpenStreetMap → anteprima sotto la mappa come nel design; il piede fisso del foglio dei
+  filtri copriva i suggerimenti dei comuni (axe `target-size`) → contenuto con scorrimento
+  proprio; i radio di "Dove" non si potevano toccare (cerchio sopra l'input nascosto) →
+  input nativo invisibile su tutta la riga; il seed non aveva eventi nel weekend → date dal
+  prossimo venerdì; `prepara_mappa.sh` falliva se la cartella indicata non esisteva →
+  `mkdir -p`.
+- Ciclo 1: tutti i controlli verdi; dalla rilettura del diff: due strisce offline (quella del
+  guscio e quella della pagina) → la striscia del guscio usa il testo della pagina; il nome
+  dei link delle schede nascondeva annullato, distanza, prezzo e amici → nome completo;
+  "Scegli un comune" con il campo vuoto filtrava Milano senza mostrarlo → il campo si
+  riempie; nessun avviso quando la ricerca arriva al limite di 300 → riga informativa.
+- Ciclo 2: tutti i controlli verdi, nessun problema nuovo.
+
+**Esito dei test**
+- pgTAP 370/370 (14 file; nuovi `017_locali`, `018_eventi`, `019_partecipazioni_evento`,
+  `020_cerca_eventi`, `021_prestazioni_cerca_eventi`; `016_segnalazioni` aggiornato);
+  `supabase db lint` senza errori su `public` e `private`; `verifica_documentazione.py` e
+  `verifica_migrazioni.py` verdi (15 tabelle con RLS e test).
+- Prestazioni: `cerca_eventi` con 5.000 eventi in 60 giorni, 60 ricerche tipiche per un
+  adulto e un minorenne: 95° percentile 140 ms, massimo 155 ms (soglia 800 ms).
+- Vitest 63/63 (nuovo `scopri.test.tsx`: date delle serate, weekend, testi delle schede,
+  amici, filtri, comuni, componenti); ESLint, TypeScript e Prettier verdi.
+- Playwright con Supabase simulato 214/214 (nuovo `scopri.spec.ts`: axe nei due temi su
+  elenco, filtri, calendario, mappa con anteprima, dettaglio con foto, amici, menu ⋯,
+  segnala, annullato, età non dichiarata, non disponibile; filtri, posizione arrotondata e
+  negata, vuoto, errore, offline, partecipazione con Annulla e visibilità, condivisione,
+  segnalazione di evento e foto); con Supabase reale 7/7 (nuovo
+  `integrazione/scopri.spec.ts`: età e alcol per 16 e 20 anni, partecipazione visibile solo
+  all'amico e nascosta con "Solo per te").
+- Worker invariato: Ruff, mypy, pytest 29/29.
+- Prova a mano nel browser con Supabase locale (16, 15 e 20 anni, temi scuro e chiaro):
+  elenco, filtri, mappa con segnaposto e anteprima, dettaglio, partecipazione, annullato,
+  segnala. La prova con VoiceOver o TalkBack su un dispositivo resta da fare con la beta
+  (iterazione 8, verifica completa di accessibilità).
+
+**Criteri di completamento**
+| Criterio | Esito | Evidenza |
+|---|---|---|
+| Test pgTAP di R-20…R-23 per 14, 15, 16, 17, 18, 20, 21 | SÌ | `018_eventi` (visibilità per ogni età e moderatori, R-21 check, R-22 con il ruolo `noxa_worker`), `020_cerca_eventi` |
+| Test pgTAP di R-56 | SÌ | `017_locali` (check della foto, approvazione, bucket `immagini-locali` e `flyer-pubblicati`, segnalazione della foto) |
+| Test pgTAP di R-67 per tutte le età | SÌ | `019_partecipazioni_evento` (14, 15, 16, 17, 18, 20, 21, moderatore, blocco) |
+| `cerca_eventi` < 800 ms al 95° percentile con 5.000 eventi | SÌ | `021_prestazioni_cerca_eventi` (140 ms) |
+| PRD F-01 elenco e filtri | SÌ | e2e `scopri.spec.ts` (quando, filtri, posizione, vuoto, errore, offline) |
+| PRD F-02 mappa | SÌ | e2e `scopri.spec.ts` e `mappa.spec.ts` (segnaposto, gruppi, anteprima, attribuzione, elenco) |
+| PRD F-03 dettaglio | SÌ | e2e `scopri.spec.ts` (copertina con attribuzione, fonte, biglietti, Mappe, annullato, età non dichiarata, non disponibile) |
+| PRD F-04 amici che partecipano | SÌ | `019`, `020`, e2e reale `integrazione/scopri.spec.ts` |
+| PRD F-05 Mi interessa / Partecipo | SÌ | e2e `scopri.spec.ts` (un tocco, Annulla, visibilità, errore), `019` |
+
+**Safety review — Iterazione 4 (F-01…F-05)**
+Esito: SUPERATA
+
+Dati coinvolti: eventi, generi, fonti e locali (informazioni pubbliche sugli eventi, visibili
+secondo l'età di chi guarda); foto dei locali (solo moderatori in scrittura, nessuna foto
+nel seed); partecipazioni (titolare e amici confermati, se visibili); posizione del
+telefono (solo parametro della ricerca, arrotondata a ~100 m, in memoria); comune scelto e
+filtri (solo nel `sessionStorage` del dispositivo); segnalazioni di eventi e foto.
+Superfici di contatto: riga "amici che partecipano" ed elenco degli amici nel dettaglio,
+limitati agli amici confermati non bloccati con partecipazione visibile; nessun nome o
+contatore di sconosciuti; link condiviso senza dati di altri utenti.
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | RLS e policy per operazione sulle 6 nuove tabelle e sui 2 bucket; RPC `security invoker`; funzioni `private` con `search_path` vuoto; età da `private.eta_di`; test per 14, 15, 16, 17, 18, 20, 21, `moderatore`, `moderatore_senza_mfa`, `noxa_worker` e `anon` (`017`…`020`) |
+| B. Contatti tra utenti | SÌ | Partecipazioni solo di amici confermati con `private.miei_amici()` (blocchi esclusi) e solo per eventi visibili a chi guarda (`019`: il minorenne non vede l'amico adulto a un 18+); profili degli amici tramite la RLS di `profili`; nessun testo libero nuovo |
+| C. Eventi e contenuti | SÌ | Tutte le letture passano dalla policy di `eventi` (RPC invoker, storage con `exists` su `eventi`/`locali`); età sconosciuta = 18 con check; R-22 con trigger; alcol invisibile ai minorenni (`018`, `020`, e2e reale); nessun conto alla rovescia, contatori generici o incentivo a spendere (e2e `scopri.spec.ts`), prezzi solo informativi |
+| D. Posizione | SÌ | Disattivata di default, chiesta solo con "Usa la mia posizione", arrotondata, mai salvata (e2e controlla il `sessionStorage`); alternativa con il centro del comune; nessuna coordinata nei log |
+| E. Contenuti caricati | SÌ | Eventi e foto dei locali segnalabili in due tocchi (`018`, `017`, e2e); foto caricate e approvate solo da moderatori con due fattori, percorso e fonte obbligatori (R-56) |
+| F. Privacy | SÌ | Nessun dato personale nuovo oltre alle partecipazioni, già nella tabella di conservazione (§10, con l'account); nessun SDK nuovo; mappe dal bucket `mappe` (e2e senza domini esterni); "Apri in Mappe" e i link esterni partono solo da un tocco |
+| G. Documentazione | SÌ | PRD F-01, F-03, F-05; ARCHITECTURE §4.2, §5.5, §10; DATA_MODEL §3, §4, §5.2, §5.3, §5.4, §5.10, §6; SAFETY_PRIVACY R-20…R-23, R-33, R-50, R-56, R-67; DESIGN; ROADMAP iterazioni 5, 6, 8 |
+
+**Scelte fatte durante l'iterazione**
+- Un evento `annullato` resta visibile (con badge e senza azioni) a chi ha l'età per
+  vederlo, per avvisare chi voleva andarci; non ci si può segnare.
+- RPC `dettaglio_evento` (security invoker) accanto a `cerca_eventi`, con la fonte più
+  affidabile e, per i soli flyer, il sito o l'Instagram del locale.
+- Policy di `eventi` scritta in linea (funzioni valutate una volta per query) e
+  `private.miei_amici()` per le partecipazioni, per le prestazioni; il test verifica che la
+  policy coincida con `private.evento_visibile_a`.
+- Bucket `flyer-pubblicati` creato ora (lettura legata all'evento), chiavi esterne di
+  `eventi_fonti` verso `fonti` e `caricamenti_flyer` con quelle tabelle (iterazioni 5 e 6).
+- Velatura delle copertine costruita sul colore di sfondo del tema, come nel layer "scopri";
+  tolti i token `--colore-velo-foto` e `--colore-testo-su-foto`.
+- Valore `dati_errati` di `motivo_segnalazione`; la foto del locale si segnala dal menu
+  dell'evento con il tipo `immagine_locale`.
+- Calendario estratto in `Calendario` (usato anche dalla data di nascita);
+  `NEXT_PUBLIC_URL_APP` per i link condivisi dalle app native.
+- Eventi già visti in memoria finché l'app è aperta; la cache su IndexedDB arriva con
+  l'offline dell'iterazione 8.
+
+**Attese esterne**: nessuna nuova (restano quelle delle iterazioni 0–2).
+
+**Commit**: `bbc6209` … commit finale di chiusura sul branch `iterazione-04-catalogo-eventi`.
 
