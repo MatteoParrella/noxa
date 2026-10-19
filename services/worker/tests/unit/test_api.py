@@ -4,9 +4,8 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
-from noxa_worker.api import crea_app
+from noxa_worker.api import Risorse, crea_app
 from noxa_worker.configurazione import Impostazioni
-from noxa_worker.database import VerificaDatabase
 
 
 def _impostazioni() -> Impostazioni:
@@ -18,11 +17,11 @@ def _impostazioni() -> Impostazioni:
 
 
 def _client(database_raggiungibile: bool) -> TestClient:
-    async def fabbrica(_: Impostazioni) -> AsyncIterator[VerificaDatabase]:
+    async def fabbrica(_: Impostazioni) -> AsyncIterator[Risorse]:
         async def verifica() -> bool:
             return database_raggiungibile
 
-        yield verifica
+        yield Risorse(verifica)
 
     return TestClient(crea_app(_impostazioni(), fabbrica))
 

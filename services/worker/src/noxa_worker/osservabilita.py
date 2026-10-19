@@ -53,3 +53,6 @@ def configura_log(
         registro = logging.getLogger(nome)
         registro.handlers.clear()
         registro.propagate = True
+    # httpx registra ogni URL richiesto a livello INFO: niente URL nei log, solo gli avvisi.
+    for nome in ("httpx", "httpcore"):
+        logging.getLogger(nome).setLevel(logging.WARNING)

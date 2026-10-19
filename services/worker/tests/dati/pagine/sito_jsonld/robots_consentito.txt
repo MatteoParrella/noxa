@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /area-riservata/
+Crawl-delay: 2

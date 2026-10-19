@@ -1,0 +1,24 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Sala Ventuno//IT
+BEGIN:VEVENT
+UID:sv-2026-10-24@salaventuno.example
+DTSTART;TZID=Europe/Rome:20261024T230000
+DTEND;TZID=Europe/Rome:20261025T040000
+SUMMARY:Reggaeton Night\, edizione d
+  autunno
+DESCRIPTION:Reggaeton e commerciale.\nVietato ai minori.
+URL:https://salaventuno.example/eventi/reggaeton
+END:VEVENT
+BEGIN:VEVENT
+UID:sv-2026-10-31@salaventuno.example
+DTSTART:20261031T220000Z
+SUMMARY:Halloween Club
+STATUS:CANCELLED
+END:VEVENT
+BEGIN:VEVENT
+UID:sv-2026-11-01@salaventuno.example
+DTSTART;VALUE=DATE:20261101
+SUMMARY:Giornata aperta
+END:VEVENT
+END:VCALENDAR
