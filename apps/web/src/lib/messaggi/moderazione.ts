@@ -346,7 +346,7 @@ export const moderazione = {
       testo: 'Togli un filtro, oppure aggiungi una fonte dalla scheda di un locale.',
     },
     disattivataAuto: (quando: string, errore: string) =>
-      `5 errori di fila: fonte disattivata. Ultimo errore il ${quando}: ${errore}. Controlla il sito, poi prova «Esegui ora» prima di riattivarla.`,
+      `Ultimo errore il ${quando}: ${errore}. Controlla il sito, poi prova «Esegui ora» prima di riattivarla.`,
     disattivataAutoTitolo: '5 errori di fila: fonte disattivata',
     apriScheda: 'Apri la scheda della fonte',
     caricamento: 'Carico le fonti',

@@ -14,6 +14,11 @@ import { Foglio } from '@/components/ui/Foglio';
 import { Icona } from '@/components/ui/Icona';
 import { IndicatorePassi, IndicatorePunti } from '@/components/ui/Indicatori';
 import { CodiceQr } from '@/components/ui/CodiceQr';
+import { CodiceSeiCifre } from '@/components/ui/CodiceSeiCifre';
+import { DialogoMotivazione } from '@/components/ui/DialogoMotivazione';
+import { Registro } from '@/components/ui/Registro';
+import { Selezione } from '@/components/ui/Selezione';
+import { TabellaDensa } from '@/components/ui/TabellaDensa';
 import { Interruttore } from '@/components/ui/Interruttore';
 import { LinkEsterno } from '@/components/ui/LinkEsterno';
 import { MenuAzioni } from '@/components/ui/MenuAzioni';
@@ -73,6 +78,9 @@ export function Catalogo({ tema }: { tema: Tema }) {
   const [termini, setTermini] = useState(false);
   const [scelta, setScelta] = useState<SceltaPartecipazione>(null);
   const [visibile, setVisibile] = useState(true);
+  const [codice, setCodice] = useState('481');
+  const [provincia, setProvincia] = useState<'MI' | 'MB'>('MB');
+  const [motivazione, setMotivazione] = useState(false);
   const nomeTema = tema === 'scuro' ? 'Tema scuro' : 'Tema chiaro';
 
   return (
@@ -376,6 +384,83 @@ export function Catalogo({ tema }: { tema: Tema }) {
           Può dipendere dalla rete.
         </ErroreConAzione>
         <StrisciaOffline />
+      </Sezione>
+
+      <Sezione titolo="Area di moderazione">
+        <CodiceSeiCifre
+          etichetta="Codice a 6 cifre"
+          etichettaCifra={(n) => `Cifra ${n} di 6`}
+          valore={codice}
+          onCambia={setCodice}
+        />
+        <div className="flex flex-wrap gap-2">
+          <Badge variante="successo">Consentita</Badge>
+          <Badge variante="avviso">Da verificare</Badge>
+          <Badge variante="errore">Vietata</Badge>
+          <Badge variante="testo">Non attivo</Badge>
+        </div>
+        <TabellaDensa
+          etichetta="Locali di esempio"
+          titoloPrima="Locale"
+          colonne={[
+            { chiave: 'prov', titolo: 'Prov.', cella: (r) => r.provincia, classe: 'mono' },
+            { chiave: 'fonti', titolo: 'Fonti', cella: (r) => r.fonti, classe: 'mono' },
+          ]}
+          righe={[
+            { id: 'a', nome: 'Club Binario 7', provincia: 'MB', fonti: '2 / 2' },
+            { id: 'b', nome: 'Spazio Navile', provincia: 'MI', fonti: '1 / 0' },
+          ]}
+          chiaveRiga={(r) => r.id}
+          selezionata="a"
+          prima={(r) => (
+            <span className="cella-nome">
+              <b>{r.nome}</b>
+            </span>
+          )}
+        />
+        <Selezione
+          etichetta="Provincia"
+          valore={provincia}
+          opzioni={[
+            { valore: 'MI', etichetta: 'MI · Milano' },
+            { valore: 'MB', etichetta: 'MB · Monza e Brianza' },
+          ]}
+          onCambia={setProvincia}
+        />
+        <Registro
+          etichettaSistema="Sistema"
+          vuoto="Nessuna azione registrata."
+          voci={[
+            {
+              quando: '19.10 08:14',
+              autore: 'Moderatore Uno',
+              cosa: 'ha approvato la foto',
+              perche: 'Autorizzazione scritta del locale, rif. AUT-2026-014.',
+            },
+            {
+              quando: '18.10 19:31',
+              autore: null,
+              cosa: 'ha creato l’evento da @officinalambro',
+              perche: null,
+            },
+          ]}
+        />
+        <Pulsante onClick={() => setMotivazione(true)}>Conferma con motivazione</Pulsante>
+        <DialogoMotivazione
+          aperto={motivazione}
+          onChiudi={() => setMotivazione(false)}
+          titolo="Annullare «Bassi Lunghi»?"
+          sopratitolo="Annullamento"
+          effetto="Chi aveva scelto «Partecipo» lo vedrà come annullato."
+          etichettaMotivazione="Motivazione (obbligatoria)"
+          aiutoMotivazione="Resta nel registro con il tuo nome e l’ora."
+          erroreMotivazioneMancante="Scrivi la motivazione: resta nel registro."
+          etichettaConferma="Annulla evento"
+          etichettaAnnulla="Annulla"
+          variante="pericolo"
+          testoErrore={() => 'Non salvato.'}
+          onConferma={async () => setMotivazione(false)}
+        />
       </Sezione>
 
       <Sezione titolo="Foglio">
