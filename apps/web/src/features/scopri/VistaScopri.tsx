@@ -44,7 +44,12 @@ const OPZIONI_VISTA = [
  */
 export function VistaScopri() {
   const online = useOnline();
-  const [vista, setVista] = useState<Vista>('elenco');
+  const [vista, setVistaScelta] = useState<Vista>('elenco');
+  const [mappaAperta, setMappaAperta] = useState(false);
+  const setVista = (nuova: Vista) => {
+    if (nuova === 'mappa') setMappaAperta(true);
+    setVistaScelta(nuova);
+  };
   const montato = useMontato();
   // Data e filtri salvati dipendono dal telefono: si leggono dopo l'idratazione, non nella build.
   const oggi = useMemo<DataCalendario | null>(() => (montato ? serataInCorso() : null), [montato]);
@@ -136,8 +141,8 @@ export function VistaScopri() {
         </div>
       </Rivela>
 
-      <div className={classi('scopri-contenuto', vista === 'mappa' && 'is-mappa')} key={vista}>
-        {vista === 'elenco' ? (
+      {vista === 'elenco' && (
+        <div className="scopri-contenuto">
           <ElencoEventi
             eventi={eventi}
             online={online}
@@ -145,10 +150,14 @@ export function VistaScopri() {
             conFiltri={attivi > 0}
             onTogliFiltri={() => applica({ ...FILTRI_INIZIALI, quando: filtri.quando })}
           />
-        ) : (
+        </div>
+      )}
+      {/* Creata alla prima apertura e poi tenuta montata: tornare sulla mappa è immediato. */}
+      {mappaAperta && (
+        <div className="scopri-contenuto" hidden={vista !== 'mappa'}>
           <MappaEventi eventi={eventi} online={online} onVaiAllElenco={() => setVista('elenco')} />
-        )}
-      </div>
+        </div>
+      )}
 
       {foglio === 'filtri' && oggi && (
         <FoglioFiltri
