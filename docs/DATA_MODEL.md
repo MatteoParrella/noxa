@@ -86,7 +86,7 @@ erDiagram
 | `canale_amicizia` | `ricerca`, `codice_invito` |
 | `tipo_oggetto_segnalabile` | `profilo`, `evento`, `caricamento_flyer`, `gruppo`, `serata_gruppo`, `immagine_locale` |
 | `fonte_immagine_locale` | `autorizzazione_locale`, `noxa`, `licenza_libera` |
-| `motivo_segnalazione` | `contenuto_inappropriato`, `molestie`, `adescamento_o_rischio_minore`, `spam`, `evento_falso`, `eta_errata`, `alcol_a_minori`, `altro` |
+| `motivo_segnalazione` | `contenuto_inappropriato`, `molestie`, `adescamento_o_rischio_minore`, `spam`, `evento_falso`, `eta_errata`, `alcol_a_minori`, `altro`, `dati_errati` (orari, luogo o età sbagliati di un evento, dall'iterazione 4) |
 | `stato_segnalazione` | `aperta`, `in_lavorazione`, `chiusa` |
 | `azione_moderazione` | `nessuna_violazione`, `rimuovi_contenuto`, `modifica_evento`, `approva_flyer`, `rifiuta_flyer`, `sospendi_account`, `riattiva_account`, `correggi_data_nascita`, `escalation_autorita`, `accesso_segnalazione` |
 | `tipo_fonte` | `sito_locale`, `instagram`, `resident_advisor`, `xceed`, `dice` |
@@ -126,7 +126,9 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `e_membro(gruppo uuid)` | `boolean` | Come sopra, con stato `invitato` oppure `attivo`. |
 | `e_admin_gruppo(gruppo uuid)` | `boolean` | `auth.uid()` è membro attivo con ruolo `admin`. |
 | `puo_entrare_nel_gruppo(gruppo uuid, utente uuid)` | `boolean` | Per ogni membro `m` (invitato o attivo) diverso da `utente`: `not c_e_blocco(m, utente)` e (`stessa_fascia(m, utente)` oppure `sono_amici(m, utente)`); il gruppo ha meno di 30 membri. Applica R-15. |
-| `evento_visibile_a(evento uuid, utente uuid)` | `boolean` | L'evento è `pubblicato`, `eta_di(utente) >= eta_minima` e (`not riferimenti_alcol` oppure `not e_minorenne(utente)`). Applica R-20 e R-23. |
+| `evento_visibile_a(evento uuid, utente uuid)` | `boolean` | L'evento è `pubblicato` o `annullato` (un annullamento resta visibile per avvisare chi voleva andarci), `eta_di(utente) >= eta_minima` e (`not riferimenti_alcol` oppure `not e_minorenne(utente)`). Applica R-20 e R-23. La policy `SELECT` di `eventi` scrive la stessa regola con le funzioni valutate una volta per query; il test `018_eventi` verifica che coincidano per tutte le età. |
+| `evento_partecipabile(evento uuid)` | `boolean` | `evento_visibile_a(evento, auth.uid())` e l'evento è `pubblicato` (non ci si segna a un evento annullato o in revisione). F-05. |
+| `miei_amici()` | `uuid[]` | Amici confermati di `auth.uid()` senza blocchi in nessuna direzione (stessa regola di `sono_amici`), calcolati una volta per query nella policy di `partecipazioni_evento` (R-17, R-67). |
 | `evento_adatto_al_gruppo(evento uuid, gruppo uuid)` | `boolean` | `evento_visibile_a(evento, m)` per ogni membro attivo `m`. Applica R-24. |
 | `versione_corrente(tipo tipo_consenso)` | `text` | Versione in vigore oggi di termini o informativa, da `private.versioni_documenti` (R-63). |
 | `e_moderatore()` | `boolean` | `auth.uid()` ha ruolo `moderatore` o `amministratore` in `ruoli_utente` **e** il claim `aal` del JWT vale `aal2` (R-06). |
@@ -145,7 +147,7 @@ policy".
 Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `verifica_dati_registrazione`, `prima_della_creazione_utente`, `rimuovi_dati_registrazione`,
 `rimuovi_dati_registrazione_identita`, `blocca_modifica_data_nascita`, `imposta_accettata_il`,
-`prepara_segnalazione`, `nuovo_codice_invito`, `normalizza_codice`, `limita_richieste_amicizia`, `applica_blocco`,
+`prepara_segnalazione`, `registra_approvazione_immagine`, `imposta_visibilita_partecipazione`, `nuovo_codice_invito`, `normalizza_codice`, `limita_richieste_amicizia`, `applica_blocco`,
 `verifica_invariante_gruppi`, `verifica_trasporto`, `verifica_categoria_spesa`,
 `limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `calcola_data_serata`,
 `imposta_aggiornato_il`) sono descritte insieme alle tabelle a cui si applicano; quelle
@@ -335,10 +337,10 @@ Vincolo: `accettata_il` è valorizzata se e solo se `stato = 'accettata'`.
 | `creata_il`, `chiusa_il` | `timestamptz` | |
 
 - **S**: `segnalante_id = auth.uid()` (stato della propria segnalazione) oppure `private.e_moderatore()`.
-- **I**: `segnalante_id = auth.uid()` e, per `tipo_oggetto = 'profilo'`, un profilo diverso dal proprio che si può vedere o che si è bloccato; `GRANT INSERT (segnalante_id, tipo_oggetto, oggetto_id, motivo, dettagli)`. Gli altri tipi si aggiungono con le loro tabelle (eventi, flyer, gruppi).
+- **I**: `segnalante_id = auth.uid()` e uno tra: `tipo_oggetto = 'profilo'` con un profilo diverso dal proprio che si può vedere o che si è bloccato; `tipo_oggetto = 'evento'` con un evento visibile (sottoquery soggetta alla RLS di `eventi`); `tipo_oggetto = 'immagine_locale'` con un locale visibile che ha una foto (`oggetto_id` = id del locale). `GRANT INSERT (segnalante_id, tipo_oggetto, oggetto_id, motivo, dettagli)`. Gli altri tipi si aggiungono con le loro tabelle (flyer, gruppi).
 - **U**: `private.e_moderatore()`; `GRANT UPDATE (stato, gestita_da, conservazione_legale, chiusa_il)`.
 - Trigger `private.prepara_segnalazione` (`before insert`): priorità 1 per `adescamento_o_rischio_minore`, 2 se il segnalante o il profilo segnalato è minorenne, 3 per le altre (R-53); al massimo 20 segnalazioni ogni 24 ore per utente (`NX015`).
-- RPC `public.mie_segnalazioni()`: le proprie segnalazioni con stato, oggetto (per i profili l'username) e l'ultima decisione motivata da `azioni_moderazione` (DSA art. 17).
+- RPC `public.mie_segnalazioni()`: le proprie segnalazioni con stato, oggetto (l'username per i profili, il titolo per gli eventi, il nome del locale per le foto) e l'ultima decisione motivata da `azioni_moderazione` (DSA art. 17).
 - **D**: nessuna.
 
 #### `azioni_moderazione`
@@ -370,25 +372,25 @@ Registro di sola aggiunta delle decisioni e degli accessi (DSA art. 17, R-53, R-
 | Colonna | Tipo | Vincoli |
 |---|---|---|
 | `id` | `uuid` | PK |
-| `nome` | `text` | |
+| `nome` | `text` | 1–120 caratteri |
 | `nome_normalizzato` | `text` | per il matching (EVENT_INGESTION.md §6.1) |
-| `indirizzo`, `comune` | `text` | |
+| `indirizzo`, `comune` | `text` | not null |
 | `provincia` | `text` | check `in ('MI', 'MB')` nella Fase 1; l'elenco si estende con una migrazione (Fase 3) |
 | `posizione` | `geography(Point, 4326)` | indice GiST |
 | `osm_id` | `text` | nullable, unico |
 | `google_place_id` | `text` | nullable, unico (unico dato di Google conservato, ADR-0008) |
-| `sito_web`, `instagram_username` | `text` | nullable |
-| `immagine_path` | `text` | nullable; percorso nel bucket `immagini-locali` (ADR-0018) |
+| `sito_web`, `instagram_username` | `text` | nullable; check sul formato (`https?://…`, username Instagram) |
+| `immagine_path` | `text` | nullable; percorso nel bucket `immagini-locali`, sempre `<id>.webp` (ADR-0018) |
 | `immagine_fonte` | `fonte_immagine_locale` | nullable; obbligatoria se `immagine_path` non è null |
 | `immagine_attribuzione` | `text` | nullable; obbligatoria con `licenza_libera`; mostrata nel dettaglio evento |
 | `immagine_riferimento` | `text` | nullable; obbligatorio con `autorizzazione_locale` (riferimento al documento di autorizzazione) |
-| `immagine_approvata_da` | `uuid` | nullable, FK → `profili(id)`; moderatore che ha caricato e approvato la foto (R-56) |
-| `immagine_approvata_il` | `timestamptz` | nullable |
+| `immagine_approvata_da` | `uuid` | nullable, FK → `profili(id)` `on delete set null`; moderatore che ha caricato e approvato la foto (R-56), impostato dal trigger |
+| `immagine_approvata_il` | `timestamptz` | nullable; obbligatoria con la foto, impostata dal trigger |
 | `attivo` | `boolean` | default `true` |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
 - **S**: `authenticated` con `attivo = true`; moderatori: tutti.
-- **I/U**: `private.e_moderatore()`. Un check impone fonte, approvazione e attribuzione o riferimento coerenti quando `immagine_path` è valorizzato (R-56); la modifica della foto produce una riga in `azioni_moderazione`.
+- **I/U**: `private.e_moderatore()`. Il check `locali_immagine_coerente` impone percorso, fonte, approvazione e attribuzione (licenza libera) o riferimento (autorizzazione del locale) coerenti quando `immagine_path` è valorizzato, e nessun dato della foto quando manca (R-56). Il trigger `private.registra_approvazione_immagine` scrive `immagine_approvata_da = auth.uid()` e `immagine_approvata_il = now()` a ogni nuova foto o nuova fonte. Il caricamento dall'area di moderazione (iterazione 5) registra anche una riga in `azioni_moderazione`.
 - Worker: `GRANT SELECT` a `noxa_worker`, policy `to noxa_worker using (true)`.
 
 #### `fonti`
@@ -429,31 +431,33 @@ Instagram, la sua pagina su un aggregatore.
 | `fine` | `timestamptz` | nullable, > `inizio` |
 | `data_serata` | `date` | calcolata dal trigger `private.calcola_data_serata`: data di `inizio - 6 ore` nel fuso `Europe/Rome` |
 | `eta_minima` | `smallint` | not null, default 18, check 14–30 (R-20, R-21) |
-| `eta_minima_dichiarata` | `boolean` | `false` se il valore è quello predefinito |
+| `eta_minima_dichiarata` | `boolean` | `false` se il valore è quello predefinito; check `eta_minima_dichiarata or eta_minima = 18` (R-21) |
 | `riferimenti_alcol` | `boolean` | default `false` (R-23) |
 | `artisti` | `text[]` | al massimo 20 elementi |
 | `prezzo_min_centesimi` | `integer` | nullable, ≥ 0 |
-| `url_biglietti` | `text` | nullable, link esterno (PRD F-15) |
-| `immagine_path` | `text` | nullable, solo da flyer approvato, bucket `flyer-pubblicati` |
-| `stato` | `stato_evento` | |
+| `url_biglietti` | `text` | nullable, link esterno (PRD F-15), check `https?://…` |
+| `immagine_path` | `text` | nullable, solo da flyer approvato, bucket `flyer-pubblicati`, sempre `eventi/<id>.webp` |
+| `stato` | `stato_evento` | default `in_revisione` (R-51) |
 | `ultima_verifica_il` | `timestamptz` | ultima volta in cui una fonte ha confermato l'evento |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
-Indici: `(data_serata)`, `(locale_id, data_serata)`, GIN su `artisti`, indice trigram su
-`titolo` per la deduplicazione.
+Indici: `(data_serata)`, `(locale_id, data_serata)`, GIN su `artisti`, indice trigram
+(`pg_trgm`) su `titolo` per la deduplicazione.
 
-- **S** (`authenticated`): `private.evento_visibile_a(id, auth.uid())` (R-20, R-21, R-23). Moderatori: tutti.
+- **S** (`authenticated`): stessa regola di `private.evento_visibile_a(id, auth.uid())`: `stato in ('pubblicato', 'annullato')`, `eta_minima <= eta_di(auth.uid())` e niente `riferimenti_alcol` per i minorenni (R-20, R-21, R-23). Moderatori con due fattori: tutti.
 - **U**: `private.e_moderatore()` (approvazione, correzione, annullamento).
 - **I/D**: nessuna per `authenticated`.
-- Worker: `SELECT`, `INSERT`, `UPDATE` con policy `to noxa_worker`. Il trigger `private.proteggi_eta_evento` impedisce al worker di abbassare `eta_minima` quando `eta_minima_dichiarata = true` e di impostare `riferimenti_alcol` da `true` a `false` (R-22); solo un moderatore può farlo, con una riga in `azioni_moderazione`. Se invece l'età era quella predefinita (`eta_minima_dichiarata = false`), la prima età dichiarata da una fonte verificata la sostituisce, anche se più bassa di 18: diventa un dato noto e non più una supposizione (R-21).
-- RPC `public.cerca_eventi(lat double precision, lon double precision, raggio_km numeric, dal date, al date, generi text[], eta_minima_max smallint, solo_amici boolean)`: `security invoker`, quindi soggetta alla policy. Restituisce gli eventi con la distanza (`ST_Distance` su `geography`) e il numero di amici partecipanti visibili. Le coordinate non vengono salvate (R-33).
+- Worker: `SELECT`, `INSERT`, `UPDATE` con policy `to noxa_worker`. Il trigger `private.proteggi_eta_evento` impedisce al worker di abbassare `eta_minima` o di rendere "non dichiarata" un'età quando `eta_minima_dichiarata = true` (`NX017`) e di impostare `riferimenti_alcol` da `true` a `false` (`NX018`) (R-22); solo un moderatore può farlo, con una riga in `azioni_moderazione`. Se invece l'età era quella predefinita (`eta_minima_dichiarata = false`), la prima età dichiarata da una fonte verificata la sostituisce, anche se più bassa di 18: diventa un dato noto e non più una supposizione (R-21).
+- Trigger `private.calcola_data_serata`: `data_serata` = data di `inizio` nel fuso `Europe/Rome` meno 6 ore (un evento che inizia alle 02:30 appartiene alla serata precedente).
+- RPC `public.cerca_eventi(lat double precision, lon double precision, raggio_km numeric, dal date, al date, generi text[], eta_minima_max smallint, solo_amici boolean)`, tutti i parametri facoltativi: `security invoker`, quindi soggetta alla policy. Senza date cerca la serata in corso; rifiuta con `22023` coordinate incomplete o fuori intervallo, distanze fuori da 1–100 km e intervalli di date invertiti o più lunghi di 62 giorni. Esclude gli eventi già finiti (`fine`, o `inizio` + 6 ore) e quelli di locali non attivi. `eta_minima_max` restringe soltanto tra gli eventi già visibili; `generi` vale se l'evento ha almeno uno dei generi; `solo_amici` tiene gli eventi con almeno un amico visibile. Sceglie prima al massimo 300 eventi in ordine di inizio, poi calcola per quelli: generi, coordinate del locale, distanza in metri dal punto (`ST_Distance` su `geography`, null senza punto), copertina (`copertina_tipo` `locale` → `flyer` → `tipografica`, `copertina_path`, `copertina_attribuzione`, ADR-0018), numero di amici che partecipano e interessati, i primi tre amici (id, nome, stato) e la propria scelta. Gli amici passano dalla RLS di `partecipazioni_evento` e `profili` (R-67). Le coordinate non vengono salvate (R-33). Prova di prestazioni: `021_prestazioni_cerca_eventi` (5.000 eventi, 95° percentile < 800 ms).
+- RPC `public.dettaglio_evento(evento uuid)`: `security invoker`; zero righe se l'evento non si vede. Restituisce i campi dell'evento, generi, locale con indirizzo e coordinate, copertina come sopra, la fonte più affidabile con un link (`sito_locale` → `instagram` → altre, poi la più recente; per i soli flyer il sito o l'Instagram del locale), gli amici visibili con username e stato, la propria scelta e la sua visibilità.
 
 #### `generi_musicali`
 *Funzionalità: F-01.*
 
 | Colonna | Tipo | Vincoli |
 |---|---|---|
-| `codice` | `text` | PK (es. `techno`, `house`, `reggaeton`, `hip_hop`, `commerciale`, `latino`, `drum_and_bass`, `elettronica`, `live`, `altro`) |
+| `codice` | `text` | PK, `^[a-z_]{2,30}$`: `techno`, `house`, `hip_hop`, `reggaeton`, `commerciale`, `latino`, `drum_and_bass`, `elettronica`, `indie`, `live`, `altro` (inseriti dalla migrazione) |
 | `nome` | `text` | |
 
 - **S**: `authenticated`. **I/U/D**: solo migrazioni.
@@ -478,15 +482,16 @@ Provenienza di ogni evento: tutte le fonti che lo hanno confermato.
 |---|---|---|
 | `id` | `uuid` | PK |
 | `evento_id` | `uuid` | FK → `eventi(id)` `on delete cascade` |
-| `fonte_id` | `uuid` | nullable, FK → `fonti(id)` |
-| `caricamento_flyer_id` | `uuid` | nullable, FK → `caricamenti_flyer(id)` `on delete set null` |
-| `tipo_origine` | `text` | `tipo_fonte` oppure `flyer` |
-| `url_originale` | `text` | nullable per i flyer |
+| `fonte_id` | `uuid` | nullable, FK → `fonti(id)` (aggiunta con la tabella `fonti`, iterazione 5) |
+| `caricamento_flyer_id` | `uuid` | nullable, FK → `caricamenti_flyer(id)` `on delete set null` (aggiunta con la tabella `caricamenti_flyer`, iterazione 6) |
+| `tipo_origine` | `text` | un valore di `tipo_fonte` oppure `flyer` (check) |
+| `url_originale` | `text` | `https?://…`; obbligatorio tranne per i flyer (check `eventi_fonti_link`) |
 | `id_esterno` | `text` | nullable |
 | `raccolto_il` | `timestamptz` | |
 
-Vincolo: esattamente uno tra `fonte_id` e `caricamento_flyer_id` è valorizzato, oppure
-nessuno dei due se il caricamento è stato eliminato.
+Vincolo: al massimo uno tra `fonte_id` e `caricamento_flyer_id` è valorizzato
+(`num_nonnulls(...) <= 1`): nessuno dei due se il caricamento è stato eliminato o per i dati
+di esempio del seed.
 
 - **S**: come `eventi_generi`. `GRANT SELECT` escludendo `caricamento_flyer_id`, così chi ha caricato un flyer resta anonimo.
 - Worker: `SELECT`, `INSERT`.
@@ -549,12 +554,14 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 | `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade` |
 | `evento_id` | `uuid` | FK → `eventi(id)` `on delete cascade`; PK composta |
 | `stato` | `stato_partecipazione_evento` | |
-| `visibile_agli_amici` | `boolean` | default da `profili_privati.partecipazioni_visibili` |
+| `visibile_agli_amici` | `boolean` | not null; se non indicato lo imposta il trigger `private.imposta_visibilita_partecipazione` da `profili_privati.partecipazioni_visibili` (R-67) |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
-- **S**: `utente_id = auth.uid()` oppure (`visibile_agli_amici` e `private.sono_amici(auth.uid(), utente_id)` e `private.evento_visibile_a(evento_id, auth.uid())`) (R-67).
-- **I/U**: `utente_id = auth.uid()` e `private.evento_visibile_a(evento_id, auth.uid())`.
+- **S**: `utente_id = auth.uid()` oppure (`visibile_agli_amici` e `utente_id = any (private.miei_amici())` e l'evento è visibile, con una sottoquery soggetta alla RLS di `eventi`) (R-17, R-20, R-67). I moderatori non le vedono (R-69).
+- **I**: `utente_id = auth.uid()` e `private.evento_partecipabile(evento_id)`; `GRANT INSERT (utente_id, evento_id, stato, visibile_agli_amici)`.
+- **U**: `utente_id = auth.uid()` (using e with check) e `private.evento_partecipabile(evento_id)`; `GRANT UPDATE (stato, visibile_agli_amici)`.
 - **D**: `utente_id = auth.uid()`.
+- Indice `(evento_id)` per il conteggio degli amici in `cerca_eventi`.
 
 #### `gruppi`
 *Funzionalità: F-13.*
@@ -854,11 +861,12 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 |---|---|---|---|
 | `mio_account()` | definer | utenti | Stato dell'account del chiamante: username, nome, `stato_account`, `minorenne` (solo per i testi dell'onboarding, R-05), `onboarding_completato`, documenti in vigore non ancora accettati con le novità (R-63); nessuna data di nascita |
 | `cerca_eventi(...)` | invoker | utenti | Ricerca degli eventi (F-01, F-02, F-04), §5.3 `eventi` |
+| `dettaglio_evento(evento uuid)` | invoker | utenti | Dettaglio di un evento visibile con fonte, amici e propria scelta (F-03, F-04, F-05), §5.3 `eventi` |
 | `cerca_utenti(testo text)` | definer | utenti | Ricerca per prefisso di username (almeno 3 caratteri, la `@` iniziale si ignora, nessun carattere jolly) nella propria fascia, esclusi sé stessi, bloccati e sospesi; al massimo 20 risultati con identificativo (per la richiesta), username, nome visualizzato e rapporto (`nessuna`, `amici`, `inviata`, `ricevuta`), senza avatar (R-10) |
 | `crea_codice_invito()` | definer | utenti | Codice monouso di 15 minuti (R-12, R-14) |
 | `anteprima_codice_invito(codice text)` | definer | utenti | Stato del codice (`valido`, `scaduto`, `usato`, `non_valido`, `gia_amici`, `in_attesa`); identificativo, username e nome del titolare solo se il codice è utilizzabile o se siete già in contatto; blocchi, account sospesi e il proprio codice danno `non_valido`; `avviso_fasce = true` solo se chi chiama è minorenne e il titolare è maggiorenne |
 | `miei_bloccati()` | definer | utenti | Persone bloccate da chi chiama (F-42) |
-| `mie_segnalazioni()` | definer | utenti | Proprie segnalazioni con stato e decisione motivata |
+| `mie_segnalazioni()` | definer | utenti | Proprie segnalazioni (profili, eventi, foto dei locali) con stato e decisione motivata |
 | `usa_codice_invito(codice text)` | definer | utenti | Crea la richiesta di amicizia verso il titolare (R-12) |
 | `avviso_richiesta(amicizia uuid)` | definer | destinatario della richiesta | `avviso_fasce = true` solo se il destinatario è minorenne e il richiedente maggiorenne, per mostrare l'avviso prima dell'accettazione (R-12) |
 | `rigenera_mio_riepilogo()` | definer | utenti | Rigenera il proprio riepilogo annuale (F-33) |
@@ -880,8 +888,8 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 |---|---|---|---|---|
 | `avatar` | no | `<utente_id>/<file>` | `private.puo_vedere_profilo(<utente_id dal percorso>)` | titolare, solo nella propria cartella; WebP fino a 2 MB, ritagliata e senza dati EXIF (rimossi sul dispositivo); un solo file per utente, quello precedente si elimina alla sostituzione; i moderatori lo rimuovono con `decidi_segnalazione` (R-52) |
 | `flyer-caricati` | no | `<utente_id>/<uuid>.<ext>` | titolare e moderatori; il worker con `service_role` (ADR-0003) | titolare, solo nella propria cartella; JPEG/PNG/WebP fino a 10 MB (R-54) |
-| `flyer-pubblicati` | no | `eventi/<evento_id>.webp` | `exists` sull'evento (soggetta alla RLS di `eventi`) | solo il worker con `service_role`, con il job `copia_immagine_flyer` accodato da `decidi_flyer` dopo l'approvazione |
-| `immagini-locali` | no | `<locale_id>.webp` | `authenticated` se il locale è attivo (`exists` su `locali` con la sua RLS); moderatori | solo moderatori; WebP fino a 1 MB, EXIF rimosso (ADR-0018, R-56) |
+| `flyer-pubblicati` | no | `eventi/<evento_id>.webp` | `exists` su `eventi` con `immagine_path = name` (soggetta alla RLS di `eventi`, R-20, R-23) | solo il worker con `service_role`, con il job `copia_immagine_flyer` accodato da `decidi_flyer` dopo l'approvazione (iterazione 6); WebP fino a 2 MB. Bucket creato nell'iterazione 4 |
+| `immagini-locali` | no | `<locale_id>.webp` | `authenticated`: solo la foto approvata (`exists` su `locali` con `immagine_path = name`, soggetta alla RLS di `locali`, quindi solo locali attivi); moderatori con due fattori: tutti i file | solo moderatori con due fattori (insert, update, delete); WebP fino a 1 MB, EXIF rimosso (ADR-0018, R-56) |
 | `mappe` | sì | `milano-brianza.pmtiles`, `assets/` (font e icone di Protomaps) | tutti | solo durante il deploy (ADR-0016) |
 
 ## 7. Realtime

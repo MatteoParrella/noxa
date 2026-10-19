@@ -234,17 +234,21 @@ Ogni iterazione ha:
   (implementazione di `ArchivioJob` con `for update skip locked`, test di integrazione) e avvio
   degli esecutori nel lifespan del worker; `ClientHttpConforme`, normalizzazione,
   adattatori `sito_jsonld`, almeno un `sito_html_<locale>`,
-  `instagram_business_discovery`; deduplicazione e fusione con golden set; bootstrap dei
-  locali da OSM e Google Places; `pg_cron` di accodamento; RPC `esegui_fonte_ora` e
-  `decidi_duplicato`; area di moderazione per locali (con caricamento e approvazione della
-  foto, ADR-0018), fonti e duplicati.
+  `instagram_business_discovery`; chiave esterna `eventi_fonti.fonte_id` → `fonti`;
+  deduplicazione e fusione con golden set; bootstrap dei locali da OSM e Google Places;
+  `pg_cron` di accodamento; RPC `esegui_fonte_ora` e `decidi_duplicato`; area di
+  moderazione per locali (con caricamento e approvazione della foto, ADR-0018, registrati in
+  `azioni_moderazione`), fonti e duplicati; correzione di età e riferimenti all'alcol degli
+  eventi da parte dei moderatori con la riga in `azioni_moderazione` (R-22).
 - **Prerequisiti esterni**: App Review Meta approvata; chiave Google Places; foto autorizzate
   o con licenza libera dei locali verificati (ADR-0018).
 - **Criteri**: test degli adattatori su fixture; precisione della deduplicazione ≥ 98% e
   richiamo ≥ 90% sul golden set; almeno 40 locali verificati.
 
 ### Iterazione 6 — Flyer e moderazione
-- **Contenuto**: `caricamenti_flyer`, bucket `flyer-caricati` e `flyer-pubblicati`;
+- **Contenuto**: `caricamenti_flyer` (con la chiave esterna di
+  `eventi_fonti.caricamento_flyer_id`), bucket `flyer-caricati` (il bucket `flyer-pubblicati`
+  e la sua policy di lettura esistono dall'iterazione 4);
   estrattore con Claude API, prompt versionato, golden set di almeno 50 flyer, comando
   `valuta`; RPC `coda_flyer`, `decidi_flyer`, `dettaglio_segnalazione`,
   `decidi_segnalazione`; job `copia_immagine_flyer` e `pulizia_flyer`; schermate di
@@ -269,8 +273,9 @@ Ogni iterazione ha:
   gruppo misto valido e rifiutato; aggiornamento in tempo reale tra due sessioni.
 
 ### Iterazione 8 — Tracker, privacy e beta
-- **Contenuto**: tabelle del tracker e trigger di R-40; offline con coda di scritture e cache
-  delle tile della mappa già viste (richieste PMTiles a intervalli, ADR-0016); Edge
+- **Contenuto**: tabelle del tracker e trigger di R-40; offline con coda di scritture, eventi
+  già visti salvati in IndexedDB (dall'iterazione 4 restano in memoria finché l'app è aperta)
+  e cache delle tile della mappa già viste (richieste PMTiles a intervalli, ADR-0016); Edge
   Functions `esporta-dati` ed `elimina-account`; impostazioni di privacy;
   `applica_conservazione`; verifica completa di accessibilità; build interne TestFlight e
   Google Play; Sentry nell'app e nel worker con `beforeSend` (ADR-0014, R-62); link delle

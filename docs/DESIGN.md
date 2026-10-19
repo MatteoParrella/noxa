@@ -45,12 +45,18 @@ flowchart LR
   contenuto (catalogo dei componenti).
 - Font: Archivo (variabile, assi peso e larghezza) e IBM Plex Mono, serviti dall'app con
   Fontsource, senza richieste a Google Fonts (R-62).
-- Token aggiunti nel codice e da riportare in Claude Design: `--colore-velo-foto` e
-  `--colore-testo-su-foto` per il testo sopra le foto dei locali (ADR-0018).
+- Foto dei locali (ADR-0018): la velatura `.velatura` di `src/styles/scopri.css` sfuma la foto
+  nel colore di sfondo del tema, come nel layer "scopri" di Claude Design; i token
+  `--colore-velo-foto` e `--colore-testo-su-foto` della prima versione sono stati tolti con
+  l'iterazione 4.
 - Token delle schermate di accesso, dal layer "accesso" del progetto Claude Design
   (design/F-10-accesso): `--tipo-titolo-accesso`, `--tipo-marchio`,
   `--tipo-larghezza-marchio`, `--movimento-passo`, `--spostamento-passo`. Le classi stanno in
   `src/styles/accesso.css`.
+- Scopri, mappa e dettaglio evento, dal layer "scopri" (design/F-01-scopri, esportazione
+  `noxa-scopri.css`): nessun token nuovo, classi in `src/styles/scopri.css` (copertine,
+  scheda in evidenza, riga compatta, generi, amici che partecipano, selettore Mi interessa /
+  Partecipo, link esterni, segnaposto della mappa e anteprima, foglio dei filtri).
 - Token delle schermate degli amici, dal layer "amici" (design/F-11-amici): `--qr-sfondo`,
   `--qr-moduli`, `--qr-velo-testo` (il QR resta nero su bianco in entrambi i temi, per la
   lettura delle fotocamere), `--mirino-sfondo`, `--mirino-testo` (il mirino è l'immagine
@@ -69,13 +75,15 @@ flowchart LR
 
 ## 3. Componenti e schermate
 
-- Immagini degli eventi: la scheda evento mostra come sfondo la foto del locale, con una
-  velatura definita nei token che garantisce il contrasto del testo; in mancanza della foto,
+- Immagini degli eventi: la scheda in evidenza e il dettaglio mostrano la foto del locale,
+  con una velatura costruita sul colore di sfondo del tema che garantisce il contrasto del
+  testo (componente `Copertina`; se l'immagine non si carica vale il fondo tipografico); in mancanza della foto,
   il flyer approvato e poi il fondo tipografico (ADR-0018). L'accento del design system
   (arancio "lampione al sodio", esplorazione A) resta per azioni e stati attivi.
 
 - `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda,
-  SchedaEvento, Avviso, Foglio, Badge e Contatore, Avatar e GruppoAvatar, Interruttore,
+  SchedaEvidenza e RigaEvento, Copertina, Genere, AmiciPartecipano, SelettorePartecipazione,
+  LinkEsterno, Calendario, Avviso, Foglio, Badge e Contatore, Avatar e GruppoAvatar, Interruttore,
   Segmenti, Schede, ElencoVuoto, Caricamento, ErroreConAzione, StrisciaOffline,
   PulsanteSegnala, Mappa, CampoPassword con i requisiti, CampoData con il calendario in un
   foglio, CasellaLunga per i consensi, IndicatorePassi e IndicatorePunti, RigaPersona,

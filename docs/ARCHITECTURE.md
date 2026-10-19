@@ -166,13 +166,29 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
+    participant U as Utente
     participant A as App
     participant DB as Postgres
-    A->>DB: rpc cerca_eventi(lat, lon, raggio, date, generi, solo_amici)
-    Note over DB: security invoker: la policy di eventi<br/>applica R-20 e R-23 con eta_di(auth.uid())
-    DB-->>A: eventi + distanza + numero di amici partecipanti
-    Note over A,DB: lat/lon non vengono salvate né registrate (R-33)
+    participant S as Storage
+    U->>A: Stasera / Domani / Weekend, filtri
+    opt "Usa la mia posizione" (tocco esplicito)
+        A->>A: posizione del telefono arrotondata a ~100 m, solo in memoria
+    end
+    A->>DB: rpc cerca_eventi(lat, lon, raggio_km, dal, al, generi, eta_minima_max, solo_amici)
+    Note over DB: security invoker: la policy di eventi<br/>applica R-20, R-21 e R-23 con eta_di(auth.uid());<br/>la RLS di partecipazioni_evento lascia solo gli amici (R-67)
+    DB-->>A: al massimo 300 eventi con distanza, copertina, amici e propria scelta
+    A->>S: createSignedUrls (immagini-locali, flyer-pubblicati)
+    Note over S: le policy dello storage seguono<br/>la visibilità di locali ed eventi
+    S-->>A: link firmati per 1 ora
+    Note over A,DB: lat/lon non vengono salvate né registrate (R-33);<br/>un comune scelto usa il suo centro
 ```
+
+Il dettaglio (`/evento?id=`) usa la RPC `dettaglio_evento`, anch'essa `security invoker`:
+un evento non visibile restituisce zero righe e l'app mostra lo stesso testo per un evento
+tolto e per uno non adatto all'età. "Mi interessa" e "Partecipo" sono inserimenti, modifiche
+e cancellazioni dirette su `partecipazioni_evento` (aggiornamento ottimistico, "Annulla" nel
+toast); la mappa raggruppa per locale gli stessi risultati dell'elenco (MapLibre con
+raggruppamento della sorgente GeoJSON e segnaposto HTML con un nome accessibile).
 
 ### 4.3 Serata di gruppo in tempo reale
 
@@ -289,8 +305,10 @@ testo di sistema localizzato, senza testi scritti da altri utenti, poi imposta
 
 ### 5.5 Offline
 
-Il service worker conserva l'app shell. TanStack Query salva in IndexedDB le query in sola
-lettura (eventi già visti, serate di gruppo proprie, tracker). Le scritture del tracker sono
+Il service worker conserva l'app shell. Dall'iterazione 4 gli eventi già visti restano nella
+cache in memoria di TanStack Query finché l'app è aperta, con la striscia "Sei offline" e le
+azioni spente; dall'iterazione 8 TanStack Query salva in IndexedDB le query in sola lettura
+(eventi già visti, serate di gruppo proprie, tracker). Le scritture del tracker sono
 messe in coda e inviate al ritorno della connessione; le altre scritture richiedono la rete
 e lo comunicano all'utente.
 
@@ -361,9 +379,9 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 |---|---|---|
 | F-01 Elenco eventi con filtri | App (`features/scopri`), RPC `cerca_eventi` | §4.2 |
 | F-02 Mappa | App (MapLibre + Protomaps), bucket `mappe` | §3.1, §4.2, ADR-0016 |
-| F-03 Dettaglio evento | App (`/evento?id=`) | §3.1 |
-| F-04 Amici che partecipano | RPC `cerca_eventi` (conteggio amici) | §4.2 |
-| F-05 Interessato / Partecipo | App, PostgREST | §3.2 |
+| F-03 Dettaglio evento | App (`/evento?id=`), RPC `dettaglio_evento`, Storage (`immagini-locali`, `flyer-pubblicati`) | §3.1, §4.2 |
+| F-04 Amici che partecipano | RPC `cerca_eventi` e `dettaglio_evento` (amici visibili per la RLS) | §4.2 |
+| F-05 Interessato / Partecipo | App, PostgREST su `partecipazioni_evento` | §3.2, §4.2 |
 | F-06 Caricamento flyer | App (fotocamera Capacitor), Storage, worker `flyer`, Claude API | §4.5, EVENT_INGESTION.md §5 |
 | F-07 Aggregatori | Worker `fonti` (nuovi adattatori) | §4.5, ADR-0008 |
 | F-10 Registrazione e profilo | App, Supabase Auth (CAPTCHA), trigger di registrazione | §4.1 |
