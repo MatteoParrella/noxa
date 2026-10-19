@@ -46,8 +46,8 @@ class SitoFinto:
 
     def gestisci(self, richiesta: httpx.Request) -> httpx.Response:
         self.richieste.append(richiesta)
-        url = str(richiesta.url).split("?", 1)[0]
-        risposta = self.risposte.get(url)
+        completo = str(richiesta.url)
+        risposta = self.risposte.get(completo) or self.risposte.get(completo.split("?", 1)[0])
         if risposta is None:
             return httpx.Response(404, text="non trovato")
         return httpx.Response(

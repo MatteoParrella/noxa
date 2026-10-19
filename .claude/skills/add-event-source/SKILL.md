@@ -67,35 +67,35 @@ protocollo `Adattatore` (EVENT_INGESTION.md §4). Le richieste HTTP passano **so
 
 ### 3b. Sito senza dati strutturati
 1. Salva 2–3 pagine reali come fixture (§4), possibilmente in giorni diversi.
-2. Crea `fonti/sito_html_<nome_locale>.py`:
+2. Crea `fonti/sito_html_<nome_locale>.py` estendendo la base `AdattatoreSitoHtml`
+   (`fonti/sito_html.py`), che legge le pagine con `ClientHttpConforme`, segue la paginazione
+   entro il limite di pagine, segnala una struttura cambiata con `ErroreFonte("STRUTTURA")`
+   e normalizza con le funzioni comuni:
    ```python
-   class AdattatoreSitoHtmlEsempioClub:
+   class AdattatoreSitoHtmlEsempioClub(AdattatoreSitoHtml):
        nome: ClassVar[str] = "sito_html_esempio_club"
-       tipo: ClassVar[TipoFonte] = TipoFonte.SITO_LOCALE
-
-       async def raccogli(self, fonte: Fonte, http: ClientHttpConforme) -> list[EventoGrezzo]:
-           pagina = await http.get_html(fonte.url)            # applica robots.txt e limiti
-           return [estrai_scheda(nodo, base_url=fonte.url)
-                   for nodo in pagina.css("article.evento")]
-
-       def normalizza(self, grezzo: EventoGrezzo, fonte: Fonte) -> EventoNormalizzato:
-           return costruisci_evento(
-               origine=Origine.da_fonte(fonte, url=grezzo.url, id_esterno=grezzo.id),
-               titolo=grezzo.titolo,
-               inizio=interpreta_data_ora(grezzo.data, grezzo.ora, fuso=FUSO_ROMA),
-               eta_minima=estrai_eta_minima(grezzo.testo),      # None se assente → 18 (R-21)
-               riferimenti_alcol=contiene_riferimenti_alcol(grezzo.testo),
-               generi=mappa_generi(grezzo.tag),
-               artisti=estrai_artisti(grezzo.lineup),
-           )
+       selettori: ClassVar[SelettoriHtml] = SelettoriHtml(
+           evento="section.programma article.evento",
+           titolo=".evento-titolo",
+           data=".evento-data",           # testo ("sab 17 ottobre", "17/10")…
+           ora=".evento-ora",
+           # attributo_data="datetime",   # …oppure un attributo ISO 8601
+           descrizione=".evento-testo",
+           link="a.evento-link",
+           artisti=".evento-lineup li",
+           prezzo=".evento-prezzo",
+           note_ingresso=".evento-note",  # età e alcol si cercano anche qui
+           pagina_successiva="a.pagina-successiva",
+       )
    ```
-   - Usa le funzioni comuni di `normalizzazione/` (date, età, alcol, generi): non
-     reimplementarle.
+   - Se servono regole in più, sovrascrivi `_grezzo` o `normalizza` usando le funzioni di
+     `normalizzazione/` (date, età, alcol, generi): non reimplementarle.
    - Selettori il più possibile stabili (classi semantiche, attributi `itemprop`), mai
      posizionali (`div:nth-child(3)`).
-   - `http.get_html_renderizzato()` (Playwright) solo se il contenuto è generato da
-     JavaScript; spiega il motivo in un commento.
+   - Una pagina generata da JavaScript non si legge con questa base: serve un metodo
+     Playwright in `ClientHttpConforme`, da aggiungere con un ADR e spiegato in un commento.
    - Non leggere altri dati oltre a quelli dello schema; non scaricare immagini.
+   - Esempio di riferimento con una pagina di fantasia: `tests/unit/fonti/test_sito_html.py`.
 3. Registra l'adattatore in `fonti/registro.py`.
 
 ### 3c. Instagram
