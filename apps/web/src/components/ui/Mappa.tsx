@@ -1,6 +1,7 @@
 'use client';
 
 import type { GeoJSONSource, Map as MappaMaplibre, Marker } from 'maplibre-gl';
+import type { Protocol } from 'pmtiles';
 import { Map as MapIcon } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { classi } from '@/lib/classi';
@@ -23,6 +24,8 @@ const LIMITI: [[number, number], [number, number]] = [
 ];
 
 const SORGENTE = 'locali';
+
+let protocolloPmtiles: Protocol | null = null;
 
 /** Un locale sulla mappa con il numero dei suoi eventi nei filtri attuali. */
 export type LuogoMappa = { id: string; nome: string; lat: number; lon: number; eventi: number };
@@ -101,14 +104,18 @@ export function Mappa({
     const segnaposto = new Map<string, Marker>();
 
     async function crea(url: string, nodo: HTMLDivElement) {
-      const [maplibre, { Protocol }] = await Promise.all([
+      const [maplibre, { Protocol: ProtocolloPmtiles }] = await Promise.all([
         import('maplibre-gl'),
         import('pmtiles'),
       ]);
       if (annullato) return;
       maplibre.setWorkerUrl(URL_WORKER);
-      const protocollo = new Protocol();
-      maplibre.addProtocol('pmtiles', protocollo.tile);
+      // Un solo protocollo per tutta l'app: intestazione e indici del file PMTiles restano in
+      // memoria tra un'apertura e l'altra della mappa, senza riscaricarli.
+      if (!protocolloPmtiles) {
+        protocolloPmtiles = new ProtocolloPmtiles();
+        maplibre.addProtocol('pmtiles', protocolloPmtiles.tile);
+      }
       const ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const creata = new maplibre.Map({
         container: nodo,
@@ -256,8 +263,13 @@ export function Mappa({
 
     crea(urlPmtiles, elemento).catch(() => setStato('errore'));
     window.addEventListener(EVENTO_TEMA, cambiaTema);
+    // La mappa può restare montata ma nascosta (Scopri in elenco): quando torna visibile
+    // riprende le misure del contenitore.
+    const osservatore = new ResizeObserver(() => mappa?.resize());
+    osservatore.observe(elemento);
     return () => {
       annullato = true;
+      osservatore.disconnect();
       window.removeEventListener(EVENTO_TEMA, cambiaTema);
       for (const marker of segnaposto.values()) marker.remove();
       mappa?.remove();
