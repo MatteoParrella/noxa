@@ -328,7 +328,7 @@ function OpzioneRadio({
       <input
         type="radio"
         name="filtri-dove"
-        className="sr-only"
+        className="opz-input"
         checked={selezionata}
         onChange={onScegli}
       />

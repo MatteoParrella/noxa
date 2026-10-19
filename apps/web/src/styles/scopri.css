@@ -503,6 +503,9 @@
 .foglio-filtri {
   display: flex;
   flex-direction: column;
+  max-height: calc(100dvh - 240px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .foglio-sezione {
   display: flex;
@@ -515,8 +518,6 @@
   border-bottom: 0;
 }
 .foglio-piede {
-  position: sticky;
-  bottom: calc(-1 * var(--spazio-6));
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spazio-2);
@@ -532,6 +533,20 @@
   min-height: var(--spazio-12);
   padding: 6px 0;
   font-size: 0.9375rem;
+  cursor: pointer;
+}
+.opz-riga {
+  position: relative;
+}
+/* Il radio nativo copre tutta la riga, invisibile: frecce e tocco come un radio vero. */
+.opz-input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
   cursor: pointer;
 }
 .opz-riga:focus-within .opzione {

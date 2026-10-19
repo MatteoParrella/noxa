@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
 import { test as base, expect, type Page, type Request } from '@playwright/test';
 
@@ -11,6 +12,45 @@ export const ORIGINE_MAPPE = 'http://mappe.noxa.test';
 
 /** Origine fittizia di Supabase nella build dei test (playwright.config.ts). */
 export const ORIGINE_SUPABASE = 'http://supabase.noxa.test';
+
+const FIXTURE = new URL('./fixture/', import.meta.url);
+
+/**
+ * Bucket `mappe` simulato: PMTiles con le richieste a intervalli (Range) e glifi dalla
+ * fixture, così la mappa si carica senza rete (ADR-0016).
+ */
+export async function simulaMappe(pagina: Page) {
+  const pmtiles = await readFile(new URL('fixture-e2e.pmtiles', FIXTURE));
+  const glifo = await readFile(new URL('glifo-0-255.pbf', FIXTURE));
+  await pagina.route(`${ORIGINE_MAPPE}/**`, async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('.pmtiles')) {
+      const intervallo = /bytes=(\d+)-(\d+)/.exec(route.request().headers()['range'] ?? '');
+      const inizio = Number(intervallo?.[1] ?? 0);
+      const fine = Math.min(Number(intervallo?.[2] ?? pmtiles.length - 1), pmtiles.length - 1);
+      await route.fulfill({
+        status: 206,
+        headers: {
+          'Content-Range': `bytes ${inizio}-${fine}/${pmtiles.length}`,
+          'Content-Type': 'application/octet-stream',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Expose-Headers': 'Content-Range, ETag',
+        },
+        body: pmtiles.subarray(inizio, fine + 1),
+      });
+      return;
+    }
+    if (url.pathname.includes('/assets/fonts/')) {
+      await route.fulfill({
+        status: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: glifo,
+      });
+      return;
+    }
+    await route.fulfill({ status: 404, headers: { 'Access-Control-Allow-Origin': '*' } });
+  });
+}
 
 /** Imposta il tema prima che la pagina si carichi, come farebbe la scelta dell'utente. */
 export async function impostaTema(pagina: Page, tema: TemaProva) {
@@ -93,7 +133,15 @@ export type Endpoint =
   | 'segnalazioni_crea'
   | 'profili_leggi'
   | 'profili_aggiorna'
-  | 'codici_invito_leggi';
+  | 'codici_invito_leggi'
+  | 'cerca_eventi'
+  | 'dettaglio_evento'
+  | 'generi_musicali'
+  | 'profili_privati_leggi'
+  | 'partecipazioni_crea'
+  | 'partecipazioni_aggiorna'
+  | 'partecipazioni_elimina'
+  | 'firma_immagini';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
@@ -213,11 +261,199 @@ export const AMICIZIE_DI_PROVA = [
   amicizia('00000000-0000-4000-8000-00000000a003', PERSONE.marta, 'in_attesa', 'inviata'),
 ];
 
+// ---------------------------------------------------------------------------------------------
+// Catalogo degli eventi (Scopri, iterazione 4)
+// ---------------------------------------------------------------------------------------------
+
+/** Serata in corso a Milano (AAAA-MM-GG): fino alle 06:00 vale ancora quella di ieri. */
+export function serataDiProva(spostamento = 0): string {
+  const istante = new Date(Date.now() - 6 * 3600_000 + spostamento * 86_400_000);
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(istante);
+}
+
+/** Istante a Milano nella serata `giorno` (le ore dopo mezzanotte vanno al giorno dopo). */
+function alle(giorno: string, ora: string, giornoDopo = false): string {
+  const [anno, mese, data] = giorno.split('-').map(Number) as [number, number, number];
+  const [hh, mm] = ora.split(':').map(Number) as [number, number];
+  const comeUtc = Date.UTC(anno, mese - 1, data + (giornoDopo ? 1 : 0), hh, mm);
+  // Differenza tra Milano e UTC in quel momento (ora legale o solare).
+  const aMilano = new Date(new Date(comeUtc).toLocaleString('en-US', { timeZone: 'Europe/Rome' }));
+  const aUtc = new Date(new Date(comeUtc).toLocaleString('en-US', { timeZone: 'UTC' }));
+  return new Date(comeUtc - (aMilano.getTime() - aUtc.getTime())).toISOString();
+}
+
+export const LOCALI_DI_PROVA = {
+  binario: {
+    id: '00000000-0000-4000-8000-00000000c001',
+    nome: 'Club Binario 7',
+    comune: 'Monza',
+    lat: 45.5845,
+    lon: 9.2744,
+  },
+  lambro: {
+    id: '00000000-0000-4000-8000-00000000c002',
+    nome: 'Officina Lambro',
+    comune: 'Monza',
+    lat: 45.578,
+    lon: 9.28,
+  },
+  ventuno: {
+    id: '00000000-0000-4000-8000-00000000c004',
+    nome: 'Sala Ventuno',
+    comune: 'Desio',
+    lat: 45.618,
+    lon: 9.207,
+  },
+};
+
+type LocaleProva = (typeof LOCALI_DI_PROVA)[keyof typeof LOCALI_DI_PROVA];
+
+export function eventoDiProva(dati: {
+  id: string;
+  titolo: string;
+  locale: LocaleProva;
+  giorno?: string;
+  inizio: string;
+  fine?: string;
+  eta?: number;
+  dichiarata?: boolean;
+  generi?: string[];
+  prezzo?: number | null;
+  stato?: 'pubblicato' | 'annullato';
+  copertina?: { tipo: 'locale' | 'flyer'; path: string; attribuzione?: string };
+  amici?: Array<{ id: string; nome_visualizzato: string; stato: 'partecipo' | 'interessato' }>;
+  mia?: 'interessato' | 'partecipo' | null;
+  distanza?: number | null;
+}) {
+  const giorno = dati.giorno ?? serataDiProva();
+  const fine = dati.fine ?? '04:00';
+  return {
+    id: dati.id,
+    titolo: dati.titolo,
+    inizio: alle(giorno, dati.inizio),
+    fine: alle(giorno, fine, fine < dati.inizio),
+    data_serata: giorno,
+    eta_minima: dati.eta ?? 18,
+    eta_minima_dichiarata: dati.dichiarata ?? true,
+    stato: dati.stato ?? 'pubblicato',
+    prezzo_min_centesimi: dati.prezzo === undefined ? 1500 : dati.prezzo,
+    generi_evento: dati.generi ?? ['techno'],
+    locale_id: dati.locale.id,
+    locale_nome: dati.locale.nome,
+    locale_comune: dati.locale.comune,
+    locale_lat: dati.locale.lat,
+    locale_lon: dati.locale.lon,
+    distanza_m: dati.distanza ?? null,
+    copertina_tipo: dati.copertina?.tipo ?? 'tipografica',
+    copertina_path: dati.copertina?.path ?? null,
+    copertina_attribuzione: dati.copertina?.attribuzione ?? null,
+    amici_partecipano: (dati.amici ?? []).filter((a) => a.stato === 'partecipo').length,
+    amici_interessati: (dati.amici ?? []).filter((a) => a.stato === 'interessato').length,
+    amici: dati.amici ?? [],
+    mia_partecipazione: dati.mia ?? null,
+  };
+}
+
+export const EVENTI_DI_PROVA = [
+  eventoDiProva({
+    id: '00000000-0000-4000-8000-00000000e001',
+    titolo: 'Notte Ferrovia',
+    locale: LOCALI_DI_PROVA.binario,
+    inizio: '23:00',
+    fine: '05:00',
+    generi: ['techno', 'house'],
+    copertina: {
+      tipo: 'locale',
+      path: '00000000-0000-4000-8000-00000000c001.webp',
+      attribuzione: 'Laura Bassi, CC BY 4.0',
+    },
+    amici: [
+      {
+        id: '00000000-0000-4000-8000-0000000000f1',
+        nome_visualizzato: 'Marco',
+        stato: 'partecipo',
+      },
+      { id: '00000000-0000-4000-8000-0000000000f4', nome_visualizzato: 'Sara', stato: 'partecipo' },
+    ],
+  }),
+  eventoDiProva({
+    id: '00000000-0000-4000-8000-00000000e002',
+    titolo: 'Open Decks',
+    locale: LOCALI_DI_PROVA.lambro,
+    inizio: '21:30',
+    fine: '00:30',
+    eta: 14,
+    generi: ['house'],
+    prezzo: 0,
+  }),
+  eventoDiProva({
+    id: '00000000-0000-4000-8000-00000000e003',
+    titolo: 'Bassi Lunghi',
+    locale: LOCALI_DI_PROVA.lambro,
+    inizio: '22:30',
+    dichiarata: false,
+    generi: ['hip_hop', 'reggaeton'],
+    prezzo: null,
+  }),
+  eventoDiProva({
+    id: '00000000-0000-4000-8000-00000000e005',
+    titolo: 'Reggaeton Night',
+    locale: LOCALI_DI_PROVA.ventuno,
+    giorno: serataDiProva(1),
+    inizio: '23:00',
+    generi: ['reggaeton', 'commerciale'],
+  }),
+];
+
+export const DETTAGLIO_DI_PROVA = {
+  ...EVENTI_DI_PROVA[0]!,
+  descrizione: 'Techno e house fino all’alba nella sala grande.',
+  artisti: ['Nera Vale', 'Corrado B.', 'Otto Fili'],
+  url_biglietti: 'https://binario7.example/biglietti',
+  locale_indirizzo: 'Via dei Cantieri 12',
+  fonte_tipo: 'sito_locale',
+  fonte_url: 'https://binario7.example/eventi/notte-ferrovia',
+  amici: [
+    {
+      id: '00000000-0000-4000-8000-0000000000f1',
+      username: 'marco.brivio',
+      nome_visualizzato: 'Marco',
+      stato: 'partecipo',
+    },
+    {
+      id: '00000000-0000-4000-8000-0000000000f4',
+      username: 'sara.colombo',
+      nome_visualizzato: 'Sara',
+      stato: 'partecipo',
+    },
+  ],
+  mia_visibilita: null,
+} as Record<string, unknown>;
+
+export const GENERI_DI_PROVA = [
+  { codice: 'altro', nome: 'altro' },
+  { codice: 'commerciale', nome: 'commerciale' },
+  { codice: 'hip_hop', nome: 'hip hop' },
+  { codice: 'house', nome: 'house' },
+  { codice: 'indie', nome: 'indie' },
+  { codice: 'live', nome: 'live' },
+  { codice: 'reggaeton', nome: 'reggaeton' },
+  { codice: 'techno', nome: 'techno' },
+];
+
+/** Immagine PNG di 1×1 pixel servita al posto delle foto firmate. */
+export const PIXEL_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  'base64',
+);
+
 export class SupabaseSimulato {
   readonly richieste: Array<{ endpoint: Endpoint; corpo: unknown; url: string }> = [];
   private readonly risposte = new Map<Endpoint, Risposta>();
   account: AccountSimulato | null;
   amicizie: unknown[] = AMICIZIE_DI_PROVA;
+  /** Partecipazione salvata all'evento del dettaglio, aggiornata dalle chiamate simulate. */
+  partecipazione: { stato: string; visibile: boolean } | null = null;
   /** Profili visibili per `profili_leggi` (la RLS reale decide chi si vede). */
   profiliVisibili: PersonaProva[] = Object.values(PERSONE);
 
@@ -327,8 +563,44 @@ export class SupabaseSimulato {
             },
           ],
         };
+      case 'cerca_eventi':
+        return { stato: 200, corpo: EVENTI_DI_PROVA };
+      case 'dettaglio_evento':
+        return {
+          stato: 200,
+          corpo: [
+            {
+              ...DETTAGLIO_DI_PROVA,
+              mia_partecipazione: this.partecipazione?.stato ?? null,
+              mia_visibilita: this.partecipazione?.visibile ?? null,
+            },
+          ],
+        };
+      case 'generi_musicali':
+        return { stato: 200, corpo: GENERI_DI_PROVA };
+      case 'profili_privati_leggi':
+        return { stato: 200, corpo: { partecipazioni_visibili: true } };
+      case 'partecipazioni_crea':
+        return { stato: 201 };
+      case 'partecipazioni_aggiorna':
+      case 'partecipazioni_elimina':
+        return { stato: 204 };
+      case 'firma_immagini':
+        return { stato: 200, corpo: [] };
       default:
         return { stato: 200, corpo: {} };
+    }
+  }
+
+  /** Come il database: la partecipazione salvata torna nel dettaglio successivo. */
+  private ricordaPartecipazione(endpoint: Endpoint, corpo: unknown) {
+    const dati = (corpo ?? {}) as { stato?: string; visibile_agli_amici?: boolean };
+    if (endpoint === 'partecipazioni_elimina') this.partecipazione = null;
+    if (endpoint === 'partecipazioni_crea' || endpoint === 'partecipazioni_aggiorna') {
+      this.partecipazione = {
+        stato: dati.stato ?? this.partecipazione?.stato ?? 'interessato',
+        visibile: dati.visibile_agli_amici ?? this.partecipazione?.visibile ?? true,
+      };
     }
   }
 
@@ -379,6 +651,13 @@ export class SupabaseSimulato {
       '/rest/v1/segnalazioni': { POST: 'segnalazioni_crea' },
       '/rest/v1/profili': { GET: 'profili_leggi', PATCH: 'profili_aggiorna' },
       '/rest/v1/codici_invito': { GET: 'codici_invito_leggi' },
+      '/rest/v1/generi_musicali': { GET: 'generi_musicali' },
+      '/rest/v1/profili_privati': { GET: 'profili_privati_leggi' },
+      '/rest/v1/partecipazioni_evento': {
+        POST: 'partecipazioni_crea',
+        PATCH: 'partecipazioni_aggiorna',
+        DELETE: 'partecipazioni_elimina',
+      },
     };
     const daTabella = tabelle[percorso]?.[metodo];
     if (daTabella) return daTabella;
@@ -391,8 +670,12 @@ export class SupabaseSimulato {
       'avviso_richiesta',
       'miei_bloccati',
       'mie_segnalazioni',
+      'cerca_eventi',
+      'dettaglio_evento',
     ];
     if (rpc && rpcSimulate.includes(rpc)) return rpc as Endpoint;
+    if (percorso.startsWith('/storage/v1/object/sign/') && metodo === 'POST')
+      return 'firma_immagini';
     if (percorso === '/auth/v1/signup') return 'signup';
     if (percorso === '/auth/v1/resend') return 'resend';
     if (percorso === '/auth/v1/verify') return 'verify';
@@ -434,6 +717,7 @@ export class SupabaseSimulato {
         corpo = richiesta.postData();
       }
       this.richieste.push({ endpoint, corpo, url: richiesta.url() });
+      if (!this.risposte.has(endpoint)) this.ricordaPartecipazione(endpoint, corpo);
       const risposta =
         this.risposte.get(endpoint) ??
         (endpoint === 'profili_leggi'
