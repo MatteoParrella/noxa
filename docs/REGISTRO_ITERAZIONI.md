@@ -24,7 +24,7 @@ Iterazioni completate: 4 su 15.
 | 1 | completata con attese esterne | 2026-10-15 | 2026-10-15 | 3 | `iterazione-01-design-system` | Mancano la prova su emulatore Android e simulatore iOS, gli account degli store e la mappa nei bucket di staging e produzione |
 | 2 | completata con attese esterne | 2026-10-16 | 2026-10-16 | 2 | `iterazione-02-account` | Mancano Auth di staging e produzione (hook, Turnstile, email), D-01 e App Review Meta per chiudere la Fase 0 |
 | 3 | completata | 2026-10-16 | 2026-10-16 | 3 | `iterazione-03-amicizie` | Notifiche delle richieste e reclamo nell'iterazione 6, gruppi nella 7 (ROADMAP) |
-| 4 | da iniziare | — | — | 0 | — | — |
+| 4 | in corso | 2026-10-19 | — | 0 | `iterazione-04-catalogo-eventi` | — |
 | 5 | da iniziare | — | — | 0 | — | — |
 | 6 | da iniziare | — | — | 0 | — | — |
 | 7 | da iniziare | — | — | 0 | — | — |
@@ -398,4 +398,32 @@ e a chi ha una richiesta in attesa; nessun messaggio libero.
 **Attese esterne**: nessuna nuova (restano quelle delle iterazioni 0–2).
 
 **Commit**: `148cb2e` … commit finale di chiusura sul branch `iterazione-03-amicizie`.
+
+### Iterazione 4 — Catalogo eventi e scoperta
+
+**Piano**
+- Funzionalità: F-01 (elenco con filtri), F-02 (mappa), F-03 (dettaglio), F-04 (amici che
+  partecipano), F-05 (mi interessa / partecipo). Regole: R-20…R-23, R-33, R-43, R-50, R-56,
+  R-67; ADR-0016, ADR-0018, ADR-0019.
+- Design: `design/F-01-scopri/` (elenco, filtri e scegli data, mappa, dettaglio con le
+  copertine, stati, partecipazione e visibilità, componenti, verifica a 360 px).
+- Database: enum `stato_evento`, `stato_partecipazione_evento`, `fonte_immagine_locale`,
+  valore `dati_errati` di `motivo_segnalazione`; tabelle `locali` (con le colonne della foto e
+  il check di R-56), `generi_musicali`, `eventi`, `eventi_generi`, `eventi_fonti`,
+  `partecipazioni_evento`; funzioni `evento_visibile_a`, `amici_di`; trigger
+  `calcola_data_serata`, `proteggi_eta_evento` (R-22), visibilità predefinita delle
+  partecipazioni (R-67); bucket `immagini-locali` e `flyer-pubblicati` (sola lettura per
+  l'app); RPC `cerca_eventi` e `dettaglio_evento` (`security invoker`) con la copertina
+  nell'ordine dell'ADR-0018; segnalazione di eventi e foto dei locali; permessi del worker
+  sulle tabelle degli eventi; dati di esempio nel seed.
+- Test pgTAP per 14, 15, 16, 17, 18, 20, 21, moderatore e worker; prova di prestazioni di
+  `cerca_eventi` con 5.000 eventi sintetici.
+- App: Scopri con elenco (scheda in evidenza, righe, sezioni per serata), segmenti
+  Stasera/Domani/Weekend e calendario, foglio dei filtri (posizione non salvata o comune,
+  distanza, generi, età minima, solo con amici), mappa con marker raggruppati e anteprima,
+  dettaglio evento con copertine, età non dichiarata, annullato, amici, Mi interessa /
+  Partecipo con visibilità e "Annulla", fonte, biglietti, Apri in Mappe, menu ⋯ con
+  Condividi e Segnala; stati di caricamento, vuoto, errore e offline.
+- Criteri: test pgTAP di R-20…R-23, R-56 e R-67 per tutte le età; `cerca_eventi` < 800 ms al
+  95° percentile con 5.000 eventi; criteri di accettazione di F-01…F-05.
 
