@@ -91,6 +91,10 @@ La CLI Supabase è una dipendenza di sviluppo del repository: si esegue con `pnp
 | Worker (dipendenze) | `cd services/worker && uv sync` |
 | Controlli worker | `uv run ruff check .` · `uv run ruff format --check .` · `uv run mypy src tests` · `uv run pytest` |
 | Worker in Docker | `docker compose up --build worker` |
+| Test di integrazione del worker (database locale avviato) | `NOXA_TEST_DATABASE_URL=postgresql://noxa_worker:sviluppo-locale@127.0.0.1:54322/postgres NOXA_TEST_DATABASE_URL_ADMIN=postgresql://postgres:postgres@127.0.0.1:54322/postgres uv run pytest tests/integrazione` |
+| Bootstrap dei locali (da `services/worker`) | `uv run python -m noxa_worker.fonti.bootstrap_locali --csv candidati.csv [--importa]` |
+| Prova di una fonte senza scrittura | `uv run python -m noxa_worker.fonti.prova --fonte <fonte_id> --senza-scrittura` |
+| Golden set della deduplicazione (prima versione) | `uv run python tests/dati/genera_dedup_golden.py` |
 | Valutazione flyer (da `services/worker`) | `uv run python -m noxa_worker.flyer.valuta --golden tests/dati/flyer_golden` |
 | Formattazione JS/TS | `pnpm format:check` · `pnpm format` |
 | Coerenza documentazione | `python3 scripts/verifica_documentazione.py` |

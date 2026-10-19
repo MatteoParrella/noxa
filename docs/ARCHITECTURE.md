@@ -105,10 +105,12 @@ flowchart LR
 | Modulo | Responsabilità |
 |---|---|
 | `coda` | Prelievo dei job con `select … for update skip locked`, lease (`bloccato_fino`, 10 minuti), recupero dei job con lease scaduto, retry con backoff esponenziale (massimo 5 tentativi), idempotenza per `tipo` + chiave del payload. L'esecutore (`EsecutoreCoda`) accede alla tabella tramite il protocollo `ArchivioJob`, verificabile senza database e sostituibile se la coda dovesse uscire da Postgres. Il worker non pianifica nulla: l'unico scheduler è `pg_cron` (ADR-0003). |
-| `fonti` | Adattatori, uno per tipo di fonte, con un'interfaccia comune (EVENT_INGESTION.md §4); controllo di robots.txt; limitazione della frequenza per dominio. |
+| `coda_postgres` | `ArchivioJob` su `coda_job`: prelievo con `for update skip locked`, un solo job in esecuzione per dominio (`chiave_concorrenza`, con indice unico), completamento, rinvio e fallimento. |
+| `fonti` | `ClientHttpConforme` (`fonti/http.py`: user agent, robots.txt, intervallo per dominio, limite di pagine, cache condizionale, 5 MB per risposta; l'unico modulo che usa httpx, verificato da `test_architettura.py`); adattatori `sito_jsonld` e `instagram_business_discovery` nel registro `fonti/registro.py` (EVENT_INGESTION.md §4); strumenti `bootstrap_locali`, `prova` e `salva_fixture`. |
 | `flyer` | Prompt, schema Pydantic ed estrazione con Claude API (ADR-0007). |
-| `normalizzazione` | Conversione nel formato di `packages/schemas/evento.schema.json`, risoluzione del locale, normalizzazione di date e generi. |
-| `dedup` | Normalizzazione dei titoli, confronto fuzzy con rapidfuzz, fusione (ADR-0009). |
+| `normalizzazione` | Modello Pydantic dello schema evento v1 (verificato in CI contro `packages/schemas/evento.schema.json`), date nel fuso di Milano, età minima, riferimenti all'alcol, generi, regole di validazione e impronta dei grezzi. |
+| `dedup` | Normalizzazione dei titoli, confronto fuzzy con rapidfuzz, decisione e fusione (ADR-0009), golden set in `tests/dati/dedup_golden.jsonl`. |
+| `raccolta` | Gestori dei job `esegui_fonte` e `deduplica_grezzo` (`pipeline.py`) dietro il protocollo `ArchivioRaccolta`, con l'implementazione Postgres in `postgres.py`; una transazione per ogni evento raccolto. |
 | `api` | FastAPI con i soli endpoint interni `GET /salute` (liveness) e `GET /pronto` (readiness: database raggiungibile), usati dai controlli di Fly.io; il worker non è raggiungibile da internet. I comandi di amministrazione (per esempio "esegui ora una fonte") passano da RPC che inseriscono job in `coda_job`. Nel lifespan dell'applicazione avvia `CODA_CONCORRENZA` esecutori della coda. |
 | `osservabilita` | Log JSON strutturati (structlog), Sentry, metriche per job. |
 
@@ -399,11 +401,11 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | F-31 Statistiche | Vista `statistiche_personali` | §3.2 |
 | F-32 Badge | Funzione SQL `private.assegna_badge()` con `pg_cron` | §3.2 |
 | F-33 Wrapped | Funzione SQL `private.genera_riepiloghi()` con `pg_cron`, App (immagine generata sul dispositivo) | §3.2 |
-| F-40 Moderazione | App (area di moderazione, MFA), RPC di moderazione | §5.1, SAFETY_PRIVACY.md §11 |
+| F-40 Moderazione | App (area `/moderazione/` con navigazione propria, attivazione e codice TOTP, accesso di 8 ore; `src/features/moderazione/`), RPC di moderazione con registro delle azioni | §5.1, SAFETY_PRIVACY.md §11, DATA_MODEL.md §5.10 |
 | F-41 Diritti privacy | Edge Functions `esporta-dati`, `elimina-account` | §3.2 |
 | F-42 Impostazioni di privacy | App | §3.1 |
 | F-43 App installabile | Export statico, service worker, Capacitor, store | §3.1, §6, ADR-0001 |
-| F-44 Raccolta eventi | Worker (`coda`, `fonti`, `normalizzazione`, `dedup`), `pg_cron` | §4.5, EVENT_INGESTION.md |
+| F-44 Raccolta eventi | Worker (`coda`, `coda_postgres`, `fonti`, `normalizzazione`, `dedup`, `raccolta`), `pg_cron` (`accoda_fonti_da_eseguire`) | §4.5, EVENT_INGESTION.md |
 | F-45 Accessibilità | App, CI (axe) | DESIGN.md §4 |
 | F-46 Nuove aree | Worker (bootstrap dei locali), migrazione su `locali.provincia` | §7 |
 
