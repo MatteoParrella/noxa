@@ -25,7 +25,7 @@ Iterazioni completate: 5 su 15.
 | 2 | completata con attese esterne | 2026-10-16 | 2026-10-16 | 2 | `iterazione-02-account` | Mancano Auth di staging e produzione (hook, Turnstile, email), D-01 e App Review Meta per chiudere la Fase 0 |
 | 3 | completata | 2026-10-16 | 2026-10-16 | 3 | `iterazione-03-amicizie` | Notifiche delle richieste e reclamo nell'iterazione 6, gruppi nella 7 (ROADMAP) |
 | 4 | completata | 2026-10-19 | 2026-10-19 | 2 | `iterazione-04-catalogo-eventi` | Eventi reali dall'iterazione 5; foto dei locali caricate dai moderatori nell'iterazione 5; flyer nell'iterazione 6 |
-| 5 | da iniziare | — | — | 0 | — | — |
+| 5 | in corso | 2026-10-19 | — | 0 | `iterazione-05-raccolta-eventi` | — |
 | 6 | da iniziare | — | — | 0 | — | — |
 | 7 | da iniziare | — | — | 0 | — | — |
 | 8 | da iniziare | — | — | 0 | — | — |
@@ -526,4 +526,33 @@ contatore di sconosciuti; link condiviso senza dati di altri utenti.
 **Attese esterne**: nessuna nuova (restano quelle delle iterazioni 0–2).
 
 **Commit**: `bbc6209` … commit finale di chiusura sul branch `iterazione-04-catalogo-eventi`.
+
+### Iterazione 5 — Raccolta automatica degli eventi
+
+**Piano**
+- Funzionalità: F-44 (raccolta automatica), F-40 (moderazione di locali, fonti, duplicati ed
+  eventi). Regole: R-06, R-21, R-22, R-23, R-50, R-53, R-56, R-69; ADR-0003, ADR-0008,
+  ADR-0018.
+- Design: `design/F-40-moderazione-fonti/` (accesso con due fattori, guscio, locali e candidati,
+  scheda e foto del locale, fonti ed esecuzioni, duplicati, eventi e possibili annullamenti,
+  componenti, verifiche a 1024 e 390 px).
+- Database: enum `tipo_fonte`, `stato_conformita`, `stato_grezzo`, `tipo_job`, `stato_job` e
+  nuovi valori di `tipo_oggetto_segnalabile` e `azione_moderazione`; tabelle `fonti`,
+  `esecuzioni_fonte`, `eventi_grezzi`, `candidati_locali`, `coda_job`; chiave esterna
+  `eventi_fonti.fonte_id`; foto dei locali solo con RPC registrate; registro automatico delle
+  modifiche dei moderatori; età, alcol e stato degli eventi solo con motivazione (R-22);
+  `accoda_fonti_da_eseguire` e `applica_conservazione` con `pg_cron`; RPC di moderazione
+  (`esegui_fonte_ora`, `decidi_duplicato`, `coda_duplicati`, `decidi_candidato_locale`,
+  `salva_foto_locale`, `rimuovi_foto_locale`, `correggi_eta_alcol_evento`,
+  `cambia_stato_evento`, `possibili_annullamenti`, `decidi_possibile_annullamento`,
+  `registro_moderazione`, `locali_moderazione`, `eventi_moderazione`,
+  `contatori_moderazione`).
+- Worker: archivio Postgres della coda (`for update skip locked`, un job per dominio) ed
+  esecutori nel lifespan; `ClientHttpConforme`; normalizzazione (date, età, alcol, generi);
+  adattatori `sito_jsonld` (JSON-LD, microdata, iCal) e `instagram_business_discovery`;
+  deduplicazione e fusione con golden set; job `esegui_fonte` e `deduplica_grezzo`; bootstrap
+  dei locali da OSM e Google Places (solo `place_id`); strumenti `prova` e `salva_fixture`.
+- App: area di moderazione con due fattori e le schermate del design.
+- Criteri: test degli adattatori su fixture; precisione ≥ 98% e richiamo ≥ 90% sul golden
+  set; almeno 40 locali verificati.
 
