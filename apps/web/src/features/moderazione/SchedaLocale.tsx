@@ -201,6 +201,15 @@ function ModuloLocale({
     },
   });
 
+  const riattivazione = useMutation({
+    mutationFn: () => salvaLocale(locale?.id ?? null, dati(true)),
+    onSuccess: () => {
+      cambia('attivo', true);
+      setSalvato(true);
+      void client.invalidateQueries({ queryKey: CHIAVI.tutto });
+    },
+  });
+
   function invia(evento: FormEvent) {
     evento.preventDefault();
     const trovati = valida(modulo);
@@ -240,12 +249,8 @@ function ModuloLocale({
               ) : (
                 <Pulsante
                   variante="secondario"
-                  onClick={() => {
-                    cambia('attivo', true);
-                    void salvaLocale(locale.id, dati(true)).then(() =>
-                      client.invalidateQueries({ queryKey: CHIAVI.tutto }),
-                    );
-                  }}
+                  caricamento={riattivazione.isPending}
+                  onClick={() => riattivazione.mutate()}
                 >
                   {s.riattiva}
                 </Pulsante>
@@ -270,9 +275,9 @@ function ModuloLocale({
                 {testi.comune.salvato}
               </div>
             )}
-            {salvataggio.isError && (
+            {(salvataggio.isError || riattivazione.isError) && (
               <Avviso tipo="errore" titolo={testi.comune.erroreSalvataggio.titolo} portaInVista>
-                {testoErrore(salvataggio.error)}
+                {testoErrore(salvataggio.error ?? riattivazione.error)}
               </Avviso>
             )}
             <form id="modulo-locale" className="md-sezione" onSubmit={invia} noValidate>
