@@ -17,7 +17,6 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 /** Worker di MapLibre copiato tra i file statici (scripts/copia-maplibre-worker.mjs). */
 const URL_WORKER = '/vendor/maplibre/maplibre-gl-worker.mjs';
 
-
 const SORGENTE = 'locali';
 
 let protocolloPmtiles: Protocol | null = null;
