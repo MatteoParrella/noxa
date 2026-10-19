@@ -192,7 +192,7 @@ export function FotoLocale({ locale }: { locale: Locale }) {
           <fieldset className="m-0 flex flex-col border-0 p-0">
             <legend className="campo-etichetta pb-1">{f.fonte}</legend>
             {FONTI.map((valore) => (
-              <label key={valore} className="casella">
+              <label key={valore} className="scelta-riga">
                 <input
                   type="radio"
                   name={`${id}-fonte`}
@@ -223,7 +223,7 @@ export function FotoLocale({ locale }: { locale: Locale }) {
           )}
           <fieldset className="m-0 flex flex-col border-0 p-0">
             <legend className="campo-etichetta pb-1">{f.conferme}</legend>
-            <label className="casella">
+            <label className="scelta-riga">
               <input
                 type="checkbox"
                 checked={senzaPersone}
@@ -231,7 +231,7 @@ export function FotoLocale({ locale }: { locale: Locale }) {
               />
               <span>{f.senzaPersone}</span>
             </label>
-            <label className="casella">
+            <label className="scelta-riga">
               <input
                 type="checkbox"
                 checked={senzaAlcol}

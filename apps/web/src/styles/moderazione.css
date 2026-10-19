@@ -812,7 +812,7 @@
   line-height: 1.4;
   color: var(--colore-testo-secondario);
 }
-.casella {
+.scelta-riga {
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr);
   gap: 10px;
@@ -822,7 +822,7 @@
   font-size: var(--tipo-corpo-piccolo);
   cursor: pointer;
 }
-.casella input {
+.scelta-riga input {
   width: 20px;
   height: 20px;
   margin: 1px 0 0;

@@ -23,8 +23,9 @@ export async function caricaMaplibre(): Promise<typeof MapLibre> {
     import('maplibre-gl'),
     import('pmtiles'),
   ]);
-  maplibre.setWorkerUrl(URL_WORKER);
+  // Una sola volta: richiamarlo dopo che una mappa ha avviato i worker la blocca al caricamento.
   if (!protocolloPmtiles) {
+    maplibre.setWorkerUrl(URL_WORKER);
     protocolloPmtiles = new ProtocolloPmtiles();
     maplibre.addProtocol('pmtiles', protocolloPmtiles.tile);
   }

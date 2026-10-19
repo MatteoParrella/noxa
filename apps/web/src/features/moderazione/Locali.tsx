@@ -443,7 +443,7 @@ function ElencoCandidati({ candidatiTotali }: { candidatiTotali: number | undefi
           <fieldset className="m-0 flex flex-col border-0 p-0">
             <legend className="sr-only">{c.unisciCerca}</legend>
             {opzioniLocali.map((locale) => (
-              <label key={locale.id} className="casella">
+              <label key={locale.id} className="scelta-riga">
                 <input
                   type="radio"
                   name="locale-unione"
