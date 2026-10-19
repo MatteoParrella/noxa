@@ -8,7 +8,6 @@ import { Campo } from '@/components/ui/Campo';
 import { Interruttore } from '@/components/ui/Interruttore';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { PulsanteSegnala } from '@/components/ui/PulsanteSegnala';
-import { SchedaEvento } from '@/components/ui/SchedaEvento';
 import { Schede } from '@/components/ui/Schede';
 import { Segmenti } from '@/components/ui/Segmenti';
 import { ErroreConAzione } from '@/components/ui/Stati';
@@ -170,36 +169,5 @@ describe('PulsanteSegnala', () => {
     expect(
       screen.getByRole('button', { name: 'Segnala l’evento Notte italo-disco' }),
     ).toBeInTheDocument();
-  });
-});
-
-describe('SchedaEvento', () => {
-  const base = {
-    titolo: 'Notte italo-disco',
-    locale: 'Magazzino Nove',
-    zona: 'Porta Genova',
-    orario: '23:30',
-    eta: '16+',
-  };
-
-  it('mostra la foto del locale con testo alternativo e attribuzione (ADR-0018)', () => {
-    render(
-      <SchedaEvento
-        {...base}
-        immagine={{
-          url: '/foto.webp',
-          alt: 'Foto di Magazzino Nove',
-          attribuzione: 'Mario Rossi, CC BY 4.0',
-        }}
-      />,
-    );
-    expect(screen.getByRole('img', { name: 'Foto di Magazzino Nove' })).toBeInTheDocument();
-    expect(screen.getByText('Foto: Mario Rossi, CC BY 4.0')).toBeInTheDocument();
-  });
-
-  it('senza foto usa il fondo tipografico', () => {
-    render(<SchedaEvento {...base} />);
-    expect(screen.queryByRole('img')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Notte italo-disco' })).toBeInTheDocument();
   });
 });

@@ -1,10 +1,11 @@
 'use client';
 
-import { Map as IconaMappa, Plus, Search, Sparkles, X } from 'lucide-react';
+import { Globe, Map as IconaMappa, Plus, Search, Sparkles, Ticket, X } from 'lucide-react';
 import { useState } from 'react';
+import { AmiciPartecipano } from '@/components/ui/AmiciPartecipano';
 import { Avatar, GruppoAvatar } from '@/components/ui/Avatar';
 import { Avviso } from '@/components/ui/Avviso';
-import { Badge, Contatore } from '@/components/ui/Badge';
+import { Badge, Contatore, Genere } from '@/components/ui/Badge';
 import { Campo } from '@/components/ui/Campo';
 import { CampoData } from '@/components/ui/CampoData';
 import { CampoPassword } from '@/components/ui/CampoPassword';
@@ -14,12 +15,16 @@ import { Icona } from '@/components/ui/Icona';
 import { IndicatorePassi, IndicatorePunti } from '@/components/ui/Indicatori';
 import { CodiceQr } from '@/components/ui/CodiceQr';
 import { Interruttore } from '@/components/ui/Interruttore';
+import { LinkEsterno } from '@/components/ui/LinkEsterno';
 import { MenuAzioni } from '@/components/ui/MenuAzioni';
 import { RigaPersona } from '@/components/ui/RigaPersona';
 import { Rivela } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
-import { PulsanteSegnala } from '@/components/ui/PulsanteSegnala';
-import { SchedaEvento } from '@/components/ui/SchedaEvento';
+import { RigaEvento, SchedaEvidenza, type DatiSchedaEvento } from '@/components/ui/SchedaEvento';
+import {
+  SelettorePartecipazione,
+  type SceltaPartecipazione,
+} from '@/components/ui/SelettorePartecipazione';
 import { Schede } from '@/components/ui/Schede';
 import { Segmenti } from '@/components/ui/Segmenti';
 import { Caricamento, ElencoVuoto, ErroreConAzione, StrisciaOffline } from '@/components/ui/Stati';
@@ -32,6 +37,21 @@ const PERSONE = [
   { nome: 'Luca Sala' },
   { nome: 'Anna Villa' },
 ];
+
+const EVENTO: DatiSchedaEvento = {
+  href: '#',
+  nome: 'Notte Ferrovia, Club Binario 7, Monza, gio 15.10 23:00, 18+',
+  titolo: 'Notte Ferrovia',
+  locale: 'Club Binario 7',
+  comune: 'Monza',
+  quando: 'gio 15.10 · 23:00 → 05:00',
+  ora: '23:00',
+  orario: '23:00 → 05:00',
+  eta: '18+',
+  generi: ['techno', 'house'],
+  meta: ['2,1 km', 'da 15 €'],
+  copertina: { tipo: 'tipografica', alt: 'Foto di Club Binario 7' },
+};
 
 function Sezione({ titolo, children }: { titolo: string; children: React.ReactNode }) {
   return (
@@ -51,6 +71,8 @@ export function Catalogo({ tema }: { tema: Tema }) {
   const [foglio, setFoglio] = useState(false);
   const [data, setData] = useState('14.03.2009');
   const [termini, setTermini] = useState(false);
+  const [scelta, setScelta] = useState<SceltaPartecipazione>(null);
+  const [visibile, setVisibile] = useState(true);
   const nomeTema = tema === 'scuro' ? 'Tema scuro' : 'Tema chiaro';
 
   return (
@@ -242,18 +264,90 @@ export function Catalogo({ tema }: { tema: Tema }) {
         />
       </Sezione>
 
-      <Sezione titolo="Scheda evento">
-        <SchedaEvento
-          titolo="Notte italo-disco"
-          locale="Magazzino Nove"
-          zona="Porta Genova"
-          orario="23:30 → 04:00"
-          eta="16+"
-          dettagli={<GruppoAvatar persone={PERSONE.slice(0, 2)} />}
-          azioni={
-            <PulsanteSegnala oggetto="l’evento Notte italo-disco" onSegnala={() => undefined} />
-          }
+      <Sezione titolo="Scheda in evidenza">
+        <SchedaEvidenza
+          dati={{
+            ...EVENTO,
+            amici: (
+              <AmiciPartecipano
+                persone={PERSONE.slice(1, 3)}
+                altri={2}
+                testo="Marco, Sara e altri 2 ci vanno"
+              />
+            ),
+          }}
         />
+      </Sezione>
+
+      <Sezione titolo="Riga evento compatta">
+        <ul className="m-0 list-none p-0">
+          <li>
+            <RigaEvento
+              dati={{
+                ...EVENTO,
+                titolo: 'Anni Zero',
+                nome: 'Anni Zero, Sala Ventuno, Desio, sab 17.10 22:00, 16+',
+                locale: 'Sala Ventuno',
+                comune: 'Desio',
+                ora: '22:00',
+                orario: '22:00 → 03:00',
+                eta: '16+',
+                generi: ['commerciale'],
+                meta: ['7,9 km', 'da 10 €'],
+              }}
+            />
+          </li>
+        </ul>
+      </Sezione>
+
+      <Sezione titolo="Badge d’età e generi">
+        <div className="rc-tag">
+          {['14+', '16+', '18+', '21+', '18+ · non dichiarata'].map((eta) => (
+            <Badge key={eta} variante="eta">
+              {eta}
+            </Badge>
+          ))}
+          <Badge variante="annullato">
+            <Icona icona={X} dimensione="s" />
+            Annullato
+          </Badge>
+          <Genere>techno</Genere>
+          <Genere>hip hop</Genere>
+          <Genere>live</Genere>
+        </div>
+      </Sezione>
+
+      <Sezione titolo="Mi interessa / Partecipo">
+        <SelettorePartecipazione
+          scelta={scelta}
+          visibile={visibile}
+          onScegli={setScelta}
+          onVisibilita={setVisibile}
+        />
+      </Sezione>
+
+      <Sezione titolo="Amici che partecipano e link esterni">
+        <AmiciPartecipano
+          persone={PERSONE.slice(1, 3)}
+          altri={2}
+          testo="Marco, Sara e altri 2 ci vanno"
+          onApri={() => undefined}
+          className="riga-amici-dettaglio"
+        />
+        <div>
+          <LinkEsterno
+            href="https://binario7.example"
+            icona={Globe}
+            etichetta="Fonte: sito del locale"
+            destinazione="binario7.example"
+          />
+          <LinkEsterno
+            href="https://binario7.example/biglietti"
+            icona={Ticket}
+            etichetta="Biglietti"
+            destinazione="sito esterno"
+          />
+        </div>
       </Sezione>
 
       <Sezione titolo="Avvisi">

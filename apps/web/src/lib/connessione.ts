@@ -19,3 +19,17 @@ export function useOnline(): boolean {
     () => true,
   );
 }
+
+const nessunaIscrizione = () => () => undefined;
+
+/**
+ * Vero dopo l'idratazione nel browser: i valori che dipendono dal telefono (data, ora, dati
+ * salvati) si leggono solo da lì, così l'export statico non li fissa al momento della build.
+ */
+export function useMontato(): boolean {
+  return useSyncExternalStore(
+    nessunaIscrizione,
+    () => true,
+    () => false,
+  );
+}

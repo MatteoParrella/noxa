@@ -106,6 +106,8 @@ do $$
 declare
   -- Serata in corso: fino alle 06:00 vale ancora quella del giorno prima (DATA_MODEL.md §5.3).
   d date := ((now() at time zone 'Europe/Rome') - interval '6 hours')::date;
+  -- Prossimo venerdì (oggi, se è venerdì): così anche il weekend ha eventi di esempio.
+  v date := d + ((5 - extract(isodow from d)::int + 7) % 7);
   ora constant text := 'Europe/Rome';
 begin
   insert into public.eventi
@@ -136,12 +138,12 @@ begin
      18, true, false, '{}', 1500, null, 'pubblicato'),
     ('00000000-0000-4000-8000-00000000e006', '00000000-0000-4000-8000-00000000c003',
      'Cortile Live', null,
-     (d + 2 + time '21:00') at time zone ora, (d + 3 + time '01:00') at time zone ora,
+     (v + 1 + time '21:00') at time zone ora, (v + 2 + time '01:00') at time zone ora,
      16, true, false, array['I Fili Scoperti', 'Mare di Brughiera', 'Lanterna'], 800, null,
      'annullato'),
     ('00000000-0000-4000-8000-00000000e007', '00000000-0000-4000-8000-00000000c004',
      'Ventuno Club', null,
-     (d + 2 + time '23:30') at time zone ora, (d + 3 + time '05:00') at time zone ora,
+     (v + 1 + time '23:30') at time zone ora, (v + 2 + time '05:00') at time zone ora,
      21, true, false, array['Corrado B.'], 2000, null, 'pubblicato'),
     ('00000000-0000-4000-8000-00000000e008', '00000000-0000-4000-8000-00000000c005',
      'Elettronica al Magazzino', null,
@@ -149,7 +151,7 @@ begin
      18, true, true, array['Otto Fili'], 1000, null, 'pubblicato'),
     ('00000000-0000-4000-8000-00000000e009', '00000000-0000-4000-8000-00000000c004',
      'Anni Zero', null,
-     (d + 3 + time '22:00') at time zone ora, (d + 4 + time '03:00') at time zone ora,
+     (v + time '22:00') at time zone ora, (v + 1 + time '03:00') at time zone ora,
      16, true, false, '{}', 1000, null, 'pubblicato'),
     ('00000000-0000-4000-8000-00000000e010', '00000000-0000-4000-8000-00000000c005',
      'Sotto Cassa', null,
@@ -161,7 +163,7 @@ begin
      14, true, false, '{}', 0, null, 'pubblicato'),
     ('00000000-0000-4000-8000-00000000e012', '00000000-0000-4000-8000-00000000c003',
      'Pomeriggio in Cascina', 'Musica dal vivo in cortile, pomeriggio.',
-     (d + 3 + time '16:00') at time zone ora, (d + 3 + time '20:00') at time zone ora,
+     (v + 2 + time '16:00') at time zone ora, (v + 2 + time '20:00') at time zone ora,
      14, true, false, array['Lanterna'], 500, null, 'pubblicato');
 end
 $$;

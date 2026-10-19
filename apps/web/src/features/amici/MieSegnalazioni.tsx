@@ -58,13 +58,25 @@ export function MieSegnalazioni() {
   );
 }
 
+/** Cosa è stato segnalato, con il nome che chi segnala conosceva già. */
+function descrizioneOggetto(voce: MiaSegnalazione): string {
+  const { oggetto } = testi;
+  switch (voce.tipo_oggetto) {
+    case 'profilo':
+      return voce.descrizione ? `${oggetto.profilo} ${voce.descrizione}` : oggetto.profiloRimosso;
+    case 'evento':
+      return voce.descrizione ? `${oggetto.evento} «${voce.descrizione}»` : oggetto.eventoRimosso;
+    case 'immagine_locale':
+      return voce.descrizione
+        ? `${oggetto.immagine_locale} ${voce.descrizione}`
+        : oggetto.immagineRimossa;
+    default:
+      return voce.descrizione ?? voce.tipo_oggetto;
+  }
+}
+
 function Voce({ voce }: { voce: MiaSegnalazione }) {
-  const cosa =
-    voce.tipo_oggetto === 'profilo'
-      ? voce.descrizione
-        ? `${testi.oggetto.profilo} ${voce.descrizione}`
-        : testi.oggetto.profiloRimosso
-      : (voce.descrizione ?? voce.tipo_oggetto);
+  const cosa = descrizioneOggetto(voce);
   return (
     <li className="segn">
       <div className="segn-testa">

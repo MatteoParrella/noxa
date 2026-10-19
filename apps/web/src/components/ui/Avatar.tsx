@@ -47,22 +47,31 @@ export function Avatar({ nome, dimensione = 'm', decorativo = false }: Props) {
 type PropsGruppo = {
   persone: Persona[];
   massimo?: number;
+  /** Altre persone oltre a quelle elencate (per esempio gli amici non mostrati). */
+  altri?: number;
+  /** Se i nomi sono già scritti accanto, il gruppo resta decorativo. */
+  decorativo?: boolean;
 };
 
 /** Avatar sovrapposti con "+N"; l'etichetta accessibile elenca i primi nomi. */
-export function GruppoAvatar({ persone, massimo = 3 }: PropsGruppo) {
+export function GruppoAvatar({ persone, massimo = 3, altri, decorativo = false }: PropsGruppo) {
   const visibili = persone.slice(0, massimo);
-  const altri = persone.length - visibili.length;
+  const nonMostrate = altri ?? persone.length - visibili.length;
   const nomi = visibili.map((p) => p.nome.split(' ')[0]).join(', ');
-  const etichetta = altri > 0 ? `${nomi} e altre ${altri} persone` : nomi;
+  const etichetta = nonMostrate > 0 ? `${nomi} e altre ${nonMostrate} persone` : nomi;
   return (
-    <span className="avatar-gruppo" role="img" aria-label={etichetta}>
+    <span
+      className="avatar-gruppo"
+      role={decorativo ? undefined : 'img'}
+      aria-label={decorativo ? undefined : etichetta}
+      aria-hidden={decorativo || undefined}
+    >
       {visibili.map((p) => (
         <Avatar key={p.nome} nome={p.nome} dimensione="s" decorativo />
       ))}
-      {altri > 0 && (
+      {nonMostrate > 0 && (
         <span className="avatar avatar-s avatar-piu" aria-hidden="true">
-          +{altri}
+          +{nonMostrate}
         </span>
       )}
     </span>

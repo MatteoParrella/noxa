@@ -651,6 +651,7 @@ as $$
                   'https://www.instagram.com/' || l.instagram_username || '/'),
          coalesce((
            select jsonb_agg(jsonb_build_object('id', pr.id,
+                                               'username', pr.username,
                                                'nome_visualizzato', pr.nome_visualizzato,
                                                'stato', p.stato)
                             order by p.stato desc, pr.nome_visualizzato)

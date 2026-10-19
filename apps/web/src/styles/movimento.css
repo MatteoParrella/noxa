@@ -168,11 +168,11 @@
 .nav-voce:active {
   transform: scale(0.97);
 }
-.scheda-evento-copertina img {
+.copertina-evidenza .copertina-immagine {
   transition: transform var(--movimento-ingresso) var(--curva-espressiva);
 }
-.scheda-evento:hover .scheda-evento-copertina img,
-.scheda-evento:focus-within .scheda-evento-copertina img {
+.evidenza:hover .copertina-immagine,
+.evidenza:focus-visible .copertina-immagine {
   transform: scale(1.04);
 }
 
@@ -192,7 +192,8 @@
   .btn:active,
   .segmento:active,
   .nav-voce:active,
-  .scheda-evento:hover .scheda-evento-copertina img {
+  .evidenza:hover .copertina-immagine,
+  .evidenza:focus-visible .copertina-immagine {
     transform: none;
   }
 }

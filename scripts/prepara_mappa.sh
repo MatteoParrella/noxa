@@ -16,6 +16,7 @@ RIQUADRO="8.65,45.15,9.60,45.80"   # province di Milano e Monza e Brianza
 ZOOM_MASSIMO=15
 DATA_BUILD="${DATA_BUILD:-$(date -u -d yesterday +%Y%m%d)}"
 CARTELLA="${CARTELLA:-$(mktemp -d)}"
+mkdir -p "$CARTELLA"
 ASSETS="https://raw.githubusercontent.com/protomaps/basemaps-assets/main"
 # Intervalli di glifi per l'italiano: latino, latino esteso, punteggiatura.
 INTERVALLI=("0-255" "256-511" "8192-8447")

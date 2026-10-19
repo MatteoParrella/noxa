@@ -457,6 +457,228 @@ export const messaggi = {
     caricamento: 'Carico le persone bloccate',
   },
 
+  scopri: {
+    titolo: 'Scopri',
+    milanoBrianza: 'Milano e Brianza',
+    vicinoATe: 'Vicino a te',
+    entro: (km: number) => `entro ${km} km`,
+    fino: (eta: number) => `fino a ${eta}+`,
+    conAmici: 'con amici',
+    tuttiGliEventi: 'Tutti gli eventi',
+    vista: 'Vista',
+    elenco: 'Elenco',
+    mappa: 'Mappa',
+    quando: 'Quando',
+    stasera: 'Stasera',
+    domani: 'Domani',
+    weekend: 'Weekend',
+    scegliData: 'Scegli data',
+    filtri: 'Filtri',
+    filtriAttivi: (numero: number) =>
+      numero === 0 ? 'Filtri' : numero === 1 ? 'Filtri, 1 attivo' : `Filtri, ${numero} attivi`,
+    etaNonDichiarata: 'non dichiarata',
+    ingressoLibero: 'Ingresso libero',
+    caricamento: 'Carico gli eventi',
+    soloVisibili: 'Vedi solo gli eventi a cui puoi entrare.',
+    annullato: 'Annullato',
+    amici: {
+      vanno: (nomi: string[], altri: number) => {
+        const elenco =
+          altri > 0
+            ? `${nomi.join(', ')} e ${altri === 1 ? 'un’altra persona' : `altri ${altri}`}`
+            : nomi.join(' e ');
+        return `${elenco} ${nomi.length + altri === 1 ? 'ci va' : 'ci vanno'}`;
+      },
+      interessa: (nomi: string[], altri: number) =>
+        altri > 0
+          ? `Interessa a ${nomi.join(', ')} e ad ${altri === 1 ? 'un’altra persona' : `altre ${altri} persone`}`
+          : `Interessa a ${nomi.join(' e ')}`,
+    },
+    evento: (dati: {
+      titolo: string;
+      locale: string;
+      comune: string;
+      quando: string;
+      eta: string;
+    }) => `${dati.titolo}, ${dati.locale}, ${dati.comune}, ${dati.quando}, ${dati.eta}`,
+    vuoto: {
+      titolo: 'Nessun evento con questi filtri',
+      testo: 'Prova a togliere un genere o ad allargare la distanza.',
+      azione: 'Togli i filtri',
+      titoloSenzaFiltri: 'Nessun evento in questa data',
+      testoSenzaFiltri: 'Prova un altro giorno: il catalogo si aggiorna ogni giorno.',
+    },
+    errore: {
+      titolo: 'Gli eventi non si sono caricati',
+      testo: 'Colpa nostra o della rete. Riprova tra un attimo.',
+    },
+    offline: 'Sei offline: vedi gli eventi salvati sul telefono.',
+    offlineVuoto: {
+      titolo: 'Sei offline',
+      testo: 'Gli eventi compaiono quando torna la connessione.',
+    },
+    distanze: { tutte: 'tutte le distanze', tutteBreve: 'Tutte' },
+    foglio: {
+      titolo: 'Filtri',
+      chiudi: 'Chiudi i filtri',
+      quando: 'Quando',
+      dove: 'Dove',
+      ovunque: 'Tutta Milano e Brianza',
+      usaPosizione: 'Usa la mia posizione',
+      scegliComune: 'Scegli un comune',
+      comune: 'Comune',
+      comuneSegnaposto: 'Scrivi il nome del comune',
+      nessunComune: 'Nessun comune di Milano o della Brianza con questo nome.',
+      posizioneNota: 'La posizione serve solo a calcolare le distanze e non viene salvata.',
+      posizioneAttesa: 'Cerco la posizione…',
+      posizioneNegata: {
+        titolo: 'Posizione non disponibile',
+        testo:
+          'Noxa non ha il permesso di usare la posizione. Va bene così: scegli un comune e calcoliamo le distanze da lì.',
+      },
+      posizioneAssente: {
+        titolo: 'Posizione non trovata',
+        testo:
+          'Il telefono non ha dato la posizione. Scegli un comune e calcoliamo le distanze da lì.',
+      },
+      distanza: 'Distanza',
+      generi: 'Generi musicali',
+      eta: 'Età minima',
+      etaSpiegazione:
+        'Restringe tra gli eventi che puoi già vedere: utile se esci con amici più piccoli.',
+      etaTutte: 'Tutte',
+      soloAmici: 'Solo eventi con amici',
+      soloAmiciDescrizione: 'Dove un tuo amico ci va o è interessato.',
+      azzera: 'Azzera',
+      mostra: (numero: number | null) =>
+        numero === null
+          ? 'Mostra gli eventi'
+          : numero === 1
+            ? 'Mostra 1 evento'
+            : `Mostra ${numero} eventi`,
+    },
+    calendario: {
+      titolo: 'Scegli una data',
+      mese: 'Mese',
+      anno: 'Anno',
+      annulla: 'Annulla',
+      mostra: (giorno: string) => `Mostra ${giorno}`,
+      passato: 'giorno passato',
+    },
+    mappaVista: {
+      etichetta: 'Mappa degli eventi',
+      mostraElenco: 'Mostra elenco',
+      caricamento: 'Carico la mappa…',
+      errore: {
+        titolo: 'La mappa non si è caricata',
+        testo: 'Vedi gli eventi in elenco: sono gli stessi.',
+      },
+      offline: {
+        titolo: 'La mappa non è disponibile offline',
+        testo: 'Gli eventi salvati sul telefono sono nell’elenco.',
+      },
+      vediElenco: 'Vedi gli eventi in elenco',
+      vuota: {
+        titolo: 'Nessun evento in quest’area',
+        testo: 'Sposta la mappa o allarga la distanza nei filtri.',
+      },
+      locale: (nome: string, eventi: number) =>
+        `${nome}, ${eventi === 1 ? '1 evento' : `${eventi} eventi`}`,
+      gruppo: (locali: number) => `${locali} locali vicini, tocca per avvicinarti`,
+      anteprima: (nome: string) => `Anteprima: ${nome}`,
+      eventiLocale: (nome: string, eventi: number) => `${nome} · ${eventi} eventi`,
+      apri: 'Apri',
+      apriEvento: (titolo: string) => `Apri ${titolo}`,
+      chiudiAnteprima: 'Chiudi l’anteprima',
+    },
+  },
+
+  evento: {
+    caricamento: 'Carico l’evento',
+    indietro: 'Indietro',
+    nonDisponibile: {
+      titolo: 'Questo evento non c’è più o non è adatto alla tua età',
+      testo: 'Trovi altri eventi in Scopri.',
+      azione: 'Torna a Scopri',
+    },
+    errore: {
+      titolo: 'L’evento non si è caricato',
+      testo: 'Colpa nostra o della rete. Riprova tra un attimo.',
+    },
+    offline: 'Sei offline: vedi i dettagli salvati sul telefono.',
+    offlineAzioni: 'Partecipazione e link tornano attivi con la connessione.',
+    foto: (attribuzione: string) => `Foto: ${attribuzione}`,
+    fotoLocale: (locale: string) => `Foto di ${locale}`,
+    flyer: (titolo: string) => `Flyer approvato: ${titolo}`,
+    annullato: {
+      titolo: 'Il locale ha annullato l’evento',
+      testo: 'Se avevi un biglietto, il rimborso lo gestisce chi l’ha venduto.',
+    },
+    etaNonDichiarata: {
+      titolo: 'Età non dichiarata',
+      testo: 'Il locale non ha indicato un’età minima: la consideriamo 18+.',
+    },
+    dove: 'Dove',
+    lineUp: 'Line-up',
+    prezzo: 'Prezzo',
+    prezzoNonIndicato: 'Prezzo non indicato',
+    apriInMappe: 'Apri in Mappe',
+    fonte: {
+      sito_locale: 'Fonte: sito del locale',
+      instagram: 'Fonte: Instagram del locale',
+      altro: 'Fonte: pagina dell’evento',
+    },
+    biglietti: 'Biglietti',
+    sitoEsterno: 'sito esterno',
+    apreSitoEsterno: '(apre un sito esterno)',
+    altreAzioni: (titolo: string) => `Altre azioni per ${titolo}`,
+    condividi: 'Condividi il link',
+    linkCopiato: 'Link copiato',
+    linkNonCopiato: 'Non siamo riusciti a copiare il link.',
+    segnala: 'Segnala',
+    amici: {
+      titolo: 'Amici a questo evento',
+      partecipa: 'ci va',
+      interessato: 'è interessato',
+      nota: 'Vedi solo gli amici che hanno reso visibile la loro scelta.',
+    },
+    partecipazione: {
+      gruppo: 'La tua partecipazione',
+      interessa: 'Mi interessa',
+      partecipo: 'Partecipo',
+      nessuna: 'Non hai ancora scelto.',
+      statoInteressa: 'Segnato: ti interessa. Tocca di nuovo per togliere.',
+      statoPartecipo: 'Segnato: partecipi. Tocca di nuovo per togliere.',
+      visibile: 'Visibile ai tuoi amici',
+      visibileTesto: 'Gli amici vedono la tua scelta per questo evento.',
+      soloTe: 'Solo per te',
+      soloTeTesto: 'Gli amici non vedono la tua scelta per questo evento.',
+      toastInteressa: 'Segnato: ti interessa',
+      toastPartecipo: 'Segnato: partecipi',
+      toastTolta: 'Scelta tolta',
+      toastVisibile: 'Ora i tuoi amici la vedono',
+      toastSoloTe: 'Ora è solo per te',
+      annulla: 'Annulla',
+      errore: 'La scelta non è stata salvata. Riprova.',
+    },
+    segnalaFoglio: {
+      titolo: 'Segnala l’evento',
+      spiegazione: 'Tocca un motivo: la segnalazione parte subito. Resta anonima.',
+      motivi: [
+        { valore: 'evento_falso', etichetta: 'Evento falso' },
+        { valore: 'dati_errati', etichetta: 'Dati sbagliati (orari, luogo, età)' },
+        { valore: 'contenuto_inappropriato', etichetta: 'Contenuto inappropriato' },
+        { valore: 'alcol_a_minori', etichetta: 'Riferimenti all’alcol non segnalati' },
+        { valore: 'altro', etichetta: 'Altro' },
+      ],
+      foto: 'Foto del locale inappropriata',
+      inviata: {
+        titolo: 'Grazie, ce ne occupiamo noi.',
+        testo: 'Trovi lo stato in Profilo › Le mie segnalazioni.',
+      },
+    },
+  },
+
   mieSegnalazioni: {
     titolo: 'Le mie segnalazioni',
     vuoto: {
@@ -464,7 +686,14 @@ export const messaggi = {
       testo: 'Profili, eventi e flyer si segnalano dal menu ⋯.',
     },
     stati: { aperta: 'Inviata', in_lavorazione: 'In lavorazione', chiusa: 'Chiusa' },
-    oggetto: { profilo: 'Profilo', profiloRimosso: 'Profilo non più disponibile' },
+    oggetto: {
+      profilo: 'Profilo',
+      profiloRimosso: 'Profilo non più disponibile',
+      evento: 'Evento',
+      eventoRimosso: 'Evento non più disponibile',
+      immagine_locale: 'Foto di',
+      immagineRimossa: 'Foto di un locale non più disponibile',
+    },
     decisione: 'Decisione del',
     dsa: 'art. 17 DSA',
     persona: 'Decisione presa da una persona del team, non da un sistema automatico.',

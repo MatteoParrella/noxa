@@ -9,12 +9,24 @@ export type OpzioneSegmento<V extends string> = { valore: V; etichetta: string; 
 type Props<V extends string> = {
   etichetta: string;
   opzioni: ReadonlyArray<OpzioneSegmento<V>>;
-  valore: V;
+  /** Null quando nessuna opzione vale (per esempio una data scelta dal calendario). */
+  valore: V | null;
   onCambia: (valore: V) => void;
+  /** Solo le icone: l'etichetta diventa il nome accessibile di ogni opzione. */
+  soloIcone?: boolean;
+  className?: string;
 };
 
 /** Scelta singola tra poche opzioni (radiogroup), con le frecce da tastiera. */
-export function Segmenti<V extends string>({ etichetta, opzioni, valore, onCambia }: Props<V>) {
+export function Segmenti<V extends string>({
+  etichetta,
+  opzioni,
+  valore,
+  onCambia,
+  soloIcone = false,
+  className,
+}: Props<V>) {
+  const nessuna = !opzioni.some((opzione) => opzione.valore === valore);
   const riferimenti = useRef<Array<HTMLButtonElement | null>>([]);
 
   function tasto(evento: KeyboardEvent<HTMLButtonElement>, indice: number) {
@@ -34,7 +46,7 @@ export function Segmenti<V extends string>({ etichetta, opzioni, valore, onCambi
   }
 
   return (
-    <div className="segmenti" role="radiogroup" aria-label={etichetta}>
+    <div className={classi('segmenti', className)} role="radiogroup" aria-label={etichetta}>
       {opzioni.map((opzione, indice) => {
         const selezionato = opzione.valore === valore;
         return (
@@ -46,13 +58,14 @@ export function Segmenti<V extends string>({ etichetta, opzioni, valore, onCambi
             type="button"
             role="radio"
             aria-checked={selezionato}
-            tabIndex={selezionato ? 0 : -1}
-            className={classi('segmento', selezionato && 'is-on')}
+            tabIndex={selezionato || (nessuna && indice === 0) ? 0 : -1}
+            aria-label={soloIcone ? opzione.etichetta : undefined}
+            className={classi('segmento', selezionato && 'is-on', soloIcone && 'segmento-icona')}
             onClick={() => onCambia(opzione.valore)}
             onKeyDown={(e) => tasto(e, indice)}
           >
             {opzione.icona}
-            {opzione.etichetta}
+            {!soloIcone && opzione.etichetta}
           </button>
         );
       })}
