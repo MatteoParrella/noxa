@@ -24,13 +24,15 @@ type Props = {
   /** Testo in cima al menu, per esempio l'username. */
   titolo?: string;
   voci: readonly VoceMenu[];
+  /** Classe del pulsante ⋯, per esempio sopra una copertina. */
+  className?: string;
 };
 
 /**
  * Menu "⋯" (design/F-11-amici): pulsante con nome, voci navigabili con le frecce, chiusura
  * con Esc o con un tocco fuori; il focus torna al pulsante.
  */
-export function MenuAzioni({ etichetta, titolo, voci }: Props) {
+export function MenuAzioni({ etichetta, titolo, voci, className }: Props) {
   const [aperto, setAperto] = useState(false);
   const [sopra, setSopra] = useState(false);
   const id = useId();
@@ -74,6 +76,7 @@ export function MenuAzioni({ etichetta, titolo, voci }: Props) {
       <Pulsante
         variante="neutro"
         soloIcona
+        className={className}
         aria-label={etichetta}
         aria-haspopup="menu"
         aria-expanded={aperto}

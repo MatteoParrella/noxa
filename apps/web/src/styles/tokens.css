@@ -147,14 +147,10 @@
 }
 
 /*
-  Token aggiunti con ADR-0018 (foto del locale come sfondo): uguali nei due temi, perché la
-  foto non cambia col tema. Bianco caldo su velatura al 78%: contrasto ≥ 7:1 anche su una
-  foto bianca. Da riportare nel progetto Claude Design.
+  Foto del locale come copertina (ADR-0018): la velatura delle copertine (scopri.css, .velatura)
+  sfuma la foto nel colore di sfondo del tema, così il testo sopra resta ≥ 4,5:1 in entrambi i
+  temi (design/F-01-scopri, layer "scopri").
 */
-:root {
-  --colore-velo-foto: rgba(5, 7, 10, 0.78);
-  --colore-testo-su-foto: #f7f5f0;
-}
 
 /*
   Movimento espressivo (ADR-0019): ingressi più lunghi e morbidi, ispirati ai siti di

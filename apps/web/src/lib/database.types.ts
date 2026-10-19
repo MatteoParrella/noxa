@@ -147,6 +147,132 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"eventi": {
+                  Row: {
+                    "aggiornato_il": string,"artisti": (string)[],"creato_il": string,"data_serata": string,"descrizione": string | null,"eta_minima": number,"eta_minima_dichiarata": boolean,"fine": string | null,"id": string,"immagine_path": string | null,"inizio": string,"locale_id": string,"prezzo_min_centesimi": number | null,"riferimenti_alcol": boolean,"stato": Database["public"]['Enums']["stato_evento"],"titolo": string,"ultima_verifica_il": string,"url_biglietti": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aggiornato_il"?: string,"artisti"?: (string)[],"creato_il"?: string,"data_serata": string,"descrizione"?: string | null,"eta_minima"?: number,"eta_minima_dichiarata"?: boolean,"fine"?: string | null,"id"?: string,"immagine_path"?: string | null,"inizio": string,"locale_id": string,"prezzo_min_centesimi"?: number | null,"riferimenti_alcol"?: boolean,"stato"?: Database["public"]['Enums']["stato_evento"],"titolo": string,"ultima_verifica_il"?: string,"url_biglietti"?: string | null
+                  }
+                  Update: {
+                    "aggiornato_il"?: string,"artisti"?: (string)[],"creato_il"?: string,"data_serata"?: string,"descrizione"?: string | null,"eta_minima"?: number,"eta_minima_dichiarata"?: boolean,"fine"?: string | null,"id"?: string,"immagine_path"?: string | null,"inizio"?: string,"locale_id"?: string,"prezzo_min_centesimi"?: number | null,"riferimenti_alcol"?: boolean,"stato"?: Database["public"]['Enums']["stato_evento"],"titolo"?: string,"ultima_verifica_il"?: string,"url_biglietti"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "eventi_locale_id_fkey"
+      columns: ["locale_id"]
+isOneToOne: false
+      referencedRelation: "locali"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"eventi_fonti": {
+                  Row: {
+                    "caricamento_flyer_id": string | null,"evento_id": string,"fonte_id": string | null,"id": string,"id_esterno": string | null,"raccolto_il": string,"tipo_origine": string,"url_originale": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "caricamento_flyer_id"?: string | null,"evento_id": string,"fonte_id"?: string | null,"id"?: string,"id_esterno"?: string | null,"raccolto_il"?: string,"tipo_origine": string,"url_originale"?: string | null
+                  }
+                  Update: {
+                    "caricamento_flyer_id"?: string | null,"evento_id"?: string,"fonte_id"?: string | null,"id"?: string,"id_esterno"?: string | null,"raccolto_il"?: string,"tipo_origine"?: string,"url_originale"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "eventi_fonti_evento_id_fkey"
+      columns: ["evento_id"]
+isOneToOne: false
+      referencedRelation: "eventi"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"eventi_generi": {
+                  Row: {
+                    "evento_id": string,"genere_codice": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "evento_id": string,"genere_codice": string
+                  }
+                  Update: {
+                    "evento_id"?: string,"genere_codice"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "eventi_generi_evento_id_fkey"
+      columns: ["evento_id"]
+isOneToOne: false
+      referencedRelation: "eventi"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "eventi_generi_genere_codice_fkey"
+      columns: ["genere_codice"]
+isOneToOne: false
+      referencedRelation: "generi_musicali"
+      referencedColumns: ["codice"]
+    }
+                  ]
+                },"generi_musicali": {
+                  Row: {
+                    "codice": string,"nome": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "codice": string,"nome": string
+                  }
+                  Update: {
+                    "codice"?: string,"nome"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"locali": {
+                  Row: {
+                    "aggiornato_il": string,"attivo": boolean,"comune": string,"creato_il": string,"google_place_id": string | null,"id": string,"immagine_approvata_da": string | null,"immagine_approvata_il": string | null,"immagine_attribuzione": string | null,"immagine_fonte": Database["public"]['Enums']["fonte_immagine_locale"] | null,"immagine_path": string | null,"immagine_riferimento": string | null,"indirizzo": string,"instagram_username": string | null,"nome": string,"nome_normalizzato": string,"osm_id": string | null,"posizione": unknown,"provincia": string,"sito_web": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aggiornato_il"?: string,"attivo"?: boolean,"comune": string,"creato_il"?: string,"google_place_id"?: string | null,"id"?: string,"immagine_approvata_da"?: string | null,"immagine_approvata_il"?: string | null,"immagine_attribuzione"?: string | null,"immagine_fonte"?: Database["public"]['Enums']["fonte_immagine_locale"] | null,"immagine_path"?: string | null,"immagine_riferimento"?: string | null,"indirizzo": string,"instagram_username"?: string | null,"nome": string,"nome_normalizzato": string,"osm_id"?: string | null,"posizione": unknown,"provincia": string,"sito_web"?: string | null
+                  }
+                  Update: {
+                    "aggiornato_il"?: string,"attivo"?: boolean,"comune"?: string,"creato_il"?: string,"google_place_id"?: string | null,"id"?: string,"immagine_approvata_da"?: string | null,"immagine_approvata_il"?: string | null,"immagine_attribuzione"?: string | null,"immagine_fonte"?: Database["public"]['Enums']["fonte_immagine_locale"] | null,"immagine_path"?: string | null,"immagine_riferimento"?: string | null,"indirizzo"?: string,"instagram_username"?: string | null,"nome"?: string,"nome_normalizzato"?: string,"osm_id"?: string | null,"posizione"?: unknown,"provincia"?: string,"sito_web"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "locali_immagine_approvata_da_fkey"
+      columns: ["immagine_approvata_da"]
+isOneToOne: false
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"partecipazioni_evento": {
+                  Row: {
+                    "aggiornato_il": string,"creato_il": string,"evento_id": string,"stato": Database["public"]['Enums']["stato_partecipazione_evento"],"utente_id": string,"visibile_agli_amici": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aggiornato_il"?: string,"creato_il"?: string,"evento_id": string,"stato": Database["public"]['Enums']["stato_partecipazione_evento"],"utente_id": string,"visibile_agli_amici": boolean
+                  }
+                  Update: {
+                    "aggiornato_il"?: string,"creato_il"?: string,"evento_id"?: string,"stato"?: Database["public"]['Enums']["stato_partecipazione_evento"],"utente_id"?: string,"visibile_agli_amici"?: boolean
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "partecipazioni_evento_evento_id_fkey"
+      columns: ["evento_id"]
+isOneToOne: false
+      referencedRelation: "eventi"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "partecipazioni_evento_utente_id_fkey"
+      columns: ["utente_id"]
+isOneToOne: false
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profili": {
                   Row: {
                     "aggiornato_il": string,"avatar_path": string | null,"creato_il": string,"id": string,"nome_visualizzato": string,"stato_account": Database["public"]['Enums']["stato_account"],"username": string
@@ -241,6 +367,11 @@ isOneToOne: false
 "avviso_richiesta":
 { Args: { "amicizia": string }; Returns: boolean
                            },
+"cerca_eventi":
+{ Args: { "al"?: string,"dal"?: string,"eta_minima_max"?: number,"generi"?: (string)[],"lat"?: number,"lon"?: number,"raggio_km"?: number,"solo_amici"?: boolean }; Returns: {
+              "amici": Json,"amici_interessati": number,"amici_partecipano": number,"copertina_attribuzione": string,"copertina_path": string,"copertina_tipo": string,"data_serata": string,"distanza_m": number,"eta_minima": number,"eta_minima_dichiarata": boolean,"fine": string,"generi_evento": (string)[],"id": string,"inizio": string,"locale_comune": string,"locale_id": string,"locale_lat": number,"locale_lon": number,"locale_nome": string,"mia_partecipazione": Database["public"]['Enums']["stato_partecipazione_evento"],"prezzo_min_centesimi": number,"stato": Database["public"]['Enums']["stato_evento"],"titolo": string
+            }[]
+                           },
 "cerca_utenti":
 { Args: { "testo": string }; Returns: {
               "id": string,"nome_visualizzato": string,"relazione": string,"username": string
@@ -249,6 +380,11 @@ isOneToOne: false
 "crea_codice_invito":
 { Args: Record<PropertyKey, never>; Returns: {
               "codice": string,"scade_il": string
+            }[]
+                           },
+"dettaglio_evento":
+{ Args: { "evento": string }; Returns: {
+              "amici": Json,"artisti": (string)[],"copertina_attribuzione": string,"copertina_path": string,"copertina_tipo": string,"data_serata": string,"descrizione": string,"eta_minima": number,"eta_minima_dichiarata": boolean,"fine": string,"fonte_tipo": string,"fonte_url": string,"generi_evento": (string)[],"id": string,"inizio": string,"locale_comune": string,"locale_id": string,"locale_indirizzo": string,"locale_lat": number,"locale_lon": number,"locale_nome": string,"mia_partecipazione": Database["public"]['Enums']["stato_partecipazione_evento"],"mia_visibilita": boolean,"prezzo_min_centesimi": number,"stato": Database["public"]['Enums']["stato_evento"],"titolo": string,"url_biglietti": string
             }[]
                            },
 "mie_segnalazioni":
@@ -269,7 +405,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "azione_moderazione": "nessuna_violazione"|"rimuovi_contenuto"|"modifica_evento"|"approva_flyer"|"rifiuta_flyer"|"sospendi_account"|"riattiva_account"|"correggi_data_nascita"|"escalation_autorita"|"accesso_segnalazione","canale_amicizia": "ricerca"|"codice_invito","motivo_segnalazione": "contenuto_inappropriato"|"molestie"|"adescamento_o_rischio_minore"|"spam"|"evento_falso"|"eta_errata"|"alcol_a_minori"|"altro","ruolo_utente": "moderatore"|"amministratore","stato_account": "attivo"|"sospeso","stato_amicizia": "in_attesa"|"accettata","stato_segnalazione": "aperta"|"in_lavorazione"|"chiusa","tipo_consenso": "termini"|"privacy","tipo_oggetto_segnalabile": "profilo"|"evento"|"caricamento_flyer"|"gruppo"|"serata_gruppo"|"immagine_locale"
+            "azione_moderazione": "nessuna_violazione"|"rimuovi_contenuto"|"modifica_evento"|"approva_flyer"|"rifiuta_flyer"|"sospendi_account"|"riattiva_account"|"correggi_data_nascita"|"escalation_autorita"|"accesso_segnalazione","canale_amicizia": "ricerca"|"codice_invito","fonte_immagine_locale": "autorizzazione_locale"|"noxa"|"licenza_libera","motivo_segnalazione": "contenuto_inappropriato"|"molestie"|"adescamento_o_rischio_minore"|"spam"|"evento_falso"|"eta_errata"|"alcol_a_minori"|"altro"|"dati_errati","ruolo_utente": "moderatore"|"amministratore","stato_account": "attivo"|"sospeso","stato_amicizia": "in_attesa"|"accettata","stato_evento": "in_revisione"|"pubblicato"|"rifiutato"|"annullato","stato_partecipazione_evento": "interessato"|"partecipo","stato_segnalazione": "aperta"|"in_lavorazione"|"chiusa","tipo_consenso": "termini"|"privacy","tipo_oggetto_segnalabile": "profilo"|"evento"|"caricamento_flyer"|"gruppo"|"serata_gruppo"|"immagine_locale"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -389,7 +525,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "azione_moderazione": ["nessuna_violazione", "rimuovi_contenuto", "modifica_evento", "approva_flyer", "rifiuta_flyer", "sospendi_account", "riattiva_account", "correggi_data_nascita", "escalation_autorita", "accesso_segnalazione"],"canale_amicizia": ["ricerca", "codice_invito"],"motivo_segnalazione": ["contenuto_inappropriato", "molestie", "adescamento_o_rischio_minore", "spam", "evento_falso", "eta_errata", "alcol_a_minori", "altro"],"ruolo_utente": ["moderatore", "amministratore"],"stato_account": ["attivo", "sospeso"],"stato_amicizia": ["in_attesa", "accettata"],"stato_segnalazione": ["aperta", "in_lavorazione", "chiusa"],"tipo_consenso": ["termini", "privacy"],"tipo_oggetto_segnalabile": ["profilo", "evento", "caricamento_flyer", "gruppo", "serata_gruppo", "immagine_locale"]
+            "azione_moderazione": ["nessuna_violazione", "rimuovi_contenuto", "modifica_evento", "approva_flyer", "rifiuta_flyer", "sospendi_account", "riattiva_account", "correggi_data_nascita", "escalation_autorita", "accesso_segnalazione"],"canale_amicizia": ["ricerca", "codice_invito"],"fonte_immagine_locale": ["autorizzazione_locale", "noxa", "licenza_libera"],"motivo_segnalazione": ["contenuto_inappropriato", "molestie", "adescamento_o_rischio_minore", "spam", "evento_falso", "eta_errata", "alcol_a_minori", "altro", "dati_errati"],"ruolo_utente": ["moderatore", "amministratore"],"stato_account": ["attivo", "sospeso"],"stato_amicizia": ["in_attesa", "accettata"],"stato_evento": ["in_revisione", "pubblicato", "rifiutato", "annullato"],"stato_partecipazione_evento": ["interessato", "partecipo"],"stato_segnalazione": ["aperta", "in_lavorazione", "chiusa"],"tipo_consenso": ["termini", "privacy"],"tipo_oggetto_segnalabile": ["profilo", "evento", "caricamento_flyer", "gruppo", "serata_gruppo", "immagine_locale"]
           }
         }
 } as const

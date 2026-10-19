@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { classi } from '@/lib/classi';
 
-export type VarianteBadge = 'neutro' | 'eta' | 'accento' | 'tenue' | 'avviso' | 'successo' | 'info';
+export type VarianteBadge =
+  'neutro' | 'eta' | 'accento' | 'tenue' | 'avviso' | 'successo' | 'info' | 'annullato';
 
 type Props = {
   variante?: VarianteBadge;
@@ -16,6 +17,11 @@ export function Badge({ variante = 'neutro', children, className }: Props) {
       {children}
     </span>
   );
+}
+
+/** Pillola del genere musicale: informativa, non cliccabile (design/F-01-scopri). */
+export function Genere({ children }: { children: ReactNode }) {
+  return <span className="genere">{children}</span>;
 }
 
 type PropsContatore = {

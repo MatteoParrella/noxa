@@ -1162,55 +1162,6 @@
   border-radius: var(--raggio-3);
   overflow: hidden;
 }
-.scheda-evento-copertina {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  background: var(--colore-superficie-2);
-  overflow: hidden;
-}
-.scheda-evento-copertina img {
-  object-fit: cover;
-}
-.scheda-evento-fondo {
-  position: absolute;
-  inset: 0;
-  background: var(--colore-superficie-2);
-  border-bottom: 1px solid var(--colore-linea);
-}
-/* La velatura copre la fascia del testo con un fondo scuro fisso: contrasto ≥ 4,5:1 anche su una foto bianca. */
-.scheda-evento-velo {
-  position: absolute;
-  inset: auto 0 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spazio-1);
-  padding: var(--spazio-10) var(--spazio-4) var(--spazio-4);
-  background: linear-gradient(to bottom, transparent 0, var(--colore-velo-foto) var(--spazio-8));
-  color: var(--colore-testo-su-foto);
-}
-.scheda-evento-eta {
-  position: absolute;
-  top: var(--spazio-3);
-  right: var(--spazio-3);
-  background: var(--colore-velo-foto);
-  color: var(--colore-testo-su-foto);
-  border-color: var(--colore-testo-su-foto);
-}
-.scheda-evento-titolo {
-  margin: 0;
-  font-size: var(--tipo-titolo-2);
-  line-height: 1.17;
-  font-weight: 700;
-  font-stretch: 75%;
-  max-width: 90%;
-}
-.scheda-evento-corpo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spazio-2);
-  padding: var(--spazio-3) var(--spazio-4) var(--spazio-4);
-}
-
 /* ---------- MAPPA (contenitore) ---------- */
 .mappa {
   position: relative;
@@ -1220,7 +1171,8 @@
   background: var(--mappa-terra);
   overflow: hidden;
 }
-.mappa-tela {
+/* Più specifico di .maplibregl-map (position: relative), che altrimenti lascerebbe la tela alta 0. */
+.mappa > .mappa-tela {
   position: absolute;
   inset: 0;
 }

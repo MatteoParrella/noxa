@@ -92,3 +92,40 @@ export function analizzaDataNascita(testo: string, oggi: DataCalendario = oggiAR
   if (confronta(data, oggi) > 0) return { valida: false, errore: testi.futura };
   return { valida: true, data, eta: etaA(data, oggi) };
 }
+
+/**
+ * Serata in corso nel fuso Europe/Rome: fino alle 06:00 vale ancora quella del giorno prima,
+ * come `eventi.data_serata` nel database (DATA_MODEL.md §5.3).
+ */
+export function serataInCorso(adesso: Date = new Date()): DataCalendario {
+  return oggiARoma(new Date(adesso.getTime() - 6 * 3600_000));
+}
+
+/** Data spostata di `giorni` (anche negativi), senza problemi di fuso o di ora legale. */
+export function aggiungiGiorni(data: DataCalendario, giorni: number): DataCalendario {
+  const spostata = new Date(Date.UTC(data.anno, data.mese - 1, data.giorno + giorni));
+  return {
+    anno: spostata.getUTCFullYear(),
+    mese: spostata.getUTCMonth() + 1,
+    giorno: spostata.getUTCDate(),
+  };
+}
+
+/** Giorno della settimana: 0 lunedì … 6 domenica. */
+export function giornoSettimana(data: DataCalendario): number {
+  return (new Date(Date.UTC(data.anno, data.mese - 1, data.giorno)).getUTCDay() + 6) % 7;
+}
+
+export function confrontaDate(a: DataCalendario, b: DataCalendario): number {
+  return confronta(a, b);
+}
+
+/** AAAA-MM-GG (dal database) → data di calendario. */
+export function daIso(testo: string): DataCalendario {
+  const [anno, mese, giorno] = testo.slice(0, 10).split('-').map(Number) as [
+    number,
+    number,
+    number,
+  ];
+  return { anno, mese, giorno };
+}

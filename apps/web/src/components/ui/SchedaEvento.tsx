@@ -1,73 +1,108 @@
-import Image from 'next/image';
+import { X } from 'lucide-react';
+import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { Badge } from './Badge';
+import { messaggi } from '@/lib/messaggi/it';
+import { Badge, Genere } from './Badge';
+import { Copertina, type DatiCopertina } from './Copertina';
+import { Icona } from './Icona';
 
-export type ImmagineEvento = {
-  url: string;
-  /** Testo alternativo, per esempio "Foto di Magazzino Nove". */
-  alt: string;
-  /** Attribuzione richiesta dalla licenza della foto (ADR-0018). */
-  attribuzione?: string;
-};
-
-type Props = {
+export type DatiSchedaEvento = {
+  href: string;
+  /** Nome accessibile del link: titolo, locale, comune, quando, età. */
+  nome: string;
   titolo: string;
   locale: string;
-  zona: string;
+  comune: string;
+  /** "gio 15.10 · 23:00 → 05:00" (evidenza) */
+  quando: string;
+  /** "23:00" */
+  ora: string;
+  /** "23:00 → 05:00" */
   orario: string;
-  /** Età minima già calcolata nel database ("14+", "18+"). */
+  /** Età minima già calcolata nel database: "18+" o "18+ · non dichiarata". */
   eta: string;
-  /**
-   * Foto del locale; in mancanza il flyer approvato. Senza immagine si usa il fondo
-   * tipografico (ADR-0018).
-   */
-  immagine?: ImmagineEvento;
-  dettagli?: ReactNode;
-  azioni?: ReactNode;
+  /** Al massimo due generi nelle schede (design/F-01-scopri). */
+  generi: string[];
+  /** Distanza e prezzo minimo, solo se noti. */
+  meta: string[];
+  annullato?: boolean;
+  copertina: DatiCopertina;
+  /** Riga "amici che partecipano" (AmiciPartecipano). */
+  amici?: ReactNode;
 };
 
-/** Scheda evento con la foto del locale come sfondo e una velatura per il contrasto. */
-export function SchedaEvento({
-  titolo,
-  locale,
-  zona,
-  orario,
-  eta,
-  immagine,
-  dettagli,
-  azioni,
-}: Props) {
+function Etichette({ dati, conEta }: { dati: DatiSchedaEvento; conEta: boolean }) {
   return (
-    <article className="scheda scheda-evento" aria-label={`${titolo}, ${locale}`}>
-      <div className="scheda-evento-copertina">
-        {immagine ? (
-          <Image
-            src={immagine.url}
-            alt={immagine.alt}
-            fill
-            sizes="(max-width: 600px) 100vw, 560px"
-          />
-        ) : (
-          <span className="scheda-evento-fondo" aria-hidden="true" />
-        )}
-        <Badge variante="eta" className="scheda-evento-eta">
-          {eta}
+    <div className="rc-tag">
+      {dati.annullato && (
+        <Badge variante="annullato">
+          <Icona icona={X} dimensione="s" />
+          {messaggi.scopri.annullato}
         </Badge>
-        <div className="scheda-evento-velo">
-          <span className="t-mono-dato">{orario}</span>
-          <h3 className="scheda-evento-titolo">{titolo}</h3>
-        </div>
-      </div>
-      <div className="scheda-evento-corpo">
-        <span className="t-corpo-s c-2">
-          {locale} · {zona}
+      )}
+      {conEta && <Badge variante="eta">{dati.eta}</Badge>}
+      {dati.generi.slice(0, 2).map((genere) => (
+        <Genere key={genere}>{genere}</Genere>
+      ))}
+    </div>
+  );
+}
+
+function Meta({ meta }: { meta: string[] }) {
+  if (meta.length === 0) return null;
+  return (
+    <div className="rc-meta">
+      {meta.map((voce) => (
+        <span key={voce}>{voce}</span>
+      ))}
+    </div>
+  );
+}
+
+/** Prima scheda della serata: copertina grande con orario, titolo e locale (design/F-01-scopri). */
+export function SchedaEvidenza({ dati }: { dati: DatiSchedaEvento }) {
+  return (
+    <Link className="evidenza" href={dati.href} aria-label={dati.nome}>
+      <Copertina copertina={dati.copertina} forma="evidenza" ora={dati.ora} titolo={dati.titolo}>
+        <span className="badge-sopra">
+          <Badge variante="eta">{dati.eta}</Badge>
         </span>
-        {dettagli}
-        {immagine?.attribuzione && (
-          <span className="t-didascalia">Foto: {immagine.attribuzione}</span>
-        )}
-        {azioni && <div className="flex items-center gap-1">{azioni}</div>}
-      </div>
-    </article>
+        <span className="t-mono-dato">{dati.quando}</span>
+        <h3 className="evidenza-titolo">{dati.titolo}</h3>
+        <span className="t-corpo-s">
+          {dati.locale} · {dati.comune}
+        </span>
+      </Copertina>
+      <span className="evidenza-corpo">
+        <Etichette dati={dati} conEta={false} />
+        <Meta meta={dati.meta} />
+        {dati.amici}
+      </span>
+    </Link>
+  );
+}
+
+/** Riga compatta dell'elenco con miniatura, orario, badge d'età e generi. */
+export function RigaEvento({ dati }: { dati: DatiSchedaEvento }) {
+  return (
+    <Link className="riga-compatta" href={dati.href} aria-label={dati.nome}>
+      <Copertina
+        copertina={dati.copertina}
+        forma="miniatura"
+        ora={dati.ora}
+        titolo={dati.titolo}
+        className="miniatura"
+      />
+      <span className="min-w-0">
+        <h3 className="rc-titolo">{dati.titolo}</h3>
+        <span className="rc-luogo">
+          {dati.locale} · {dati.comune}
+        </span>
+        <span className="rc-ora">{dati.orario}</span>
+        <Etichette dati={dati} conEta />
+        <Meta meta={dati.meta} />
+        {dati.amici}
+      </span>
+    </Link>
   );
 }

@@ -32,3 +32,11 @@ export function leggiAmbiente(): Ambiente {
 export function chiaveTurnstile(): string | undefined {
   return process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || undefined;
 }
+
+/**
+ * Indirizzo pubblico dell'app per i link condivisi: NEXT_PUBLIC_URL_APP (nelle app native,
+ * dove l'origine è locale) oppure l'origine della pagina.
+ */
+export function urlPubblicoApp(): string {
+  return (process.env.NEXT_PUBLIC_URL_APP || window.location.origin).replace(/\/$/, '');
+}
