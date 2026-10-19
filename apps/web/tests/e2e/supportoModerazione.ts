@@ -553,9 +553,11 @@ export class ModerazioneSimulata {
       case 'POST /rest/v1/rpc/correggi_eta_alcol_evento':
       case 'POST /rest/v1/rpc/cambia_stato_evento':
       case 'POST /rest/v1/rpc/decidi_possibile_annullamento':
-      case 'POST /rest/v1/rpc/salva_foto_locale':
-      case 'POST /rest/v1/rpc/rimuovi_foto_locale':
         return { stato: 204 };
+      case 'POST /rest/v1/rpc/salva_foto_locale':
+        return { stato: 200, corpo: null };
+      case 'POST /rest/v1/rpc/rimuovi_foto_locale':
+        return { stato: 200, corpo: `${ID.binario}.webp` };
       case 'GET /rest/v1/fonti': {
         const id = url.searchParams.get('id')?.replace(/^eq\./, '');
         const locale = url.searchParams.get('locale_id')?.replace(/^eq\./, '');

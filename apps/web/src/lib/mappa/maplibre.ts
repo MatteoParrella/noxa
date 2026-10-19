@@ -14,9 +14,10 @@ export const LIMITI: [[number, number], [number, number]] = [
 let protocolloPmtiles: Protocol | null = null;
 
 /**
- * MapLibre caricato solo quando serve una mappa, con il worker locale e un solo protocollo
- * PMTiles per tutta l'app: intestazione e indici del file restano in memoria tra un'apertura
- * e l'altra, senza riscaricarli.
+ * MapLibre per le mappe piccole dell'area di moderazione (MappaPosizione), con il worker locale
+ * e il protocollo PMTiles registrati una volta. La mappa di Scopri (`Mappa.tsx`) ha il suo
+ * caricamento, tenuto separato: unificarli rallentava l'avvio della mappa sotto carico nei
+ * test e2e.
  */
 export async function caricaMaplibre(): Promise<typeof MapLibre> {
   const [maplibre, { Protocol: ProtocolloPmtiles }] = await Promise.all([

@@ -77,9 +77,9 @@ export function FotoLocale({ locale }: { locale: Locale }) {
   const salvataggio = useMutation({
     mutationFn: async (foto: FotoConvertita) => {
       setAvanzamento(40);
-      await caricaFotoLocale(locale.id, foto.blob);
+      const percorso = await caricaFotoLocale(locale.id, foto.blob);
       setAvanzamento(80);
-      await salvaFotoLocale(locale.id, {
+      await salvaFotoLocale(locale.id, percorso, {
         fonte,
         attribuzione,
         riferimento,

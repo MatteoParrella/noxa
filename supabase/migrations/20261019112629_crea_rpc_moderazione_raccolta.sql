@@ -205,31 +205,37 @@ begin
 end;
 $$;
 
--- R-56: salva la foto già caricata in immagini-locali/<id>.webp con la sua fonte lecita e le
--- conferme del moderatore (niente persone riconoscibili, niente alcol in evidenza).
+-- R-56: approva la foto già caricata in immagini-locali/<percorso> con la sua fonte lecita e
+-- le conferme del moderatore (niente persone riconoscibili, niente alcol in evidenza). Solo da
+-- questo momento gli utenti la vedono. Restituisce il percorso della foto precedente, che
+-- l'app elimina.
 create or replace function public.salva_foto_locale(
   locale uuid,
+  percorso text,
   fonte public.fonte_immagine_locale,
   senza_persone boolean,
   senza_alcol boolean,
   attribuzione text default null,
   riferimento text default null
 )
-returns void
+returns text
 language plpgsql
 security definer
 set search_path = ''
 as $$
 declare
-  percorso text := locale::text || '.webp';
   nome_locale text;
+  precedente text;
 begin
   perform private.richiedi_moderatore();
+  if percorso is null or percorso !~ ('^' || locale::text || '(-[0-9a-z]{6,32})?\.webp$') then
+    raise exception using errcode = '22023', message = 'Percorso della foto non valido.';
+  end if;
   if not coalesce(senza_persone, false) or not coalesce(senza_alcol, false) then
     raise exception using errcode = 'NX023',
       message = 'Conferma che nella foto non ci sono persone riconoscibili né alcolici in evidenza.';
   end if;
-  select l.nome into nome_locale from public.locali l where l.id = locale;
+  select l.nome, l.immagine_path into nome_locale, precedente from public.locali l where l.id = locale;
   if nome_locale is null then
     raise exception using errcode = 'P0002', message = 'Locale inesistente.';
   end if;
@@ -254,22 +260,26 @@ begin
       immagine_approvata_il = now()
   where l.id = locale;
   perform private.chiudi_operazione();
+  return case when precedente is distinct from percorso then precedente end;
 end;
 $$;
 
--- R-56: la rimozione chiede una motivazione; il file si elimina dall'app subito dopo.
+-- R-56: la rimozione chiede una motivazione; restituisce il percorso, che l'app elimina subito
+-- (già da ora gli utenti non lo leggono più).
 create or replace function public.rimuovi_foto_locale(locale uuid, motivazione text)
-returns void
+returns text
 language plpgsql
 security definer
 set search_path = ''
 as $$
 declare
   testo text;
+  precedente text;
 begin
   perform private.richiedi_moderatore();
   testo := private.richiedi_motivazione(motivazione);
-  if not exists (select 1 from public.locali l where l.id = locale and l.immagine_path is not null) then
+  select l.immagine_path into precedente from public.locali l where l.id = locale;
+  if precedente is null then
     raise exception using errcode = 'NX025', message = 'Il locale non ha una foto.';
   end if;
   perform private.registra_azione('locale', locale, 'rimuovi_immagine_locale', testo);
@@ -278,6 +288,7 @@ begin
       immagine_riferimento = null
   where l.id = locale;
   perform private.chiudi_operazione();
+  return precedente;
 end;
 $$;
 
@@ -794,7 +805,7 @@ revoke all on function private.e_possibile_annullamento(uuid) from public;
 revoke all on function public.contatori_moderazione() from public, anon;
 revoke all on function public.locali_moderazione() from public, anon;
 revoke all on function public.locale_moderazione(uuid) from public, anon;
-revoke all on function public.salva_foto_locale(uuid, public.fonte_immagine_locale, boolean,
+revoke all on function public.salva_foto_locale(uuid, text, public.fonte_immagine_locale, boolean,
                                                 boolean, text, text) from public, anon;
 revoke all on function public.rimuovi_foto_locale(uuid, text) from public, anon;
 revoke all on function public.decidi_candidato_locale(uuid, text, uuid, text) from public, anon;
@@ -815,7 +826,7 @@ revoke all on function public.decidi_possibile_annullamento(uuid, boolean, text)
 grant execute on function public.contatori_moderazione() to authenticated;
 grant execute on function public.locali_moderazione() to authenticated;
 grant execute on function public.locale_moderazione(uuid) to authenticated;
-grant execute on function public.salva_foto_locale(uuid, public.fonte_immagine_locale, boolean,
+grant execute on function public.salva_foto_locale(uuid, text, public.fonte_immagine_locale, boolean,
                                                    boolean, text, text) to authenticated;
 grant execute on function public.rimuovi_foto_locale(uuid, text) to authenticated;
 grant execute on function public.decidi_candidato_locale(uuid, text, uuid, text) to authenticated;

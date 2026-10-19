@@ -220,9 +220,14 @@ test.describe('locali e candidati', () => {
     const caricamento = simulata.chiamate.find((c) =>
       c.chiave.startsWith('POST /storage/v1/object/immagini-locali/'),
     );
-    expect(caricamento?.chiave).toBe(`POST /storage/v1/object/immagini-locali/${ID.binario}.webp`);
+    // Percorso nuovo per ogni foto: quella approvata resta visibile finché la nuova non lo è.
+    expect(caricamento?.chiave).toMatch(
+      new RegExp(`^POST /storage/v1/object/immagini-locali/${ID.binario}-[0-9a-f]{16}\\.webp$`),
+    );
+    const percorso = caricamento?.chiave.split('/').pop();
     expect(simulata.di('POST /rest/v1/rpc/salva_foto_locale')[0]?.corpo).toEqual({
       locale: ID.binario,
+      percorso,
       fonte: 'autorizzazione_locale',
       senza_persone: true,
       senza_alcol: true,

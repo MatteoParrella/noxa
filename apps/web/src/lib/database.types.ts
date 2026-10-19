@@ -595,10 +595,10 @@ isOneToOne: false
             }[]
                            },
 "rimuovi_foto_locale":
-{ Args: { "locale": string,"motivazione": string }; Returns: undefined
+{ Args: { "locale": string,"motivazione": string }; Returns: string
                            },
 "salva_foto_locale":
-{ Args: { "attribuzione"?: string,"fonte": Database["public"]['Enums']["fonte_immagine_locale"],"locale": string,"riferimento"?: string,"senza_alcol": boolean,"senza_persone": boolean }; Returns: undefined
+{ Args: { "attribuzione"?: string,"fonte": Database["public"]['Enums']["fonte_immagine_locale"],"locale": string,"percorso": string,"riferimento"?: string,"senza_alcol": boolean,"senza_persone": boolean }; Returns: string
                            },
 "usa_codice_invito":
 { Args: { "codice": string }; Returns: string

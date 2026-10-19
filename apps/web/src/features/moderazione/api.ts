@@ -263,12 +263,19 @@ export async function salvaLocale(id: string | null, dati: DatiLocale): Promise<
   return data.id;
 }
 
-/** Foto già convertita in WebP sul dispositivo: si carica sempre come `<id>.webp`. */
-export async function caricaFotoLocale(id: string, foto: Blob): Promise<void> {
+/**
+ * Foto già convertita in WebP sul dispositivo, caricata con un percorso nuovo
+ * (`<id>-<versione>.webp`): finché `salvaFotoLocale` non la approva gli utenti non la vedono
+ * (R-56). Restituisce il percorso.
+ */
+export async function caricaFotoLocale(id: string, foto: Blob): Promise<string> {
+  const versione = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+  const percorso = `${id}-${versione}.webp`;
   const { error } = await supabase()
     .storage.from('immagini-locali')
-    .upload(`${id}.webp`, foto, { upsert: true, contentType: 'image/webp', cacheControl: '60' });
+    .upload(percorso, foto, { upsert: false, contentType: 'image/webp', cacheControl: '3600' });
   if (error) throw converti(error);
+  return percorso;
 }
 
 export type DatiFoto = {
@@ -279,9 +286,12 @@ export type DatiFoto = {
   senzaAlcol: boolean;
 };
 
-export async function salvaFotoLocale(id: string, dati: DatiFoto): Promise<void> {
-  const { error } = await supabase().rpc('salva_foto_locale', {
+/** Approva la foto caricata ed elimina quella che sostituisce. */
+export async function salvaFotoLocale(id: string, percorso: string, dati: DatiFoto): Promise<void> {
+  const client = supabase();
+  const { data: precedente, error } = await client.rpc('salva_foto_locale', {
     locale: id,
+    percorso,
     fonte: dati.fonte,
     ...(dati.attribuzione.trim() ? { attribuzione: dati.attribuzione.trim() } : {}),
     ...(dati.riferimento.trim() ? { riferimento: dati.riferimento.trim() } : {}),
@@ -289,16 +299,26 @@ export async function salvaFotoLocale(id: string, dati: DatiFoto): Promise<void>
     senza_alcol: dati.senzaAlcol,
   });
   if (error) throw converti(error);
+  if (typeof precedente === 'string' && precedente) {
+    // La foto vecchia non è più leggibile dagli utenti; se l'eliminazione fallisce resta un
+    // file orfano, invisibile, che non blocca il salvataggio.
+    await client.storage.from('immagini-locali').remove([precedente]);
+  }
 }
 
 export async function rimuoviFotoLocale(id: string, motivazione: string): Promise<void> {
   const client = supabase();
-  const { error } = await client.rpc('rimuovi_foto_locale', { locale: id, motivazione });
+  const { data: percorso, error } = await client.rpc('rimuovi_foto_locale', {
+    locale: id,
+    motivazione,
+  });
   if (error) throw converti(error);
   // Il file non è più leggibile dagli utenti (la policy richiede la foto approvata); lo si
   // elimina subito.
-  const rimozione = await client.storage.from('immagini-locali').remove([`${id}.webp`]);
-  if (rimozione.error) throw converti(rimozione.error);
+  if (typeof percorso === 'string' && percorso) {
+    const rimozione = await client.storage.from('immagini-locali').remove([percorso]);
+    if (rimozione.error) throw converti(rimozione.error);
+  }
 }
 
 /** URL firmati delle foto dei locali, validi un'ora. */

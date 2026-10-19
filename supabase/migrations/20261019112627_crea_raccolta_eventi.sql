@@ -52,6 +52,22 @@ create trigger locali_nome_normalizzato
   before insert or update of nome on public.locali
   for each row execute function private.imposta_nome_normalizzato();
 
+-- R-56: ogni foto ha un percorso suo (`<id>-<versione>.webp`). Una foto nuova si carica
+-- accanto a quella approvata e gli utenti la vedono solo quando salva_foto_locale la approva:
+-- la lettura del bucket richiede immagine_path = name.
+alter table public.locali drop constraint locali_immagine_coerente;
+alter table public.locali add constraint locali_immagine_coerente check (
+  (immagine_path is null and immagine_fonte is null and immagine_attribuzione is null
+   and immagine_riferimento is null and immagine_approvata_il is null)
+  or (immagine_path ~ ('^' || id::text || '(-[0-9a-z]{6,32})?\.webp$')
+      and immagine_fonte is not null
+      and immagine_approvata_il is not null
+      and (immagine_fonte <> 'licenza_libera'
+           or char_length(btrim(coalesce(immagine_attribuzione, ''))) > 0)
+      and (immagine_fonte <> 'autorizzazione_locale'
+           or char_length(btrim(coalesce(immagine_riferimento, ''))) > 0))
+);
+
 -- R-56: i dati della foto si cambiano solo con le RPC salva_foto_locale e rimuovi_foto_locale,
 -- che registrano l'azione; il nome normalizzato lo scrive il trigger.
 revoke insert, update on public.locali from authenticated;

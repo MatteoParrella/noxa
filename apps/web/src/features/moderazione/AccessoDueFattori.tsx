@@ -99,10 +99,13 @@ function CampoCodice({
 /** Prima volta: QR, codice segreto e primo codice per attivare i due fattori (R-06). */
 export function AttivaDueFattori({ onAttivato }: { onAttivato: () => void }) {
   const nuovo = useQuery({
-    queryKey: ['moderazione', 'attivazione'],
+    // Fuori dalle chiavi 'moderazione': dopo il codice si rileggono i dati, non l'attivazione.
+    queryKey: ['attivazione-due-fattori'],
     queryFn: avviaAttivazione,
+    // Un'attivazione sola per visita: rifarla cambierebbe il QR già scansionato.
     staleTime: Infinity,
-    gcTime: 0,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
     retry: false,
   });
   const [copiato, setCopiato] = useState(false);
