@@ -1,6 +1,7 @@
 'use client';
 
-import { Ban, ChevronRight, Flag, Pencil, Users } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Ban, ChevronRight, Flag, Pencil, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Contatore } from '@/components/ui/Badge';
@@ -10,6 +11,7 @@ import { Caricamento, ErroreConAzione } from '@/components/ui/Stati';
 import { ImpostazioniAspetto } from '@/features/account/ImpostazioniAspetto';
 import { PulsanteEsci } from '@/features/account/PulsanteEsci';
 import { useMioAccount, useSessione } from '@/features/account/sessione';
+import { leggiMieiRuoli } from '@/features/moderazione/api';
 import { messaggi } from '@/lib/messaggi/it';
 import { useAmici } from './dati';
 
@@ -20,6 +22,13 @@ export function MioProfilo() {
   const account = useMioAccount(sessione);
   const amici = useAmici();
   const richieste = amici.data?.ricevute.length ?? 0;
+  const utenteId = sessione.stato === 'presente' ? sessione.utenteId : null;
+  // La voce compare solo a chi ha un ruolo; l'area chiede comunque i due fattori (R-06).
+  const ruoli = useQuery({
+    queryKey: ['moderazione', 'ruoli', utenteId],
+    queryFn: () => leggiMieiRuoli(utenteId as string),
+    enabled: utenteId !== null,
+  });
 
   if (account.isPending) return <Caricamento descrizione={testi.caricamento} righe={2} />;
   if (account.isError || !account.data) {
@@ -72,6 +81,15 @@ export function MioProfilo() {
               <Icona icona={ChevronRight} dimensione="s" />
             </span>
           </Link>
+          {(ruoli.data ?? []).length > 0 && (
+            <Link className="voce-profilo" href="/moderazione/locali/">
+              <Icona icona={ShieldCheck} />
+              {testi.moderazione}
+              <span className="valore">
+                <Icona icona={ChevronRight} dimensione="s" />
+              </span>
+            </Link>
+          )}
         </nav>
       </Entra>
 

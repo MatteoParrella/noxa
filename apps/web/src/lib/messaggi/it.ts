@@ -281,6 +281,7 @@ export const messaggi = {
     richieste: (n: number) => (n === 1 ? '1 richiesta' : `${n} richieste`),
     bloccati: 'Persone bloccate',
     segnalazioni: 'Le mie segnalazioni',
+    moderazione: 'Area di moderazione',
     aspetto: 'Aspetto',
     caricamento: 'Carico il tuo profilo',
     modificaTitolo: 'Modifica',
