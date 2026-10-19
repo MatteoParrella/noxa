@@ -1,7 +1,7 @@
 -- candidati_locali e decisione dei moderatori (DATA_MODEL.md §5.3; EVENT_INGESTION.md §2.1).
 -- Regole: R-06; ADR-0008 (da Google solo il place_id).
 begin;
-select plan(16);
+select plan(18);
 
 create function tests.c(n text) returns uuid language sql immutable as $$
   select ('00000000-0000-4000-8000-0000000000' || n)::uuid;
@@ -33,10 +33,18 @@ select throws_ok(
   '42501', null,
   'Un utente non decide i candidati'
 );
+select throws_ok($$ select * from public.candidati_da_verificare() $$, '42501', null,
+                 'Un utente non legge l''elenco dei candidati');
 select tests.autentica_come('moderatore_senza_mfa');
 select is_empty($$ select 1 from public.candidati_locali $$, 'R-06: senza due fattori i candidati non si vedono');
 select tests.autentica_come('moderatore');
 select is((select count(*)::int from public.candidati_locali), 3, 'Un moderatore vede i candidati');
+select is(
+  (select round(lat::numeric, 2) || ' ' || doppione_nome from public.candidati_da_verificare()
+   where id = tests.c('a1')),
+  '45.58 Club Binario 7',
+  'L''elenco dei candidati ha coordinate e possibile doppione'
+);
 select throws_ok(
   $$ update public.candidati_locali set stato = 'scartato' where id = tests.c('a2') $$,
   '42501', null,

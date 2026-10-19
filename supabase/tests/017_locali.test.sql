@@ -94,7 +94,7 @@ select throws_ok(
   'R-56: un utente non cambia la foto di un locale'
 );
 select throws_ok(
-  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', null, null, true, true) $$,
+  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', true, true, null, null) $$,
   '42501', null,
   'R-56: un utente non salva la foto di un locale'
 );
@@ -106,7 +106,7 @@ select throws_ok(
   'R-56: anche un moderatore cambia la foto solo con la RPC che la registra'
 );
 select throws_ok(
-  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', null, null, true, true) $$,
+  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', true, true, null, null) $$,
   'NX024', null,
   'R-56: senza il file caricato la foto non si salva'
 );
@@ -120,29 +120,28 @@ values ('immagini-locali', tests.l('001')::text || '.webp'),
 
 select tests.autentica_come('moderatore_senza_mfa');
 select throws_ok(
-  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', null, null, true, true) $$,
+  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', true, true, null, null) $$,
   '42501', null,
   'R-06, R-56: senza due fattori un moderatore non salva le foto'
 );
 select tests.autentica_come('moderatore');
 select throws_ok(
-  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', null, null, true, false) $$,
+  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', true, false, null, null) $$,
   'NX023', null,
   'R-56: senza la conferma "niente alcolici in evidenza" la foto non si salva'
 );
 select throws_ok(
-  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', null, null, false, true) $$,
+  $$ select public.salva_foto_locale(tests.l('001'), 'noxa', false, true, null, null) $$,
   'NX023', null,
   'R-56: senza la conferma "niente persone riconoscibili" la foto non si salva'
 );
 select throws_ok(
-  $$ select public.salva_foto_locale(tests.l('001'), 'licenza_libera', ' ', null, true, true) $$,
+  $$ select public.salva_foto_locale(tests.l('001'), 'licenza_libera', true, true, ' ', null) $$,
   '23514', null,
   'R-56: una licenza libera senza attribuzione non si salva'
 );
 select lives_ok(
-  $$ select public.salva_foto_locale(tests.l('001'), 'licenza_libera', 'Laura Bassi, CC BY 4.0',
-                                      null, true, true) $$,
+  $$ select public.salva_foto_locale(tests.l('001'), 'licenza_libera', true, true, 'Laura Bassi, CC BY 4.0', null) $$,
   'R-56: un moderatore con due fattori salva una foto con licenza libera e attribuzione'
 );
 select is(
@@ -158,8 +157,7 @@ select is(
   'R-56: il caricamento è registrato una sola volta in azioni_moderazione'
 );
 select lives_ok(
-  $$ select public.salva_foto_locale(tests.l('006'), 'autorizzazione_locale', null,
-                                      'AUT-2026-014', true, true) $$,
+  $$ select public.salva_foto_locale(tests.l('006'), 'autorizzazione_locale', true, true, null, 'AUT-2026-014') $$,
   'Un moderatore salva la foto di un locale non attivo, autorizzata dal locale'
 );
 

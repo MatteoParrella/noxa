@@ -162,15 +162,58 @@ begin
 end;
 $$;
 
+-- Scheda del locale: dati modificabili, coordinate, foto con chi l'ha approvata.
+create or replace function public.locale_moderazione(locale uuid)
+returns table (
+  id uuid,
+  nome text,
+  indirizzo text,
+  comune text,
+  provincia text,
+  lat double precision,
+  lon double precision,
+  osm_id text,
+  google_place_id text,
+  sito_web text,
+  instagram_username text,
+  attivo boolean,
+  immagine_path text,
+  immagine_fonte public.fonte_immagine_locale,
+  immagine_attribuzione text,
+  immagine_riferimento text,
+  immagine_approvata_da text,
+  immagine_approvata_il timestamptz,
+  aggiornato_il timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  perform private.richiedi_moderatore();
+  return query
+  select l.id, l.nome, l.indirizzo, l.comune, l.provincia,
+         extensions.st_y(l.posizione::extensions.geometry),
+         extensions.st_x(l.posizione::extensions.geometry),
+         l.osm_id, l.google_place_id, l.sito_web, l.instagram_username, l.attivo,
+         l.immagine_path, l.immagine_fonte, l.immagine_attribuzione, l.immagine_riferimento,
+         p.nome_visualizzato, l.immagine_approvata_il, l.aggiornato_il
+  from public.locali l
+  left join public.profili p on p.id = l.immagine_approvata_da
+  where l.id = locale;
+end;
+$$;
+
 -- R-56: salva la foto già caricata in immagini-locali/<id>.webp con la sua fonte lecita e le
 -- conferme del moderatore (niente persone riconoscibili, niente alcol in evidenza).
 create or replace function public.salva_foto_locale(
   locale uuid,
   fonte public.fonte_immagine_locale,
-  attribuzione text,
-  riferimento text,
   senza_persone boolean,
-  senza_alcol boolean
+  senza_alcol boolean,
+  attribuzione text default null,
+  riferimento text default null
 )
 returns void
 language plpgsql
@@ -238,14 +281,51 @@ begin
 end;
 $$;
 
+-- Candidati ancora da verificare, con coordinate e possibile doppione per la tabella.
+create or replace function public.candidati_da_verificare()
+returns table (
+  id uuid,
+  origine text,
+  osm_id text,
+  google_place_id text,
+  nome text,
+  indirizzo text,
+  comune text,
+  provincia text,
+  lat double precision,
+  lon double precision,
+  sito_web text,
+  doppione_id uuid,
+  doppione_nome text
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  perform private.richiedi_moderatore();
+  return query
+  select c.id, c.origine, c.osm_id, c.google_place_id, c.nome, c.indirizzo, c.comune,
+         c.provincia,
+         extensions.st_y(c.posizione::extensions.geometry),
+         extensions.st_x(c.posizione::extensions.geometry),
+         c.sito_web, l.id, l.nome
+  from public.candidati_locali c
+  left join public.locali l on l.id = c.possibile_doppione_id
+  where c.stato = 'da_verificare'
+  order by c.creato_il, c.id;
+end;
+$$;
+
 -- Candidati da OpenStreetMap e Google Places (EVENT_INGESTION.md §2.1): "creato" dopo aver
 -- creato il locale verificato, "unito" a un locale esistente, "scartato" con il motivo.
 -- L'identificativo OSM o Google passa al locale; nessun altro dato viene sovrascritto.
 create or replace function public.decidi_candidato_locale(
   candidato uuid,
   esito text,
-  locale uuid,
-  motivazione text
+  locale uuid default null,
+  motivazione text default null
 )
 returns void
 language plpgsql
@@ -674,7 +754,7 @@ $$;
 create or replace function public.decidi_possibile_annullamento(
   evento uuid,
   annullato boolean,
-  motivazione text
+  motivazione text default null
 )
 returns void
 language plpgsql
@@ -713,10 +793,12 @@ revoke all on function private.e_possibile_annullamento(uuid) from public;
 
 revoke all on function public.contatori_moderazione() from public, anon;
 revoke all on function public.locali_moderazione() from public, anon;
-revoke all on function public.salva_foto_locale(uuid, public.fonte_immagine_locale, text, text,
-                                                boolean, boolean) from public, anon;
+revoke all on function public.locale_moderazione(uuid) from public, anon;
+revoke all on function public.salva_foto_locale(uuid, public.fonte_immagine_locale, boolean,
+                                                boolean, text, text) from public, anon;
 revoke all on function public.rimuovi_foto_locale(uuid, text) from public, anon;
 revoke all on function public.decidi_candidato_locale(uuid, text, uuid, text) from public, anon;
+revoke all on function public.candidati_da_verificare() from public, anon;
 revoke all on function public.registro_moderazione(public.tipo_oggetto_segnalabile, uuid)
   from public, anon;
 revoke all on function public.esegui_fonte_ora(uuid) from public, anon;
@@ -732,10 +814,12 @@ revoke all on function public.decidi_possibile_annullamento(uuid, boolean, text)
 
 grant execute on function public.contatori_moderazione() to authenticated;
 grant execute on function public.locali_moderazione() to authenticated;
-grant execute on function public.salva_foto_locale(uuid, public.fonte_immagine_locale, text, text,
-                                                   boolean, boolean) to authenticated;
+grant execute on function public.locale_moderazione(uuid) to authenticated;
+grant execute on function public.salva_foto_locale(uuid, public.fonte_immagine_locale, boolean,
+                                                   boolean, text, text) to authenticated;
 grant execute on function public.rimuovi_foto_locale(uuid, text) to authenticated;
 grant execute on function public.decidi_candidato_locale(uuid, text, uuid, text) to authenticated;
+grant execute on function public.candidati_da_verificare() to authenticated;
 grant execute on function public.registro_moderazione(public.tipo_oggetto_segnalabile, uuid)
   to authenticated;
 grant execute on function public.esegui_fonte_ora(uuid) to authenticated;

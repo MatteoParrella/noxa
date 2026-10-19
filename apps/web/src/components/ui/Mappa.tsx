@@ -1,10 +1,10 @@
 'use client';
 
 import type { GeoJSONSource, Map as MappaMaplibre, Marker } from 'maplibre-gl';
-import type { Protocol } from 'pmtiles';
 import { Map as MapIcon } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { classi } from '@/lib/classi';
+import { CENTRO, LIMITI, caricaMaplibre } from '@/lib/mappa/maplibre';
 import { leggiColori, stileMappa } from '@/lib/mappa/stile';
 import { messaggi } from '@/lib/messaggi/it';
 import { EVENTO_TEMA, temaAttivo } from '@/lib/tema';
@@ -13,19 +13,7 @@ import { Icona } from './Icona';
 import { Pulsante } from './Pulsante';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-/** Worker di MapLibre copiato tra i file statici (scripts/copia-maplibre-worker.mjs). */
-const URL_WORKER = '/vendor/maplibre/maplibre-gl-worker.mjs';
-
-/** Centro e zoom iniziali: Milano, con la Brianza a nord. */
-const CENTRO: [number, number] = [9.19, 45.5];
-const LIMITI: [[number, number], [number, number]] = [
-  [8.65, 45.15],
-  [9.6, 45.8],
-];
-
 const SORGENTE = 'locali';
-
-let protocolloPmtiles: Protocol | null = null;
 
 /** Un locale sulla mappa con il numero dei suoi eventi nei filtri attuali. */
 export type LuogoMappa = { id: string; nome: string; lat: number; lon: number; eventi: number };
@@ -104,18 +92,8 @@ export function Mappa({
     const segnaposto = new Map<string, Marker>();
 
     async function crea(url: string, nodo: HTMLDivElement) {
-      const [maplibre, { Protocol: ProtocolloPmtiles }] = await Promise.all([
-        import('maplibre-gl'),
-        import('pmtiles'),
-      ]);
+      const maplibre = await caricaMaplibre();
       if (annullato) return;
-      maplibre.setWorkerUrl(URL_WORKER);
-      // Un solo protocollo per tutta l'app: intestazione e indici del file PMTiles restano in
-      // memoria tra un'apertura e l'altra della mappa, senza riscaricarli.
-      if (!protocolloPmtiles) {
-        protocolloPmtiles = new ProtocolloPmtiles();
-        maplibre.addProtocol('pmtiles', protocolloPmtiles.tile);
-      }
       const ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const creata = new maplibre.Map({
         container: nodo,

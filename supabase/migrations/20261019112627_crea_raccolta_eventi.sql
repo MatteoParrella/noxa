@@ -45,6 +45,9 @@ begin
 end;
 $$;
 
+-- Il valore vero lo scrive il trigger: il predefinito serve solo a non chiederlo a chi scrive.
+alter table public.locali alter column nome_normalizzato set default '';
+
 create trigger locali_nome_normalizzato
   before insert or update of nome on public.locali
   for each row execute function private.imposta_nome_normalizzato();

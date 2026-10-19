@@ -404,6 +404,16 @@
   color: var(--colore-info);
   font-family: var(--tipo-famiglia-testo);
 }
+.badge-errore {
+  border-color: transparent;
+  background: var(--colore-errore-tenue);
+  color: var(--colore-errore);
+  font-family: var(--tipo-famiglia-testo);
+}
+.badge-testo {
+  font-family: var(--tipo-famiglia-testo);
+  color: var(--colore-testo-secondario);
+}
 .badge .ico {
   width: 13px;
   height: 13px;

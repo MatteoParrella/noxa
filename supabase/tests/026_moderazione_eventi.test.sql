@@ -2,7 +2,7 @@
 -- registro e generi (DATA_MODEL.md §5.3, §5.10; EVENT_INGESTION.md §7). Regole: R-06, R-22,
 -- R-53, R-69.
 begin;
-select plan(30);
+select plan(32);
 
 create function tests.e(n text) returns uuid language sql immutable as $$
   select ('00000000-0000-4000-8000-00000000e' || n)::uuid;
@@ -32,6 +32,8 @@ select throws_ok($$ select * from public.eventi_moderazione() $$, '42501', null,
                  'Un utente non usa la ricerca dei moderatori');
 select throws_ok($$ select * from public.locali_moderazione() $$, '42501', null,
                  'Un utente non vede l''elenco dei locali dei moderatori');
+select throws_ok($$ select * from public.locale_moderazione('00000000-0000-4000-8000-00000000c001') $$,
+                 '42501', null, 'Un utente non apre la scheda di moderazione di un locale');
 select throws_ok($$ select * from public.contatori_moderazione() $$, '42501', null,
                  'Un utente non vede i contatori della moderazione');
 select throws_ok($$ select * from public.registro_moderazione('evento', tests.e('001')) $$, '42501', null,
@@ -63,6 +65,12 @@ select is(
    from public.locali_moderazione() where nome = 'Club Binario 7'),
   '1/1/3',
   'L''elenco dei locali conta fonti, fonti attive ed eventi dei prossimi 7 giorni'
+);
+select is(
+  (select round(lat::numeric, 4) || ' ' || round(lon::numeric, 4) || ' ' || nome
+   from public.locale_moderazione('00000000-0000-4000-8000-00000000c001')),
+  '45.5845 9.2744 Club Binario 7',
+  'La scheda del locale ha le coordinate per la mappa'
 );
 select is(
   (select attivo from public.locali_moderazione() where nome = 'Spazio Navile'),
