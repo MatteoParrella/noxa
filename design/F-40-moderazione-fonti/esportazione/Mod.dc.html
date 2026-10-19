@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Noxa · Moderazione: locali e fonti</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/6fa6353d716b68f787ff2702a9363d96">
+<link rel="stylesheet" href="/_blob/afc4088ee394ab1a58e9ba7651ca762e">
+<link rel="stylesheet" href="/_blob/dbab4423ee519d83500f0485a4806ddb">
+<link rel="stylesheet" href="/_blob/cdf778b603b9eec9b9e8c7c0cba7983e">
+<link rel="stylesheet" href="/_blob/75de66852ef3f7538a23c938780b4826">
+<link rel="stylesheet" href="/_blob/a1cf835a0f7990ee258f07644356accd">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="{{radice}}" style="width: {{larghezza}}px; height: {{altezza}}px; position: relative; overflow: hidden">
+
+  <!-- ===================== PORTA: DUE FATTORI ===================== -->
+  <sc-if value="{{is.porta}}" hint-placeholder-val="{{ false }}">
+    <div class="porta">
+      <div class="porta-scheda">
+        <div class="md-marchio" style="padding: 0"><b>noxa</b><span>moderazione</span></div>
+        <sc-if value="{{p.attiva}}" hint-placeholder-val="{{ false }}">
+          <h1 class="t-titolo-2" style="margin: 0">Attiva i due fattori</h1>
+          <p class="t-corpo-s c-2" style="margin: 0">L’area si apre solo con un codice che cambia ogni 30 secondi. Serve un’app di autenticazione, per esempio quella del telefono.</p>
+          <ol class="t-corpo-s" style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px"><li>Apri l’app e scansiona il codice QR.</li><li>Se non puoi scansionare, copia il codice segreto.</li><li>Scrivi qui sotto le 6 cifre che vedi nell’app.</li></ol>
+          <div style="display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 16px; align-items: center">
+            <div class="qr-box" style="padding: 10px; align-self: start"><svg viewBox="0 0 29 29" role="img" aria-label="Codice QR per l’app di autenticazione. Il codice segreto è scritto a fianco." shape-rendering="crispEdges" style="width: 112px; height: 112px"><path d="{{qrPath}}" fill="#15181E"></path></svg></div>
+            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+              <span class="campo-etichetta">Codice segreto</span>
+              <div class="segreto"><span>NXQ4 7KD2 M9WP 3HTR</span><button class="btn btn-s btn-testo" type="button" style="flex: none">Copia</button></div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{p.accesso}}" hint-placeholder-val="{{ true }}">
+          <h1 class="t-titolo-2" style="margin: 0">{{p.titolo}}</h1>
+          <p class="t-corpo-s c-2" style="margin: 0">{{p.testo}}</p>
+        </sc-if>
+        <sc-if value="{{p.haCampo}}" hint-placeholder-val="{{ true }}">
+          <div class="campo">
+            <span class="campo-etichetta" id="c6-l">Codice a 6 cifre</span>
+            <div class="{{p.c6Cls}}" role="group" aria-labelledby="c6-l">
+              <sc-for list="{{p.cifre}}" as="d" hint-placeholder-count="6"><input class="{{d.cls}}" type="text" inputmode="numeric" maxlength="1" value="{{d.v}}" aria-label="Cifra {{d.n}}" disabled="{{p.bloccato}}" readonly></sc-for>
+            </div>
+            <sc-if value="{{p.errato}}" hint-placeholder-val="{{ false }}"><span class="campo-errore" role="alert"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Codice non valido. Correggi le ultime cifre o aspetta il prossimo codice dell’app.</span></span></sc-if>
+            <sc-if value="{{p.tentativi}}" hint-placeholder-val="{{ false }}"><span class="campo-errore" role="alert"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>Troppi tentativi. Puoi riprovare tra <span class="mono">04:30</span>.</span></span></sc-if>
+          </div>
+          <button class="{{p.btnCls}}" type="button" disabled="{{p.bloccato}}">{{p.btn}}</button>
+          <a class="link-in-testo" href="#" style="align-self: flex-start">Non hai il telefono? Scrivi all’amministratore</a>
+        </sc-if>
+        <sc-if value="{{p.noruolo}}" hint-placeholder-val="{{ false }}">
+          <div class="avviso avviso-info" role="note"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span><span class="avviso-titolo">Il tuo account non ha il ruolo di moderatore</span>Se pensi di doverlo avere, chiedilo all’amministratore.</span></div>
+          <a class="btn btn-secondario btn-pieno" href="#">Torna all’app</a>
+        </sc-if>
+        <sc-if value="{{p.scaduta}}" hint-placeholder-val="{{ false }}">
+          <button class="btn btn-principale btn-pieno" type="button">Accedi di nuovo</button>
+        </sc-if>
+        <p class="ax-piccolo" style="margin: 0; padding-top: 12px; border-top: 1px solid var(--colore-linea)">In quest’area non ci sono dati degli utenti: solo locali, fonti ed eventi. Ogni azione viene registrata con il tuo nome.</p>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== GUSCIO ===================== -->
+  <sc-if value="{{is.guscio}}" hint-placeholder-val="{{ true }}">
+    <div class="md-guscio">
+      <aside class="md-lato" aria-label="Sezioni della moderazione">
+        <div class="md-marchio"><b>noxa</b><span>moderazione</span></div>
+        <nav style="display: flex; flex-direction: column; gap: 2px">
+          <sc-for list="{{nav}}" as="v" hint-placeholder-count="6">
+            <button class="{{v.cls}}" type="button" aria-current="{{v.cur}}" disabled="{{v.spenta}}" onClick="{{v.vai}}"><span class="sr">{{v.sr}}</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{v.ico}}"></path></svg><span aria-hidden="true">{{v.t}}</span><sc-if value="{{v.haN}}" hint-placeholder-val="{{ false }}"><span class="contatore" aria-hidden="true">{{v.n}}</span></sc-if><sc-if value="{{v.spenta}}" hint-placeholder-val="{{ false }}"><span class="arrivo" aria-hidden="true">In arrivo</span></sc-if></button>
+          </sc-for>
+        </nav>
+        <div class="md-piede">
+          <div class="md-utente"><span class="avatar avatar-t1" aria-hidden="true">M1</span><span>Moderatore Uno<small>Due fattori attivi</small></span></div>
+          <a class="md-voce" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>Torna all’app</a>
+          <button class="md-voce" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg>Esci</button>
+        </div>
+      </aside>
+
+      <div class="md-main">
+        <div class="md-barra-mobile">
+          <b>noxa</b><span class="etichetta">moderazione</span><span style="flex: 1 1 auto"></span>
+          <button class="btn btn-s btn-secondario" type="button" aria-label="Apri il menu delle sezioni"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>{{sezioneNome}}</button>
+        </div>
+
+        <!-- ---------- LOCALI / CANDIDATI ---------- -->
+        <sc-if value="{{is.locali}}" hint-placeholder-val="{{ true }}">
+          <header class="md-testa">
+            <div class="md-titolo-riga">
+              <h1 class="md-titolo">Locali <span class="conta">{{loc.conta}}</span></h1>
+              <div class="md-strumenti">
+                <div class="campo-box campo-ricerca compatto"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input type="search" placeholder="Cerca per nome" aria-label="Cerca un locale per nome" readonly></div>
+                <button class="btn btn-s btn-principale" type="button"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Nuovo locale</button>
+              </div>
+            </div>
+            <div class="schede-sezione" role="tablist" style="margin-bottom: -14px">
+              <button class="{{loc.tabTutti}}" type="button" role="tab" aria-selected="{{loc.tutti}}" onClick="{{vai.locali}}">Tutti i locali</button>
+              <button class="{{loc.tabCand}}" type="button" role="tab" aria-selected="{{loc.cand}}" onClick="{{vai.candidati}}">Candidati da verificare <span class="t-mono-dato c-2">3</span></button>
+            </div>
+          </header>
+          <div class="md-contenuto">
+            <div class="md-scorre">
+              <sc-if value="{{loc.isTutti}}" hint-placeholder-val="{{ true }}">
+                <div class="md-filtri" role="group" aria-label="Filtri" style="padding: 14px 0 4px">
+                  <span class="etichetta">Provincia</span><button class="chip is-on" type="button" aria-pressed="true">Tutte</button><button class="chip" type="button" aria-pressed="false">MI</button><button class="chip" type="button" aria-pressed="false">MB</button>
+                  <span class="etichetta" style="margin-left: 10px">Stato</span><button class="chip" type="button" aria-pressed="false">Attivo</button><button class="chip" type="button" aria-pressed="false">Da verificare</button>
+                  <button class="{{loc.chipFoto}}" type="button" aria-pressed="{{loc.vuoto}}" style="margin-left: 10px">Senza foto</button><button class="chip" type="button" aria-pressed="false">Senza fonti attive</button>
+                </div>
+                <sc-if value="{{loc.carica}}" hint-placeholder-val="{{ false }}"><div aria-busy="true" aria-label="Caricamento dei locali" style="display: flex; flex-direction: column; gap: 10px; padding-top: 18px"><sc-for list="{{sei}}" as="k" hint-placeholder-count="6"><span class="scheletro" style="height: 36px"></span></sc-for></div></sc-if>
+                <sc-if value="{{loc.vuotoStato}}" hint-placeholder-val="{{ false }}"><div class="stato-vuoto" role="status" style="padding-top: 40px"><span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg></span><span class="t-titolo-3">Nessun locale con questi filtri</span><span class="t-corpo-s c-2">Tutti i locali di Milano hanno una foto. Togli un filtro per vederli.</span><button class="btn btn-s btn-secondario" type="button">Togli i filtri</button></div></sc-if>
+                <sc-if value="{{loc.errore}}" hint-placeholder-val="{{ false }}"><div class="stato-vuoto" role="alert" style="padding-top: 40px"><span class="cornice-icona" style="color: var(--colore-errore); border-color: var(--colore-errore)"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span><span class="t-titolo-3">L’elenco non si è caricato</span><span class="t-corpo-s c-2">Il server non ha risposto (codice <span class="mono">503</span>). Riprova; se succede ancora, avvisa chi gestisce i server.</span><button class="btn btn-s btn-secondario" type="button">Riprova</button></div></sc-if>
+                <sc-if value="{{loc.lista}}" hint-placeholder-val="{{ true }}">
+                  <table class="tab-densa" aria-label="Locali">
+                    <thead><tr><th scope="col">Locale</th><th scope="col">Prov.</th><th scope="col">Stato</th><th scope="col">Foto</th><th scope="col" class="nasc-1024">Fonti</th><th scope="col" class="num">Eventi 7 gg</th><th scope="col">Aggiornato</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{locali}}" as="r" hint-placeholder-count="6">
+                        <tr class="{{r.cls}}" tabindex="0" aria-selected="{{r.sel}}" onClick="{{vai.locale}}">
+                          <td class="cella-prima"><span class="cella-nome"><b>{{r.nome}}</b><span>{{r.comune}}</span></span></td>
+                          <td class="mono" data-l="Provincia">{{r.prov}}</td>
+                          <td data-l="Stato"><span class="{{r.stCls}}">{{r.stato}}</span></td>
+                          <td data-l="Foto"><sc-if value="{{r.foto}}" hint-placeholder-val="{{ true }}"><span class="mini-foto"><i aria-hidden="true"></i>Sì</span></sc-if><sc-if value="{{r.noFoto}}" hint-placeholder-val="{{ false }}"><span class="st st-neutro">Nessuna</span></sc-if></td>
+                          <td class="mono nasc-1024" data-l="Fonti">{{r.fonti}}</td>
+                          <td class="mono num" data-l="Eventi 7 gg">{{r.ev}}</td>
+                          <td class="mono" data-l="Aggiornato">{{r.agg}}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                  <p class="t-didascalia" style="margin: 12px 0 0">Fonti: totali / attive. Righe selezionabili da tastiera: frecce su e giù, Invio per aprire.</p>
+                </sc-if>
+              </sc-if>
+
+              <sc-if value="{{loc.isCand}}" hint-placeholder-val="{{ false }}">
+                <p class="t-corpo-s c-2" style="margin: 16px 0 4px">Locali trovati in OpenStreetMap e Google Places. Non sono visibili nell’app finché un moderatore non li verifica. Da Google teniamo solo l’identificativo.</p>
+                <table class="tab-densa" aria-label="Candidati da verificare">
+                  <thead><tr><th scope="col">Candidato</th><th scope="col">Origine</th><th scope="col">Possibile doppione</th><th scope="col">Azioni</th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{candidati}}" as="r" hint-placeholder-count="3">
+                      <tr tabindex="0">
+                        <td class="cella-prima"><span class="cella-nome"><b>{{r.nome}}</b><span>{{r.indirizzo}}</span></span></td>
+                        <td data-l="Origine"><span class="st st-neutro">{{r.origine}}</span></td>
+                        <td data-l="Doppione">{{r.doppione}}</td>
+                        <td data-l="Azioni"><span style="display: flex; gap: 6px; flex-wrap: wrap"><button class="btn btn-s btn-secondario" type="button">Verifica e crea</button><button class="btn btn-s btn-secondario" type="button" onClick="{{vai.unisci}}">Unisci…</button><button class="btn btn-s btn-testo" type="button">Scarta…</button></span></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ---------- SCHEDA LOCALE ---------- -->
+        <sc-if value="{{is.locale}}" hint-placeholder-val="{{ false }}">
+          <header class="md-testa">
+            <nav class="briciole" aria-label="Percorso"><a href="#" onClick="{{vai.locali}}">Locali</a><span aria-hidden="true">/</span><span>Club Binario 7</span></nav>
+            <div class="md-titolo-riga">
+              <h1 class="md-titolo">Club Binario 7 <span class="st st-ok" style="font-family: var(--tipo-famiglia-testo); font-stretch: 100%"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Attivo</span></h1>
+              <div class="md-strumenti"><button class="btn btn-s btn-secondario" type="button">Disattiva…</button><button class="btn btn-s btn-principale" type="button">Salva modifiche</button></div>
+            </div>
+          </header>
+          <div class="md-contenuto"><div class="md-scorre">
+            <div class="md-due">
+              <div class="md-col">
+                <section class="md-sezione" style="border-top: 0; padding-top: 0" aria-labelledby="s-dati">
+                  <div class="etichetta-riga"><h2 class="etichetta" id="s-dati" style="margin: 0">Dati del locale</h2></div>
+                  <div class="campi2">
+                    <div class="campo"><label class="campo-etichetta" for="l-n">Nome</label><div class="campo-box compatto"><input id="l-n" value="Club Binario 7" readonly></div></div>
+                    <div class="campo"><label class="campo-etichetta" for="l-i">Indirizzo</label><div class="campo-box compatto"><input id="l-i" value="Via dei Cantieri 12" readonly></div></div>
+                    <div class="campo"><label class="campo-etichetta" for="l-c">Comune</label><div class="campo-box compatto"><input id="l-c" value="Monza" readonly></div></div>
+                    <div class="campo"><label class="campo-etichetta" for="l-p">Provincia</label><div class="campo-box compatto"><select id="l-p" aria-label="Provincia"><option>MB · Monza e Brianza</option><option>MI · Milano</option></select></div></div>
+                    <div class="campo"><label class="campo-etichetta" for="l-s">Sito</label><div class="campo-box compatto"><input id="l-s" class="mono" value="https://binario7.example" readonly></div></div>
+                    <div class="campo"><label class="campo-etichetta" for="l-ig">Username Instagram</label><div class="campo-box compatto"><span class="prefisso">@</span><input id="l-ig" value="clubbinario7" readonly></div></div>
+                  </div>
+                  <div class="campo">
+                    <span class="campo-etichetta">Posizione</span>
+                    <div class="mappa-mini" role="img" aria-label="Mappa con il segnaposto del locale. Trascinalo o scrivi le coordinate.">
+                      <svg width="100%" height="140" viewBox="0 0 600 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="600" height="140" style="fill: var(--mappa-terra)"></rect><path d="M0 70 H600 M220 0 V140 M420 0 L460 140" style="stroke: var(--mappa-strade-principali); stroke-width: 10; fill: none"></path><path d="M0 30 H600 M0 115 H600 M110 0 V140" style="stroke: var(--mappa-strade-secondarie); stroke-width: 6; fill: none"></path></svg>
+                      <span class="marker-locale is-on" style="left: 300px; top: 72px; cursor: grab"><span class="n">1</span>Club Binario 7</span>
+                      <span class="mappa-attribuzione">© OpenStreetMap contributors</span>
+                    </div>
+                    <span class="guida mono">45.5843, 9.2741 · trascina il segnaposto per correggere</span>
+                  </div>
+                </section>
+                <section class="md-sezione" aria-labelledby="s-fonti">
+                  <div style="display: flex; justify-content: space-between; align-items: center"><div class="etichetta-riga" style="flex: 1 1 auto"><h2 class="etichetta" id="s-fonti" style="margin: 0">Fonti · 2</h2></div><button class="btn btn-s btn-secondario" type="button" onClick="{{vai.fonte}}" style="margin-left: 12px">Aggiungi fonte</button></div>
+                  <div class="riga-dato"><span class="lbl">Sito</span><span class="mono" style="overflow-wrap: anywhere">binario7.example/eventi</span><span style="display: flex; gap: 6px"><span class="st st-ok">Consentita</span><span class="st st-ok">Attiva</span></span></div>
+                  <div class="riga-dato"><span class="lbl">Instagram</span><span class="mono">@clubbinario7 · API ufficiale</span><span style="display: flex; gap: 6px"><span class="st st-ok">Consentita</span><span class="st st-ok">Attiva</span></span></div>
+                </section>
+                <section class="md-sezione" aria-labelledby="s-ev">
+                  <div class="etichetta-riga"><h2 class="etichetta" id="s-ev" style="margin: 0">Prossimi eventi · 5</h2></div>
+                  <sc-for list="{{prossimi}}" as="e" hint-placeholder-count="3"><div class="riga-dato"><span class="mono">{{e.data}}</span><span><b>{{e.t}}</b></span><span style="display: flex; gap: 6px"><span class="badge badge-eta">{{e.eta}}</span><span class="{{e.stCls}}">{{e.stato}}</span></span></div></sc-for>
+                </section>
+              </div>
+              <div class="md-col">
+                <section class="md-sezione" style="border-top: 0; padding-top: 0" aria-labelledby="s-foto">
+                  <div class="etichetta-riga"><h2 class="etichetta" id="s-foto" style="margin: 0">Foto del locale</h2></div>
+                  <sc-if value="{{foto.salvata}}" hint-placeholder-val="{{ true }}">
+                    <div class="anteprima-1610 copertina su-velatura" style="color: var(--colore-testo-primario)">
+                      <svg class="foto" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Foto del locale: facciata di sera"><rect width="400" height="250" fill="#0C0F14"></rect><circle cx="330" cy="40" r="5" fill="#F7B26A"></circle><path d="M20 220 V110 Q200 40 380 110 V220 Z" fill="#1E1E22"></path><rect x="52" y="120" width="46" height="36" rx="4" fill="#E3A25A"></rect><rect x="116" y="120" width="46" height="36" rx="4" fill="#2B2D33"></rect><rect x="180" y="120" width="46" height="36" rx="4" fill="#E3A25A"></rect><rect x="244" y="120" width="46" height="36" rx="4" fill="#E3A25A"></rect><rect x="308" y="120" width="46" height="36" rx="4" fill="#2B2D33"></rect><rect y="220" width="400" height="30" fill="#141518"></rect></svg>
+                      <div class="velatura" aria-hidden="true"></div>
+                      <span class="t-mono-dato">Anteprima come in Scopri</span><b style="font-size: 1.25rem; font-stretch: 75%">Club Binario 7</b>
+                    </div>
+                    <div class="riga-dato"><span class="lbl">Fonte</span><span>Autorizzazione scritta del locale · <span class="mono">AUT-2026-014</span></span><span></span></div>
+                    <div class="riga-dato"><span class="lbl">Approvata</span><span>Moderatore Uno · <span class="mono">19.10.2026 08:14</span></span><span></span></div>
+                    <div class="riga-dato"><span class="lbl">File</span><span class="mono">WebP · 1600 × 1000 · 412 KB</span><span></span></div>
+                    <div class="azioni-doppie"><button class="btn btn-s btn-secondario" type="button" onClick="{{vai.foto}}">Sostituisci</button><button class="btn btn-s btn-pericolo" type="button" onClick="{{vai.rimuovi}}">Rimuovi foto…</button></div>
+                  </sc-if>
+                  <sc-if value="{{foto.form}}" hint-placeholder-val="{{ false }}">
+                    <sc-if value="{{foto.dropzone}}" hint-placeholder-val="{{ false }}">
+                      <div class="carica" role="button" tabindex="0" aria-describedby="fmt"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m17 8-5-5-5 5"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg><span><b>Trascina qui la foto</b> oppure <span class="ax-link">scegli un file</span></span><span id="fmt" class="mono" style="font-size: 0.75rem">JPEG, PNG o WebP · una sola foto per locale</span></div>
+                    </sc-if>
+                    <sc-if value="{{foto.formato}}" hint-placeholder-val="{{ false }}"><span class="campo-errore" role="alert"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>«locandina.heic» non è un formato valido. Esportala come JPEG, PNG o WebP e riprova.</span></span></sc-if>
+                    <sc-if value="{{foto.carica}}" hint-placeholder-val="{{ false }}">
+                      <div class="carica" aria-busy="true"><span class="mono">facciata-binario7.jpg · 3,4 MB</span><div class="barra-avanz" style="width: 80%" role="progressbar" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100" aria-label="Caricamento"><i></i></div><span>Caricamento e conversione in WebP… <span class="mono">62%</span></span></div>
+                    </sc-if>
+                    <sc-if value="{{foto.anteprima}}" hint-placeholder-val="{{ true }}">
+                      <div class="anteprima-1610 copertina su-velatura" style="color: var(--colore-testo-primario)">
+                        <svg class="foto" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Anteprima della nuova foto ritagliata 16:10"><rect width="400" height="250" fill="#0D1015"></rect><circle cx="70" cy="40" r="5" fill="#F7B26A"></circle><path d="M30 220 V100 L120 70 L210 100 L300 70 L370 100 V220 Z" fill="#202126"></path><rect x="56" y="112" width="34" height="30" rx="2" fill="#E3A25A"></rect><rect x="102" y="112" width="34" height="30" rx="2" fill="#E3A25A"></rect><rect x="148" y="112" width="34" height="30" rx="2" fill="#2B2D33"></rect><rect x="194" y="112" width="34" height="30" rx="2" fill="#E3A25A"></rect><rect x="240" y="112" width="34" height="30" rx="2" fill="#2B2D33"></rect><rect x="286" y="112" width="34" height="30" rx="2" fill="#E3A25A"></rect><rect y="220" width="400" height="30" fill="#121316"></rect></svg>
+                        <div class="velatura" aria-hidden="true"></div>
+                        <span class="t-mono-dato">Ritaglio 16:10 · con velatura</span><b style="font-size: 1.25rem; font-stretch: 75%">Club Binario 7</b>
+                      </div>
+                      <sc-if value="{{foto.grande}}" hint-placeholder-val="{{ false }}"><div class="avviso avviso-info" role="status"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span><span class="avviso-titolo">Foto ridotta da sola</span>Pesava <span class="mono">3,4 MB</span> dopo la conversione: l’abbiamo portata a <span class="mono">0,9 MB</span>. Controlla che sia ancora nitida.</span></div></sc-if>
+                      <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px">
+                        <legend class="campo-etichetta" style="margin-bottom: 4px">Fonte della foto (obbligatoria)</legend>
+                        <button class="opz-riga" type="button" role="radio" aria-checked="true"><span class="opzione is-on"></span>Autorizzazione scritta del locale</button>
+                        <button class="opz-riga" type="button" role="radio" aria-checked="false"><span class="opzione"></span>Foto scattata da Noxa</button>
+                        <button class="opz-riga" type="button" role="radio" aria-checked="false"><span class="opzione"></span>Licenza libera con attribuzione</button>
+                      </fieldset>
+                      <div class="campo"><label class="campo-etichetta" for="f-rif">Riferimento del documento di autorizzazione</label><div class="campo-box compatto"><input id="f-rif" class="mono" value="AUT-2026-021 · email del 17.10.2026" readonly></div><span class="guida">Con «Licenza libera» qui va l’attribuzione, es. «Laura Bassi, CC BY 4.0».</span></div>
+                      <div>
+                        <button class="casella-lunga" type="button" role="checkbox" aria-checked="true"><span class="casella is-on"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 2.5"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Nella foto non ci sono persone riconoscibili.</span></button>
+                        <button class="casella-lunga" type="button" role="checkbox" aria-checked="true"><span class="casella is-on"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 2.5"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Non ci sono bottiglie o marchi di alcolici in evidenza. La foto la vedono anche i minorenni.</span></button>
+                      </div>
+                      <div class="azioni-doppie"><button class="btn btn-s btn-secondario" type="button" onClick="{{vai.locale}}">Annulla</button><button class="btn btn-s btn-principale" type="button" onClick="{{vai.locale}}">Salva foto</button></div>
+                    </sc-if>
+                  </sc-if>
+                </section>
+                <section class="md-sezione" aria-labelledby="s-reg">
+                  <div class="etichetta-riga"><h2 class="etichetta" id="s-reg" style="margin: 0">Registro</h2></div>
+                  <div class="registro">
+                    <div class="reg-riga"><span class="quando">19.10 08:14</span><span class="cosa"><b>Moderatore Uno</b> ha approvato la foto</span><span class="perche">Autorizzazione scritta, rif. AUT-2026-014.</span></div>
+                    <div class="reg-riga"><span class="quando">12.10 17:02</span><span class="cosa"><b>Moderatore Due</b> ha attivato la fonte Instagram</span><span class="perche">Conformità verificata: API ufficiale.</span></div>
+                    <div class="reg-riga"><span class="quando">03.10 10:40</span><span class="cosa"><b>Moderatore Uno</b> ha creato il locale da un candidato OSM</span><span class="perche">Sopralluogo e sito ufficiale coincidono.</span></div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div></div>
+        </sc-if>
+
+        <!-- ---------- FONTI ---------- -->
+        <sc-if value="{{is.fonti}}" hint-placeholder-val="{{ false }}">
+          <header class="md-testa">
+            <div class="md-titolo-riga">
+              <h1 class="md-titolo">Fonti <span class="conta">{{fo.conta}}</span></h1>
+              <div class="md-strumenti"><div class="campo-box campo-ricerca compatto"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input type="search" placeholder="Locale, URL o @username" aria-label="Cerca una fonte" readonly></div><button class="btn btn-s btn-principale" type="button" onClick="{{vai.fonte}}"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Nuova fonte</button></div>
+            </div>
+            <div class="md-filtri" role="group" aria-label="Filtri">
+              <span class="etichetta">Conformità</span><button class="chip is-on" type="button" aria-pressed="true">Tutte</button><button class="chip" type="button" aria-pressed="false">Da verificare</button><button class="chip" type="button" aria-pressed="false">Consentite</button><button class="chip" type="button" aria-pressed="false">Vietate</button>
+              <button class="chip" type="button" aria-pressed="false" style="margin-left: 10px">Attive</button><button class="{{fo.chipErr}}" type="button" aria-pressed="{{fo.err}}">Con errori</button><button class="chip" type="button" aria-pressed="false">0 eventi nelle ultime 3 esecuzioni</button>
+            </div>
+          </header>
+          <div class="md-contenuto">
+            <div class="md-scorre">
+              <table class="tab-densa" aria-label="Fonti">
+                <thead><tr><th scope="col">Locale · fonte</th><th scope="col" class="nasc-1024">Adattatore</th><th scope="col">Conformità</th><th scope="col">Attiva</th><th scope="col" class="nasc-1024">Frequenza</th><th scope="col">Ultima esecuzione</th><th scope="col">Esito</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{fonti}}" as="r" hint-placeholder-count="6">
+                    <tr class="{{r.cls}}" tabindex="0" aria-selected="{{r.sel}}" onClick="{{vai.esito}}">
+                      <td class="cella-prima"><span class="cella-nome"><b>{{r.locale}} · {{r.tipo}}</b><span class="mono">{{r.url}}</span></span></td>
+                      <td class="mono nasc-1024" data-l="Adattatore">{{r.adatt}}</td>
+                      <td data-l="Conformità"><span class="{{r.confCls}}">{{r.conf}}</span></td>
+                      <td data-l="Attiva"><span class="{{r.attCls}}">{{r.att}}</span></td>
+                      <td class="mono nasc-1024" data-l="Frequenza">{{r.freq}}</td>
+                      <td class="mono" data-l="Ultima">{{r.ultima}}</td>
+                      <td data-l="Esito"><span class="esito"><span><b>{{r.letti}}</b> letti</span><span><b>{{r.nuovi}}</b> nuovi</span><span><b>{{r.uniti}}</b> uniti</span><span class="{{r.errCls}}">{{r.errori}}</span></span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+            <sc-if value="{{fo.pannello}}" hint-placeholder-val="{{ false }}">
+              <aside class="md-pannello" aria-label="Fonte selezionata">
+                <div style="display: flex; justify-content: space-between; gap: 12px"><div><span class="etichetta">Officina Lambro · Sito</span><h2>officinalambro.example</h2></div><button class="ico-btn" type="button" aria-label="Chiudi il pannello"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="st st-ok"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Consentita</span><span class="st st-no"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>Disattivata in automatico</span></div>
+                <div class="avviso avviso-errore" role="alert"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span><span class="avviso-titolo">5 errori di fila: fonte disattivata</span>Ultimo errore il <span class="mono">18.10 18:00</span>: <span class="mono">HTTP 503 Service Unavailable</span> su <span class="mono">/eventi</span>. Controlla il sito, poi prova «Esegui ora» prima di riattivarla.</span></div>
+                <div class="azioni-doppie"><button class="btn btn-s btn-secondario" type="button">Esegui ora</button><button class="btn btn-s btn-secondario" type="button">Riattiva</button></div>
+                <button class="btn btn-s btn-testo" type="button" onClick="{{vai.esito}}" style="align-self: flex-start">Apri la scheda della fonte</button>
+              </aside>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- ---------- SCHEDA FONTE / NUOVA FONTE ---------- -->
+        <sc-if value="{{is.fonte}}" hint-placeholder-val="{{ false }}">
+          <header class="md-testa">
+            <nav class="briciole" aria-label="Percorso"><a href="#" onClick="{{vai.fonti}}">Fonti</a><span aria-hidden="true">/</span><span>{{fs.brice}}</span></nav>
+            <div class="md-titolo-riga">
+              <h1 class="md-titolo" style="flex-wrap: wrap">{{fs.titolo}} <span class="{{fs.confCls}}" style="font-stretch: 100%">{{fs.conf}}</span><span class="{{fs.attCls}}" style="font-stretch: 100%">{{fs.att}}</span></h1>
+              <div class="md-strumenti">
+                <button class="btn btn-s btn-secondario" type="button">Esegui ora</button>
+                <sc-if value="{{fs.nuova}}" hint-placeholder-val="{{ true }}"><button class="btn btn-s btn-principale is-disabilitato" type="button" disabled aria-describedby="perche-no">Attiva</button></sc-if>
+                <sc-if value="{{fs.esito}}" hint-placeholder-val="{{ false }}"><button class="btn btn-s btn-secondario" type="button">Disattiva</button><button class="btn btn-s btn-pericolo" type="button">Segna come vietata…</button></sc-if>
+              </div>
+            </div>
+            <sc-if value="{{fs.nuova}}" hint-placeholder-val="{{ true }}"><p class="t-corpo-s" id="perche-no" style="margin: 0; display: flex; gap: 8px; align-items: center; color: var(--colore-avviso)"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Non si può attivare: la conformità è «Da verificare». Completa la verifica qui sotto e scegli «Consentita».</p></sc-if>
+          </header>
+          <div class="md-contenuto"><div class="md-scorre">
+            <sc-if value="{{fs.nuova}}" hint-placeholder-val="{{ true }}">
+              <div class="md-due">
+                <div class="md-col">
+                  <section class="md-sezione" style="border-top: 0; padding-top: 0">
+                    <div class="etichetta-riga"><h2 class="etichetta" style="margin: 0">Fonte</h2></div>
+                    <div class="campi2">
+                      <div class="campo"><label class="campo-etichetta" for="n-l">Locale</label><div class="campo-box compatto"><select id="n-l"><option>Sala Ventuno · Desio</option></select></div></div>
+                      <div class="campo"><span class="campo-etichetta">Tipo</span><div class="segmenti" role="radiogroup" aria-label="Tipo"><button class="segmento is-on" type="button" role="radio" aria-checked="true">Sito</button><button class="segmento" type="button" role="radio" aria-checked="false">Instagram</button><button class="segmento" type="button" role="radio" aria-checked="false">Aggregatore</button></div></div>
+                      <div class="campo"><label class="campo-etichetta" for="n-u">URL</label><div class="campo-box compatto"><input id="n-u" class="mono" value="https://salaventuno.example/calendario" readonly></div></div>
+                      <div class="campo"><label class="campo-etichetta" for="n-a">Adattatore</label><div class="campo-box compatto"><select id="n-a" class="mono"><option>html-agenda v2</option><option>json-ld</option><option>ical</option></select></div></div>
+                      <div class="campo"><label class="campo-etichetta" for="n-f">Frequenza</label><div class="campo-box compatto"><select id="n-f" class="mono"><option>ogni 6 h</option><option>ogni 12 h</option><option>ogni 24 h</option></select></div><span class="guida">Minimo ogni 6 h per i siti, ogni 12 h per Instagram (solo API ufficiale). Gli aggregatori sono vietati finché non c’è un accordo.</span></div>
+                      <div class="campo"><label class="campo-etichetta" for="n-p">Pagine massime per esecuzione</label><div class="campo-box compatto"><input id="n-p" class="mono" value="3" readonly></div></div>
+                    </div>
+                  </section>
+                  <section class="md-sezione">
+                    <div class="etichetta-riga"><h2 class="etichetta" style="margin: 0">Verifica di conformità · ADR-0008</h2></div>
+                    <div class="campo"><label class="campo-etichetta" for="v-r">Esito di robots.txt per <span class="mono">NoxaBot</span> e <span class="mono">*</span></label><div class="campo-box compatto"><select id="v-r"><option>Consentito per entrambi su /calendario</option><option>Vietato</option></select></div><a class="link-in-testo mono" href="#" style="font-size: 0.8125rem">salaventuno.example/robots.txt</a></div>
+                    <div class="campi2">
+                      <div class="campo"><label class="campo-etichetta" for="v-t">Termini d’uso · link</label><div class="campo-box compatto"><input id="v-t" class="mono" value="salaventuno.example/termini" readonly></div></div>
+                      <div class="campo"><label class="campo-etichetta" for="v-d">Data di lettura</label><div class="campo-box compatto is-errore"><input id="v-d" class="mono" placeholder="gg.mm.aaaa" aria-invalid="true" readonly></div><span class="campo-errore"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Scrivi quando hai letto i termini: serve per scegliere «Consentita».</span></span></div>
+                    </div>
+                    <div class="campo"><span class="campo-etichetta">Campi raccolti</span><button class="casella-lunga" type="button" role="checkbox" aria-checked="true"><span class="casella is-on"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 2.5"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Solo quelli dello schema evento (titolo, date, età, prezzo, artisti, link). Nessun dato di persone.</span></button></div>
+                    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px">
+                      <legend class="campo-etichetta" style="margin-bottom: 4px">Decisione</legend>
+                      <button class="opz-riga" type="button" role="radio" aria-checked="false" disabled><span class="opzione"></span>Consentita <span class="guida" style="margin-left: 6px">(si sblocca con tutti i campi)</span></button>
+                      <button class="opz-riga" type="button" role="radio" aria-checked="false"><span class="opzione"></span>Vietata</button>
+                      <button class="opz-riga" type="button" role="radio" aria-checked="true"><span class="opzione is-on"></span>Da verificare</button>
+                    </fieldset>
+                    <div class="campo"><label class="campo-etichetta" for="v-m">Motivazione</label><div class="campo-box area compatto"><textarea id="v-m" rows="2" readonly>Robots.txt consente /calendario; manca la data di lettura dei termini.</textarea></div></div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn btn-s btn-principale" type="button">Salva la verifica</button><button class="btn btn-s btn-secondario" type="button" onClick="{{vai.fonti}}">Annulla</button></div>
+                  </section>
+                </div>
+                <div class="md-col">
+                  <section class="md-sezione" style="border-top: 0; padding-top: 0">
+                    <div class="etichetta-riga"><h2 class="etichetta" style="margin: 0">Regole</h2></div>
+                    <div class="effetto"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Si attivano solo le fonti <b>Consentite</b>. «Da verificare» e «Vietata» non leggono nulla, nemmeno in automatico.</span></div>
+                    <div class="effetto"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>«Esegui ora» fa una prova anche se la fonte non è attiva: legge, non pubblica, e mostra l’esito qui.</span></div>
+                  </section>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{fs.esito}}" hint-placeholder-val="{{ false }}">
+              <div class="md-due">
+                <div class="md-col">
+                  <sc-if value="{{fs.prova}}" hint-placeholder-val="{{ false }}"><div class="conferma-riga" role="status"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span>Esecuzione di prova completata alle <span class="mono">10:42</span>: 12 eventi letti, 1 nuovo.</span></div></sc-if>
+                  <section class="md-sezione" style="border-top: 0; padding-top: 0">
+                    <div class="etichetta-riga"><h2 class="etichetta" style="margin: 0">Ultime esecuzioni</h2></div>
+                    <table class="tab-densa" aria-label="Ultime esecuzioni">
+                      <thead><tr><th scope="col">Inizio</th><th scope="col">Durata</th><th scope="col">Pagine</th><th scope="col">Eventi</th><th scope="col">Errore</th></tr></thead>
+                      <tbody>
+                        <sc-for list="{{esecuzioni}}" as="x" hint-placeholder-count="6">
+                          <tr tabindex="0"><td class="mono cella-prima">{{x.inizio}}</td><td class="mono" data-l="Durata">{{x.durata}}</td><td class="mono" data-l="Pagine">{{x.pagine}}</td><td data-l="Eventi"><span class="esito"><span><b>{{x.letti}}</b> letti</span><span><b>{{x.nuovi}}</b> nuovi</span><span><b>{{x.uniti}}</b> uniti</span></span></td><td class="mono" data-l="Errore"><span class="{{x.errCls}}">{{x.errore}}</span></td></tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </section>
+                </div>
+                <div class="md-col">
+                  <section class="md-sezione" style="border-top: 0; padding-top: 0">
+                    <div class="etichetta-riga"><h2 class="etichetta" style="margin: 0">Conformità</h2></div>
+                    <div class="riga-dato"><span class="lbl">robots.txt</span><span>Consentito per <span class="mono">NoxaBot</span> e <span class="mono">*</span></span><a class="link-in-testo" href="#" aria-label="Apri robots.txt">Apri</a></div>
+                    <div class="riga-dato"><span class="lbl">Termini</span><span>Letti il <span class="mono">02.10.2026</span></span><a class="link-in-testo" href="#" aria-label="Apri i termini">Apri</a></div>
+                    <div class="riga-dato"><span class="lbl">Limiti</span><span class="mono">3 pagine · ogni 6 h</span><span></span></div>
+                  </section>
+                  <section class="md-sezione">
+                    <div class="etichetta-riga"><h2 class="etichetta" style="margin: 0">Registro</h2></div>
+                    <div class="registro">
+                      <div class="reg-riga"><span class="quando">02.10 16:20</span><span class="cosa"><b>Moderatore Uno</b> ha segnato la fonte come consentita</span><span class="perche">Robots.txt e termini compatibili; solo campi dello schema.</span></div>
+                      <div class="reg-riga"><span class="quando">02.10 16:21</span><span class="cosa"><b>Moderatore Uno</b> ha attivato la fonte</span><span class="perche">Prima esecuzione di prova senza errori.</span></div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </sc-if>
+          </div></div>
+        </sc-if>
+
+        <!-- ---------- DUPLICATI ---------- -->
+        <sc-if value="{{is.duplicati}}" hint-placeholder-val="{{ false }}">
+          <header class="md-testa">
+            <div class="md-titolo-riga">
+              <h1 class="md-titolo">Duplicati <span class="conta">{{du.conta}}</span></h1>
+              <div class="md-strumenti t-corpo-s c-2" style="gap: 6px"><span class="tasto">S</span>stesso <span class="tasto" style="margin-left: 8px">D</span>distinti <span class="tasto" style="margin-left: 8px">←</span><span class="tasto">→</span>precedente / successivo</div>
+            </div>
+          </header>
+          <div class="md-contenuto">
+            <sc-if value="{{du.haCoda}}" hint-placeholder-val="{{ true }}">
+              <div class="md-coda" role="listbox" aria-label="Coda dei possibili duplicati">
+                <sc-for list="{{coda}}" as="q" hint-placeholder-count="3">
+                  <button class="{{q.cls}}" type="button" role="option" aria-selected="{{q.sel}}"><span class="punteggio">{{q.p}}</span><b>{{q.t}}</b><span>{{q.motivo}}</span><span class="mono" style="grid-column: 2">{{q.fonte}} · {{q.quando}}</span></button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <div class="md-scorre" style="padding-top: 20px">
+              <sc-if value="{{du.vuota}}" hint-placeholder-val="{{ false }}"><div class="stato-vuoto" role="status" style="padding-top: 40px"><span class="cornice-icona"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><span class="t-titolo-3">Niente da controllare</span><span class="t-corpo-s c-2">La coda è vuota. I nuovi possibili duplicati arrivano dopo ogni esecuzione delle fonti.</span></div></sc-if>
+              <sc-if value="{{du.carica}}" hint-placeholder-val="{{ false }}"><div aria-busy="true" style="display: flex; flex-direction: column; gap: 10px"><span class="scheletro" style="height: 28px; width: 40%"></span><sc-for list="{{sei}}" as="k" hint-placeholder-count="6"><span class="scheletro" style="height: 40px"></span></sc-for></div></sc-if>
+              <sc-if value="{{du.errore}}" hint-placeholder-val="{{ false }}"><div class="avviso avviso-errore" role="alert"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg><span><span class="avviso-titolo">La decisione non è stata salvata</span>Il confronto è ancora qui, non hai perso niente. Riprova.<span class="avviso-azioni"><button class="btn btn-s btn-secondario" type="button">Riprova</button></span></span></div></sc-if>
+              <sc-if value="{{du.salvata}}" hint-placeholder-val="{{ false }}"><div class="conferma-riga" role="status" style="margin-bottom: 16px"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span>Salvato: «Notte Ferrovia» è lo stesso evento, fonti unite. Ecco il successivo.</span><button class="btn btn-s btn-testo" type="button" style="margin-left: auto">Annulla</button></div></sc-if>
+              <sc-if value="{{du.confronto}}" hint-placeholder-val="{{ true }}">
+                <div style="display: flex; flex-direction: column; gap: 14px">
+                  <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap"><span class="punteggio" style="font-size: 1.75rem">{{cf.p}}</span><h2 class="t-titolo-2" style="margin: 0">{{cf.titolo}}</h2><span class="t-corpo-s c-2">{{cf.motivo}}</span></div>
+                  <span class="mono c-2" style="font-size: 0.8125rem">{{cf.fonte}} · arrivato {{cf.quando}} · <span class="nasc-390">{{cf.pos}}</span></span>
+                  <div class="confronto" role="table" aria-label="Confronto campo per campo">
+                    <div class="cf-testa vuota" role="columnheader">Campo</div><div class="cf-testa" role="columnheader">Esistente</div><div class="cf-testa" role="columnheader">Appena raccolto</div><div class="cf-testa segno" role="columnheader" style="justify-content: flex-end">Confronto</div>
+                    <sc-for list="{{cf.righe}}" as="c" hint-placeholder-count="9">
+                      <div class="cf-campo" role="rowheader">{{c.campo}}</div><div class="{{c.clsA}}" role="cell">{{c.a}}</div><div class="{{c.clsB}}" role="cell">{{c.b}}</div><div class="{{c.clsS}}" role="cell">{{c.segno}}</div>
+                    </sc-for>
+                  </div>
+                  <div class="effetto"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg><span><b>Se è lo stesso evento</b>, il risultato sarà: {{cf.eff1}} <b>{{cf.alcol}}</b> {{cf.eff2}}</span></div>
+                  <div class="cf-azioni"><button class="btn btn-principale" type="button">Stesso evento <span class="tasto" style="margin-left: 6px; background: transparent; color: inherit; border-color: currentColor">S</span></button><button class="btn btn-secondario" type="button">Eventi distinti <span class="tasto" style="margin-left: 6px">D</span></button></div>
+                </div>
+              </sc-if>
+              <sc-if value="{{du.locale}}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 14px; max-width: 720px">
+                  <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap"><span class="punteggio" style="font-size: 1.75rem">64</span><h2 class="t-titolo-2" style="margin: 0">Open Decks Vol. 3</h2><span class="st st-attesa">Locale non riconosciuto</span></div>
+                  <div class="riga-dato"><span class="lbl">Locale nel dato</span><span class="mono">«Officina Lambro Monza (ex lavatoio)»</span><span></span></div>
+                  <div class="riga-dato"><span class="lbl">Fonte</span><span class="mono">@officinalambro · 18.10 19:30</span><span></span></div>
+                  <div class="campo"><label class="campo-etichetta" for="cerca-l">Collega a un locale</label><div class="campo-box campo-ricerca compatto"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input id="cerca-l" value="lambro" readonly></div></div>
+                  <div role="radiogroup" aria-label="Locali trovati">
+                    <button class="opz-riga" type="button" role="radio" aria-checked="true"><span class="opzione is-on"></span><span><b>Officina Lambro</b> · Via del Lavatoio 3, Monza <span class="st st-ok" style="margin-left: 6px">Attivo</span></span></button>
+                    <button class="opz-riga" type="button" role="radio" aria-checked="false"><span class="opzione"></span><span>Lambro Sound · Brugherio <span class="st st-neutro" style="margin-left: 6px">Non attivo</span></span></button>
+                  </div>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn btn-principale" type="button">Collega a Officina Lambro</button><button class="btn btn-secondario" type="button">Crea locale…</button></div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ---------- EVENTI ---------- -->
+        <sc-if value="{{is.eventi}}" hint-placeholder-val="{{ false }}">
+          <header class="md-testa">
+            <sc-if value="{{ev.isScheda}}" hint-placeholder-val="{{ false }}"><nav class="briciole" aria-label="Percorso"><a href="#" onClick="{{vai.eventi}}">Eventi</a><span aria-hidden="true">/</span><span>Bassi Lunghi</span></nav></sc-if>
+            <div class="md-titolo-riga">
+              <h1 class="md-titolo">{{ev.titolo}} <span class="conta">{{ev.conta}}</span></h1>
+              <sc-if value="{{ev.isScheda}}" hint-placeholder-val="{{ false }}"><div class="md-strumenti"><button class="btn btn-s btn-secondario" type="button">Rifiuta…</button><button class="btn btn-s btn-pericolo" type="button" onClick="{{vai.annulla}}">Annulla evento…</button><button class="btn btn-s btn-principale" type="button">Pubblica</button></div></sc-if>
+              <sc-if value="{{ev.isElenco}}" hint-placeholder-val="{{ true }}"><div class="md-strumenti"><div class="campo-box campo-ricerca compatto"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input type="search" placeholder="Titolo o locale" aria-label="Cerca un evento" readonly></div></div></sc-if>
+            </div>
+            <sc-if value="{{ev.isElenco}}" hint-placeholder-val="{{ true }}">
+              <div class="schede-sezione" role="tablist" style="margin-bottom: -14px"><button class="{{ev.tabTutti}}" type="button" role="tab" aria-selected="{{ev.tutti}}" onClick="{{vai.eventi}}">Ricerca e correzione</button><button class="{{ev.tabAnn}}" type="button" role="tab" aria-selected="{{ev.ann}}" onClick="{{vai.annullamenti}}">Possibili annullamenti <span class="t-mono-dato c-2">2</span></button></div>
+            </sc-if>
+          </header>
+          <div class="md-contenuto"><div class="md-scorre">
+            <sc-if value="{{ev.isTutti}}" hint-placeholder-val="{{ true }}">
+              <div class="md-filtri" role="group" aria-label="Filtri" style="padding: 14px 0 4px"><span class="etichetta">Stato</span><button class="chip is-on" type="button">Tutti</button><button class="chip" type="button">Pubblicato</button><button class="chip" type="button">In revisione</button><button class="chip" type="button">Annullato</button><button class="chip" type="button">Rifiutato</button><span class="etichetta" style="margin-left: 10px">Serata</span><button class="chip" type="button"><span class="mono">20–26.10</span></button><button class="chip" type="button">Locale</button></div>
+              <table class="tab-densa" aria-label="Eventi">
+                <thead><tr><th scope="col">Evento</th><th scope="col">Serata</th><th scope="col">Età</th><th scope="col">Alcol</th><th scope="col">Stato</th><th scope="col" class="nasc-1024">Fonti</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{eventi}}" as="r" hint-placeholder-count="6">
+                    <tr class="{{r.cls}}" tabindex="0" aria-selected="{{r.sel}}" onClick="{{vai.scheda}}">
+                      <td class="cella-prima"><span class="cella-nome"><b>{{r.t}}</b><span>{{r.locale}}</span></span></td>
+                      <td class="mono" data-l="Serata">{{r.data}}</td>
+                      <td data-l="Età"><span class="badge badge-eta">{{r.eta}}</span></td>
+                      <td data-l="Alcol"><span class="{{r.alcCls}}">{{r.alc}}</span></td>
+                      <td data-l="Stato"><span class="{{r.stCls}}">{{r.stato}}</span></td>
+                      <td class="mono nasc-1024" data-l="Fonti">{{r.fonti}}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </sc-if>
+            <sc-if value="{{ev.isAnn}}" hint-placeholder-val="{{ false }}">
+              <p class="t-corpo-s c-2" style="margin: 16px 0 4px">Eventi non più trovati nella loro unica fonte per due esecuzioni di fila, a più di 48 ore dall’inizio. Decidi tu: nulla cambia finché non confermi.</p>
+              <table class="tab-densa" aria-label="Possibili annullamenti">
+                <thead><tr><th scope="col">Evento</th><th scope="col">Serata</th><th scope="col">Ultima volta visto</th><th scope="col">Partecipano</th><th scope="col">Decisione</th></tr></thead>
+                <tbody>
+                  <tr tabindex="0"><td class="cella-prima"><span class="cella-nome"><b>Live in Cascina</b><span>Cascina Torretta · cascinatorretta.example</span></span></td><td class="mono" data-l="Serata">sab 25.10</td><td class="mono" data-l="Visto">18.10 22:05</td><td data-l="Partecipano"><span class="t-corpo-s c-2">Sì, alcuni utenti</span></td><td data-l="Decisione"><span style="display: flex; gap: 6px; flex-wrap: wrap"><button class="btn btn-s btn-secondario" type="button">È ancora in programma</button><button class="btn btn-s btn-pericolo" type="button" onClick="{{vai.annulla}}">Conferma annullamento…</button></span></td></tr>
+                  <tr tabindex="0"><td class="cella-prima"><span class="cella-nome"><b>Indie al Binario</b><span>Club Binario 7 · binario7.example</span></span></td><td class="mono" data-l="Serata">dom 26.10</td><td class="mono" data-l="Visto">18.10 18:00</td><td data-l="Partecipano"><span class="t-corpo-s c-2">Nessuno</span></td><td data-l="Decisione"><span style="display: flex; gap: 6px; flex-wrap: wrap"><button class="btn btn-s btn-secondario" type="button">È ancora in programma</button><button class="btn btn-s btn-pericolo" type="button">Conferma annullamento…</button></span></td></tr>
+                </tbody>
+              </table>
+            </sc-if>
+            <sc-if value="{{ev.isScheda}}" hint-placeholder-val="{{ false }}">
+              <div class="md-due">
+                <div class="md-col">
+                  <section class="md-sezione" style="border-top: 0; padding-top: 0">
+                    <div class="etichetta-riga"><h2 class="etichetta" style="margin: 0">Dati correggibili</h2></div>
+                    <div style="display: flex; gap: 6px"><span class="st st-info">In revisione</span><span class="st st-neutro">1 fonte · @officinalambro</span></div>
+                    <div class="campi2">
+                      <div class="campo"><label class="campo-etichetta" for="e-t">Titolo</label><div class="campo-box compatto"><input id="e-t" value="Bassi Lunghi" readonly></div></div>
+                      <div class="campo"><label class="campo-etichetta" for="e-l">Locale</label><div class="campo-box compatto"><select id="e-l"><option>Officina Lambro · Monza</option></select></div></div>
+                      <div class="campo"><label class="campo-etichetta" for="e-i">Inizio</label><div class="campo-box compatto"><input id="e-i" class="mono" value="ven 24.10.2026 22:30" readonly></div></div>
+                      <div class="campo"><label class="campo-etichetta" for="e-f">Fine</label><div class="campo-box compatto"><input id="e-f" class="mono" value="sab 25.10.2026 04:00" readonly></div></div>
+                      <div class="campo"><label class="campo-etichetta" for="e-g">Generi</label><div class="campo-box compatto"><input id="e-g" value="hip hop, reggaeton" readonly></div></div>
+                      <div class="campo"><label class="campo-etichetta" for="e-p">Prezzo minimo</label><div class="campo-box compatto"><input id="e-p" class="mono" placeholder="non indicato" readonly></div></div>
+                    </div>
+                  </section>
+                  <section class="md-sezione">
+                    <div class="etichetta-riga"><h2 class="etichetta" style="margin: 0">Operazioni delicate · visibilità ai minorenni</h2></div>
+                    <div class="riga-dato"><span class="lbl">Età minima</span><span><span class="badge badge-eta">18+ · non dichiarata</span> <span class="t-corpo-s c-2">vale 18+</span></span><button class="btn btn-s btn-secondario" type="button" onClick="{{vai.eta}}">Abbassa l’età…</button></div>
+                    <div class="riga-dato"><span class="lbl">Riferimenti all’alcol</span><span><span class="st st-attesa">Sì · segnalato dalla fonte</span></span><button class="btn btn-s btn-secondario" type="button" onClick="{{vai.alcol}}">Togli…</button></div>
+                    <p class="guida" style="margin: 0">Queste due modifiche le fa solo un moderatore, con una motivazione che resta nel registro. Alzare l’età o aggiungere «alcol» non chiede conferma.</p>
+                  </section>
+                </div>
+                <div class="md-col">
+                  <section class="md-sezione" style="border-top: 0; padding-top: 0">
+                    <div class="etichetta-riga"><h2 class="etichetta" style="margin: 0">Registro</h2></div>
+                    <div class="registro">
+                      <div class="reg-riga"><span class="quando">18.10 19:31</span><span class="cosa"><b>Sistema</b> ha creato l’evento da @officinalambro</span><span class="perche">Età non dichiarata: impostata a 18+.</span></div>
+                      <div class="reg-riga"><span class="quando">18.10 19:31</span><span class="cosa"><b>Sistema</b> ha segnato «riferimenti all’alcol»</span><span class="perche">Parola trovata nel testo del post.</span></div>
+                      <div class="reg-riga"><span class="quando">19.10 09:02</span><span class="cosa"><b>Moderatore Uno</b> ha corretto l’orario di fine</span><span class="perche">Il sito del locale indica le 04:00.</span></div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </sc-if>
+          </div></div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== CONFERME CON MOTIVAZIONE ===================== -->
+  <sc-if value="{{dlg.on}}" hint-placeholder-val="{{ false }}">
+    <div class="md-velo">
+      <div class="md-dialogo" role="dialog" aria-modal="true" aria-labelledby="dl-t" tabindex="-1" onKeyDown="{{esc}}">
+        <span class="etichetta">{{dlg.etichetta}}</span>
+        <h2 id="dl-t">{{dlg.titolo}}</h2>
+        <sc-if value="{{dlg.haPrimaDopo}}" hint-placeholder-val="{{ false }}"><div class="prima-dopo"><span class="badge badge-eta">{{dlg.prima}}</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span class="badge badge-eta">{{dlg.dopo}}</span><span class="sr">da {{dlg.prima}} a {{dlg.dopo}}</span></div></sc-if>
+        <sc-if value="{{dlg.haCerca}}" hint-placeholder-val="{{ false }}">
+          <div class="campo-box campo-ricerca compatto"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colore-testo-secondario)"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input value="binario" aria-label="Cerca il locale esistente" readonly></div>
+          <div role="radiogroup" aria-label="Locali esistenti"><button class="opz-riga" type="button" role="radio" aria-checked="true"><span class="opzione is-on"></span><span><b>Club Binario 7</b> · Via dei Cantieri 12, Monza</span></button><button class="opz-riga" type="button" role="radio" aria-checked="false"><span class="opzione"></span>Binari Ovest · Milano</button></div>
+        </sc-if>
+        <div class="effetto"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>{{dlg.effetto}}</span></div>
+        <div class="campo"><span class="campo-riga"><label class="campo-etichetta" for="dl-m">Motivazione (obbligatoria)</label><span class="campo-conta">{{dlg.conta}}</span></span><div class="campo-box area"><textarea id="dl-m" rows="3" readonly>{{dlg.motivo}}</textarea></div><span class="guida">Resta nel registro con il tuo nome e l’ora.</span></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap"><button class="btn btn-s btn-secondario" type="button" onClick="{{chiudi}}">Annulla</button><button class="{{dlg.btnCls}}" type="button" onClick="{{chiudi}}">{{dlg.btn}}</button></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tema":{"editor":"enum","options":["scuro","chiaro"],"default":"scuro"},"schermata":{"editor":"enum","options":["porta","locali","candidati","locale","fonti","fonte","duplicati","eventi"],"default":"locali"},"stato":{"editor":"text","default":"normale"},"larghezza":{"editor":"int","default":1280,"min":360,"max":1600,"unit":"px"},"altezza":{"editor":"int","default":800,"min":640,"max":1200,"unit":"px"},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const P = this.props;
+    const tema = P.tema ?? 'scuro';
+    const s = st.s ?? (P.schermata ?? 'locali');
+    const stato = st.st ?? (P.stato ?? 'normale');
+    const go = (ns, nst) => () => this.setState({ s: ns, st: nst || 'normale' });
+    const sezione = { locali: 'locali', candidati: 'locali', locale: 'locali', fonti: 'fonti', fonte: 'fonti', duplicati: 'duplicati', eventi: 'eventi' }[s] || 'locali';
+    const ICO = {
+      locali: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6',
+      fonti: 'M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16M5 19h.01',
+      duplicati: 'M8 8h12v12H8zM4 16V4h12',
+      eventi: 'M8 2v4M16 2v4M3 4h18v18H3zM3 10h18',
+      flyer: 'M4 3h16v18H4zM8 8h8M8 12h8M8 16h5',
+      segn: 'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7'
+    };
+    const nav = [
+      { k: 'locali', t: 'Locali', n: '', vai: go('locali') },
+      { k: 'fonti', t: 'Fonti', n: '', vai: go('fonti') },
+      { k: 'duplicati', t: 'Duplicati', n: '3', vai: go('duplicati') },
+      { k: 'eventi', t: 'Eventi', n: '2', vai: go('eventi') },
+      { k: 'flyer', t: 'Flyer', spenta: true },
+      { k: 'segn', t: 'Segnalazioni', spenta: true }
+    ].map((v) => ({
+      t: v.t, n: v.n, haN: !!v.n, spenta: !!v.spenta, ico: ICO[v.k], vai: v.vai || (() => {}),
+      cls: 'md-voce' + (v.k === sezione ? ' is-on' : '') + (v.spenta ? ' is-spenta' : ''),
+      cur: v.k === sezione ? 'page' : 'false',
+      sr: v.spenta ? '(in arrivo, iterazione 6) ' : (v.n ? '(' + v.n + ' da controllare) ' : '')
+    }));
+
+    // QR
+    const N = 29; const grid = []; let seed = 911;
+    const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+    for (let y = 0; y < N; y++) { grid.push([]); for (let x = 0; x < N; x++) grid[y].push(rnd() > 0.52); }
+    const finder = (ox, oy) => { for (let y = -1; y < 8; y++) for (let x = -1; x < 8; x++) { const X = ox + x, Y = oy + y; if (X < 0 || Y < 0 || X >= N || Y >= N) continue; const d = Math.max(Math.abs(x - 3), Math.abs(y - 3)); grid[Y][X] = d === 3 || d <= 1; } };
+    finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
+    let qrPath = ''; for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (grid[y][x]) qrPath += 'M' + x + ' ' + y + 'h1v1h-1z';
+
+    // porta
+    const PT = {
+      attiva: ['', ''], codice: ['Inserisci il codice', 'Apri l’app di autenticazione e scrivi le 6 cifre per Noxa · moderazione.'],
+      errato: ['Inserisci il codice', 'Apri l’app di autenticazione e scrivi le 6 cifre per Noxa · moderazione.'],
+      tentativi: ['Inserisci il codice', 'Per sicurezza l’accesso è in pausa per qualche minuto.'],
+      noruolo: ['Quest’area è riservata al team di moderazione', 'Hai inserito il codice giusto, ma il tuo account non è tra i moderatori.'],
+      scaduta: ['Sessione scaduta', 'Per sicurezza la sessione dura 8 ore. Accedi di nuovo con il codice: le modifiche salvate restano.']
+    };
+    const cifreV = stato === 'errato' ? ['4', '8', '1', '0', '', ''] : stato === 'codice' ? ['4', '8', '1', '', '', ''] : stato === 'attiva' ? ['', '', '', '', '', ''] : ['', '', '', '', '', ''];
+    const p = {
+      attiva: stato === 'attiva', accesso: stato !== 'attiva', titolo: (PT[stato] || PT.codice)[0], testo: (PT[stato] || PT.codice)[1],
+      haCampo: ['attiva', 'codice', 'errato', 'tentativi', 'normale'].indexOf(stato) >= 0,
+      cifre: cifreV.map((v, i) => ({ v, n: i + 1, cls: (stato === 'codice' && i === 3) || (stato === 'errato' && i === 4) ? 'is-focus' : '' })),
+      c6Cls: 'codice6' + (stato === 'errato' ? ' is-errore' : ''),
+      errato: stato === 'errato', tentativi: stato === 'tentativi', bloccato: stato === 'tentativi',
+      btn: stato === 'attiva' ? 'Attiva i due fattori' : 'Continua',
+      btnCls: stato === 'tentativi' ? 'btn btn-principale btn-pieno is-disabilitato' : 'btn btn-principale btn-pieno',
+      noruolo: stato === 'noruolo', scaduta: stato === 'scaduta'
+    };
+
+    // locali
+    const ST = { Attivo: 'st st-ok', 'Non attivo': 'st st-neutro', 'Da verificare': 'st st-attesa' };
+    const L = (nome, comune, prov, stato2, foto, fonti, ev, agg, sel) => ({ nome, comune, prov, stato: stato2, stCls: ST[stato2], foto, noFoto: !foto, fonti, ev, agg, sel: sel ? 'true' : 'false', cls: sel ? 'is-sel' : '' });
+    let locali = [
+      L('Club Binario 7', 'Monza', 'MB', 'Attivo', true, '2 / 2', '5', '19.10 08:12', true),
+      L('Officina Lambro', 'Monza', 'MB', 'Attivo', true, '2 / 1', '4', '19.10 07:40'),
+      L('Cascina Torretta', 'Vimercate', 'MB', 'Attivo', false, '1 / 1', '2', '18.10 22:05'),
+      L('Sala Ventuno', 'Desio', 'MB', 'Attivo', false, '2 / 0', '0', '17.10 11:30'),
+      L('Spazio Navigli 40', 'Milano', 'MI', 'Da verificare', false, '1 / 0', '0', '16.10 15:02'),
+      L('Capannone Ortica', 'Milano', 'MI', 'Non attivo', true, '1 / 0', '0', '02.10 10:11')
+    ];
+    const candidati = [
+      { nome: 'Club Binario Sette', indirizzo: 'Via dei Cantieri 12, Monza', origine: 'OSM', doppione: 'Club Binario 7 · stesso indirizzo' },
+      { nome: 'Corte delle Rose', indirizzo: 'Via Giardini 4, Lissone', origine: 'OSM', doppione: '—' },
+      { nome: 'Spazio Vetrina', indirizzo: 'Seregno · solo identificativo', origine: 'Google: solo identificativo', doppione: '—' }
+    ];
+    const isCand = s === 'candidati';
+    const loc = {
+      conta: isCand ? '3 candidati' : (stato === 'vuoto' ? '0 di 24' : '24'),
+      isTutti: !isCand, isCand, tutti: isCand ? 'false' : 'true', cand: isCand ? 'true' : 'false',
+      tabTutti: 'tab' + (isCand ? '' : ' is-on'), tabCand: 'tab' + (isCand ? ' is-on' : ''),
+      carica: stato === 'caricamento', vuotoStato: stato === 'vuoto', errore: stato === 'errore',
+      lista: ['caricamento', 'vuoto', 'errore'].indexOf(stato) < 0,
+      chipFoto: stato === 'vuoto' ? 'chip is-on' : 'chip', vuoto: stato === 'vuoto' ? 'true' : 'false'
+    };
+    const prossimi = [
+      { data: 'gio 23.10', t: 'Notte Ferrovia', eta: '18+', stato: 'Pubblicato', stCls: 'st st-ok' },
+      { data: 'ven 24.10', t: 'Indie al Binario', eta: '16+', stato: 'Pubblicato', stCls: 'st st-ok' },
+      { data: 'sab 25.10', t: 'Techno Lunga', eta: '18+', stato: 'In revisione', stCls: 'st st-info' }
+    ];
+    const fotoForm = ['foto', 'caricamento', 'grande', 'formato'].indexOf(stato) >= 0;
+    const foto = {
+      salvata: !fotoForm, form: fotoForm,
+      dropzone: stato === 'formato', formato: stato === 'formato', carica: stato === 'caricamento',
+      anteprima: stato === 'foto' || stato === 'grande', grande: stato === 'grande'
+    };
+
+    // fonti
+    const CF = { Consentita: 'st st-ok', Vietata: 'st st-no', 'Da verificare': 'st st-attesa' };
+    const F = (locale, tipo, url, adatt, conf, att, freq, ultima, letti, nuovi, errori, sel) => ({ locale, tipo, url, adatt, conf, confCls: CF[conf], att, attCls: att === 'Sì' ? 'st st-ok' : att === 'Spenta auto' ? 'st st-no' : 'st st-neutro', freq, ultima, letti, nuovi, errori, errCls: /err|HTTP|0 eventi/.test(errori) && errori !== '0 errori' ? 'a-capo err' : 'a-capo', sel: sel ? 'true' : 'false', cls: sel ? 'is-sel' : '' });
+    let fonti = [
+      F('Club Binario 7', 'Sito', 'binario7.example/eventi', 'html-agenda v2', 'Consentita', 'Sì', 'ogni 6 h', '19.10 06:00', '12', '1', '0 errori'),
+      F('Club Binario 7', 'Instagram', '@clubbinario7', 'instagram-graph', 'Consentita', 'Sì', 'ogni 12 h', '19.10 00:00', '4', '0', '0 errori'),
+      F('Officina Lambro', 'Sito', 'officinalambro.example', 'json-ld', 'Consentita', 'Spenta auto', 'ogni 6 h', '18.10 18:00', '0', '0', 'HTTP 503 · 5 di fila', stato === 'errori'),
+      F('Cascina Torretta', 'Sito', 'cascinatorretta.example', 'json-ld', 'Consentita', 'Sì', 'ogni 12 h', '19.10 06:00', '0', '0', '0 eventi da 3 esecuzioni'),
+      F('Sala Ventuno', 'Sito', 'salaventuno.example/calendario', 'html-agenda v2', 'Da verificare', 'No', '—', 'solo prove', '—', '—', '—'),
+      F('Sala Ventuno', 'Aggregatore', 'eventiovunque.example', '—', 'Vietata', 'No', '—', 'mai', '—', '—', 'nessun accordo')
+    ];
+    fonti = fonti.map((f) => Object.assign({}, f, { uniti: f.letti === '12' ? '3' : f.letti === '4' ? '1' : f.letti === '—' ? '—' : '0' }));
+    if (stato === 'errori') fonti = fonti.filter((f) => f.errCls === 'a-capo err');
+    const fo = { conta: stato === 'errori' ? '2 di 9' : '9', chipErr: stato === 'errori' ? 'chip is-on' : 'chip', err: stato === 'errori' ? 'true' : 'false', pannello: stato === 'errori' };
+    const isNuova = stato === 'nuova' || (s === 'fonte' && stato === 'normale');
+    const fs = {
+      nuova: isNuova, esito: !isNuova, prova: stato === 'esito',
+      brice: isNuova ? 'Nuova fonte' : 'Club Binario 7 · Sito', titolo: isNuova ? 'Nuova fonte' : 'binario7.example/eventi',
+      conf: isNuova ? 'Da verificare' : 'Consentita', confCls: isNuova ? 'st st-attesa' : 'st st-ok',
+      att: isNuova ? 'Non attiva' : 'Attiva', attCls: isNuova ? 'st st-neutro' : 'st st-ok'
+    };
+    const X = (inizio, durata, pagine, letti, nuovi, uniti, errore) => ({ inizio, durata, pagine, letti, nuovi, uniti, errore, errCls: errore === '—' ? 'trattino' : 'st st-no' });
+    const esecuzioni = [X('19.10 10:42 prova', '8,4 s', '3', '12', '1', '3', '—'), X('19.10 06:00', '7,9 s', '3', '12', '1', '3', '—'), X('19.10 00:00', '8,1 s', '3', '11', '0', '2', '—'), X('18.10 18:00', '30,0 s', '1', '0', '0', '0', 'TIMEOUT · 30 s'), X('18.10 12:00', '7,6 s', '3', '11', '2', '1', '—'), X('18.10 06:00', '7,7 s', '3', '9', '0', '1', '—')];
+
+    // duplicati
+    const coda = [
+      { p: '92', t: 'Notte Ferrovia', motivo: 'Stesso locale, orario a 30 minuti, titolo simile', fonte: '@clubbinario7', quando: '19.10 06:01' },
+      { p: '78', t: 'Cortile Live', motivo: 'Modifica rilevante: età da 16+ a 18+', fonte: 'cascinatorretta.example', quando: '18.10 22:05' },
+      { p: '64', t: 'Open Decks Vol. 3', motivo: 'Locale non riconosciuto', fonte: '@officinalambro', quando: '18.10 19:30' }
+    ];
+    const selDup = stato === 'locale' ? 2 : stato === 'salvata' ? 1 : 0;
+    const codaV = (stato === 'salvata' ? coda.slice(1) : coda).map((q, i) => Object.assign({}, q, { sel: (stato === 'salvata' ? i === 0 : coda.indexOf(q) === selDup) ? 'true' : 'false', cls: 'coda-voce' + ((stato === 'salvata' ? i === 0 : coda.indexOf(q) === selDup) ? ' is-on' : '') }));
+    const R = (campo, a, b, diff, ult) => ({ campo, a, b, segno: diff ? '≠ diverso' : '= uguale', clsA: (diff ? 'cf-diff' : '') + (ult ? ' ultima' : ''), clsB: (diff ? 'cf-diff' : '') + (ult ? ' ultima' : ''), clsS: 'cf-segno' + (diff ? ' diff' : '') + (ult ? ' ultima' : '') });
+    const cf = stato === 'salvata'
+      ? { p: '78', titolo: 'Cortile Live', motivo: 'Modifica rilevante', fonte: 'cascinatorretta.example', quando: '18.10 22:05', pos: '1 di 2 in coda', eff1: 'fine 01:30 e prezzo da 10 € (dati più recenti), età 18+ (la più alta),', alcol: 'alcol: no', eff2: '(nessuna fonte lo indica), una fonte aggiornata.', righe: [
+          R('Titolo', 'Cortile Live', 'Cortile Live', false), R('Locale', 'Cascina Torretta', 'Cascina Torretta', false), R('Inizio', 'sab 25.10 21:00', 'sab 25.10 21:00', false),
+          R('Fine', '01:00', '01:30', true), R('Età', '16+', '18+', true), R('Alcol', 'No', 'No', false), R('Generi', 'indie, live', 'indie, live', false),
+          R('Artisti', 'I Fili Scoperti · Lanterna', 'I Fili Scoperti · Lanterna', false), R('Prezzo', 'da 8 €', 'da 10 €', true, true)] }
+      : { p: '92', titolo: 'Notte Ferrovia', motivo: 'Stesso locale, orario a 30 minuti, titolo simile', fonte: '@clubbinario7', quando: '19.10 06:01', pos: '1 di 3 in coda', eff1: 'inizio 23:30 (dato più recente), età 18+ (la più alta),', alcol: 'alcol: sì', eff2: '(basta una fonte), generi techno, house, minimal, due fonti collegate.', righe: [
+          R('Titolo', 'Notte Ferrovia', 'NOTTE FERROVIA – techno all night', true), R('Locale', 'Club Binario 7', 'Club Binario 7', false), R('Inizio', 'gio 23.10 23:00', 'gio 23.10 23:30', true),
+          R('Fine', '05:00', '05:00', false), R('Età', '18+', '18+', false), R('Alcol', 'No', 'Sì', true), R('Generi', 'techno, house', 'techno, minimal', true),
+          R('Artisti', 'Nera Vale · Corrado B.', 'Nera Vale · Corrado B.', false), R('Prezzo', 'da 15 €', 'da 15 €', false), R('Link', 'binario7.example/eventi/23-10', 'instagram.example/p/NX92', true, true)] };
+    const du = {
+      conta: stato === 'vuota' ? '0' : stato === 'salvata' ? '2' : '3', haCoda: ['vuota', 'caricamento'].indexOf(stato) < 0,
+      vuota: stato === 'vuota', carica: stato === 'caricamento', errore: stato === 'errore', salvata: stato === 'salvata',
+      confronto: ['normale', 'confronto', 'salvata', 'errore'].indexOf(stato) >= 0, locale: stato === 'locale'
+    };
+
+    // eventi
+    const SE = { Pubblicato: 'st st-ok', 'In revisione': 'st st-info', Annullato: 'st st-no', Rifiutato: 'st st-neutro' };
+    const E = (t, locale, data, eta, alc, stato2, fonti2, sel) => ({ t, locale, data, eta, alc, alcCls: alc === 'Sì' ? 'st st-attesa' : 'st st-neutro', stato: stato2, stCls: SE[stato2], fonti: fonti2, sel: sel ? 'true' : 'false', cls: sel ? 'is-sel' : '' });
+    const eventi = [
+      E('Notte Ferrovia', 'Club Binario 7 · Monza', 'gio 23.10', '18+', 'No', 'Pubblicato', '2'),
+      E('Bassi Lunghi', 'Officina Lambro · Monza', 'ven 24.10', '18+ · non dichiarata', 'Sì', 'In revisione', '1', true),
+      E('Cortile Live', 'Cascina Torretta · Vimercate', 'sab 25.10', '16+', 'No', 'Pubblicato', '1'),
+      E('Anni Zero', 'Sala Ventuno · Desio', 'sab 25.10', '16+', 'No', 'Pubblicato', '1'),
+      E('Live in Cascina', 'Cascina Torretta · Vimercate', 'sab 25.10', '14+', 'No', 'Annullato', '1'),
+      E('Promo Notte Libera', 'Capannone Ortica · Milano', 'ven 24.10', '18+', 'Sì', 'Rifiutato', '1')
+    ];
+    const isScheda = s === 'eventi' && ['scheda', 'eta', 'alcol', 'annulla'].indexOf(stato) >= 0;
+    const isAnn = s === 'eventi' && stato === 'annullamenti';
+    const ev = {
+      isScheda, isElenco: !isScheda, isTutti: !isScheda && !isAnn, isAnn,
+      titolo: isScheda ? 'Bassi Lunghi' : 'Eventi', conta: isScheda ? '' : isAnn ? '2 da decidere' : '148',
+      tabTutti: 'tab' + (isAnn ? '' : ' is-on'), tabAnn: 'tab' + (isAnn ? ' is-on' : ''), tutti: isAnn ? 'false' : 'true', ann: isAnn ? 'true' : 'false'
+    };
+
+    // dialoghi
+    const D = {
+      eta: { etichetta: 'Operazione delicata · R-22', titolo: 'Abbassare l’età di «Bassi Lunghi»?', haPrimaDopo: true, prima: '18+', dopo: '16+', effetto: 'L’evento diventerà visibile anche a chi ha meno di 18 anni: lo vedranno da 16 anni in su, anche nelle mappe e nei suggerimenti degli amici.', motivo: 'Il locale ha confermato via email (17.10) che l’ingresso è dai 16 anni, con documento.', conta: '86/500', btn: 'Abbassa a 16+', btnCls: 'btn btn-s btn-principale' },
+      alcol: { etichetta: 'Operazione delicata · R-23', titolo: 'Togliere «riferimenti all’alcol»?', haPrimaDopo: false, effetto: 'L’evento diventerà visibile anche a chi ha meno di 18 anni, se l’età minima lo permette. Ora l’età è 18+: cambierà qualcosa solo se abbassi anche quella.', motivo: 'La parola trovata era nel nome di un artista, non un riferimento a bevande.', conta: '72/500', btn: 'Togli il riferimento', btnCls: 'btn btn-s btn-principale' },
+      annulla: { etichetta: 'Annullamento', titolo: 'Annullare «Bassi Lunghi»?', haPrimaDopo: false, effetto: 'Chi aveva scelto «Partecipo» o «Mi interessa» lo vedrà come annullato. L’evento resta in elenco con il badge «Annullato» fino alla data.', motivo: 'Il locale ha scritto su Instagram che la serata è rimandata a data da definire.', conta: '79/500', btn: 'Annulla evento', btnCls: 'btn btn-s btn-pericolo' },
+      rimuovi: { etichetta: 'Foto del locale', titolo: 'Rimuovere la foto di Club Binario 7?', haPrimaDopo: false, effetto: 'In Scopri il locale userà il flyer approvato o il fondo tipografico finché non carichi un’altra foto.', motivo: 'Il locale ha ritirato l’autorizzazione (email del 18.10).', conta: '55/500', btn: 'Rimuovi foto', btnCls: 'btn btn-s btn-pericolo' },
+      unisci: { etichetta: 'Candidato · Club Binario Sette (OSM)', titolo: 'Unire a un locale esistente', haPrimaDopo: false, haCerca: true, effetto: 'Il candidato sparisce dalla coda; il suo identificativo OSM viene salvato sul locale scelto. Nessun dato del locale esistente viene sovrascritto.', motivo: 'Stesso indirizzo e stesso sito: è il nome scritto per esteso.', conta: '58/500', btn: 'Unisci', btnCls: 'btn btn-s btn-principale' }
+    };
+    const dk = (s === 'eventi' && D[stato]) ? stato : (s === 'locale' && stato === 'rimuovi') ? 'rimuovi' : (s === 'candidati' && stato === 'unisci') ? 'unisci' : null;
+    const dlg = dk ? Object.assign({ on: true, haCerca: false }, D[dk]) : { on: false };
+
+    return {
+      radice: 'nx nx-' + tema + ' md',
+      larghezza: P.larghezza ?? 1280, altezza: P.altezza ?? 800,
+      is: { porta: s === 'porta', guscio: s !== 'porta', locali: s === 'locali' || s === 'candidati', locale: s === 'locale', fonti: s === 'fonti', fonte: s === 'fonte', duplicati: s === 'duplicati', eventi: s === 'eventi' },
+      sezioneNome: { locali: 'Locali', fonti: 'Fonti', duplicati: 'Duplicati', eventi: 'Eventi' }[sezione],
+      nav, qrPath, p, loc, locali, candidati, prossimi, foto, fonti, fo, fs, esecuzioni, coda: codaV, cf, du, eventi, ev, dlg,
+      sei: [1, 2, 3, 4, 5, 6].map((k) => ({ k })),
+      vai: {
+        locali: go('locali'), candidati: go('candidati'), unisci: go('candidati', 'unisci'), locale: go('locale'), foto: go('locale', 'foto'), rimuovi: go('locale', 'rimuovi'),
+        fonti: go('fonti'), fonte: go('fonte', 'nuova'), esito: go('fonte', 'esito'), eventi: go('eventi'), annullamenti: go('eventi', 'annullamenti'),
+        scheda: go('eventi', 'scheda'), eta: go('eventi', 'eta'), alcol: go('eventi', 'alcol'), annulla: go('eventi', 'annulla')
+      },
+      chiudi: () => this.setState({ st: s === 'eventi' ? 'scheda' : 'normale' }),
+      esc: (e) => { if (e && e.key === 'Escape') this.setState({ st: s === 'eventi' ? 'scheda' : 'normale' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Noxa · F-40 · Locali e candidati</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/6fa6353d716b68f787ff2702a9363d96">
+<link rel="stylesheet" href="/_blob/afc4088ee394ab1a58e9ba7651ca762e">
+<link rel="stylesheet" href="/_blob/dbab4423ee519d83500f0485a4806ddb">
+<link rel="stylesheet" href="/_blob/cdf778b603b9eec9b9e8c7c0cba7983e">
+<link rel="stylesheet" href="/_blob/75de66852ef3f7538a23c938780b4826">
+<link rel="stylesheet" href="/_blob/a1cf835a0f7990ee258f07644356accd">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="nx nx-scuro" style="width: 4048px; height: 2006px; padding: 64px; display: flex; flex-direction: column; gap: 40px; overflow: hidden">
+  <header style="display: flex; flex-direction: column; gap: 8px; max-width: 1100px">
+    <span class="etichetta">F-40 · Moderazione · 02</span>
+    <h1 class="t-titolo-1" style="margin: 0">Locali e candidati</h1>
+    <p class="c-2" style="margin: 0">Elenco denso con filtri e candidati da OSM o da identificativo Google: si creano solo dopo verifica, con Unisci se sono già noti. Nessun dato di utenti in quest’area (R-69).</p>
+  </header>
+  <sc-for list="{{righe}}" as="r" hint-placeholder-count="2">
+    <div style="display: flex; gap: 40px">
+      <sc-for list="{{r.celle}}" as="c" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column; gap: 12px; width: 1280px; flex: none">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><span style="font-weight: 700">{{c.nome}}</span><span class="t-mono-dato c-2">{{c.tema}} · {{c.tag}}</span></div>
+          <div style="width: 1280px; height: 800px; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px var(--colore-linea)">
+            <dc-import name="Mod" tema="{{c.tema}}" schermata="{{c.s}}" stato="{{c.st}}" larghezza="{{ 1280 }}" altezza="{{ 800 }}" hint-size="1280px,800px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":4048,"height":2006}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+  "righe": [
+    {
+      "celle": [
+        {
+          "nome": "Locali",
+          "tema": "scuro",
+          "s": "locali",
+          "st": "normale",
+          "tag": "1280"
+        },
+        {
+          "nome": "Locali",
+          "tema": "chiaro",
+          "s": "locali",
+          "st": "normale",
+          "tag": "1280"
+        },
+        {
+          "nome": "Candidati",
+          "tema": "scuro",
+          "s": "candidati",
+          "st": "normale",
+          "tag": "1280"
+        }
+      ]
+    },
+    {
+      "celle": [
+        {
+          "nome": "Unisci a un locale",
+          "tema": "chiaro",
+          "s": "candidati",
+          "st": "unisci",
+          "tag": "dialogo"
+        },
+        {
+          "nome": "Nessun risultato",
+          "tema": "scuro",
+          "s": "locali",
+          "st": "vuoto",
+          "tag": "vuoto"
+        },
+        {
+          "nome": "Errore di caricamento",
+          "tema": "chiaro",
+          "s": "locali",
+          "st": "errore",
+          "tag": "errore"
+        }
+      ]
+    }
+  ]
+};
+  }
+}
+</script>
+</body>
+</html>
