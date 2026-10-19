@@ -35,7 +35,7 @@ select throws_ok(
   $$ insert into public.segnalazioni (segnalante_id, tipo_oggetto, oggetto_id, motivo)
      values (tests.id('minore_16'), 'evento', gen_random_uuid(), 'evento_falso') $$,
   '42501', null,
-  'Gli altri tipi di oggetto arrivano con le loro tabelle'
+  'Non si segnala un evento che non esiste'
 );
 select throws_ok(
   $$ insert into public.segnalazioni (segnalante_id, tipo_oggetto, oggetto_id, motivo, dettagli)
