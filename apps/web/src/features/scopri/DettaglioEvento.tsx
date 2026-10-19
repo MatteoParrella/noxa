@@ -30,7 +30,6 @@ import {
   SelettorePartecipazione,
   type SceltaPartecipazione,
 } from '@/components/ui/SelettorePartecipazione';
-import { StrisciaOffline } from '@/components/ui/Stati';
 import { useToast } from '@/components/ui/Toast';
 import { useIo } from '@/features/amici/dati';
 import { urlPubblicoApp } from '@/lib/ambiente';
@@ -297,7 +296,6 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
 
   return (
     <article className="dettaglio">
-      {!online && <StrisciaOffline testo={testi.offline} />}
       <Copertina
         copertina={datiCopertina}
         forma="dettaglio"

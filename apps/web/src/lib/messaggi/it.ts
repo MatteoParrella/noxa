@@ -500,7 +500,10 @@ export const messaggi = {
       comune: string;
       quando: string;
       eta: string;
-    }) => `${dati.titolo}, ${dati.locale}, ${dati.comune}, ${dati.quando}, ${dati.eta}`,
+      altro: string[];
+    }) => [dati.titolo, dati.locale, dati.comune, dati.quando, dati.eta, ...dati.altro].join(', '),
+    limite: (numero: number) =>
+      `Vedi i primi ${numero} eventi: restringi date o filtri per vedere gli altri.`,
     vuoto: {
       titolo: 'Nessun evento con questi filtri',
       testo: 'Prova a togliere un genere o ad allargare la distanza.',

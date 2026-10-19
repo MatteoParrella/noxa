@@ -4,7 +4,7 @@ import { daIso } from '@/lib/date';
 import { messaggi } from '@/lib/messaggi/it';
 import type { EventoElenco, TipoCopertina } from './api';
 import { nomeGenere } from './dati';
-import { distanza, etichettaEta, giornoBreve, ora, orario, prezzo } from './formato';
+import { distanza, etichettaEta, giornoBreve, ora, orario, prezzo, testoAmici } from './formato';
 
 /** Copertina con il link firmato, se c'è (ADR-0018). */
 export function copertina(
@@ -36,6 +36,11 @@ export function datiScheda(
   const giorno = giornoBreve(daIso(evento.data_serata));
   const eta = etichettaEta(evento.eta_minima, evento.eta_minima_dichiarata);
   const quando = `${giorno} · ${orario(evento.inizio, evento.fine)}`;
+  const meta = [distanza(evento.distanza_m), prezzo(evento.prezzo_min_centesimi)].filter(
+    (voce): voce is string => voce !== null,
+  );
+  const amici = testoAmici(evento.amici, evento.amici_partecipano, evento.amici_interessati);
+  const annullato = evento.stato === 'annullato';
   return {
     href: `/evento/?id=${evento.id}`,
     nome: messaggi.scopri.evento({
@@ -44,6 +49,12 @@ export function datiScheda(
       comune: evento.locale_comune,
       quando: `${giorno} ${ora(evento.inizio)}`,
       eta,
+      // Il nome del link sostituisce il contenuto: dentro c'è tutto quello che la scheda mostra.
+      altro: [
+        ...(annullato ? [messaggi.scopri.annullato] : []),
+        ...meta,
+        ...(amici ? [amici] : []),
+      ],
     }),
     titolo: evento.titolo,
     locale: evento.locale_nome,
@@ -53,10 +64,8 @@ export function datiScheda(
     orario: orario(evento.inizio, evento.fine),
     eta,
     generi: evento.generi_evento.slice(0, 2).map((codice) => nomeGenere(nomiGeneri, codice)),
-    meta: [distanza(evento.distanza_m), prezzo(evento.prezzo_min_centesimi)].filter(
-      (voce): voce is string => voce !== null,
-    ),
-    annullato: evento.stato === 'annullato',
+    meta,
+    annullato,
     copertina: copertina(evento, link),
   };
 }

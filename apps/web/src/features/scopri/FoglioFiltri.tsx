@@ -145,12 +145,12 @@ export function FoglioFiltri({
               </OpzioneRadio>
               <OpzioneRadio
                 selezionata={bozza.dove.tipo === 'comune'}
-                onScegli={() =>
-                  cambia({
-                    dove: { tipo: 'comune', comune: testoComune || 'Milano' },
-                    distanzaKm: bozza.distanzaKm ?? 10,
-                  })
-                }
+                onScegli={() => {
+                  // Si parte da Milano finché non se ne sceglie un altro: campo e filtro coincidono.
+                  const comune = testoComune || 'Milano';
+                  setTestoComune(comune);
+                  cambia({ dove: { tipo: 'comune', comune }, distanzaKm: bozza.distanzaKm ?? 10 });
+                }}
               >
                 {testi.scegliComune}
               </OpzioneRadio>

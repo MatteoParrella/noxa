@@ -8,7 +8,6 @@ import { Icona } from '@/components/ui/Icona';
 import { Rivela } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { RigaEvento, SchedaEvidenza } from '@/components/ui/SchedaEvento';
-import { StrisciaOffline } from '@/components/ui/Stati';
 import type { DataCalendario } from '@/lib/date';
 import { messaggi } from '@/lib/messaggi/it';
 import type { EventoElenco } from './api';
@@ -17,6 +16,9 @@ import { perSerata, testoAmici } from './formato';
 import { datiScheda } from './schede';
 
 const testi = messaggi.scopri;
+
+/** Massimo di eventi restituiti da `cerca_eventi` (DATA_MODEL.md §5.3). */
+const LIMITE_RISULTATI = 300;
 
 type Props = {
   eventi: UseQueryResult<EventoElenco[]>;
@@ -93,7 +95,6 @@ export function ElencoEventi({ eventi, online, oggi, conFiltri, onTogliFiltri }:
   if (elenco.length === 0) {
     return (
       <div className="pagina">
-        {!online && <StrisciaOffline testo={testi.offline} />}
         <StatoElenco
           icona={SlidersHorizontal}
           titolo={conFiltri ? testi.vuoto.titolo : testi.vuoto.titoloSenzaFiltri}
@@ -115,7 +116,6 @@ export function ElencoEventi({ eventi, online, oggi, conFiltri, onTogliFiltri }:
   let indice = 0;
   return (
     <div className="pagina pb-6" aria-busy={eventi.isFetching}>
-      {!online && <StrisciaOffline testo={testi.offline} />}
       {serate.map((serata, posizione) => (
         <section key={serata.data} aria-labelledby={`serata-${serata.data}`}>
           <div className="etichetta-riga scopri-sezione">
@@ -139,6 +139,9 @@ export function ElencoEventi({ eventi, online, oggi, conFiltri, onTogliFiltri }:
           </ul>
         </section>
       ))}
+      {elenco.length >= LIMITE_RISULTATI && (
+        <p className="t-corpo-s c-2 m-0 pt-5">{testi.limite(LIMITE_RISULTATI)}</p>
+      )}
       <p className="t-didascalia m-0 py-5 text-center">{testi.soloVisibili}</p>
     </div>
   );
