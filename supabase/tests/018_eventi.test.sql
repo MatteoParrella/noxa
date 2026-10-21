@@ -2,7 +2,7 @@
 -- Eventi del seed: e002, e011, e012 14+; e004, e006 (annullato), e009 16+; e001, e005 18+;
 -- e003 18+ non dichiarata; e008 18+ con riferimenti all'alcol; e007 21+; e010 in revisione.
 begin;
-select plan(46);
+select plan(51);
 
 create function tests.e(n text) returns uuid language sql immutable as $$
   select ('00000000-0000-4000-8000-00000000e' || n)::uuid;
@@ -131,8 +131,13 @@ select is_empty(
   'R-06: senza due fattori un moderatore non approva eventi'
 );
 select tests.autentica_come('moderatore');
-select isnt_empty(
-  $$ update public.eventi set stato = 'pubblicato' where id = tests.e('010') returning id $$,
+select throws_ok(
+  $$ update public.eventi set stato = 'pubblicato' where id = tests.e('010') $$,
+  'NX020', null,
+  'Lo stato di un evento cambia solo con la RPC che registra la decisione'
+);
+select lives_ok(
+  $$ select public.cambia_stato_evento(tests.e('010'), 'pubblicato', null) $$,
   'Un moderatore con due fattori approva un evento'
 );
 
@@ -183,13 +188,37 @@ select throws_ok(
 reset role;
 
 select tests.autentica_come('moderatore');
-select lives_ok(
+select throws_ok(
   $$ update public.eventi set eta_minima = 18 where id = tests.e('005') $$,
-  'R-22: un moderatore abbassa un''età dichiarata'
+  'NX020', null,
+  'R-22: anche un moderatore abbassa un''età solo con una motivazione registrata'
+);
+select throws_ok(
+  $$ update public.eventi set riferimenti_alcol = false where id = tests.e('009') $$,
+  'NX020', null,
+  'R-23: anche un moderatore toglie l''alcol solo con una motivazione registrata'
+);
+select throws_ok(
+  $$ select public.correggi_eta_alcol_evento(tests.e('005'), 18::smallint, true, false, ' ') $$,
+  'NX021', null,
+  'R-22: la correzione dell''età chiede la motivazione'
 );
 select lives_ok(
-  $$ update public.eventi set riferimenti_alcol = false where id = tests.e('009') $$,
-  'R-22: un moderatore toglie i riferimenti all''alcol'
+  $$ select public.correggi_eta_alcol_evento(tests.e('005'), 18::smallint, true, false,
+                                             'Il locale ha confermato via email.') $$,
+  'R-22: un moderatore abbassa un''età dichiarata con la motivazione'
+);
+select lives_ok(
+  $$ select public.correggi_eta_alcol_evento(tests.e('009'), 18::smallint, false, false,
+                                             'La parola era il nome di un artista.') $$,
+  'R-22: un moderatore toglie i riferimenti all''alcol con la motivazione'
+);
+select is(
+  (select count(*)::int from public.azioni_moderazione
+   where oggetto_id in (tests.e('005'), tests.e('009')) and azione = 'correggi_eta_alcol'
+     and moderatore_id = tests.id('moderatore')),
+  2,
+  'R-22: le correzioni di età e alcol restano nel registro'
 );
 
 -- ---------------------------------------------------------------------------------------------

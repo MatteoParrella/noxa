@@ -47,6 +47,8 @@ erDiagram
     generi_musicali ||--o{ eventi_generi : ""
     eventi ||--o{ eventi_fonti : ""
     fonti ||--o{ eventi_grezzi : ""
+    fonti ||--o{ esecuzioni_fonte : ""
+    locali |o--o{ candidati_locali : "possibile doppione"
     caricamenti_flyer ||--o{ eventi_grezzi : ""
     eventi_grezzi }o--o| eventi : "unito in"
     profili ||--o{ caricamenti_flyer : ""
@@ -84,11 +86,11 @@ erDiagram
 | `tipo_consenso` | `termini`, `privacy` |
 | `stato_amicizia` | `in_attesa`, `accettata` |
 | `canale_amicizia` | `ricerca`, `codice_invito` |
-| `tipo_oggetto_segnalabile` | `profilo`, `evento`, `caricamento_flyer`, `gruppo`, `serata_gruppo`, `immagine_locale` |
+| `tipo_oggetto_segnalabile` | `profilo`, `evento`, `caricamento_flyer`, `gruppo`, `serata_gruppo`, `immagine_locale`; dall'iterazione 5 anche `locale`, `fonte`, `candidato_locale`, usati solo dal registro di `azioni_moderazione` (la policy INSERT di `segnalazioni` non li ammette) |
 | `fonte_immagine_locale` | `autorizzazione_locale`, `noxa`, `licenza_libera` |
 | `motivo_segnalazione` | `contenuto_inappropriato`, `molestie`, `adescamento_o_rischio_minore`, `spam`, `evento_falso`, `eta_errata`, `alcol_a_minori`, `altro`, `dati_errati` (orari, luogo o età sbagliati di un evento, dall'iterazione 4) |
 | `stato_segnalazione` | `aperta`, `in_lavorazione`, `chiusa` |
-| `azione_moderazione` | `nessuna_violazione`, `rimuovi_contenuto`, `modifica_evento`, `approva_flyer`, `rifiuta_flyer`, `sospendi_account`, `riattiva_account`, `correggi_data_nascita`, `escalation_autorita`, `accesso_segnalazione` |
+| `azione_moderazione` | `nessuna_violazione`, `rimuovi_contenuto`, `modifica_evento`, `approva_flyer`, `rifiuta_flyer`, `sospendi_account`, `riattiva_account`, `correggi_data_nascita`, `escalation_autorita`, `accesso_segnalazione`; dall'iterazione 5 `crea_locale`, `modifica_locale`, `approva_immagine_locale`, `rimuovi_immagine_locale`, `crea_fonte`, `modifica_fonte`, `esegui_fonte`, `unisci_duplicato`, `separa_duplicato`, `pubblica_evento`, `annulla_evento`, `rifiuta_evento`, `correggi_eta_alcol`, `conferma_in_programma`, `verifica_candidato_locale`, `unisci_candidato_locale`, `scarta_candidato_locale` |
 | `tipo_fonte` | `sito_locale`, `instagram`, `resident_advisor`, `xceed`, `dice` |
 | `stato_conformita` | `da_verificare`, `consentita`, `vietata` |
 | `stato_evento` | `in_revisione`, `pubblicato`, `rifiutato`, `annullato` |
@@ -133,6 +135,12 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `versione_corrente(tipo tipo_consenso)` | `text` | Versione in vigore oggi di termini o informativa, da `private.versioni_documenti` (R-63). |
 | `e_moderatore()` | `boolean` | `auth.uid()` ha ruolo `moderatore` o `amministratore` in `ruoli_utente` **e** il claim `aal` del JWT vale `aal2` (R-06). |
 | `e_amministratore()` | `boolean` | Come sopra, solo con ruolo `amministratore`. |
+| `richiedi_moderatore()` | `void` | Prima istruzione delle RPC di moderazione: errore `42501` se `e_moderatore()` è falso. |
+| `richiedi_motivazione(motivazione text)` | `text` | Motivazione senza spazi ai lati; `NX021` se vuota, `22001` oltre 500 caratteri. Non è `security definer`. |
+| `registra_azione(tipo, oggetto, azione, motivazione)` | `void` | Scrive la riga in `azioni_moderazione` per conto di `auth.uid()` e imposta per la transazione `noxa.azione_registrata`, così il registro automatico non la duplica. |
+| `chiudi_operazione()` | `void` | Azzera `noxa.azione_registrata` e `noxa.operazione_moderazione` alla fine di ogni RPC, così il permesso non vale per le istruzioni successive della stessa transazione. |
+| `e_possibile_annullamento(evento uuid)` | `boolean` | Evento `pubblicato` a più di 48 ore dall'inizio, con una sola riga in `eventi_fonti` e quella riga assente da almeno due esecuzioni (`assenze_consecutive >= 2`) (EVENT_INGESTION.md §7). |
+| `normalizza_nome(testo text)` | `text` | Minuscole senza accenti né punteggiatura (`unaccent`), per `locali.nome_normalizzato` (EVENT_INGESTION.md §6.1); `immutable`, non `security definer`. |
 | `e_titolare_checkin(checkin uuid)` | `boolean` | `auth.uid()` è l'autore del check-in. |
 | `e_destinatario_checkin(checkin uuid)` | `boolean` | `auth.uid()` è in `checkin_destinatari` del check-in. |
 | `e_titolare_ritorno(ritorno uuid)` | `boolean` | `auth.uid()` è il titolare del ritorno sicuro. |
@@ -150,7 +158,8 @@ Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `prepara_segnalazione`, `registra_approvazione_immagine`, `imposta_visibilita_partecipazione`, `nuovo_codice_invito`, `normalizza_codice`, `limita_richieste_amicizia`, `applica_blocco`,
 `verifica_invariante_gruppi`, `verifica_trasporto`, `verifica_categoria_spesa`,
 `limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `calcola_data_serata`,
-`imposta_aggiornato_il`) sono descritte insieme alle tabelle a cui si applicano; quelle
+`imposta_aggiornato_il`, `imposta_nome_normalizzato`, `prepara_fonte`,
+`registra_modifica_moderatore`) sono descritte insieme alle tabelle a cui si applicano; quelle
 pianificate (`elimina_account_non_confermati`, `elimina_codici_invito_scaduti`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`,
 `assegna_badge`, `genera_riepiloghi`) nel §8.
 
@@ -363,6 +372,7 @@ Registro di sola aggiunta delle decisioni e degli accessi (DSA art. 17, R-53, R-
 - **S**: `private.e_moderatore()`.
 - **I**: `private.e_moderatore()` e `moderatore_id = auth.uid()`.
 - **U/D**: nessuna.
+- Dall'iterazione 5 il registro si riempie anche da solo: il trigger `private.registra_modifica_moderatore` registra le modifiche dei moderatori a locali, fonti ed eventi, e le RPC di moderazione registrano le loro decisioni con `private.registra_azione` (`tipo_oggetto` `locale`, `fonte`, `evento` o `candidato_locale`). Nessuna azione dell'area di moderazione è silenziosa.
 
 ### 5.3 Locali, fonti, eventi
 
@@ -380,7 +390,7 @@ Registro di sola aggiunta delle decisioni e degli accessi (DSA art. 17, R-53, R-
 | `osm_id` | `text` | nullable, unico |
 | `google_place_id` | `text` | nullable, unico (unico dato di Google conservato, ADR-0008) |
 | `sito_web`, `instagram_username` | `text` | nullable; check sul formato (`https?://…`, username Instagram) |
-| `immagine_path` | `text` | nullable; percorso nel bucket `immagini-locali`, sempre `<id>.webp` (ADR-0018) |
+| `immagine_path` | `text` | nullable; percorso nel bucket `immagini-locali`: `<id>.webp` o, dall'iterazione 5, `<id>-<versione>.webp` (ADR-0018). Ogni foto nuova ha un percorso suo, così resta invisibile agli utenti finché non è approvata |
 | `immagine_fonte` | `fonte_immagine_locale` | nullable; obbligatoria se `immagine_path` non è null |
 | `immagine_attribuzione` | `text` | nullable; obbligatoria con `licenza_libera`; mostrata nel dettaglio evento |
 | `immagine_riferimento` | `text` | nullable; obbligatorio con `autorizzazione_locale` (riferimento al documento di autorizzazione) |
@@ -390,7 +400,9 @@ Registro di sola aggiunta delle decisioni e degli accessi (DSA art. 17, R-53, R-
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
 - **S**: `authenticated` con `attivo = true`; moderatori: tutti.
-- **I/U**: `private.e_moderatore()`. Il check `locali_immagine_coerente` impone percorso, fonte, approvazione e attribuzione (licenza libera) o riferimento (autorizzazione del locale) coerenti quando `immagine_path` è valorizzato, e nessun dato della foto quando manca (R-56). Il trigger `private.registra_approvazione_immagine` scrive `immagine_approvata_da = auth.uid()` e `immagine_approvata_il = now()` a ogni nuova foto o nuova fonte. Il caricamento dall'area di moderazione (iterazione 5) registra anche una riga in `azioni_moderazione`.
+- **I/U**: `private.e_moderatore()`, con permessi di colonna: `GRANT INSERT/UPDATE (nome, indirizzo, comune, provincia, posizione, osm_id, google_place_id, sito_web, instagram_username, attivo)`. `nome_normalizzato` lo calcola il trigger `private.imposta_nome_normalizzato` con `private.normalizza_nome(nome)`. Le colonne `immagine_*` si cambiano solo con le RPC `public.salva_foto_locale(locale, percorso, fonte, senza_persone, senza_alcol, attribuzione, riferimento)` (percorso del locale, `22023` altrimenti; le due conferme del moderatore sono obbligatorie, `NX023`; il file deve essere nel bucket, `NX024`; restituisce il percorso della foto sostituita, che l'app elimina) e `public.rimuovi_foto_locale(locale, motivazione)` (motivazione obbligatoria, `NX021`; `NX025` senza foto; restituisce il percorso da eliminare), che registrano l'azione in `azioni_moderazione` (R-56). Il check `locali_immagine_coerente` impone percorso, fonte, approvazione e attribuzione (licenza libera) o riferimento (autorizzazione del locale) coerenti quando `immagine_path` è valorizzato, e nessun dato della foto quando manca. Il trigger `private.registra_approvazione_immagine` scrive `immagine_approvata_da` e `immagine_approvata_il` a ogni nuova foto o nuova fonte.
+- Registro automatico: il trigger `private.registra_modifica_moderatore` (`after insert or update` su `locali`, `fonti` ed `eventi`) scrive in `azioni_moderazione` ogni modifica fatta da un moderatore con i campi cambiati, salvo quando la RPC che l'ha fatta ha già registrato l'azione (`noxa.azione_registrata`).
+- RPC `public.locali_moderazione()` (elenco con fonti totali e attive, eventi dei prossimi 7 giorni e "da verificare" se ha fonti non verificate) e `public.locale_moderazione(locale)` (scheda con coordinate e nome di chi ha approvato la foto).
 - Worker: `GRANT SELECT` a `noxa_worker`, policy `to noxa_worker using (true)`.
 
 #### `fonti`
@@ -403,20 +415,64 @@ Instagram, la sua pagina su un aggregatore.
 |---|---|---|
 | `id` | `uuid` | PK |
 | `locale_id` | `uuid` | FK → `locali(id)` |
-| `tipo` | `tipo_fonte` | |
-| `url` | `text` | URL della pagina o username Instagram |
-| `adattatore` | `text` | nome registrato nel worker (es. `sito_jsonld`, `instagram_business_discovery`) |
-| `frequenza_minuti` | `integer` | ≥ 360 per i siti, ≥ 720 per Instagram |
+| `tipo` | `tipo_fonte` | unico con `lower(url)` |
+| `url` | `text` | URL della pagina (`https?://…`) o, per Instagram, l'username senza `@` |
+| `adattatore` | `text` | nullable; nome registrato nel worker (es. `sito_jsonld`, `instagram_business_discovery`) |
+| `frequenza_minuti` | `integer` | ≥ 360 per i siti, ≥ 720 per Instagram, ≤ 10080 |
+| `pagine_massime` | `smallint` | 1–50, default 10 |
 | `stato_conformita` | `stato_conformita` | default `da_verificare` |
-| `note_conformita` | `text` | esito della verifica di robots.txt e termini d'uso |
-| `verificata_il`, `verificata_da` | | |
-| `attiva` | `boolean` | check: `attiva` implica `stato_conformita = 'consentita'` (ADR-0008) |
-| `ultima_esecuzione_il` | `timestamptz` | |
-| `ultimo_esito` | `jsonb` | conteggi e codice di errore |
-| `errori_consecutivi` | `integer` | dopo 5 la fonte viene disattivata automaticamente |
+| `robots_esito` | `text` | `consentito`, `vietato` o `non_applicabile` (API ufficiale) |
+| `termini_url`, `termini_letti_il` | `text`, `date` | link ai termini d'uso e data della lettura |
+| `note_conformita` | `text` | note sulla verifica, al massimo 2000 caratteri |
+| `verificata_il`, `verificata_da` | `timestamptz`, `uuid` | impostati dal trigger a ogni cambio di conformità |
+| `attiva` | `boolean` | default `false` |
+| `ultima_esecuzione_il` | `timestamptz` | ultima esecuzione non di prova |
+| `ultimo_esito` | `jsonb` | conteggi e codice d'errore dell'ultima esecuzione (anche di prova) |
+| `errori_consecutivi`, `esecuzioni_senza_eventi` | `integer` | dopo 5 errori la fonte si disattiva; da 3 esecuzioni senza eventi l'allarme |
+| `ultimo_errore`, `disattivata_automaticamente_il` | `text`, `timestamptz` | ultimo errore e momento della disattivazione automatica |
+| `dominio` | `text` | generata: host dell'URL, `graph.facebook.com` per Instagram (chiave di concorrenza dei job) |
 
-- **S/I/U**: `private.e_moderatore()`.
-- Worker: `SELECT` e `UPDATE (ultima_esecuzione_il, ultimo_esito, errori_consecutivi, attiva)`. Il worker può solo **disattivare** (`with check (attiva = false or attiva = old.attiva)`, applicato con un trigger).
+Vincoli (ADR-0008): `fonti_conformita_verificata`: `consentita` solo per siti e Instagram,
+con `verificata_il`, termini con link e data e `robots_esito = 'consentito'` (siti) o
+`'non_applicabile'` (Instagram); gli aggregatori non diventano consentiti senza accordo
+(D-05). `fonti_attiva_consentita`: `attiva` solo se `consentita` e con un adattatore.
+
+- **S/I/U**: `private.e_moderatore()`, con permessi di colonna sui campi della fonte e della verifica (non su quelli dell'esito).
+- **D**: nessuna: le righe restano per `eventi_fonti` e per lo storico.
+- Trigger `private.prepara_fonte` (`before insert or update`): per i moderatori imposta `verificata_il/da` a ogni cambio di conformità, spegne una fonte non consentita e azzera i contatori degli errori a ogni riattivazione; a `noxa_worker` vieta di attivare (`NX019`).
+- Worker: `SELECT` e `UPDATE (ultima_esecuzione_il, ultimo_esito, errori_consecutivi, esecuzioni_senza_eventi, ultimo_errore, disattivata_automaticamente_il, attiva)`.
+- RPC `public.esegui_fonte_ora(fonte uuid)`: accoda subito `esegui_fonte` per una fonte consentita con adattatore (`NX022` altrimenti), come prova se non è attiva; restituisce il job, nuovo o già in coda.
+
+#### `esecuzioni_fonte`
+*Funzionalità: F-40, F-44.*
+
+Storico delle esecuzioni (EVENT_INGESTION.md §8): `id` (identity), `fonte_id` (FK `on delete
+cascade`), `prova`, `iniziata_il`, `durata_ms`, `pagine_lette`, `eventi_letti`,
+`eventi_nuovi`, `eventi_uniti`, `eventi_in_revisione`, `eventi_scartati`, `codice_errore`
+(`^[A-Z0-9_]{2,40}$`), `messaggio_errore` (al massimo 500 caratteri). Nessun dato personale.
+
+- **S**: `private.e_moderatore()`. Worker: `SELECT`, `INSERT`.
+- Conservazione: 90 giorni (`private.applica_conservazione`).
+
+#### `candidati_locali`
+*Funzionalità: F-40, F-44.*
+
+Locali trovati dal bootstrap (EVENT_INGESTION.md §2.1), da verificare a mano.
+
+| Colonna | Tipo | Vincoli |
+|---|---|---|
+| `id` | `uuid` | PK |
+| `origine` | `text` | `osm` o `google` |
+| `osm_id`, `google_place_id` | `text` | unici; uno dei due secondo l'origine |
+| `nome`, `indirizzo`, `comune`, `provincia`, `posizione`, `sito_web` | | solo per OSM: da Google si conserva **solo** il `place_id` (check `candidati_locali_identificativo`, ADR-0008) |
+| `possibile_doppione_id` | `uuid` | FK → `locali(id)`: locale entro 200 m o con lo stesso nome normalizzato |
+| `stato` | `text` | `da_verificare`, `creato`, `unito`, `scartato` |
+| `locale_id`, `deciso_da`, `deciso_il` | | esito della verifica |
+
+- **S**: `private.e_moderatore()`. **I/U/D**: nessuna per gli utenti; le decisioni passano dalla RPC `public.decidi_candidato_locale(candidato, esito, locale, motivazione)`: `creato` dopo aver creato il locale, `unito` a un locale esistente (motivazione obbligatoria), `scartato` (motivazione obbligatoria); l'identificativo OSM o Google passa al locale senza sovrascrivere altri dati; `NX025` se già deciso.
+- Worker: `SELECT`, `INSERT` con `stato = 'da_verificare'` (comando `noxa_worker.fonti.bootstrap_locali --importa`).
+- RPC `public.candidati_da_verificare()`: candidati aperti con coordinate e nome del possibile doppione.
+- Conservazione: le righe decise restano, così un candidato scartato non torna nella coda.
 
 #### `eventi`
 *Funzionalità: F-01, F-02, F-03, F-06, F-44.*
@@ -445,7 +501,7 @@ Indici: `(data_serata)`, `(locale_id, data_serata)`, GIN su `artisti`, indice tr
 (`pg_trgm`) su `titolo` per la deduplicazione.
 
 - **S** (`authenticated`): stessa regola di `private.evento_visibile_a(id, auth.uid())`: `stato in ('pubblicato', 'annullato')`, `eta_minima <= eta_di(auth.uid())` e niente `riferimenti_alcol` per i minorenni (R-20, R-21, R-23). Moderatori con due fattori: tutti.
-- **U**: `private.e_moderatore()` (approvazione, correzione, annullamento).
+- **U**: `private.e_moderatore()` per le correzioni ordinarie (titolo, orari, locale, prezzo, biglietti), registrate in automatico. Stato, abbassamento dell'età dichiarata e rimozione dei riferimenti all'alcol passano solo dalle RPC `public.cambia_stato_evento(evento, stato, motivazione)` (pubblica da `in_revisione` o `annullato`; annulla da `pubblicato`; rifiuta da `in_revisione` o `pubblicato`; `NX026` per gli altri passaggi; motivazione obbligatoria per annullare e rifiutare) e `public.correggi_eta_alcol_evento(evento, eta_minima, eta_minima_dichiarata, riferimenti_alcol, motivazione)`; senza la RPC il trigger `private.proteggi_eta_evento` rifiuta con `NX020` (R-22, R-23). RPC `public.eventi_moderazione(testo, stati, dal, al, locale)`: ricerca dei moderatori, al massimo 200 eventi.
 - **I/D**: nessuna per `authenticated`.
 - Worker: `SELECT`, `INSERT`, `UPDATE` con policy `to noxa_worker`. Il trigger `private.proteggi_eta_evento` impedisce al worker di abbassare `eta_minima` o di rendere "non dichiarata" un'età quando `eta_minima_dichiarata = true` (`NX017`) e di impostare `riferimenti_alcol` da `true` a `false` (`NX018`) (R-22); solo un moderatore può farlo, con una riga in `azioni_moderazione`. Se invece l'età era quella predefinita (`eta_minima_dichiarata = false`), la prima età dichiarata da una fonte verificata la sostituisce, anche se più bassa di 18: diventa un dato noto e non più una supposizione (R-21).
 - Trigger `private.calcola_data_serata`: `data_serata` = data di `inizio` nel fuso `Europe/Rome` meno 6 ore (un evento che inizia alle 02:30 appartiene alla serata precedente).
@@ -471,6 +527,7 @@ Indici: `(data_serata)`, `(locale_id, data_serata)`, GIN su `artisti`, indice tr
 | `genere_codice` | `text` | FK → `generi_musicali(codice)`; PK composta |
 
 - **S**: `exists (select 1 from eventi e where e.id = evento_id)`. La sottoquery è soggetta alla RLS di `eventi`.
+- **I/D**: `private.e_moderatore()` (correzione dei generi dalla scheda evento).
 - Worker: `SELECT`, `INSERT`, `DELETE`.
 
 #### `eventi_fonti`
@@ -482,19 +539,22 @@ Provenienza di ogni evento: tutte le fonti che lo hanno confermato.
 |---|---|---|
 | `id` | `uuid` | PK |
 | `evento_id` | `uuid` | FK → `eventi(id)` `on delete cascade` |
-| `fonte_id` | `uuid` | nullable, FK → `fonti(id)` (aggiunta con la tabella `fonti`, iterazione 5) |
+| `fonte_id` | `uuid` | nullable, FK → `fonti(id)` (iterazione 5) |
 | `caricamento_flyer_id` | `uuid` | nullable, FK → `caricamenti_flyer(id)` `on delete set null` (aggiunta con la tabella `caricamenti_flyer`, iterazione 6) |
 | `tipo_origine` | `text` | un valore di `tipo_fonte` oppure `flyer` (check) |
 | `url_originale` | `text` | `https?://…`; obbligatorio tranne per i flyer (check `eventi_fonti_link`) |
 | `id_esterno` | `text` | nullable |
 | `raccolto_il` | `timestamptz` | |
+| `ultima_conferma_il` | `timestamptz` | ultima esecuzione della fonte che ha trovato l'evento |
+| `assenze_consecutive` | `smallint` | esecuzioni di fila in cui la fonte non l'ha più trovato (possibili annullamenti, EVENT_INGESTION.md §7) |
 
 Vincolo: al massimo uno tra `fonte_id` e `caricamento_flyer_id` è valorizzato
 (`num_nonnulls(...) <= 1`): nessuno dei due se il caricamento è stato eliminato o per i dati
 di esempio del seed.
 
 - **S**: come `eventi_generi`. `GRANT SELECT` escludendo `caricamento_flyer_id`, così chi ha caricato un flyer resta anonimo.
-- Worker: `SELECT`, `INSERT`.
+- Worker: `SELECT`, `INSERT`, `UPDATE (url_originale, id_esterno, raccolto_il, ultima_conferma_il, assenze_consecutive)`.
+- RPC `public.possibili_annullamenti()` e `public.decidi_possibile_annullamento(evento, annullato, motivazione)`: l'elenco indica solo se qualcuno si è segnato, senza dire chi (R-69); "è ancora in programma" azzera le assenze, "conferma annullamento" passa da `cambia_stato_evento`.
 
 #### `eventi_grezzi`
 *Funzionalità: F-06, F-07, F-40, F-44.*
@@ -506,7 +566,7 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 | `id` | `uuid` | PK |
 | `fonte_id` | `uuid` | nullable, FK → `fonti(id)` |
 | `caricamento_flyer_id` | `uuid` | nullable, FK → `caricamenti_flyer(id)` `on delete cascade` |
-| `payload` | `jsonb` | conforme a `packages/schemas/evento.schema.json` |
+| `payload` | `jsonb` | conforme a `packages/schemas/evento.schema.json`; per gli scarti solo URL, identificativo, titolo e inizio |
 | `hash_contenuto` | `text` | SHA-256 del payload normalizzato; unico per `fonte_id` |
 | `stato` | `stato_grezzo` | |
 | `evento_id` | `uuid` | nullable: evento creato o in cui il grezzo è stato unito |
@@ -516,7 +576,8 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 | `errore` | `text` | nullable |
 | `creato_il` | `timestamptz` | |
 
-- **S/U**: `private.e_moderatore()` (revisione dei duplicati).
+- Colonne aggiunte nell'iterazione 5: `decisione` (`stesso_evento` o `distinti`), `deciso_da`, `deciso_il`. Stati: `normalizzato` = ha creato un evento nuovo; `unito` = fuso in un evento esistente; `in_revisione_dedup` = nella coda dei duplicati; `scartato` = evento passato o troppo lontano; `errore` = dato non valido (con il codice in `errore`).
+- **S**: `private.e_moderatore()`. **U**: nessuna diretta: la decisione passa dalla RPC `public.decidi_duplicato(grezzo, stesso_evento)`, che la registra, la annota sul grezzo (`NX025` se già decisa) e accoda il job `deduplica_grezzo`; il worker applica fusione o creazione con le regole del §7 di EVENT_INGESTION.md. RPC `public.coda_duplicati()`: grezzi in revisione non decisi con l'evento candidato (locale, generi, link) per il confronto affiancato.
 - Worker: `SELECT`, `INSERT`, `UPDATE`.
 - Conservazione: 30 giorni.
 
@@ -826,7 +887,7 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `tipo` | `tipo_job` | |
 | `payload` | `jsonb` | |
 | `chiave_idempotenza` | `text` | unica tra i job non completati (es. `esegui_fonte:<fonte_id>`) |
-| `chiave_concorrenza` | `text` | nullable; al massimo un job `in_esecuzione` per valore (es. dominio della fonte) |
+| `chiave_concorrenza` | `text` | nullable; al massimo un job `in_esecuzione` per valore (es. `dominio:<host>`), garantito dall'indice unico parziale `coda_job_concorrenza_idx` |
 | `stato` | `stato_job` | default `in_coda` |
 | `tentativi` | `smallint` | default 0, massimo 5 |
 | `esegui_dopo` | `timestamptz` | default `now()`; backoff esponenziale |
@@ -835,7 +896,7 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `creato_il`, `completato_il` | `timestamptz` | |
 
 - `authenticated`: nessun accesso.
-- Worker: `SELECT`, `INSERT`, `UPDATE`. Il prelievo usa `for update skip locked` (ADR-0003).
+- Worker: `SELECT`, `INSERT`, `UPDATE` (nessun `DELETE`). Il prelievo (`noxa_worker.coda_postgres`) usa `for update skip locked`, recupera i job con il lease scaduto e salta quelli di un dominio già in esecuzione (ADR-0003). `chiave_idempotenza` è unica tra i job `in_coda` e `in_esecuzione`.
 - Conservazione: 14 giorni per i job completati.
 
 ### 5.8 Viste
@@ -874,6 +935,16 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `decidi_flyer(...)` | definer | moderatori | Approvazione, correzione o rifiuto di un flyer (R-51); se l'immagine è approvata per la pubblicazione accoda `copia_immagine_flyer` |
 | `esegui_fonte_ora(fonte uuid)` | definer | moderatori | Accoda subito un job `esegui_fonte` per una fonte `consentita`, anche non ancora attiva, per la prova in staging (skill `add-event-source`) |
 | `decidi_duplicato(grezzo uuid, stesso_evento boolean)` | definer | moderatori | Revisione dei duplicati (EVENT_INGESTION.md §6.4) |
+| `coda_duplicati()` | definer | moderatori | Grezzi in revisione con l'evento candidato per il confronto affiancato |
+| `contatori_moderazione()` | definer | moderatori | Duplicati, possibili annullamenti e candidati da verificare (navigazione laterale) |
+| `locali_moderazione()`, `locale_moderazione(locale uuid)` | definer | moderatori | Elenco e scheda dei locali, anche non attivi, con coordinate e conteggi |
+| `candidati_da_verificare()`, `decidi_candidato_locale(candidato, esito, locale, motivazione)` | definer | moderatori | Candidati del bootstrap e loro verifica (EVENT_INGESTION.md §2.1) |
+| `salva_foto_locale(…)`, `rimuovi_foto_locale(locale, motivazione)` | definer | moderatori | Foto del locale con fonte, conferme e motivazione (R-56) |
+| `eventi_moderazione(testo, stati, dal, al, locale)` | definer | moderatori | Ricerca degli eventi in tutti gli stati |
+| `correggi_eta_alcol_evento(evento, eta_minima, eta_minima_dichiarata, riferimenti_alcol, motivazione)` | definer | moderatori | Età e alcol con motivazione registrata (R-22, R-23) |
+| `cambia_stato_evento(evento, stato, motivazione)` | definer | moderatori | Pubblicazione, annullamento e rifiuto motivati |
+| `possibili_annullamenti()`, `decidi_possibile_annullamento(evento, annullato, motivazione)` | definer | moderatori | Eventi spariti dalla loro unica fonte (EVENT_INGESTION.md §7) |
+| `registro_moderazione(tipo, oggetto)` | definer | moderatori | Ultime 50 azioni su un locale, una fonte, un evento o un candidato, con il nome del moderatore e, per gli eventi, le operazioni della raccolta |
 | `dettaglio_segnalazione(id uuid)` | definer | moderatori | Oggetto segnalato con registrazione dell'accesso (R-69) |
 | `decidi_segnalazione(id uuid, azione azione_moderazione, motivazione text)` | definer | moderatori | Azione motivata e notifiche (R-53) |
 | `correggi_data_nascita(utente uuid, data date, motivazione text)` | definer | amministratori (`private.e_amministratore()`) | Correzione verificata (R-02) |
@@ -889,7 +960,7 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 | `avatar` | no | `<utente_id>/<file>` | `private.puo_vedere_profilo(<utente_id dal percorso>)` | titolare, solo nella propria cartella; WebP fino a 2 MB, ritagliata e senza dati EXIF (rimossi sul dispositivo); un solo file per utente, quello precedente si elimina alla sostituzione; i moderatori lo rimuovono con `decidi_segnalazione` (R-52) |
 | `flyer-caricati` | no | `<utente_id>/<uuid>.<ext>` | titolare e moderatori; il worker con `service_role` (ADR-0003) | titolare, solo nella propria cartella; JPEG/PNG/WebP fino a 10 MB (R-54) |
 | `flyer-pubblicati` | no | `eventi/<evento_id>.webp` | `exists` su `eventi` con `immagine_path = name` (soggetta alla RLS di `eventi`, R-20, R-23) | solo il worker con `service_role`, con il job `copia_immagine_flyer` accodato da `decidi_flyer` dopo l'approvazione (iterazione 6); WebP fino a 2 MB. Bucket creato nell'iterazione 4 |
-| `immagini-locali` | no | `<locale_id>.webp` | `authenticated`: solo la foto approvata (`exists` su `locali` con `immagine_path = name`, soggetta alla RLS di `locali`, quindi solo locali attivi); moderatori con due fattori: tutti i file | solo moderatori con due fattori (insert, update, delete); WebP fino a 1 MB, EXIF rimosso (ADR-0018, R-56) |
+| `immagini-locali` | no | `<locale_id>.webp` o `<locale_id>-<versione>.webp` | `authenticated`: solo la foto approvata (`exists` su `locali` con `immagine_path = name`, soggetta alla RLS di `locali`, quindi solo locali attivi); moderatori con due fattori: tutti i file | solo moderatori con due fattori (insert, update, delete); WebP fino a 1 MB, EXIF rimosso (ADR-0018, R-56) |
 | `mappe` | sì | `milano-brianza.pmtiles`, `assets/` (font e icone di Protomaps) | tutti | solo durante il deploy (ADR-0016) |
 
 ## 7. Realtime
@@ -907,9 +978,9 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 | Codici invito scaduti | ogni ora, al minuto 23 | `private.elimina_codici_invito_scaduti()`: elimina i codici scaduti da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Account non confermati | ogni ora, al minuto 17 | `private.elimina_account_non_confermati()`: elimina gli account senza email confermata creati da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Ritorni scaduti | ogni minuto | `private.verifica_ritorni_scaduti()` |
-| Conservazione | ogni ora | `private.applica_conservazione()`: applica tutte le scadenze di SAFETY_PRIVACY.md §10, compresi gli account inattivi |
+| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; l'iterazione 8 aggiunge le altre scadenze di SAFETY_PRIVACY.md §10, compresi gli account inattivi |
 | Invariante dei gruppi | ogni giorno alle 04:00 | `private.verifica_invariante_gruppi()` |
-| Accodamento job del worker | ogni 5 minuti | `private.accoda_fonti_da_eseguire()`: inserisce `esegui_fonte` per le fonti attive scadute |
+| Accodamento job del worker | ogni 5 minuti | `private.accoda_fonti_da_eseguire()`: inserisce `esegui_fonte` per le fonti attive scadute; dopo un errore l'intervallo raddoppia (fino a 8 volte la frequenza), che è il backoff delle fonti |
 | Metriche | ogni giorno alle 02:00 | `refresh materialized view private.metriche_settimanali` |
 | Badge | ogni giorno alle 05:00 | `private.assegna_badge()` |
 | Riepiloghi annuali | 1° dicembre alle 03:00 | `private.genera_riepiloghi(extract(year from now())::smallint)` |

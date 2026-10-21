@@ -155,10 +155,10 @@ fase della roadmap. La matrice va aggiornata insieme alla funzionalità (skill `
 | F-31 | App · viste SQL | come F-30 | R-40 | 2 |
 | F-32 | `pg_cron` · funzione SQL `private.assegna_badge()` | `badge`, `badge_utente` | R-41 | 2 |
 | F-33 | `pg_cron` · funzione SQL `private.genera_riepiloghi()` · App | `riepiloghi_annuali` | R-42 | 2 |
-| F-40 | App (area di moderazione) · RPC di moderazione | `segnalazioni`, `azioni_moderazione`, `caricamenti_flyer`, `eventi_grezzi`, `locali`, `fonti` | R-06, R-53, R-55, R-69 | 1 |
+| F-40 | App (area di moderazione) · RPC di moderazione | `segnalazioni`, `azioni_moderazione`, `caricamenti_flyer`, `eventi_grezzi`, `locali`, `fonti`, `esecuzioni_fonte`, `candidati_locali` | R-06, R-53, R-55, R-69 | 1 |
 | F-41 | Edge Functions `esporta-dati`, `elimina-account` | tutte le tabelle personali | R-64 | 1 |
 | F-42 | App | `profili_privati`, `blocchi` | R-30, R-67 | 1 |
 | F-43 | App (Next.js export statico + Capacitor) · service worker | — | — | 1–2 |
-| F-44 | `pg_cron` · Worker (coda, adattatori, normalizzazione, dedup) | `fonti`, `eventi_grezzi`, `eventi`, `eventi_fonti`, `coda_job` | R-21, R-22, ADR-0008 | 1 |
+| F-44 | `pg_cron` · Worker (coda, adattatori, normalizzazione, dedup) | `fonti`, `esecuzioni_fonte`, `eventi_grezzi`, `eventi`, `eventi_fonti`, `coda_job`, `candidati_locali` | R-21, R-22, ADR-0008 | 1 |
 | F-45 | App · CI (axe) | — | — | 1 |
 | F-46 | Worker (bootstrap locali) | `locali` | — | 3 |

@@ -2,7 +2,16 @@ import type { ReactNode } from 'react';
 import { classi } from '@/lib/classi';
 
 export type VarianteBadge =
-  'neutro' | 'eta' | 'accento' | 'tenue' | 'avviso' | 'successo' | 'info' | 'annullato';
+  | 'neutro'
+  | 'eta'
+  | 'accento'
+  | 'tenue'
+  | 'avviso'
+  | 'successo'
+  | 'info'
+  | 'annullato'
+  | 'errore'
+  | 'testo';
 
 type Props = {
   variante?: VarianteBadge;

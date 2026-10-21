@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Worker di Noxa: raccolta eventi, estrazione dei flyer, deduplicazione (ADR-0003)."
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "beautifulsoup4==4.15.0",
     "fastapi==0.143.1",
     "httpx==0.28.1",
     "playwright==1.64.0",
@@ -11,6 +12,7 @@ dependencies = [
     "psycopg-pool==3.3.3",
     "pydantic==2.14.1",
     "pydantic-settings==2.16.0",
+    "rapidfuzz==3.14.6",
     "structlog==26.1.0",
     "uvicorn==0.54.0",
 ]
@@ -18,10 +20,12 @@ dependencies = [
 [dependency-groups]
 dev = [
     "httpx2==2.13.1",
+    "jsonschema==4.26.0",
     "mypy==2.4.0",
     "pytest==9.1.1",
     "pytest-asyncio==1.4.0",
     "ruff==0.17.0",
+    "types-jsonschema==4.26.0.20261006",
 ]
 
 [build-system]

@@ -48,6 +48,9 @@ jobs:
               - '.github/workflows/ci.yml'
             database:
               - 'supabase/**'
+              - 'services/worker/src/noxa_worker/coda_postgres.py'
+              - 'services/worker/src/noxa_worker/raccolta/**'
+              - 'services/worker/tests/integrazione/**'
               - 'scripts/verifica_migrazioni.py'
               - 'package.json'
               - 'pnpm-lock.yaml'
@@ -179,6 +182,18 @@ jobs:
       - run: pnpm exec supabase db start
       - run: pnpm exec supabase test db
       - run: pnpm exec supabase db lint --schema public,private --level warning --fail-on error
+      # Coda e pipeline del worker sul database vero, con il ruolo noxa_worker (ADR-0003).
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          enable-cache: true
+      - name: Test di integrazione del worker
+        working-directory: services/worker
+        env:
+          NOXA_TEST_DATABASE_URL: postgresql://noxa_worker:sviluppo-locale@127.0.0.1:54322/postgres
+          NOXA_TEST_DATABASE_URL_ADMIN: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: |
+          uv sync --frozen
+          uv run pytest tests/integrazione
 
   dipendenze:
     name: Controllo delle dipendenze

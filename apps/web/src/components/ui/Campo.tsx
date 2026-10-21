@@ -7,9 +7,9 @@ import { Icona } from './Icona';
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> & {
   etichetta: string;
-  aiuto?: string;
+  aiuto?: string | undefined;
   /** Messaggio d'errore con il suggerimento di correzione (DESIGN.md §4). */
-  errore?: string;
+  errore?: string | undefined;
   facoltativo?: boolean;
   /** Elemento prima del testo, per esempio l'icona della ricerca. */
   prefisso?: ReactNode;

@@ -258,6 +258,10 @@ Ogni iterazione ha:
   rimozione da parte dei moderatori (R-52). Tabella `notifiche` mostrata nell'app con Realtime
   (richieste di amicizia, amicizie accettate, esiti della moderazione con la motivazione,
   R-53) e reclamo sulle decisioni dalla schermata "Le mie segnalazioni" (DSA art. 20).
+  Estrattore anche per Instagram (EVENT_INGESTION.md §2.5): didascalia in modalità testo e
+  immagine del post quando la didascalia non basta (dall'iterazione 5 la didascalia si legge
+  con regole). Valori di `tipo_oggetto_segnalabile` e voci "Flyer" e "Segnalazioni" della
+  navigazione dell'area di moderazione, oggi spente con "In arrivo".
 - **Prerequisiti esterni**: chiave Claude API con limite di spesa; accordo sul trattamento
   dei dati (D-12).
 - **Criteri**: soglie della skill `flyer-parser`; test pgTAP di R-51, R-54, R-69 e delle
@@ -277,7 +281,8 @@ Ogni iterazione ha:
   già visti salvati in IndexedDB (dall'iterazione 4 restano in memoria finché l'app è aperta)
   e cache delle tile della mappa già viste (richieste PMTiles a intervalli, ADR-0016); Edge
   Functions `esporta-dati` ed `elimina-account`; impostazioni di privacy;
-  `applica_conservazione`; verifica completa di accessibilità; build interne TestFlight e
+  `applica_conservazione` completa (dall'iterazione 5 copre già grezzi, job ed esecuzioni
+  delle fonti); verifica completa di accessibilità; build interne TestFlight e
   Google Play; Sentry nell'app e nel worker con `beforeSend` (ADR-0014, R-62); link delle
   email di conferma e di recupero aperti nell'app nativa con App Links e Universal Links sul
   dominio di D-01.

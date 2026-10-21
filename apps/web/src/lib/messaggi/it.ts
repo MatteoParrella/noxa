@@ -1,3 +1,5 @@
+import { moderazione } from './moderazione';
+
 /**
  * Testi dell'app in italiano (DESIGN.md §6: "tu", frasi brevi, niente pressione). I testi
  * delle schermate di accesso vengono da design/F-10-accesso.
@@ -279,6 +281,7 @@ export const messaggi = {
     richieste: (n: number) => (n === 1 ? '1 richiesta' : `${n} richieste`),
     bloccati: 'Persone bloccate',
     segnalazioni: 'Le mie segnalazioni',
+    moderazione: 'Area di moderazione',
     aspetto: 'Aspetto',
     caricamento: 'Carico il tuo profilo',
     modificaTitolo: 'Modifica',
@@ -702,4 +705,6 @@ export const messaggi = {
     persona: 'Decisione presa da una persona del team, non da un sistema automatico.',
     caricamento: 'Carico le tue segnalazioni',
   },
+
+  moderazione,
 } as const;

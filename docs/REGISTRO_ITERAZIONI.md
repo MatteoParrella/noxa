@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 5 su 15.
+Iterazioni completate: 6 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -25,7 +25,7 @@ Iterazioni completate: 5 su 15.
 | 2 | completata con attese esterne | 2026-10-16 | 2026-10-16 | 2 | `iterazione-02-account` | Mancano Auth di staging e produzione (hook, Turnstile, email), D-01 e App Review Meta per chiudere la Fase 0 |
 | 3 | completata | 2026-10-16 | 2026-10-16 | 3 | `iterazione-03-amicizie` | Notifiche delle richieste e reclamo nell'iterazione 6, gruppi nella 7 (ROADMAP) |
 | 4 | completata | 2026-10-19 | 2026-10-19 | 2 | `iterazione-04-catalogo-eventi` | Eventi reali dall'iterazione 5; foto dei locali caricate dai moderatori nell'iterazione 5; flyer nell'iterazione 6 |
-| 5 | da iniziare | — | — | 0 | — | — |
+| 5 | completata con attese esterne | 2026-10-19 | 2026-10-19 | 2 | `iterazione-05-raccolta-eventi` | Mancano App Review Meta e token, chiave Google Places, 40 locali verificati e il primo `sito_html_<locale>` in staging |
 | 6 | da iniziare | — | — | 0 | — | — |
 | 7 | da iniziare | — | — | 0 | — | — |
 | 8 | da iniziare | — | — | 0 | — | — |
@@ -527,3 +527,126 @@ contatore di sconosciuti; link condiviso senza dati di altri utenti.
 
 **Commit**: `bbc6209` … commit finale di chiusura sul branch `iterazione-04-catalogo-eventi`.
 
+### Iterazione 5 — Raccolta automatica degli eventi
+
+**Piano**
+- Funzionalità: F-44 (raccolta automatica), F-40 (moderazione di locali, fonti, duplicati ed
+  eventi). Regole: R-06, R-21, R-22, R-23, R-50, R-53, R-56, R-69; ADR-0003, ADR-0008,
+  ADR-0018.
+- Design: `design/F-40-moderazione-fonti/` (accesso con due fattori, guscio, locali e candidati,
+  scheda e foto del locale, fonti ed esecuzioni, duplicati, eventi e possibili annullamenti,
+  componenti, verifiche a 1024 e 390 px).
+- Database: enum `tipo_fonte`, `stato_conformita`, `stato_grezzo`, `tipo_job`, `stato_job` e
+  nuovi valori di `tipo_oggetto_segnalabile` e `azione_moderazione`; tabelle `fonti`,
+  `esecuzioni_fonte`, `eventi_grezzi`, `candidati_locali`, `coda_job`; chiave esterna
+  `eventi_fonti.fonte_id`; foto dei locali solo con RPC registrate; registro automatico delle
+  modifiche dei moderatori; età, alcol e stato degli eventi solo con motivazione (R-22);
+  `accoda_fonti_da_eseguire` e `applica_conservazione` con `pg_cron`; RPC di moderazione
+  (`esegui_fonte_ora`, `decidi_duplicato`, `coda_duplicati`, `decidi_candidato_locale`,
+  `salva_foto_locale`, `rimuovi_foto_locale`, `correggi_eta_alcol_evento`,
+  `cambia_stato_evento`, `possibili_annullamenti`, `decidi_possibile_annullamento`,
+  `registro_moderazione`, `locali_moderazione`, `eventi_moderazione`,
+  `contatori_moderazione`).
+- Worker: archivio Postgres della coda (`for update skip locked`, un job per dominio) ed
+  esecutori nel lifespan; `ClientHttpConforme`; normalizzazione (date, età, alcol, generi);
+  adattatori `sito_jsonld` (JSON-LD, microdata, iCal) e `instagram_business_discovery`;
+  deduplicazione e fusione con golden set; job `esegui_fonte` e `deduplica_grezzo`; bootstrap
+  dei locali da OSM e Google Places (solo `place_id`); strumenti `prova` e `salva_fixture`.
+- App: area di moderazione con due fattori e le schermate del design.
+- Criteri: test degli adattatori su fixture; precisione ≥ 98% e richiamo ≥ 90% sul golden
+  set; almeno 40 locali verificati.
+
+
+**Cicli di revisione**
+- Durante lo sviluppo: i test di fonti, grezzi ed eventi contavano anche i dati di esempio
+  del seed → ogni file della raccolta parte da tabelle vuote dentro la propria transazione;
+  il caricamento di MapLibre unificato con la nuova mappa della scheda locale rallentava fino
+  al blocco la mappa di Scopri sotto carico → la mappa di Scopri tiene il suo caricamento e
+  condivide solo centro e limiti; la classe `.casella` dell'area si scontrava con quella del
+  design system → `.scelta-riga`; il testo dell'avviso "fonte disattivata" ripeteva il
+  titolo → solo l'ultimo errore e cosa fare.
+- Ciclo 1: dall'e2e, dopo il primo codice dei due fattori l'invalidazione dei dati dell'area
+  rilanciava l'attivazione e creava un secondo fattore non verificato → la query
+  dell'attivazione ha una chiave fuori dall'area e non si ricarica. Dalla rilettura del diff
+  (R-56): sostituendo una foto, il file nuovo andava nello stesso percorso di quella
+  approvata e gli utenti lo vedevano prima di fonte e conferme → ogni foto ha un percorso
+  `<id>-<versione>.webp`, visibile solo dopo `salva_foto_locale`, che restituisce la foto
+  precedente da eliminare (nuovi test pgTAP in `017_locali`); "Riattiva" del locale non
+  gestiva gli errori → mutazione con avviso. `Mappa.tsx` non formattato → Prettier.
+- Ciclo 2: tutti i controlli verdi, nessun problema nuovo. Il test e2e della mappa di Scopri
+  su mobile resta sensibile al carico quando la suite gira insieme ad altri processi pesanti
+  (in CI ci sono due tentativi); da solo e nella suite completa passa.
+
+**Esito dei test**
+- pgTAP 523/523 (19 file; nuovi `022_fonti`, `023_eventi_grezzi`, `024_candidati_locali`,
+  `025_coda_job`, `026_moderazione_eventi`; aggiornati `017_locali` e `018_eventi`);
+  `supabase db lint` senza errori; `verifica_documentazione.py` e `verifica_migrazioni.py`
+  verdi (20 tabelle con RLS e test).
+- Worker: Ruff, mypy strict, pytest 191/191 (187 unitari: client HTTP conforme, adattatori su
+  fixture, normalizzazione, schema evento condiviso, deduplicazione, golden set, pipeline,
+  architettura; 4 di integrazione su Postgres reale con il ruolo `noxa_worker`).
+- Golden set della deduplicazione: 350 coppie, precisione 100% e richiamo 94,7% (soglie 98% e
+  90%); prima versione sintetica, da estendere con le coppie decise in moderazione.
+- App: Vitest 76/76 (nuovo `moderazione.test.tsx`); ESLint, TypeScript e Prettier verdi.
+  Playwright con Supabase simulato 262/262 (nuovo `moderazione.spec.ts`, 48 test: due
+  fattori, locali e candidati, scheda e foto, fonti e conformità, duplicati con tastiera,
+  eventi e operazioni delicate, possibili annullamenti, registro, 390 px, axe nei due temi);
+  con Supabase reale 9/9 (nuovo `integrazione/moderazione.spec.ts`: attivazione dei due
+  fattori con un codice TOTP vero, RPC protette, scarto di un candidato).
+
+**Criteri di completamento**
+| Criterio | Esito | Evidenza |
+|---|---|---|
+| Test degli adattatori su fixture | SÌ | `test_sito_jsonld.py` (JSON-LD, microdata, iCal), `test_instagram.py`, `test_sito_html.py`, `test_http.py` |
+| Precisione ≥ 98% e richiamo ≥ 90% sul golden set | SÌ | `test_dedup_golden.py` (100% e 94,7% su 350 coppie) |
+| Almeno 40 locali verificati | ATTESA | Lavoro operativo dei moderatori in staging: bootstrap (`bootstrap_locali --importa`) e verifica dei candidati nell'area |
+| PRD F-40: locali e fonti con verifica di conformità, coda dei duplicati, azioni motivate e registrate, due fattori | SÌ | `022`…`026`, `moderazione.spec.ts`, `integrazione/moderazione.spec.ts` |
+| PRD F-44: adattatori dati strutturati, HTML e Instagram; deduplicazione; conformità ADR-0008 | SÌ, con attese | `sito_jsonld`, base `AdattatoreSitoHtml`, `instagram_business_discovery`, `test_pipeline.py`; il primo `sito_html_<locale>` reale e il token Meta sono attese |
+
+**Safety review — Iterazione 5 (F-40, F-44)**
+Esito: SUPERATA
+
+Dati coinvolti: locali, fonti, esecuzioni, grezzi, candidati ed eventi (informazioni
+pubbliche, nessun dato personale; da Google solo il `place_id`); registro delle azioni con il
+nome visualizzato dei moderatori, visibile solo ai moderatori; foto dei locali (fonte lecita,
+conferme, EXIF rimosso sul dispositivo); fattore TOTP gestito da Supabase Auth.
+Superfici di contatto: nessuna nuova tra utenti. I moderatori non vedono utenti: i possibili
+annullamenti dicono solo se qualcuno si è segnato (R-69).
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | RLS e policy per operazione su 5 nuove tabelle; RPC `security definer` con `richiedi_moderatore()` come prima istruzione e `search_path` vuoto; permessi di colonna su `locali`, `fonti`, `eventi_fonti`; il worker può solo disattivare (NX019); test per 14, 15, 16, 17, 18, 20, 21, `moderatore`, `moderatore_senza_mfa`, `noxa_worker` (`017`, `018`, `022`…`026`) |
+| B. Contatti tra utenti | N/A | Nessun nuovo contatto o testo libero tra utenti; le motivazioni le scrivono solo i moderatori |
+| C. Eventi e contenuti | SÌ | Età sconosciuta = 18 e massimo tra le fonti (`fusione.py`, `test_dedup.py`); alcol se una fonte lo indica; abbassare l'età o togliere l'alcol solo con RPC e motivazione (NX020, `018`, e2e); i nuovi eventi passano dalla policy di `eventi` |
+| D. Posizione | N/A | Solo coordinate dei locali, nessuna posizione degli utenti |
+| E. Contenuti caricati e moderazione | SÌ | Foto: fonte, conferme e percorso nuovo visibile solo dopo l'approvazione (`017`); ogni decisione in `azioni_moderazione` (registro automatico e RPC); due fattori obbligatori e verificati nel database (R-06) |
+| F. Privacy | SÌ | Nessun nuovo dato personale; grezzi 30 giorni, job 14, esecuzioni 90 (`applica_conservazione`, `025`); scarti senza testi della fonte; didascalie Instagram non salvate; token Meta nell'intestazione e URL fuori dai log; nessun SDK nuovo nell'app |
+| G. Documentazione | SÌ | DATA_MODEL §3, §4, §5, §6, §8; EVENT_INGESTION §2, §3, §6, §7; ARCHITECTURE §3.3, §10; SAFETY_PRIVACY R-06, R-22, R-56 e §10; PRD §7; ROADMAP iterazioni 6 e 8; skill `add-event-source`; CLAUDE.md |
+
+**Scelte fatte durante l'iterazione**
+- Registro automatico delle modifiche dei moderatori con un trigger; le RPC registrano da sé
+  le decisioni e lo segnalano per la transazione (`noxa.azione_registrata`), azzerato a fine
+  operazione.
+- Stato, età e alcol degli eventi solo dalle RPC con motivazione (NX020 anche per i
+  moderatori); correzioni ordinarie dirette, registrate.
+- Tabelle nuove non previste dal modello: `esecuzioni_fonte` (storico per il dettaglio
+  dell'esito) e `candidati_locali` (candidati del bootstrap); colonne di verifica strutturate
+  in `fonti` (`robots_esito`, `termini_url`, `termini_letti_il`, `pagine_massime`).
+- Backoff delle fonti nella pianificazione (intervallo raddoppiato dopo gli errori) invece di
+  nuovi tentativi immediati; "Esegui ora" su una fonte non attiva è una prova che non scrive.
+- Instagram: didascalia letta con regole fino all'estrattore dell'iterazione 6.
+- Il primo adattatore `sito_html_<locale>` si scrive in staging su un locale verificato
+  (scelta del product owner); ora c'è la base `AdattatoreSitoHtml`.
+- Foto dei locali con percorso per versione (`<id>-<versione>.webp`).
+- Accesso all'area: 8 ore dal codice, poi lo si chiede di nuovo (controllo dell'app sul claim
+  `amr`; il database richiede comunque `aal2`).
+
+**Attese esterne**
+- App Review di Meta e token di sistema (`META_IG_USER_ID`, `META_ACCESS_TOKEN`) per le fonti
+  Instagram: senza, l'adattatore si ferma con `META_NON_CONFIGURATA`.
+- Chiave Google Places (`GOOGLE_PLACES_API_KEY`) per il bootstrap; senza, solo OSM.
+- In staging: bootstrap dei locali e verifica di almeno 40 locali; il primo adattatore
+  `sito_html_<locale>` su un sito verificato; foto autorizzate o con licenza libera (ADR-0018).
+- Restano quelle delle iterazioni 0–2.
+
+**Commit**: `99c6827` … commit finale di chiusura sul branch `iterazione-05-raccolta-eventi`.

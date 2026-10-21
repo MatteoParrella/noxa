@@ -5,6 +5,7 @@
 @import '../styles/accesso.css';
 @import '../styles/amici.css';
 @import '../styles/scopri.css';
+@import '../styles/moderazione.css';
 
 /*
   Tailwind 4: le utility usano i token (DESIGN.md §2). Si azzerano le palette predefinite,

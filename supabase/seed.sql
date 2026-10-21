@@ -209,3 +209,83 @@ values
   ('00000000-0000-4000-8000-000000000021', '00000000-0000-4000-8000-00000000e001', 'partecipo', true),
   ('00000000-0000-4000-8000-000000000020', '00000000-0000-4000-8000-00000000e004', 'interessato', true),
   ('00000000-0000-4000-8000-000000000018', '00000000-0000-4000-8000-00000000e001', 'partecipo', true);
+
+-- Area di moderazione (iterazione 5): fonti in tutti gli stati, esecuzioni, un possibile
+-- duplicato e candidati da verificare. Nessuna fonte è attiva: in locale pg_cron non accoda
+-- letture verso i siti di esempio.
+insert into public.fonti
+  (id, locale_id, tipo, url, adattatore, frequenza_minuti, pagine_massime, stato_conformita,
+   robots_esito, termini_url, termini_letti_il, note_conformita, attiva, ultima_esecuzione_il,
+   ultimo_esito, errori_consecutivi, ultimo_errore, disattivata_automaticamente_il)
+values
+  ('00000000-0000-4000-8000-00000000f101', '00000000-0000-4000-8000-00000000c001', 'sito_locale',
+   'https://binario7.example/eventi', 'sito_jsonld', 360, 3, 'consentita', 'consentito',
+   'https://binario7.example/termini', current_date - 17,
+   'robots.txt: /eventi consentito per * e NoxaBot. Termini senza divieti di raccolta.', false,
+   now() - interval '6 hours',
+   '{"prova": false, "pagine_lette": 3, "eventi_letti": 12, "eventi_nuovi": 1, "eventi_uniti": 3, "eventi_in_revisione": 1, "eventi_scartati": 0, "codice_errore": null}',
+   0, null, null),
+  ('00000000-0000-4000-8000-00000000f102', '00000000-0000-4000-8000-00000000c002', 'instagram',
+   'officinalambro', 'instagram_business_discovery', 720, 1, 'consentita', 'non_applicabile',
+   'https://developers.facebook.com/terms', current_date - 17, 'API ufficiale Business Discovery.',
+   false, now() - interval '1 day',
+   '{"prova": false, "pagine_lette": 1, "eventi_letti": 0, "eventi_nuovi": 0, "eventi_uniti": 0, "codice_errore": "HTTP_503"}',
+   5, 'HTTP_503: il sito ha risposto HTTP 503', now() - interval '1 day'),
+  ('00000000-0000-4000-8000-00000000f103', '00000000-0000-4000-8000-00000000c004', 'sito_locale',
+   'https://salaventuno.example/calendario', 'sito_jsonld', 360, 3, 'da_verificare', null, null,
+   null, null, false, null, null, 0, null, null),
+  ('00000000-0000-4000-8000-00000000f104', '00000000-0000-4000-8000-00000000c004',
+   'resident_advisor', 'https://eventivunque.example/club/sala-ventuno', null, 360, 3, 'vietata',
+   null, null, null, 'Aggregatore senza accordo (D-05).', false, null, null, 0, null, null);
+
+update public.eventi_fonti set fonte_id = '00000000-0000-4000-8000-00000000f101'
+where evento_id in ('00000000-0000-4000-8000-00000000e001', '00000000-0000-4000-8000-00000000e004');
+
+insert into public.esecuzioni_fonte
+  (fonte_id, prova, iniziata_il, durata_ms, pagine_lette, eventi_letti, eventi_nuovi, eventi_uniti,
+   eventi_in_revisione, codice_errore, messaggio_errore)
+values
+  ('00000000-0000-4000-8000-00000000f101', false, now() - interval '6 hours', 7900, 3, 12, 1, 3, 1, null, null),
+  ('00000000-0000-4000-8000-00000000f101', false, now() - interval '12 hours', 8100, 3, 11, 0, 2, 0, null, null),
+  ('00000000-0000-4000-8000-00000000f101', false, now() - interval '18 hours', 30000, 1, 0, 0, 0, 0, 'TIMEOUT', 'timeout su binario7.example'),
+  ('00000000-0000-4000-8000-00000000f102', false, now() - interval '1 day', 1200, 1, 0, 0, 0, 0, 'HTTP_503', 'il sito ha risposto HTTP 503');
+
+-- Possibile duplicato di "Notte Ferrovia" raccolto da Instagram, con titolo e orario diversi.
+insert into public.eventi_grezzi
+  (id, fonte_id, payload, hash_contenuto, stato, evento_candidato_id, punteggio_dedup, nota_revisione)
+select '00000000-0000-4000-8000-00000000d101', '00000000-0000-4000-8000-00000000f102',
+       jsonb_build_object(
+         'versione_schema', 1,
+         'origine', jsonb_build_object(
+           'tipo', 'instagram', 'fonte_id', '00000000-0000-4000-8000-00000000f102',
+           'caricamento_flyer_id', null, 'url', 'https://www.instagram.com/p/ESEMPIO01/',
+           'id_esterno', 'esempio-01', 'raccolto_il', now()),
+         'locale', jsonb_build_object('id', e.locale_id, 'nome', 'Club Binario 7', 'comune', 'Monza',
+                                      'indirizzo', null),
+         'titolo', 'NOTTE FERROVIA – techno all night',
+         'descrizione', null,
+         'inizio', e.inizio + interval '30 minutes',
+         'fine', e.fine,
+         'eta_minima', 18,
+         'riferimenti_alcol', true,
+         'generi', jsonb_build_array('techno', 'elettronica'),
+         'artisti', jsonb_build_array('Nera Vale', 'Corrado B.'),
+         'prezzo_min_centesimi', 1500,
+         'url_biglietti', null,
+         'estrazione', null),
+       repeat('9', 64), 'in_revisione_dedup', e.id, 82,
+       'Stesso locale, orario a 30 minuti, 2 artisti in comune, titolo simile'
+from public.eventi e
+where e.id = '00000000-0000-4000-8000-00000000e001';
+
+insert into public.candidati_locali
+  (id, origine, osm_id, nome, indirizzo, comune, provincia, posizione, sito_web, possibile_doppione_id)
+values
+  ('00000000-0000-4000-8000-0000000000b1', 'osm', 'node/9000000001', 'Club Binario Sette',
+   'Via dei Cantieri 12', 'Monza', 'MB', 'SRID=4326;POINT(9.2745 45.5846)', null,
+   '00000000-0000-4000-8000-00000000c001'),
+  ('00000000-0000-4000-8000-0000000000b2', 'osm', 'way/9000000002', 'Corte delle Rose',
+   'Via Giardini 4', 'Lissone', 'MB', 'SRID=4326;POINT(9.2430 45.6130)',
+   'https://cortedellerose.example', null);
+insert into public.candidati_locali (id, origine, google_place_id)
+values ('00000000-0000-4000-8000-0000000000b3', 'google', 'ChIJ-esempio-noxa');

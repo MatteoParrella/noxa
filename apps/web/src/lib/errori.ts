@@ -24,6 +24,16 @@ export const CODICI_DATABASE = {
   NX014: 'gia_in_contatto',
   NX015: 'troppe_segnalazioni_oggi',
   NX016: 'persona_non_disponibile',
+  NX017: 'eta_dichiarata_protetta',
+  NX018: 'alcol_protetto',
+  NX019: 'attivazione_riservata',
+  NX020: 'serve_motivazione_registrata',
+  NX021: 'motivazione_mancante',
+  NX022: 'fonte_non_consentita',
+  NX023: 'conferme_foto_mancanti',
+  NX024: 'foto_non_caricata',
+  NX025: 'gia_deciso',
+  NX026: 'cambio_stato_non_previsto',
 } as const;
 
 export type CodiceDatabase = (typeof CODICI_DATABASE)[keyof typeof CODICI_DATABASE];
@@ -37,7 +47,10 @@ export type CodiceValidazione =
   | 'link_scaduto'
   | 'verifica_umana_fallita'
   | 'valore_duplicato'
-  | 'valore_non_ammesso';
+  | 'valore_non_ammesso'
+  | 'non_trovato'
+  | 'codice_due_fattori_errato'
+  | 'codice_due_fattori_scaduto';
 
 export type CodiceAutorizzazione = 'credenziali_non_valide' | 'email_non_confermata' | 'negato';
 
@@ -139,6 +152,11 @@ export function converti(errore: unknown): ErroreDominio {
         return new ErroreValidazione('link_scaduto', errore);
       case 'captcha_failed':
         return new ErroreValidazione('verifica_umana_fallita', errore);
+      case 'mfa_verification_failed':
+      case 'mfa_verification_rejected':
+        return new ErroreValidazione('codice_due_fattori_errato', errore);
+      case 'mfa_challenge_expired':
+        return new ErroreValidazione('codice_due_fattori_scaduto', errore);
       default:
         if (errore.status === 429) return new ErroreLimite('limite', errore);
         return new ErroreSconosciuto(errore.code ?? 'auth', errore);
@@ -155,6 +173,7 @@ export function converti(errore: unknown): ErroreDominio {
     // Vincolo di unicità (per esempio uno username già preso) e vincoli di formato.
     if (codice === '23505') return new ErroreValidazione('valore_duplicato', errore);
     if (codice === '23514') return new ErroreValidazione('valore_non_ammesso', errore);
+    if (codice === 'P0002') return new ErroreValidazione('non_trovato', errore);
   }
 
   return new ErroreSconosciuto('sconosciuto', errore);

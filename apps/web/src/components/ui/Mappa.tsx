@@ -5,6 +5,7 @@ import type { Protocol } from 'pmtiles';
 import { Map as MapIcon } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { classi } from '@/lib/classi';
+import { CENTRO, LIMITI } from '@/lib/mappa/maplibre';
 import { leggiColori, stileMappa } from '@/lib/mappa/stile';
 import { messaggi } from '@/lib/messaggi/it';
 import { EVENTO_TEMA, temaAttivo } from '@/lib/tema';
@@ -15,13 +16,6 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 /** Worker di MapLibre copiato tra i file statici (scripts/copia-maplibre-worker.mjs). */
 const URL_WORKER = '/vendor/maplibre/maplibre-gl-worker.mjs';
-
-/** Centro e zoom iniziali: Milano, con la Brianza a nord. */
-const CENTRO: [number, number] = [9.19, 45.5];
-const LIMITI: [[number, number], [number, number]] = [
-  [8.65, 45.15],
-  [9.6, 45.8],
-];
 
 const SORGENTE = 'locali';
 

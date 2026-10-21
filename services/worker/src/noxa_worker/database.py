@@ -7,6 +7,8 @@ from typing import Protocol
 
 import psycopg
 import structlog
+from psycopg import AsyncConnection
+from psycopg.rows import DictRow, dict_row
 from psycopg_pool import AsyncConnectionPool
 
 log = structlog.get_logger(__name__)
@@ -18,19 +20,28 @@ class VerificaDatabase(Protocol):
     async def __call__(self) -> bool: ...
 
 
-def crea_pool(url: str, dimensione_massima: int) -> AsyncConnectionPool:
-    """Pool di connessioni non ancora aperto: si apre nel lifespan dell'API."""
+PoolDatabase = AsyncConnectionPool[AsyncConnection[DictRow]]
+
+
+def crea_pool(url: str, dimensione_massima: int) -> PoolDatabase:
+    """Pool di connessioni non ancora aperto: si apre nel lifespan dell'API. Le righe sono
+    dizionari con i nomi delle colonne."""
     return AsyncConnectionPool(
         conninfo=url,
+        connection_class=AsyncConnection[DictRow],
         min_size=1,
         max_size=dimensione_massima,
         open=False,
         timeout=10.0,
-        kwargs={"application_name": "noxa_worker", "connect_timeout": 5},
+        kwargs={
+            "application_name": "noxa_worker",
+            "connect_timeout": 5,
+            "row_factory": dict_row,
+        },
     )
 
 
-def verifica_con_pool(pool: AsyncConnectionPool, timeout_s: float) -> VerificaDatabase:
+def verifica_con_pool(pool: PoolDatabase, timeout_s: float) -> VerificaDatabase:
     """Restituisce una verifica che esegue `select 1` entro `timeout_s` secondi."""
 
     async def verifica() -> bool:

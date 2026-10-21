@@ -32,15 +32,21 @@ curato di locali dell'area e, per ognuno, le sue fonti. Questo approccio:
    il locale sia attivo, aggiunta di sito web, username Instagram e pagine sugli aggregatori,
    creazione delle righe in `fonti` con `stato_conformita = 'da_verificare'`.
 
-Lo script di bootstrap è `services/worker/src/noxa_worker/fonti/bootstrap_locali.py` e
-produce un file CSV da importare con la revisione; non scrive direttamente in `locali`.
+Lo script di bootstrap è `services/worker/src/noxa_worker/fonti/bootstrap_locali.py`
+(`uv run python -m noxa_worker.fonti.bootstrap_locali --csv candidati.csv [--importa]`):
+interroga Overpass per le due province e Google Places (Text Search con
+`X-Goog-FieldMask: places.id`, quindi solo identificativi) con `ClientHttpConforme`, scrive
+un CSV da rivedere e, con `--importa`, inserisce i candidati nuovi in `candidati_locali`
+segnalando il possibile doppione (locale entro 200 m o con lo stesso nome normalizzato). Non
+scrive mai in `locali`: i candidati si verificano nell'area di moderazione ("Verifica e
+crea", "Unisci", "Scarta" con motivazione).
 
 ### 2.2 Tipi di fonte
 
 | Tipo (`tipo_fonte`) | Adattatore | Stato nel MVP | Note |
 |---|---|---|---|
 | `sito_locale` | `sito_jsonld` | Fase 1 | Legge dati strutturati schema.org `Event` (JSON-LD o microdata) e feed iCal se presenti. È il primo da provare per ogni sito. |
-| `sito_locale` | `sito_html_<locale>` | Fase 1 | Adattatore specifico per un sito senza dati strutturati, basato su selettori CSS; Playwright solo se la pagina richiede JavaScript. |
+| `sito_locale` | `sito_html_<locale>` | Fase 1 | Adattatore specifico per un sito senza dati strutturati: estende `AdattatoreSitoHtml` (`fonti/sito_html.py`) dichiarando i selettori CSS; il primo si scrive per un locale verificato in staging. Playwright solo se la pagina richiede JavaScript. |
 | `instagram` | `instagram_business_discovery` | Fase 1 | Instagram Graph API, endpoint Business Discovery, solo per account Business o Creator. |
 | `resident_advisor`, `xceed`, `dice` | `aggregatore_<nome>` | Fase 3 | Solo con accordo scritto o API ufficiale (D-05). Fino ad allora `stato_conformita = 'vietata'`. |
 | *(flyer)* | estrattore flyer | Fase 1 | Caricati dagli utenti; non sono righe di `fonti` (§5). |
@@ -63,11 +69,11 @@ database). La procedura completa è nella skill `add-event-source`.
 | Regola | Valore |
 |---|---|
 | User agent | `NoxaBot/1.0 (+https://noxa.app/bot)`: la pagina spiega chi siamo e come chiedere la rimozione |
-| robots.txt | Riletto all'inizio di ogni esecuzione (cache di 24 ore); un percorso vietato interrompe la fonte con `ErroreConformita` |
+| robots.txt | Letto per ogni dominio e anche a ogni redirect (cache di 24 ore); un percorso vietato interrompe la fonte con `ErroreConformita` senza fare la richiesta. Come RFC 9309: 404 = nessuna regola, 401 e 403 = tutto vietato, errore del server = la fonte non si legge in questa esecuzione. `Crawl-delay` più lungo di 5 secondi viene rispettato. Le API ufficiali con chiave (Graph API, Places, Overpass) non leggono robots.txt ma hanno gli stessi limiti |
 | Frequenza | Al massimo 1 richiesta ogni 5 secondi per dominio; un solo job per dominio alla volta (`coda_job.chiave_concorrenza`) |
 | Volume | Al massimo 50 pagine per esecuzione; esecuzione ogni 6 ore o meno spesso |
 | Cache | `ETag` e `If-Modified-Since` quando supportati |
-| Errori | Con 429 o 403 la fonte si ferma e ritenta con backoff; dopo 5 errori consecutivi viene disattivata e si genera un allarme |
+| Errori | Con 429 o 403 la fonte si ferma per quell'esecuzione: niente nuovi tentativi immediati. Il backoff è nella pianificazione: dopo ogni errore l'intervallo raddoppia (fino a 8 volte la frequenza). Dopo 5 errori consecutivi viene disattivata (`disattivata_automaticamente_il`) e il worker registra l'allarme `fonte_disattivata` |
 | Vietato | Login, aggiramento di CAPTCHA o paywall, rotazione di IP o di user agent per eludere blocchi, raccolta di dati personali (commenti, partecipanti, foto di persone) |
 | Immagini | Non si scaricano né si ripubblicano immagini dai siti o da Instagram: si salva solo il link alla fonte. Le foto dei locali arrivano solo da fonti lecite, caricate dai moderatori (ADR-0018) |
 | Fonte | Ogni evento mostra sempre il link alla pagina originale (`eventi_fonti.url_originale`) |
@@ -80,9 +86,14 @@ database). La procedura completa è nella skill `add-event-source`.
   account Business o Creator. Nessuno scraping, nessun accesso a storie o account personali.
 - Chiamata per locale (frequenza ≥ 12 ore):
   `GET /{ig-user-id}?fields=business_discovery.username(<username>){media.limit(20){id,caption,media_type,media_url,permalink,timestamp}}`
-- I post degli ultimi 14 giorni vengono analizzati: la didascalia passa all'estrattore in
-  modalità testo e, se la didascalia non basta a ricavare data e titolo, l'immagine
-  (`media_url`) passa all'estrattore in modalità immagine. L'immagine non viene salvata.
+- I post degli ultimi 14 giorni vengono analizzati. Dall'iterazione 5 la didascalia si legge
+  con regole (`fonti/didascalie.py`): data, ora, titolo (prima riga significativa senza
+  hashtag), line-up; età, alcol e generi dalla didascalia e dagli hashtag. Un post senza data
+  o senza ora non diventa un evento. Con l'estrattore dei flyer (iterazione 6) la didascalia
+  passerà all'estrattore in modalità testo e, se non basta, l'immagine (`media_url`) in
+  modalità immagine, senza salvarla. Fino ad allora la richiesta chiede solo
+  `id, caption, permalink, timestamp`.
+- Il token sta nell'intestazione `Authorization`, mai nell'URL, così non finisce nei log.
 - `url_originale` = `permalink` del post.
 - Prerequisiti (Fase 0, ROADMAP.md): app Meta, account Instagram professionale di Noxa
   collegato a una pagina Facebook, App Review approvata per i permessi richiesti da Business
@@ -128,6 +139,16 @@ flowchart LR
 7. **Fusione o creazione**: §7.
 8. **Pubblicazione**: un evento nuovo da fonte `consentita` è `pubblicato`; da flyer è
    `in_revisione` (R-51).
+
+Prima della deduplicazione un grezzo con lo stesso identificativo esterno di un evento già
+raccolto dalla **stessa fonte** è un aggiornamento di quell'evento: si fonde direttamente
+(§7), con le stesse regole sulle modifiche rilevanti. Gli eventi passati o oltre 180 giorni
+diventano grezzi `scartato`, gli altri dati non validi `errore`; in entrambi i casi il
+payload conserva solo URL, identificativo, titolo e inizio.
+
+"Esegui ora" su una fonte consentita ma non attiva è una **prova**: il worker legge, normalizza
+e deduplica, conta l'esito in `esecuzioni_fonte` e `fonti.ultimo_esito`, ma non scrive
+grezzi né eventi e non sposta la pianificazione.
 
 ### 3.2 Idempotenza
 
@@ -292,8 +313,8 @@ Per ogni candidato:
 | `s_titolo < 75`, entrambi sono l'unico evento del blocco e (`artisti_comuni ≥ 1` oppure `delta_inizio ≤ 90`) | **revisione** |
 | altrimenti | **eventi distinti** |
 
-Se più candidati superano la soglia si sceglie quello con `s_titolo` più alto; a parità,
-quello con `delta_inizio` minore.
+Se più candidati superano la soglia si sceglie prima quello che si unisce da solo, poi quello
+con `s_titolo` più alto; a parità, quello con `delta_inizio` minore.
 
 **Eccezione per i flyer**: un grezzo da flyer viene unito automaticamente solo con
 `s_titolo ≥ 90` (prima riga della tabella). Nei casi della seconda riga va in revisione,
@@ -301,16 +322,23 @@ perché un flyer non verificato non deve poter agganciarsi da solo a un evento p
 (R-51).
 
 Le soglie sono in `dedup/configurazione.py` e si calibrano sul dataset
-`services/worker/tests/dati/dedup_golden.jsonl` (coppie etichettate a mano, almeno 300,
-estese con ogni errore trovato in produzione). Obiettivi: precisione ≥ 98% sulle decisioni
+`services/worker/tests/dati/dedup_golden.jsonl` (almeno 300 coppie, estese con ogni errore
+trovato in produzione). La prima versione (350 coppie) è costruita da
+`tests/dati/genera_dedup_golden.py` con locali, titoli e artisti di fantasia e le varianti
+tipiche delle fonti, compresi casi difficili (titoli che condividono parole, titoli
+riscritti); con le soglie attuali dà precisione 100% e richiamo 94,7%. Le coppie decise in
+moderazione si aggiungono in fondo al file. Obiettivi: precisione ≥ 98% sulle decisioni
 "stesso evento", richiamo ≥ 90%. Il test `test_dedup_golden.py` fallisce se una modifica li
 peggiora.
 
 ### 6.4 Revisione dei duplicati
 
 I grezzi `in_revisione_dedup` compaiono nella coda di moderazione con l'evento candidato
-affiancato. Il moderatore sceglie "stesso evento" (fusione, §7) o "eventi distinti"
-(creazione). Ogni decisione viene aggiunta al dataset di calibrazione con un'esportazione
+affiancato e il motivo ("Stesso locale, orario a 30 minuti, titolo simile", "Modifica
+rilevante: inizio spostato di 3 ore"). Il moderatore sceglie "stesso evento" (fusione, §7,
+comprese le modifiche rilevanti) o "eventi distinti" (creazione) con la RPC
+`decidi_duplicato`, che registra la decisione e accoda il job `deduplica_grezzo`: è il worker
+ad applicarla. Ogni decisione viene aggiunta al dataset di calibrazione con un'esportazione
 periodica.
 
 ## 7. Fusione
@@ -332,7 +360,13 @@ a `inizio` superiori a 2 ore o a `locale_id` vengono applicate solo da un modera
 
 Un evento non più presente nella sua unica fonte per due esecuzioni consecutive, a più di 48
 ore dall'inizio, viene segnalato in moderazione come "possibile annullamento"; non viene
-annullato in automatico.
+annullato in automatico. Il conteggio è `eventi_fonti.assenze_consecutive`, aggiornato dopo
+ogni esecuzione riuscita che ha letto almeno un evento (una pagina vuota non conta come
+assenza di tutti gli eventi).
+
+Una correzione del moderatore verso il basso (età o alcol) resta finché la fonte non cambia
+pagina: se la fonte modificata dichiara di nuovo un'età più alta o l'alcol, la fusione li
+ripristina. È la direzione prudente (R-22).
 
 ## 8. Qualità e monitoraggio
 

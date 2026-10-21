@@ -1,0 +1,5 @@
+User-agent: NoxaBot
+Disallow: /
+
+User-agent: *
+Allow: /
