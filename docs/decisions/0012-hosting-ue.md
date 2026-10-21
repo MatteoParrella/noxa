@@ -1,6 +1,6 @@
 # ADR-0012: Hosting nell'Unione Europea
 
-- **Stato**: Accettato
+- **Stato**: Sostituito da ADR-0021
 - **Data**: 2026-10-12
 
 ## Contesto

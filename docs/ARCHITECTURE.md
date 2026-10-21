@@ -42,7 +42,7 @@ flowchart LR
         CRON[pg_cron]
     end
 
-    subgraph Worker["Worker Python (Fly.io UE)"]
+    subgraph Worker["Worker Python (GitHub Actions, ADR-0021)"]
         RUN[Esecutore job]
         API[FastAPI<br/>salute e admin]
     end
@@ -84,7 +84,7 @@ flowchart LR
 | Routing | Route statiche; i dettagli usano parametri di query (`/evento?id=…`, `/gruppo?id=…`) perché l'export statico non genera pagine per identificativi dinamici. Il service worker ignora i parametri quando cerca una pagina nella cache. Le aree richiedono un account: senza sessione l'app porta al Benvenuto (R-07). |
 | Dati | `@supabase/supabase-js` con tipi generati (`src/lib/database.types.ts`); TanStack Query per cache, retry e stato offline; validazione dei dati in ingresso e uscita con Zod. |
 | Stile | Tailwind con design token generati da Claude Design (ADR-0011, [DESIGN.md](DESIGN.md)). |
-| Mappe | MapLibre GL JS con la basemap Protomaps (stili `dark` e `light` personalizzati con i design token) in un file PMTiles servito, insieme a font e icone, dal bucket `mappe`: nessuna richiesta a servizi di mappe esterni (ADR-0016). |
+| Mappe | MapLibre GL JS con la basemap Protomaps (stili `dark` e `light` personalizzati con i design token) in un file PMTiles servito, insieme a font e icone, dal bucket `mappe` in locale e da Cloudflare R2 in staging e produzione: nessuna richiesta a servizi di mappe esterni (ADR-0016, ADR-0021). |
 | Nativo | Capacitor: geolocalizzazione in background (D-04), notifiche push, fotocamera, condivisione, preferenze sicure per l'area di arrivo (R-32). |
 | PWA | Manifest e service worker (Workbox): cache dell'app shell e dei dati in sola lettura (PRD §5 Offline). |
 | Organizzazione | `src/features/<area>/` (scopri, organizza, vivi, ricorda, account, moderazione) con componenti, hook, query e test della funzionalità; `src/components/ui` per i componenti del design system. |
@@ -111,7 +111,7 @@ flowchart LR
 | `normalizzazione` | Modello Pydantic dello schema evento v1 (verificato in CI contro `packages/schemas/evento.schema.json`), date nel fuso di Milano, età minima, riferimenti all'alcol, generi, regole di validazione e impronta dei grezzi. |
 | `dedup` | Normalizzazione dei titoli, confronto fuzzy con rapidfuzz, decisione e fusione (ADR-0009), golden set in `tests/dati/dedup_golden.jsonl`. |
 | `raccolta` | Gestori dei job `esegui_fonte` e `deduplica_grezzo` (`pipeline.py`) dietro il protocollo `ArchivioRaccolta`, con l'implementazione Postgres in `postgres.py`; una transazione per ogni evento raccolto. |
-| `api` | FastAPI con i soli endpoint interni `GET /salute` (liveness) e `GET /pronto` (readiness: database raggiungibile), usati dai controlli di Fly.io; il worker non è raggiungibile da internet. I comandi di amministrazione (per esempio "esegui ora una fonte") passano da RPC che inseriscono job in `coda_job`. Nel lifespan dell'applicazione avvia `CODA_CONCORRENZA` esecutori della coda. |
+| `api` | FastAPI con i soli endpoint interni `GET /salute` (liveness) e `GET /pronto` (readiness: database raggiungibile), usati dal healthcheck di `docker compose` in locale; il worker non è raggiungibile da internet. I comandi di amministrazione (per esempio "esegui ora una fonte") passano da RPC che inseriscono job in `coda_job`. Nel lifespan dell'applicazione avvia `CODA_CONCORRENZA` esecutori della coda (in locale). In staging e produzione il workflow `worker.yml` di GitHub Actions avvia ogni 15 minuti la stessa immagine in modalità a esaurimento: svuota la coda, al massimo per 10 minuti, e termina (ADR-0021). |
 | `osservabilita` | Log JSON strutturati (structlog), Sentry, metriche per job. |
 
 Il worker accede a Postgres con il ruolo `noxa_worker` (permessi limitati, senza
@@ -321,8 +321,9 @@ flowchart LR
     GH[GitHub<br/>main + PR] -->|CI: lint, typecheck, test, pgTAP, e2e| CI[GitHub Actions]
     CI -->|supabase db push| SBP[(Supabase prod<br/>Francoforte)]
     CI -->|supabase functions deploy| SBP
-    CI -->|next build export| VER[Vercel<br/>regione UE<br/>PWA statica]
-    CI -->|docker build + fly deploy| FLY[Fly.io<br/>regione fra]
+    CI -->|next build export| CFP[Cloudflare Pages<br/>PWA statica]
+    CI -->|pmtiles + assets| R2[Cloudflare R2<br/>mappa]
+    CRONGH[GitHub Actions<br/>ogni 15 minuti] -->|worker a esaurimento| SBP
     CI -->|cap sync + fastlane| STORE[TestFlight /<br/>Google Play interno]
     SBS[(Supabase staging)] -.stesse migrazioni.-> SBP
 ```
@@ -331,7 +332,9 @@ flowchart LR
   progetto Supabase separato.
 - Le migrazioni si applicano prima a staging, poi a produzione, solo dalla CI.
 - I segreti stanno nel gestore dei segreti di ciascun fornitore; `.env.example` elenca i nomi.
-- Backup: Point-in-Time Recovery di Supabase in produzione.
+- Piano Supabase Free in staging e produzione finché non si apre la beta (ADR-0021).
+- Backup: nessuno sul piano Free; prima della beta si attiva il piano Pro di Supabase oppure un
+  backup cifrato in proprio (D-14), con una finestra di al massimo 30 giorni.
 
 ## 7. Scalabilità
 

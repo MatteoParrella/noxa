@@ -22,7 +22,8 @@ fanno dalla dashboard del progetto, perché `config.toml` vale solo per la CLI:
 |---|---|---|
 | Conferma dell'email | attiva | Authentication → Sign In / Providers → Email |
 | Lunghezza minima della password | 10 | Authentication → Sign In / Providers → Email |
-| Protezione dalle password compromesse | attiva (richiede il piano Pro) | Authentication → Attack Protection |
+| Protezione dalle password compromesse | attiva con il piano Pro; sul piano Free non è disponibile (ADR-0021, D-14) | Authentication → Attack Protection |
+| SMTP | Brevo, mittente sul dominio di D-01 con SPF e DKIM (ADR-0021) | Authentication → Emails → SMTP Settings |
 | CAPTCHA | Cloudflare Turnstile con la chiave segreta del widget (ADR-0020); in locale resta spento | Authentication → Attack Protection |
 | Hook "Before User Created" | funzione Postgres `private.prima_della_creazione_utente` | Authentication → Hooks |
 | Site URL e Redirect URLs | dominio dell'app (D-01) con `/**` | Authentication → URL Configuration |
@@ -30,4 +31,4 @@ fanno dalla dashboard del progetto, perché `config.toml` vale solo per la CLI:
 | Frequenza delle email | 60 secondi tra due invii allo stesso indirizzo | Authentication → Rate Limits |
 
 La chiave del sito di Turnstile va in `NEXT_PUBLIC_TURNSTILE_SITE_KEY` nelle variabili di
-Vercel; la chiave segreta solo in Supabase Auth.
+Cloudflare Pages; la chiave segreta solo in Supabase Auth.

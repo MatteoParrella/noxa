@@ -23,7 +23,7 @@ Database: Postgres 15+ su Supabase con le estensioni `postgis`, `citext`, `pg_cr
   - `noxa_worker`: ruolo di login del worker, senza `BYPASSRLS`, con permessi (`GRANT`) solo
     sulle tabelle di ingestione e policy dedicate (ADR-0003). La migrazione lo crea senza
     password; in locale la password è impostata da `supabase/seed.sql`, in staging e
-    produzione da un amministratore con `alter role` e conservata solo nei segreti di Fly.io.
+    produzione da un amministratore con `alter role` e conservata solo nei segreti dell'environment di GitHub Actions del worker (ADR-0021).
   - `service_role`: usato solo dalle Edge Functions lato server; non arriva mai al client.
 
 ## 2. Diagramma delle relazioni
