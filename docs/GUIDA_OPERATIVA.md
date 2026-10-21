@@ -77,7 +77,7 @@ quella corrente.
 | 3 | Amici (elenco, richieste, ricerca, codice QR, avviso al minorenne), profilo, segnala, blocca, elenco bloccati | `design/F-11-amici/`, `design/F-12-segnala-blocca/` |
 | 4 | Elenco eventi con filtri, mappa, dettaglio evento, "mi interessa / partecipo", amici che partecipano | `design/F-01-scopri/`, `design/F-03-dettaglio-evento/` |
 | 5 | Area di moderazione (desktop): locali, fonti, coda dei duplicati | `design/F-40-moderazione-fonti/` |
-| 6 | Carica flyer, stato dei miei flyer, code di moderazione di flyer e segnalazioni; foto profilo (scelta, ritaglio, sostituzione, rimozione) | `design/F-06-flyer/`, `design/F-40-moderazione/`, `design/F-10-foto-profilo/` |
+| 6 | Carica flyer, stato dei miei flyer, notifiche nell'app e reclamo sulle decisioni; code di moderazione di flyer, segnalazioni e reclami; foto profilo (scelta, ritaglio, sostituzione, rimozione) | `design/F-06-flyer/`, `design/F-40-moderazione/`, `design/F-10-foto-profilo/` |
 | 7 | Gruppi, dettaglio gruppo e inviti, serata di gruppo (chi c'è, biglietti, trasporto) | `design/F-13-gruppi/`, `design/F-14-serata/` |
 | 8 | Tracker (elenco, nuova serata, dettaglio), impostazioni di privacy, esporta dati, elimina account | `design/F-30-tracker/`, `design/F-42-privacy/` |
 | 9 | Centro notifiche, richiesta dei permessi, check-in | `design/F-22-notifiche/`, `design/F-20-checkin/` |
