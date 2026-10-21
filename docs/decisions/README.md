@@ -20,12 +20,13 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0009](0009-deduplicazione-rapidfuzz.md) | Deduplicazione con blocchi per locale e data e confronto fuzzy | Accettato |
 | [0010](0010-identificatori-in-italiano.md) | Identificatori e documentazione in italiano | Accettato |
 | [0011](0011-claude-design-design-token.md) | Claude Design come fonte del design e token in Tailwind | Accettato |
-| [0012](0012-hosting-ue.md) | Hosting nell'Unione Europea | Accettato |
+| [0012](0012-hosting-ue.md) | Hosting nell'Unione Europea | Sostituito da ADR-0021 |
 | [0013](0013-strategia-di-test.md) | Strategia di test | Accettato |
 | [0014](0014-osservabilita-senza-tracciamento.md) | Osservabilità senza tracciamento degli utenti | Accettato |
 | [0015](0015-monorepo-pnpm-uv.md) | Monorepo con pnpm e uv | Accettato |
-| [0016](0016-mappe-protomaps-autospitate.md) | Mappe gratuite con Protomaps auto-ospitato | Accettato |
+| [0016](0016-mappe-protomaps-autospitate.md) | Mappe gratuite con Protomaps auto-ospitato | Accettato (hosting sostituito da ADR-0021) |
 | [0017](0017-fascia-unica-minorenni.md) | Un'unica fascia per i minorenni dai 14 ai 17 anni | Accettato |
 | [0018](0018-foto-dei-locali.md) | Foto dei locali come immagine degli eventi | Accettato |
 | [0019](0019-movimento-espressivo.md) | Movimento espressivo | Accettato |
 | [0020](0020-captcha-cloudflare-turnstile.md) | CAPTCHA con Cloudflare Turnstile | Accettato |
+| [0021](0021-infrastruttura-a-costo-minimo.md) | Infrastruttura a costo minimo | Accettato |

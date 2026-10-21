@@ -20,8 +20,8 @@ completa solo se rispetta la definizione di completato del §6.
   mypy strict, pytest; `supabase/` inizializzata con la CLI.
 - CI su GitHub Actions: lint, typecheck, test unitari, `supabase test db`, build web, build
   Docker del worker, controllo delle dipendenze, `scripts/verifica_documentazione.py`.
-- Progetti Supabase `staging` e `produzione` nella regione di Francoforte; Vercel e Fly.io
-  configurati in regione UE (ADR-0012).
+- Progetti Supabase `staging` e `produzione` nella regione di Francoforte, sul piano Free;
+  Cloudflare Pages, Cloudflare R2 e il workflow del worker su GitHub Actions (ADR-0021).
 - Migrazioni di base: estensioni, enum, schema `private` con le funzioni del DATA_MODEL.md
   §4, `profili`, `profili_privati`, `ruoli_utente`, `consensi`, trigger di registrazione,
   test pgTAP `001_rls_abilitata` e seed con gli utenti di test per età.
@@ -182,7 +182,7 @@ Ogni iterazione ha:
   (lint, typecheck, test, `supabase test db`, build, Docker, audit dipendenze,
   `scripts/verifica_documentazione.py`); `.nvmrc`, `.python-version`.
 - **Prerequisiti esterni**: repository GitHub remoto per la CI; progetti Supabase staging e
-  produzione, Vercel e Fly.io per i deploy.
+  produzione, Cloudflare Pages e R2 per i deploy (ADR-0021).
 - **Criteri**: `pnpm --filter web build` produce l'export statico; `docker compose up worker`
   risponde su `/salute`; `supabase start` e `supabase test db` funzionano; la CI è verde su
   una PR di prova e fallisce su una PR con una tabella senza RLS.
@@ -207,7 +207,7 @@ Ogni iterazione ha:
   R-02); `000_supporto.test.sql` e seed con gli utenti per età (`001_rls_abilitata.test.sql`
   esiste dall'iterazione 0); schermate di accesso, registrazione con CAPTCHA, verifica email, onboarding di
   sicurezza, consensi versionati; client tipizzato ed errori di dominio; Content Security
-  Policy della PWA negli header di Vercel (ARCHITECTURE.md §9).
+  Policy della PWA negli header dell'hosting statico (ARCHITECTURE.md §9).
 - **Prerequisiti esterni**: chiave Cloudflare Turnstile.
 - **Criteri**: criteri della **Fase 0** (§Fase 0) verificati; test e2e che un utente di 13
   anni non può registrarsi né dall'app né dall'API.
@@ -285,7 +285,11 @@ Ogni iterazione ha:
   delle fonti); verifica completa di accessibilità; build interne TestFlight e
   Google Play; Sentry nell'app e nel worker con `beforeSend` (ADR-0014, R-62); link delle
   email di conferma e di recupero aperti nell'app nativa con App Links e Universal Links sul
-  dominio di D-01.
+  dominio di D-01. Infrastruttura di ADR-0021: worker in modalità a esaurimento con il
+  workflow `worker.yml`, mappa su Cloudflare R2 (`prepara_mappa.sh` e `mappa.yml`), header di
+  sicurezza in `_headers` di Cloudflare Pages al posto di `vercel.json`, SMTP Brevo, fornitori
+  aggiornati nella pagina `/privacy` con una nuova versione dell'informativa; decisione sui
+  backup (D-14) e sugli account degli store (D-13).
 - **Criteri**: criteri della **Fase 1** (§Fase 1) verificati per la parte tecnica; la beta
   con utenti reali si avvia alla chiusura di questa iterazione.
 
