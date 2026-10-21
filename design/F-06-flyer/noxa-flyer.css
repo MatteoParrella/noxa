@@ -1,0 +1,131 @@
+/* =========================================================
+   NOXA — layer "flyer, notifiche e reclami" (F-06).
+   Solo token di noxa.css. Mobile 390 / 360, PWA desktop ≥ 900 px (container query).
+   ========================================================= */
+.fl { container-type: inline-size; container-name: fl; }
+.fl-guscio { position: absolute; inset: 0; display: flex; }
+.fl-app { position: relative; flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.fl-rail { display: none; }
+.fl-solo-desktop { display: none !important; }
+.fl-colonna { display: flex; flex-direction: column; }
+
+/* intestazione delle aree: azioni a destra */
+.fl-testa-aree { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 8px 0 20px; min-height: 52px; }
+.fl-azioni-testa { display: flex; align-items: center; gap: 2px; }
+.campanella { position: relative; }
+.campanella .contatore { position: absolute; top: 4px; right: 2px; border: 2px solid var(--colore-sfondo); height: 20px; min-width: 20px; font-family: var(--tipo-famiglia-mono); }
+.ico-btn.con-etichetta { width: auto; padding: 0 12px 0 10px; gap: 6px; font-size: 0.875rem; font-weight: 500; border-radius: var(--raggio-tondo); box-shadow: inset 0 0 0 1px var(--colore-linea-forte); }
+
+/* passaggi */
+.fl-passi { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; counter-reset: passo; }
+.fl-passi li { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--colore-linea); }
+.fl-passi li:last-child { border-bottom: 0; }
+.fl-passi .n { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--colore-linea-forte); font-family: var(--tipo-famiglia-mono); font-size: 0.8125rem; }
+.fl-passi b { font-size: 0.9375rem; line-height: 1.3; }
+.fl-passi span.t { grid-column: 2; font-size: 0.8125rem; line-height: 1.4; color: var(--colore-testo-secondario); }
+
+/* quota giornaliera */
+.quota { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--colore-linea); border-radius: var(--raggio-2); background: var(--colore-superficie-1); }
+.quota-riga { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 0.875rem; }
+.quota-riga b { font-weight: 700; }
+.quota-num { font-family: var(--tipo-famiglia-mono); font-size: 0.8125rem; color: var(--colore-testo-secondario); white-space: nowrap; }
+.quota-barra { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+.quota-barra i { height: 4px; border-radius: 2px; background: var(--colore-testo-primario); }
+.quota-barra i.usato { background: var(--colore-superficie-3); }
+.quota.esaurita { border-color: var(--colore-avviso); }
+
+/* riga privacy */
+.privacy-riga { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; font-size: 0.8125rem; line-height: 1.45; color: var(--colore-testo-secondario); }
+.privacy-riga .ico { width: 16px; height: 16px; margin-top: 2px; }
+.ok-riga { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; font-size: 0.875rem; line-height: 1.4; }
+.ok-riga .ico { width: 16px; height: 16px; margin-top: 2px; color: var(--colore-successo); }
+
+/* selettore della foto e anteprima */
+.scegli-foto { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.trascina { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 200px; padding: 24px; border: 1.5px dashed var(--colore-linea-forte); border-radius: var(--raggio-3); background: var(--colore-superficie-1); text-align: center; font-size: 0.9375rem; color: var(--colore-testo-secondario); }
+.trascina b { color: var(--colore-testo-primario); }
+.trascina.is-sopra { border-color: var(--colore-testo-primario); background: var(--colore-superficie-2); }
+.anteprima-flyer { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; justify-content: center; padding: 16px; border-radius: var(--raggio-3); background: var(--colore-superficie-2); }
+.anteprima-flyer svg { display: block; height: 300px; width: auto; aspect-ratio: 3 / 4; border-radius: 2px; box-shadow: var(--ombra-2); }
+.anteprima-flyer.is-invio svg { opacity: .55; }
+.anteprima-flyer .file { font-family: var(--tipo-famiglia-mono); font-size: 0.6875rem; padding: 2px 6px; border-radius: var(--raggio-1); background: var(--colore-sfondo); color: var(--colore-testo-secondario); }
+.fl-avanz { display: flex; flex-direction: column; gap: 6px; }
+.fl-avanz-testa { display: flex; justify-content: space-between; font-size: 0.875rem; }
+.fl-avanz-testa .mono { font-family: var(--tipo-famiglia-mono); }
+.fl-avanz-barra { height: 6px; border-radius: 3px; background: var(--colore-superficie-3); overflow: hidden; }
+.fl-avanz-barra rect { fill: var(--colore-testo-primario); }
+
+/* i miei flyer */
+.mf-voce { display: grid; grid-template-columns: 52px minmax(0, 1fr) 44px; column-gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--colore-linea); }
+.mf-mini { width: 52px; height: 70px; border-radius: 2px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--colore-linea-forte); }
+.mf-mini svg { display: block; width: 100%; height: 100%; }
+.mf-corpo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.mf-titolo { font-weight: 700; font-size: 0.9375rem; line-height: 1.3; }
+.mf-meta { font-family: var(--tipo-famiglia-mono); font-size: 0.75rem; color: var(--colore-testo-secondario); }
+.mf-motivo { padding: 10px 12px; border-radius: var(--raggio-2); background: var(--colore-superficie-1); border: 1px solid var(--colore-linea); font-size: 0.875rem; line-height: 1.45; }
+.mf-azioni { display: flex; flex-wrap: wrap; gap: 8px; }
+.mf-link { display: inline-flex; align-items: center; gap: 4px; color: var(--colore-accento-testo); font-weight: 500; font-size: 0.875rem; text-decoration: underline; text-underline-offset: 3px; min-height: 32px; }
+.mf-link .ico { width: 14px; height: 14px; }
+.badge-errore { border-color: transparent; background: var(--colore-errore-tenue); color: var(--colore-errore); font-family: var(--tipo-famiglia-testo); }
+.badge-stato { font-family: var(--tipo-famiglia-testo); }
+
+/* notifiche */
+.nt-gruppo { padding: 16px 0 6px; }
+.nt-voce { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 12px; padding: 14px 12px 14px 10px; margin: 0 -10px; border-radius: var(--raggio-2); border-bottom: 1px solid var(--colore-linea); cursor: pointer; }
+.nt-voce:hover { background: var(--colore-superficie-1); }
+.nt-voce.non-letta { background: var(--colore-superficie-1); }
+.nt-voce.non-letta .nt-titolo { font-weight: 700; }
+.nt-voce.is-nuova { box-shadow: inset 0 0 0 1px var(--colore-linea-forte); animation: ax-dissolve 240ms linear both; }
+.nt-icona { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--colore-superficie-3); color: var(--colore-testo-primario); }
+.nt-icona .ico { width: 20px; height: 20px; }
+.nt-corpo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.nt-riga { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.nt-titolo { font-size: 0.9375rem; line-height: 1.35; }
+.nt-quando { flex: none; font-family: var(--tipo-famiglia-mono); font-size: 0.75rem; color: var(--colore-testo-secondario); }
+.nt-testo { font-size: 0.875rem; line-height: 1.45; color: var(--colore-testo-secondario); }
+.nt-segno { display: inline-flex; align-items: center; gap: 6px; font-family: var(--tipo-famiglia-mono); font-size: 0.6875rem; letter-spacing: .04em; text-transform: uppercase; color: var(--colore-testo-primario); }
+.nt-segno::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--colore-testo-primario); }
+.nt-azioni { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.nt-persona { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.nt-persona .rp-user { font-size: 0.8125rem; }
+.nt-fondo { padding: 20px 0 8px; font-size: 0.75rem; color: var(--colore-testo-secondario); text-align: center; }
+
+/* reclamo e decisione motivata */
+.decisione-riga { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 1px solid var(--colore-linea); border-left: 3px solid var(--colore-testo-primario); border-radius: var(--raggio-2); background: var(--colore-superficie-1); font-size: 0.875rem; line-height: 1.45; }
+.decisione-riga .dr-testa { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.decisione-riga .dr-chi { font-size: 0.75rem; color: var(--colore-testo-secondario); }
+.reclamo-esito { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: var(--raggio-2); background: var(--colore-superficie-2); font-size: 0.875rem; line-height: 1.45; }
+.reclamo-esito .etichetta { color: var(--colore-testo-secondario); }
+
+/* foglio */
+.fl-velo { position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; justify-content: flex-end; }
+.fl-foglio { padding-bottom: 20px; max-height: 92%; display: flex; flex-direction: column; overflow-y: auto; }
+.fl-foglio h2 { margin: 0; font-size: 1.625rem; line-height: 1.1; font-weight: 700; font-stretch: 72%; }
+
+/* ---------- PWA desktop ---------- */
+@container fl (min-width: 900px) {
+  .fl-rail { display: flex; flex: none; width: 232px; flex-direction: column; gap: 4px; padding: 24px 12px; border-right: 1px solid var(--colore-linea); background: var(--colore-superficie-1); }
+  .fl-rail .marchio { padding: 0 10px 20px; }
+  .fl-rail-voce { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: var(--raggio-2); color: var(--colore-testo-secondario); text-decoration: none; font-weight: 500; font-size: 0.9375rem; }
+  .fl-rail-voce.is-on { background: var(--colore-superficie-3); color: var(--colore-testo-primario); font-weight: 700; box-shadow: inset 3px 0 0 var(--colore-accento); }
+  .fl-rail-voce .contatore { margin-left: auto; }
+  .fl-solo-mobile { display: none !important; }
+  .fl-solo-desktop { display: flex !important; }
+  .fl-app > .barra-nav, .fl-statusbar { display: none !important; }
+  .fl-app .ax-corpo { padding: 16px 40px 40px; }
+  .fl-colonna { max-width: 640px; margin: 0 auto; width: 100%; }
+  .fl-testa-aree, .fl-app .ax-testa { max-width: 640px; width: calc(100% - 80px); margin: 0 auto; padding: 16px 0 0; }
+  .fl-app .ax-testa > .ico-btn:first-child { margin-left: -12px; }
+  .fl-azioni-testa { margin-right: -8px; }
+  .fl-velo { justify-content: center; align-items: center; padding: 40px; }
+  .fl-foglio { width: 100%; max-width: 560px; border-radius: var(--raggio-3); padding: 24px 28px; }
+  .fl-foglio .foglio-maniglia { display: none; }
+  .anteprima-flyer svg { height: 360px; }
+}
+@container fl (max-width: 370px) {
+  .fl-testa-aree { padding-left: 16px; }
+  .fl-app .ax-corpo { padding-left: 16px; padding-right: 16px; }
+  .ico-btn.con-etichetta .lbl { display: none; }
+  .ico-btn.con-etichetta { width: 44px; padding: 0; justify-content: center; }
+  .anteprima-flyer svg { height: 260px; }
+}
