@@ -26,7 +26,7 @@ Iterazioni completate: 6 su 15.
 | 3 | completata | 2026-10-16 | 2026-10-16 | 3 | `iterazione-03-amicizie` | Notifiche delle richieste e reclamo nell'iterazione 6, gruppi nella 7 (ROADMAP) |
 | 4 | completata | 2026-10-19 | 2026-10-19 | 2 | `iterazione-04-catalogo-eventi` | Eventi reali dall'iterazione 5; foto dei locali caricate dai moderatori nell'iterazione 5; flyer nell'iterazione 6 |
 | 5 | completata con attese esterne | 2026-10-19 | 2026-10-19 | 2 | `iterazione-05-raccolta-eventi` | Mancano App Review Meta e token, chiave Google Places, 40 locali verificati e il primo `sito_html_<locale>` in staging |
-| 6 | da iniziare | — | — | 0 | — | — |
+| 6 | in corso | 2026-10-21 | — | 0 | `iterazione-06-flyer-moderazione` | — |
 | 7 | da iniziare | — | — | 0 | — | — |
 | 8 | da iniziare | — | — | 0 | — | — |
 | 9 | da iniziare | — | — | 0 | — | — |
@@ -650,3 +650,41 @@ annullamenti dicono solo se qualcuno si è segnato (R-69).
 - Restano quelle delle iterazioni 0–2.
 
 **Commit**: `99c6827` … commit finale di chiusura sul branch `iterazione-05-raccolta-eventi`.
+
+### Iterazione 6 — Flyer e moderazione
+
+**Piano**
+- Funzionalità: F-06 (caricamento e stato dei flyer), F-40 (code dei flyer, delle
+  segnalazioni e dei reclami, escalation R-55), F-10 (foto profilo), F-12 (stato delle
+  proprie segnalazioni con decisione e reclamo), F-22 limitata alle notifiche nell'app
+  (Realtime). Regole: R-50…R-55, R-66, R-69; DSA art. 17 e 20. Design:
+  `design/F-06-flyer/`, `design/F-40-moderazione/`, `design/F-10-foto-profilo/`.
+- Decisione D-15 chiusa all'avvio dal product owner (nuovo ADR): occultamento automatico in
+  attesa della revisione solo per il motivo `adescamento_o_rischio_minore` segnalato da un
+  account non nuovo; il contenuto nascosto è sostituito da un'immagine senza copyright a
+  tema serata, così l'app non mostra mai vuoti o "in lavorazione"; revisione entro i tempi di
+  R-53, ripristino se infondata, mezzo automatico dichiarato nella motivazione.
+- Database: valori nuovi degli enum; `notifiche` con trigger sulle amicizie e Realtime;
+  `caricamenti_flyer` con bucket `flyer-caricati`, limite R-54, job `analizza_flyer` e
+  chiavi esterne da `eventi_grezzi` ed `eventi_fonti`; bucket `avatar` (R-52);
+  `contenuti_occultati` (D-15); `reclami` (DSA art. 20); RPC `coda_flyer`, `decidi_flyer`,
+  `coda_segnalazioni`, `dettaglio_segnalazione`, `prendi_in_carico_segnalazione`,
+  `decidi_segnalazione`, `escalation_segnalazione`, `presenta_reclamo`, `reclami_moderazione`,
+  `decidi_reclamo`; contatori dell'area estesi; conservazione delle notifiche (90 giorni).
+- Worker: modulo `flyer` (schema `FlyerEstratto`, prompt versionato, estrattore con l'SDK
+  `anthropic` e `messages.parse`, immagini con EXIF rimosso, ridimensionamento e pHash,
+  client Storage con `service_role`, risoluzione del locale, deduplicazione), job
+  `analizza_flyer`, `copia_immagine_flyer`, `pulizia_flyer`; comando `valuta`; golden set
+  iniziale di 50 flyer sintetici creati internamente; estrattore in modalità testo e immagine
+  per le didascalie Instagram. Senza `ANTHROPIC_API_KEY` il flyer va in revisione manuale
+  con i campi vuoti (scelta del product owner).
+- App: "Carica un flyer" (Scopri e stato vuoto), caricamento con EXIF rimosso, "I miei
+  flyer"; campanella e notifiche in tempo reale; decisione motivata e reclamo nelle
+  segnalazioni; foto profilo con ritaglio e conversione WebP sul dispositivo, segnalazione
+  della foto; area di moderazione: Flyer, Segnalazioni (con escalation) e Reclami.
+- Passi: database e test pgTAP → worker e test → app e test unitari/e2e → documenti →
+  cicli di revisione e `safety-review`.
+- Criteri dell'iterazione: soglie della skill `flyer-parser` (valutazione con la chiave:
+  attesa esterna); test pgTAP di R-51, R-54, R-69 e delle policy del bucket `avatar` per
+  tutte le età del seed.
+
