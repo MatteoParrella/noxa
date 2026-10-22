@@ -6,6 +6,8 @@ import { Avatar } from './Avatar';
 type Props = {
   nome: string;
   username: string;
+  /** Percorso della foto profilo, se la persona ne ha una visibile. */
+  foto?: string | null | undefined;
   /** Pagina del profilo: il nome diventa un link. */
   href?: string;
   nota?: string;
@@ -15,7 +17,15 @@ type Props = {
 };
 
 /** Riga di una persona: avatar, nome, @username e azioni (design/F-11-amici). */
-export function RigaPersona({ nome, username, href, nota, azioni, azioniSotto = false }: Props) {
+export function RigaPersona({
+  nome,
+  username,
+  foto,
+  href,
+  nota,
+  azioni,
+  azioniSotto = false,
+}: Props) {
   const testo = (
     <>
       <span className="rp-nome">{nome}</span>
@@ -25,7 +35,7 @@ export function RigaPersona({ nome, username, href, nota, azioni, azioniSotto = 
   );
   return (
     <li className="riga-persona">
-      <Avatar nome={nome} decorativo />
+      <Avatar nome={nome} foto={foto} decorativo />
       {href ? (
         <Link className="rp-testo" href={href}>
           {testo}

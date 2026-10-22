@@ -18,6 +18,7 @@ const LUNGHEZZA_MASSIMA = 1000;
 type Props = {
   io: string;
   persona: { id: string; username: string };
+  tipoOggetto?: 'profilo' | 'foto_profilo';
   onFatto: (bloccata: boolean) => void;
   onChiudi: () => void;
 };
@@ -26,7 +27,7 @@ type Props = {
  * Segnalazione in due tocchi (R-50): "Segnala" nel menu ⋯, poi il motivo, che invia subito.
  * Testo e "Blocca anche" si compilano prima, se si vuole. Resta anonima per chi è segnalato.
  */
-export function FoglioSegnala({ io, persona, onFatto, onChiudi }: Props) {
+export function FoglioSegnala({ io, persona, tipoOggetto = 'profilo', onFatto, onChiudi }: Props) {
   const testi = messaggi.segnala;
   const online = useOnline();
   const [dettagli, setDettagli] = useState('');
@@ -35,7 +36,7 @@ export function FoglioSegnala({ io, persona, onFatto, onChiudi }: Props) {
 
   const invio = useMutation({
     mutationFn: async (motivo: MotivoSegnalazione) => {
-      await segnalaProfilo({ io, profilo: persona.id, motivo, dettagli });
+      await segnalaProfilo({ io, profilo: persona.id, tipoOggetto, motivo, dettagli });
       if (bloccaAnche) await blocca(io, persona.id);
     },
     onSuccess: (_risultato, motivo) => setInviato(motivo),
@@ -72,7 +73,15 @@ export function FoglioSegnala({ io, persona, onFatto, onChiudi }: Props) {
   const errore = invio.error as ErroreDominio | null;
 
   return (
-    <Foglio aperto titolo={testi.titolo(persona.username)} onChiudi={onChiudi}>
+    <Foglio
+      aperto
+      titolo={
+        tipoOggetto === 'foto_profilo'
+          ? testi.titoloFoto(persona.username)
+          : testi.titolo(persona.username)
+      }
+      onChiudi={onChiudi}
+    >
       <div className="flex flex-col gap-4">
         {!online && <Avviso tipo="info">{testi.offline}</Avviso>}
         <p className="t-corpo-s c-2 m-0">{testi.spiegazione}</p>

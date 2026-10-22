@@ -451,6 +451,12 @@
   font-weight: 500;
   letter-spacing: 0.02em;
   border: 2px solid var(--colore-sfondo);
+  overflow: hidden;
+}
+.avatar-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .avatar-s {
   width: 28px;
@@ -1232,4 +1238,99 @@
 [data-tema] {
   background: var(--colore-sfondo);
   color: var(--colore-testo-primario);
+}
+
+/* ---------- LAYOUT RESPONSIVE — sidebar ≥ 768 px (ADR-0022) ---------- */
+
+/* Tablet landscape e desktop: la navigazione diventa una sidebar fissa a sinistra. */
+@media (min-width: 48rem) {
+  .guscio {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .guscio-contenuto {
+    flex: 1 1 auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    /* Tolto il padding-bottom pensato per la bottom bar mobile. */
+    padding-bottom: 0;
+  }
+  .guscio .barra-nav {
+    /* Da griglia orizzontale in fondo a colonna fissa a sinistra. */
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: auto;
+    bottom: auto;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: var(--sidebar-stretta, 68px);
+    height: 100dvh;
+    padding: var(--spazio-4) 0 var(--spazio-6);
+    border-top: none;
+    border-right: 1px solid var(--colore-linea);
+    overflow-y: auto;
+    /* Reset della griglia mobile. */
+    grid-template-columns: unset;
+  }
+  .guscio .nav-voce {
+    width: 100%;
+    flex-direction: column;
+    min-height: 60px;
+    padding: var(--spazio-2) 0;
+    gap: 3px;
+    font-size: var(--tipo-didascalia);
+  }
+  /* L'indicatore orizzontale è pensato per la bottom nav; non si usa in sidebar. */
+  .guscio .nav-indicatore {
+    display: none;
+  }
+  /* Al posto dell'indicatore orizzontale: un bordo sinistro sul link attivo. */
+  .guscio .nav-voce.is-on::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 2px;
+    height: calc(100% - 16px);
+    margin: 0;
+    background: var(--colore-accento);
+  }
+  /* Il padding dell'intestazione non deve compensare la safe-area verticale del telefono. */
+  .intestazione-area {
+    padding-top: var(--spazio-6);
+  }
+}
+
+/* Desktop: sidebar più larga con icone e etichette su una riga. */
+@media (min-width: 64rem) {
+  .guscio .barra-nav {
+    align-items: flex-start;
+    width: var(--sidebar-larga, 200px);
+    padding: var(--spazio-4) var(--spazio-3) var(--spazio-6);
+  }
+  .guscio .nav-voce {
+    flex-direction: row;
+    justify-content: flex-start;
+    min-height: var(--area-tocco);
+    padding: 0 var(--spazio-3);
+    gap: var(--spazio-3);
+    font-size: var(--tipo-corpo-piccolo);
+    border-radius: var(--raggio-2);
+  }
+  .guscio .nav-voce.is-on {
+    background: var(--colore-accento-tenue);
+  }
+  /* Con sfondo sul link attivo il bordo sinistro diventa un padding invisibile. */
+  .guscio .nav-voce.is-on::before {
+    display: none;
+  }
+  /* Contatore di notifiche: si sposta per allinearsi con l'icona nella riga orizzontale. */
+  .guscio .nav-icona .contatore {
+    top: -8px;
+    left: 12px;
+  }
 }

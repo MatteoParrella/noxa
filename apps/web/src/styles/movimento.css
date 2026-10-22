@@ -176,6 +176,36 @@
   transform: scale(1.04);
 }
 
+/* ---------- Transizioni di navigazione tra route (ADR-0022) ---------- */
+/*
+  View Transitions API: fade leggero tra pagine. Supportata da Chrome 111+ e Safari 18+;
+  ignorata da browser più vecchi (nessun fallback, la navigazione è comunque funzionale).
+  Con prefers-reduced-motion la transizione è soppressa.
+*/
+@view-transition {
+  navigation: auto;
+}
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: 180ms var(--curva-uscita) both naviga-esci;
+  }
+  ::view-transition-new(root) {
+    animation: 280ms var(--curva-entrata) 60ms both naviga-entra;
+  }
+  @keyframes naviga-esci {
+    to {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.99);
+    }
+  }
+  @keyframes naviga-entra {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+}
+
 /* ---------- Movimento ridotto: solo dissolvenze brevi ---------- */
 @media (prefers-reduced-motion: reduce) {
   .movimento .rivela {

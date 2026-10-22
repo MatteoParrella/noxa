@@ -207,25 +207,39 @@ export const PERSONE = {
     id: '00000000-0000-4000-8000-0000000000f1',
     username: 'marco.brivio',
     nome_visualizzato: 'Marco',
+    avatar_path: null,
+    avatar_nascosto: false,
   },
   davide: {
     id: '00000000-0000-4000-8000-0000000000f2',
     username: 'davide.sala',
     nome_visualizzato: 'Davide',
+    avatar_path: null,
+    avatar_nascosto: false,
   },
   marta: {
     id: '00000000-0000-4000-8000-0000000000f3',
     username: 'marta.re',
     nome_visualizzato: 'Marta',
+    avatar_path: null,
+    avatar_nascosto: false,
   },
   sara: {
     id: '00000000-0000-4000-8000-0000000000f4',
     username: 'sara.colombo',
     nome_visualizzato: 'Sara',
+    avatar_path: null,
+    avatar_nascosto: false,
   },
 };
 type PersonaProva = (typeof PERSONE)[keyof typeof PERSONE];
-const IO = { id: UTENTE_DI_PROVA, username: 'giulia.rota', nome_visualizzato: 'Giulia' };
+const IO = {
+  id: UTENTE_DI_PROVA,
+  username: 'giulia.rota',
+  nome_visualizzato: 'Giulia',
+  avatar_path: null,
+  avatar_nascosto: false,
+};
 
 /** Riga di `amicizie` con i profili incorporati, come la restituisce PostgREST. */
 export function amicizia(
@@ -547,8 +561,14 @@ export class SupabaseSimulato {
               stato: 'in_lavorazione',
               creata_il: '2026-10-14T20:00:00Z',
               chiusa_il: null,
+              azione_id: null,
+              decisione_azione: null,
               decisione: null,
               decisa_il: null,
+              reclamabile: false,
+              reclamo_stato: null,
+              reclamo_esito: null,
+              reclamo_motivazione: null,
             },
             {
               id: '00000000-0000-4000-8000-00000000b002',
@@ -558,8 +578,14 @@ export class SupabaseSimulato {
               stato: 'chiusa',
               creata_il: '2026-10-02T20:00:00Z',
               chiusa_il: '2026-10-05T09:00:00Z',
+              azione_id: '00000000-0000-4000-8000-00000000c001',
+              decisione_azione: 'nessuna_violazione',
               decisione: 'Abbiamo controllato: il profilo non viola i Termini.',
               decisa_il: '2026-10-05T09:00:00Z',
+              reclamabile: true,
+              reclamo_stato: null,
+              reclamo_esito: null,
+              reclamo_motivazione: null,
             },
           ],
         };
@@ -618,7 +644,9 @@ export class SupabaseSimulato {
   private profilo(richiesta: Request): Risposta {
     const filtro = new URL(richiesta.url()).searchParams.get('id') ?? '';
     const id = filtro.replace(/^eq\./, '');
-    const trovato = this.profiliVisibili.find((persona) => persona.id === id);
+    // Il proprio profilo si legge sempre (la foto profilo in Profilo e in Modifica).
+    const trovato =
+      this.profiliVisibili.find((persona) => persona.id === id) ?? (id === IO.id ? IO : undefined);
     const singolo = (richiesta.headers()['accept'] ?? '').includes('vnd.pgrst.object');
     if (singolo) {
       return trovato

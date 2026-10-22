@@ -12,6 +12,7 @@ import { useMontato, useOnline } from '@/lib/connessione';
 import { classi } from '@/lib/classi';
 import { serataInCorso, type DataCalendario } from '@/lib/date';
 import { messaggi } from '@/lib/messaggi/it';
+import { Campanella } from '@/features/notifiche/Campanella';
 import { useEventi, useNomiGeneri } from './dati';
 import { ElencoEventi } from './ElencoEventi';
 import {
@@ -94,13 +95,16 @@ export function VistaScopri() {
         titolo={testi.titolo}
         dopoTitolo={oggi && <span className="t-mono-dato c-2">{dataFiltri(filtri, oggi)}</span>}
         azioni={
-          <Segmenti
-            etichetta={testi.vista}
-            opzioni={OPZIONI_VISTA}
-            valore={vista}
-            onCambia={setVista}
-            soloIcone
-          />
+          <div className="flex items-center gap-2">
+            <Campanella />
+            <Segmenti
+              etichetta={testi.vista}
+              opzioni={OPZIONI_VISTA}
+              valore={vista}
+              onCambia={setVista}
+              soloIcone
+            />
+          </div>
         }
       />
       <Rivela className="pagina w-full" indice={2}>

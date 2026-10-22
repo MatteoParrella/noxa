@@ -127,6 +127,24 @@ describe('errori di dominio', () => {
     expect(converti(new AuthRetryableFetchError('fetch failed', 0))).toBeInstanceOf(ErroreRete);
   });
 
+  it('riconosce i codici NX027-NX031 per flyer e reclami', () => {
+    expect((converti({ code: 'NX027', message: '' }) as ErroreValidazione).codice).toBe(
+      'troppi_caricamenti_oggi',
+    );
+    expect((converti({ code: 'NX028', message: '' }) as ErroreValidazione).codice).toBe(
+      'reclamo_fuori_termine',
+    );
+    expect((converti({ code: 'NX029', message: '' }) as ErroreValidazione).codice).toBe(
+      'reclamo_gia_presentato',
+    );
+    expect((converti({ code: 'NX030', message: '' }) as ErroreValidazione).codice).toBe(
+      'reclamo_non_ammesso',
+    );
+    expect((converti({ code: 'NX031', message: '' }) as ErroreValidazione).codice).toBe(
+      'reclamo_stesso_moderatore',
+    );
+  });
+
   it('il resto è uno sconosciuto', () => {
     expect(converti(new Error('boh'))).toBeInstanceOf(ErroreSconosciuto);
   });

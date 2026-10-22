@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { converti } from '@/lib/errori';
 import { supabase } from '@/lib/supabase';
+import type { Json } from '@/lib/database.types';
 
 /**
  * Area di moderazione (F-40, F-44). Ogni lettura e scrittura passa dalla RLS o da RPC che
@@ -115,6 +116,11 @@ const SchemaContatori = z.object({
   duplicati: z.number().int(),
   possibili_annullamenti: z.number().int(),
   candidati_locali: z.number().int(),
+  flyer: z.number().int(),
+  segnalazioni: z.number().int(),
+  segnalazioni_urgenti: z.number().int(),
+  scadenza_urgente: z.string().nullable(),
+  reclami: z.number().int(),
 });
 export type Contatori = z.infer<typeof SchemaContatori>;
 
@@ -784,4 +790,187 @@ export async function leggiGeneri(): Promise<Genere[]> {
     .order('nome');
   if (error) throw converti(error);
   return verifica(z.array(SchemaGenere), data);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Coda dei flyer (R-51, R-69)
+// ---------------------------------------------------------------------------------------------
+
+const SchemaCodaFlyer = z.object({
+  id: z.uuid(),
+  stato: z.enum(['in_revisione', 'errore']),
+  creato_il: z.string(),
+  storage_path: z.string(),
+  risultato_estrazione: z.record(z.string(), z.unknown()).nullable(),
+  modello: z.string().nullable(),
+  versione_prompt: z.string().nullable(),
+  confidenza: z.number().nullable(),
+  contenuto_sospetto: z.boolean(),
+  nota_revisione: z.string().nullable(),
+  evento: z.record(z.string(), z.unknown()).nullable(),
+  candidato: z.record(z.string(), z.unknown()).nullable(),
+});
+export type FlyerCoda = z.infer<typeof SchemaCodaFlyer>;
+
+export async function leggiCodaFlyer(): Promise<FlyerCoda[]> {
+  const { data, error } = await supabase().rpc('coda_flyer');
+  if (error) throw converti(error);
+  return verifica(z.array(SchemaCodaFlyer), data);
+}
+
+export async function decidiFlyer(
+  caricamentoId: string,
+  esito: 'approva' | 'unisci' | 'rifiuta',
+  opzioni: { dati?: Record<string, unknown>; motivazione?: string; eventoEsistente?: string },
+): Promise<void> {
+  const { error } = await supabase().rpc('decidi_flyer', {
+    caricamento: caricamentoId,
+    esito,
+    ...(opzioni.dati !== undefined ? { dati: opzioni.dati as unknown as Json } : {}),
+    ...(opzioni.motivazione !== undefined ? { motivazione: opzioni.motivazione } : {}),
+    ...(opzioni.eventoEsistente !== undefined ? { evento_esistente: opzioni.eventoEsistente } : {}),
+  });
+  if (error) throw converti(error);
+}
+
+export async function escalationFlyer(caricamentoId: string, motivazione: string): Promise<void> {
+  const { error } = await supabase().rpc('escalation_flyer', {
+    caricamento: caricamentoId,
+    motivazione,
+    conferma: 'ESCALATION',
+  });
+  if (error) throw converti(error);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Coda delle segnalazioni (R-53, R-69)
+// ---------------------------------------------------------------------------------------------
+
+const SchemaCodaSegnalazione = z.object({
+  id: z.uuid(),
+  tipo_oggetto: z.string(),
+  oggetto_id: z.uuid(),
+  motivo: z.string(),
+  priorita: z.number().int(),
+  stato: z.enum(['aperta', 'in_lavorazione', 'chiusa']),
+  creata_il: z.string(),
+  scadenza: z.string(),
+  chiusa_il: z.string().nullable(),
+  presa_da_me: z.boolean(),
+  presa_da: z.string().nullable(),
+  stesso_oggetto: z.number().int(),
+  in_escalation: z.boolean(),
+});
+export type SegnalazioneCoda = z.infer<typeof SchemaCodaSegnalazione>;
+
+export async function leggiCodaSegnalazioni(): Promise<SegnalazioneCoda[]> {
+  const { data, error } = await supabase().rpc('coda_segnalazioni');
+  if (error) throw converti(error);
+  return verifica(z.array(SchemaCodaSegnalazione), data);
+}
+
+const SchemaDettaglioSegnalazione = z.object({
+  segnalazione_id: z.uuid(),
+  tipo_oggetto: z.string(),
+  oggetto_id: z.uuid(),
+  motivo: z.string(),
+  dettagli: z.string().nullable(),
+  priorita: z.number().int(),
+  stato: z.enum(['aperta', 'in_lavorazione', 'chiusa']),
+  creata_il: z.string(),
+  scadenza: z.string(),
+  presa_da_me: z.boolean(),
+  presa_da: z.string().nullable(),
+  in_escalation: z.boolean(),
+  occultato: z.boolean(),
+  oggetto: z.record(z.string(), z.unknown()).nullable(),
+  altre: z.array(z.record(z.string(), z.unknown())),
+  registro: z.array(z.record(z.string(), z.unknown())),
+});
+export type DettaglioSegnalazione = z.infer<typeof SchemaDettaglioSegnalazione>;
+
+export async function leggiDettaglioSegnalazione(
+  id: string,
+): Promise<DettaglioSegnalazione | null> {
+  const { data, error } = await supabase().rpc('dettaglio_segnalazione', { id });
+  if (error) throw converti(error);
+  const righe = verifica(z.array(SchemaDettaglioSegnalazione), data);
+  return righe[0] ?? null;
+}
+
+export async function prendiInCaricoSegnalazione(id: string): Promise<void> {
+  const { error } = await supabase().rpc('prendi_in_carico_segnalazione', { segnalazione: id });
+  if (error) throw converti(error);
+}
+
+export async function decidiSegnalazione(
+  id: string,
+  azione: 'nessuna_violazione' | 'rimuovi_contenuto' | 'modifica_evento' | 'sospendi_account',
+  motivazione: string,
+  contenuto?: string,
+): Promise<void> {
+  const { error } = await supabase().rpc('decidi_segnalazione', {
+    segnalazione: id,
+    azione,
+    motivazione,
+    ...(contenuto !== undefined ? { contenuto } : {}),
+  });
+  if (error) throw converti(error);
+}
+
+export async function escalationSegnalazione(id: string, motivazione: string): Promise<void> {
+  const { error } = await supabase().rpc('escalation_segnalazione', {
+    segnalazione: id,
+    motivazione,
+    conferma: 'ESCALATION',
+  });
+  if (error) throw converti(error);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Reclami (DSA art. 20)
+// ---------------------------------------------------------------------------------------------
+
+const SchemaReclamoModerazione = z.object({
+  id: z.uuid(),
+  stato: z.enum(['inviato', 'in_esame', 'deciso']),
+  testo: z.string(),
+  creato_il: z.string(),
+  ruolo: z.string().nullable(),
+  decisione_id: z.uuid(),
+  decisione_azione: z.string(),
+  decisione_motivazione: z.string().nullable(),
+  decisione_il: z.string(),
+  decisione_autore: z.string().nullable(),
+  tipo_oggetto: z.string(),
+  descrizione: z.string().nullable(),
+  puo_decidere: z.boolean(),
+  esito: z.string().nullable(),
+  motivazione_esito: z.string().nullable(),
+  deciso_il: z.string().nullable(),
+});
+export type ReclamoModerazione = z.infer<typeof SchemaReclamoModerazione>;
+
+export async function leggiReclamiModerazione(): Promise<ReclamoModerazione[]> {
+  const { data, error } = await supabase().rpc('reclami_moderazione');
+  if (error) throw converti(error);
+  return verifica(z.array(SchemaReclamoModerazione), data);
+}
+
+export async function esamiReclamo(reclamoId: string): Promise<void> {
+  const { error } = await supabase().rpc('esamina_reclamo', { reclamo: reclamoId });
+  if (error) throw converti(error);
+}
+
+export async function decidiReclamo(
+  reclamoId: string,
+  cambia: boolean,
+  motivazione: string,
+): Promise<void> {
+  const { error } = await supabase().rpc('decidi_reclamo', {
+    reclamo: reclamoId,
+    cambia,
+    motivazione,
+  });
+  if (error) throw converti(error);
 }

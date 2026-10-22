@@ -34,6 +34,11 @@ export const CODICI_DATABASE = {
   NX024: 'foto_non_caricata',
   NX025: 'gia_deciso',
   NX026: 'cambio_stato_non_previsto',
+  NX027: 'troppi_caricamenti_oggi',
+  NX028: 'reclamo_fuori_termine',
+  NX029: 'reclamo_gia_presentato',
+  NX030: 'reclamo_non_ammesso',
+  NX031: 'reclamo_stesso_moderatore',
 } as const;
 
 export type CodiceDatabase = (typeof CODICI_DATABASE)[keyof typeof CODICI_DATABASE];

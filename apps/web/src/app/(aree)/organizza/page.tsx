@@ -3,13 +3,14 @@ import type { Metadata } from 'next';
 import { IntestazioneArea } from '@/components/guscio/IntestazioneArea';
 import { Rivela } from '@/components/ui/Movimento';
 import { ElencoVuoto } from '@/components/ui/Stati';
+import { Campanella } from '@/features/notifiche/Campanella';
 
 export const metadata: Metadata = { title: 'Organizza · Noxa' };
 
 export default function PaginaOrganizza() {
   return (
     <>
-      <IntestazioneArea sottotitolo="Amici e gruppi" titolo="Organizza" />
+      <IntestazioneArea sottotitolo="Amici e gruppi" titolo="Organizza" azioni={<Campanella />} />
       <Rivela className="pagina pt-4" indice={2}>
         <ElencoVuoto icona={Users} titolo="Ancora nessun gruppo">
           Qui troverai i tuoi amici, i gruppi e le serate da organizzare insieme: chi c’è, i

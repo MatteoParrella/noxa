@@ -39,7 +39,10 @@ export function RigaAmici({ evento }: { evento: EventoElenco }) {
   const totale = vanno ? evento.amici_partecipano : evento.amici_interessati;
   return (
     <AmiciPartecipano
-      persone={mostrati.map((amico) => ({ nome: amico.nome_visualizzato }))}
+      persone={mostrati.map((amico) => ({
+        nome: amico.nome_visualizzato,
+        foto: amico.avatar_path,
+      }))}
       altri={totale - mostrati.length}
       testo={testo}
     />

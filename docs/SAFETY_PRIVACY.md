@@ -133,7 +133,7 @@ non può essere rilasciata, indipendentemente da scadenze o richieste commercial
 | `esecuzioni_fonte` (conteggi ed errori delle esecuzioni, nessun dato personale) | 90 giorni | come sopra |
 | `candidati_locali` decisi (dati pubblici di OSM; da Google solo il `place_id`) | Indefinita, perché un candidato scartato non torni nella coda: non sono dati personali | — |
 | `notifiche` | 90 giorni | come sopra |
-| `segnalazioni`, `azioni_moderazione` | 12 mesi dalla chiusura; più a lungo se serve per un procedimento in corso (escalation R-55) | come sopra, escluse le righe con `conservazione_legale = true` |
+| `segnalazioni`, `azioni_moderazione`, `reclami` | 12 mesi dalla chiusura; più a lungo se serve per un procedimento in corso (escalation R-55) | `private.applica_conservazione()`, escluse le righe con `conservazione_legale = true`; la cancellazione automatica a 12 mesi è in attesa di implementazione (da aggiungere a `private.applica_conservazione`) |
 | `codici_invito` | 24 ore dalla scadenza | `private.elimina_codici_invito_scaduti()` ogni ora |
 | Account mai confermato con il link dell'email | 24 ore dalla registrazione | `private.elimina_account_non_confermati()` ogni ora |
 | Account eliminato | Cancellazione immediata dei dati nel database e nello storage; scomparsa dai backup alla fine della finestra di backup (al massimo 30 giorni, D-14) | Edge Function `elimina-account` |

@@ -2,9 +2,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import {
+  decidiReclamo,
+  esamiReclamo,
   firmaFoto,
   leggiCandidati,
+  leggiCodaFlyer,
+  leggiCodaSegnalazioni,
   leggiContatori,
+  leggiDettaglioSegnalazione,
   leggiDuplicati,
   leggiEsecuzioni,
   leggiEvento,
@@ -15,6 +20,7 @@ import {
   leggiLocale,
   leggiLocali,
   leggiPossibiliAnnullamenti,
+  leggiReclamiModerazione,
   leggiRegistro,
   type FiltriEventi,
   type TipoRegistro,
@@ -37,6 +43,10 @@ export const CHIAVI = {
   registro: (tipo: TipoRegistro, id: string) => ['moderazione', 'registro', tipo, id] as const,
   foto: (percorsi: string[]) => ['moderazione', 'foto', ...percorsi] as const,
   generi: ['moderazione', 'generi'] as const,
+  codaFlyer: ['moderazione', 'coda-flyer'] as const,
+  codaSegnalazioni: ['moderazione', 'coda-segnalazioni'] as const,
+  segnalazione: (id: string) => ['moderazione', 'segnalazione', id] as const,
+  reclamiMod: ['moderazione', 'reclami'] as const,
 };
 
 export function useContatori() {
@@ -132,3 +142,33 @@ export function useFotoFirmate(percorsi: string[]) {
 export function useGeneri() {
   return useQuery({ queryKey: CHIAVI.generi, queryFn: leggiGeneri, staleTime: Infinity });
 }
+
+export function useCodaFlyer() {
+  return useQuery({ queryKey: CHIAVI.codaFlyer, queryFn: leggiCodaFlyer, refetchInterval: 60_000 });
+}
+
+export function useCodaSegnalazioni() {
+  return useQuery({
+    queryKey: CHIAVI.codaSegnalazioni,
+    queryFn: leggiCodaSegnalazioni,
+    refetchInterval: 60_000,
+  });
+}
+
+export function useDettaglioSegnalazione(id: string | null) {
+  return useQuery({
+    queryKey: CHIAVI.segnalazione(id ?? ''),
+    queryFn: () => leggiDettaglioSegnalazione(id as string),
+    enabled: id !== null,
+  });
+}
+
+export function useReclamiModerazione() {
+  return useQuery({
+    queryKey: CHIAVI.reclamiMod,
+    queryFn: leggiReclamiModerazione,
+    refetchInterval: 60_000,
+  });
+}
+
+export { decidiReclamo, esamiReclamo };

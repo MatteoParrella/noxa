@@ -3,6 +3,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSessione } from '@/features/account/sessione';
 import { leggiAmici, leggiPersona, mieiBloccati, mieSegnalazioni } from './api';
+import { leggiAvatarPath } from './api-avatar';
+
+/** Chiave stabile per le segnalazioni, usata anche da FoglioReclamo per l'invalidazione. */
+export const CHIAVE_SEGNALAZIONI = ['segnalazioni'] as const;
 
 /** Chiavi della cache: ogni azione che cambia le relazioni invalida `CHIAVI.relazioni`. */
 export const CHIAVI = {
@@ -17,6 +21,18 @@ export const CHIAVI = {
 export function useIo(): string | null {
   const sessione = useSessione();
   return sessione.stato === 'presente' ? sessione.utenteId : null;
+}
+
+/** Percorso della mia foto profilo: ogni modifica della foto invalida `CHIAVE_MIO_AVATAR`. */
+export const CHIAVE_MIO_AVATAR = ['profili', 'avatar'] as const;
+
+export function useMioAvatar() {
+  const io = useIo();
+  return useQuery({
+    queryKey: [...CHIAVE_MIO_AVATAR, io ?? ''],
+    queryFn: () => leggiAvatarPath(io!),
+    enabled: io !== null,
+  });
 }
 
 export function useAmici() {

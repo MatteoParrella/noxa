@@ -17,6 +17,8 @@ const SchemaAmico = z.object({
   /** Solo nel dettaglio, per aprire il profilo dell'amico. */
   username: z.string().optional(),
   nome_visualizzato: z.string(),
+  /** Già null se la foto è nascosta in attesa della revisione (D-15). */
+  avatar_path: z.string().nullable().optional(),
   stato: SchemaStatoPartecipazione,
 });
 export type AmicoPartecipante = z.infer<typeof SchemaAmico>;

@@ -9,6 +9,7 @@ import {
   Image as IconaImmagine,
   LogOut,
   Menu,
+  MessageSquare,
   Rss,
   Store,
   X,
@@ -25,6 +26,7 @@ import { esci } from '@/features/account/api';
 import { ricordaPaginaDopoAccesso } from '@/features/account/dopoAccesso';
 import { PERCORSI } from '@/features/account/documenti';
 import { useSessione } from '@/features/account/sessione';
+import { useMioAvatar } from '@/features/amici/dati';
 import { useOnline } from '@/lib/connessione';
 import { messaggi } from '@/lib/messaggi/it';
 import { AttivaDueFattori, InserisciCodice, SenzaRuolo, SenzaSessione } from './AccessoDueFattori';
@@ -45,6 +47,10 @@ export const PERCORSI_MODERAZIONE = {
   eventi: '/moderazione/eventi/',
   annullamenti: '/moderazione/eventi/?vista=annullamenti',
   evento: (id: string) => `/moderazione/evento/?id=${id}`,
+  flyer: '/moderazione/flyer/',
+  segnalazioni: '/moderazione/segnalazioni/',
+  segnalazione: (id: string) => `/moderazione/segnalazione/?id=${id}`,
+  reclami: '/moderazione/reclami/',
 } as const;
 
 const CHIAVE_DUE_FATTORI = ['moderazione', 'due-fattori'] as const;
@@ -202,6 +208,7 @@ function NavigazioneLaterale({ utenteId, aperta }: { utenteId: string; aperta: b
   const router = useRouter();
   const client = useQueryClient();
   const contatori = useContatori();
+  const mioAvatar = useMioAvatar();
   const nome = useQuery({
     queryKey: ['moderazione', 'nome', utenteId],
     queryFn: () => leggiMioNome(utenteId),
@@ -217,6 +224,8 @@ function NavigazioneLaterale({ utenteId, aperta }: { utenteId: string; aperta: b
   const sezione = percorso.split('/')[2] ?? '';
   const duplicati = contatori.data?.duplicati ?? 0;
   const annullamenti = contatori.data?.possibili_annullamenti ?? 0;
+  const flyerDaRevisionare = contatori.data?.flyer ?? 0;
+  const reclamiDaDecidere = contatori.data?.reclami ?? 0;
 
   return (
     <nav
@@ -256,20 +265,39 @@ function NavigazioneLaterale({ utenteId, aperta }: { utenteId: string; aperta: b
           <Contatore valore={annullamenti} descrizione={nav.contatoreEventi(annullamenti)} />
         }
       />
-      {/* Code dei flyer e delle segnalazioni: iterazione 6. */}
-      <span className="md-voce" aria-disabled="true">
-        <Icona icona={IconaImmagine} dimensione="s" />
-        {nav.flyer}
-        <span className="arrivo">{nav.inArrivo}</span>
-      </span>
-      <span className="md-voce" aria-disabled="true">
-        <Icona icona={Flag} dimensione="s" />
-        {nav.segnalazioni}
-        <span className="arrivo">{nav.inArrivo}</span>
-      </span>
+      <VoceNavigazione
+        href={PERCORSI_MODERAZIONE.flyer}
+        icona={IconaImmagine}
+        etichetta={nav.flyer}
+        attiva={sezione === 'flyer'}
+        contatore={
+          <Contatore
+            valore={flyerDaRevisionare}
+            descrizione={nav.contatoreFlyer(flyerDaRevisionare)}
+          />
+        }
+      />
+      <VoceNavigazione
+        href={PERCORSI_MODERAZIONE.segnalazioni}
+        icona={Flag}
+        etichetta={nav.segnalazioni}
+        attiva={sezione === 'segnalazioni' || sezione === 'segnalazione'}
+      />
+      <VoceNavigazione
+        href={PERCORSI_MODERAZIONE.reclami}
+        icona={MessageSquare}
+        etichetta={nav.reclami}
+        attiva={sezione === 'reclami'}
+        contatore={
+          <Contatore
+            valore={reclamiDaDecidere}
+            descrizione={nav.contatoreReclami(reclamiDaDecidere)}
+          />
+        }
+      />
       <div className="md-piede">
         <div className="md-utente">
-          <Avatar nome={nome.data ?? ''} dimensione="s" decorativo />
+          <Avatar nome={nome.data ?? ''} foto={mioAvatar.data} dimensione="s" decorativo />
           <span>
             {nome.data}
             <small>{nav.dueFattori}</small>
