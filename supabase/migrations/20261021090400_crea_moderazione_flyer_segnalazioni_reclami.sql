@@ -1,7 +1,7 @@
 -- Migrazione: moderazione dei flyer, delle segnalazioni e dei reclami; occultamento automatico
 -- in attesa della revisione (D-15); escalation alle autorità; notifiche degli esiti
 -- Documentazione: docs/DATA_MODEL.md §4, §5.2 (segnalazioni, azioni_moderazione, reclami),
--- §5.3 (caricamenti_flyer), §5.10, §8; docs/SAFETY_PRIVACY.md §11; ADR-0022;
+-- §5.3 (caricamenti_flyer), §5.10, §8; docs/SAFETY_PRIVACY.md §11; ADR-0023;
 -- regole: R-06, R-21, R-22, R-23, R-50, R-51, R-52, R-53, R-55, R-69; DSA art. 17 e 20
 --
 -- Tutte le RPC dei moderatori sono security definer e verificano come prima istruzione che
@@ -203,7 +203,7 @@ begin
 end;
 $$;
 
--- D-15, ADR-0022: una segnalazione per rischio a un minorenne da un account con almeno 7
+-- D-15, ADR-0023: una segnalazione per rischio a un minorenne da un account con almeno 7
 -- giorni nasconde subito l'immagine segnalata (foto profilo, copertina, foto del locale), in
 -- attesa del moderatore entro i tempi di R-53. Al posto dell'immagine l'app mostra
 -- un'immagine sostitutiva. Il mezzo automatico è dichiarato nella motivazione (DSA art. 17).
@@ -233,7 +233,7 @@ begin
                                          azione, motivazione)
   values (null, new.id, bersaglio, new.oggetto_id, 'occulta_contenuto',
           'Nascosto in automatico in attesa del controllo di un moderatore (mezzo automatico, '
-          || 'ADR-0022).')
+          || 'ADR-0023).')
   returning id into azione;
   if bersaglio = 'foto_profilo' then
     perform private.notifica_esito(

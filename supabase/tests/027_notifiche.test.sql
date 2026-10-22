@@ -1,7 +1,7 @@
 -- notifiche (DATA_MODEL.md §5.1, §7). Regole: R-17, R-53, R-65.
 -- Amici del seed: 15-16, 20-21, 18-17 (codice invito); richiesta in attesa 14 → 15.
 begin;
-select plan(19);
+select plan(22);
 
 select ok(
   exists (select 1 from pg_publication_tables
@@ -135,6 +135,18 @@ select throws_ok(
   '23514', null,
   'I dati di una notifica sono un oggetto'
 );
+
+-- Tutte le età del seed: nessuno legge le notifiche di altri.
+select tests.autentica_come('minore_16');
+select is((select count(*)::int from public.notifiche where utente_id <> tests.id('minore_16')), 0,
+          'A 16 anni non si leggono le notifiche di altri');
+select tests.autentica_come('minore_17');
+select is((select count(*)::int from public.notifiche where utente_id <> tests.id('minore_17')), 0,
+          'A 17 anni non si leggono le notifiche di altri');
+select tests.autentica_come('moderatore_senza_mfa');
+select is((select count(*)::int from public.notifiche where utente_id <> tests.id('moderatore_senza_mfa')), 0,
+          'Nemmeno un moderatore legge le notifiche di altri (R-69)');
+select tests.esci();
 
 select * from finish();
 rollback;

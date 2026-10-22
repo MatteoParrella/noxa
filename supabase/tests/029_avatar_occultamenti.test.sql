@@ -1,5 +1,5 @@
 -- Foto profilo (bucket avatar), contenuti_occultati e occultamento automatico (DATA_MODEL.md
--- §5.1, §5.2, §6; ADR-0022). Regole: R-10, R-13, R-17, R-50, R-52, R-53, R-69.
+-- §5.1, §5.2, §6; ADR-0023). Regole: R-10, R-13, R-17, R-50, R-52, R-53, R-69.
 -- Amici del seed: 15-16, 20-21, 18-17 (codice invito); richiesta in attesa 14 → 15.
 begin;
 select plan(45);
@@ -124,7 +124,7 @@ select tests.autentica_come('moderatore_senza_mfa');
 select is(tests.foto_visibili(), '{}'::text[], 'R-06: senza due fattori nessuna foto');
 
 -- ---------------------------------------------------------------------------------------------
--- Occultamento automatico (D-15, ADR-0022)
+-- Occultamento automatico (D-15, ADR-0023)
 -- ---------------------------------------------------------------------------------------------
 -- Un account appena creato non nasconde nulla: si limita l'abuso delle segnalazioni.
 select tests.autentica_come('adulto_20');
@@ -198,7 +198,7 @@ select ok(tests.foto('adulto_18') = any (tests.foto_visibili()),
           'Il moderatore vede la foto nascosta per decidere');
 
 -- ---------------------------------------------------------------------------------------------
--- Copertine sostitutive degli eventi (ADR-0018, ADR-0022)
+-- Copertine sostitutive degli eventi (ADR-0018, ADR-0023)
 -- ---------------------------------------------------------------------------------------------
 select tests.esci();
 insert into storage.objects (bucket_id, name)
@@ -224,12 +224,12 @@ select is(
   coalesce((select 'sostitutiva:' from public.eventi
             where id = '00000000-0000-4000-8000-00000000e002' and coalesce(fine, inizio) > now()),
            null),
-  'ADR-0022: una copertina nascosta diventa l''immagine sostitutiva nella ricerca'
+  'ADR-0023: una copertina nascosta diventa l''immagine sostitutiva nella ricerca'
 );
 select is(
   (select copertina_tipo from public.dettaglio_evento('00000000-0000-4000-8000-00000000e002')),
   'sostitutiva',
-  'ADR-0022: anche nel dettaglio dell''evento'
+  'ADR-0023: anche nel dettaglio dell''evento'
 );
 select is_empty($$ select 1 from storage.objects where bucket_id = 'flyer-pubblicati' $$,
                 'D-15: il file della copertina nascosta non si consegna');

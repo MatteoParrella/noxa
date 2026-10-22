@@ -282,7 +282,9 @@ Ogni iterazione ha:
   e cache delle tile della mappa già viste (richieste PMTiles a intervalli, ADR-0016); Edge
   Functions `esporta-dati` ed `elimina-account`; impostazioni di privacy;
   `applica_conservazione` completa (dall'iterazione 5 copre già grezzi, job ed esecuzioni
-  delle fonti); verifica completa di accessibilità; build interne TestFlight e
+  delle fonti, dall'iterazione 6 notifiche e registro dei caricamenti; mancano tra l'altro
+  segnalazioni e azioni di moderazione a 12 mesi dalla chiusura, SAFETY_PRIVACY.md
+  §10); verifica completa di accessibilità; build interne TestFlight e
   Google Play; Sentry nell'app e nel worker con `beforeSend` (ADR-0014, R-62); link delle
   email di conferma e di recupero aperti nell'app nativa con App Links e Universal Links sul
   dominio di D-01. Infrastruttura di ADR-0021: worker in modalità a esaurimento con il

@@ -238,6 +238,20 @@ describe('schede evento', () => {
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
     expect(screen.getByText('23:00')).toBeInTheDocument();
   });
+
+  it('un’immagine nascosta in attesa della revisione diventa l’illustrazione notturna (ADR-0023)', () => {
+    const { container } = render(
+      <Copertina
+        copertina={{ tipo: 'sostitutiva', url: '/non-usata.webp', alt: 'Foto di Club Binario 7' }}
+        forma="miniatura"
+        ora="23:00"
+        titolo="Notte Ferrovia"
+      />,
+    );
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(container.querySelector('.copertina-sostitutiva .illustrazione-notte')).not.toBeNull();
+    expect(screen.getByText('Notte Ferrovia')).toBeInTheDocument();
+  });
 });
 
 function SelettoreDiProva() {

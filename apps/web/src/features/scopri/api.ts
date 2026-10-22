@@ -23,7 +23,8 @@ const SchemaAmico = z.object({
 });
 export type AmicoPartecipante = z.infer<typeof SchemaAmico>;
 
-const SchemaCopertina = z.enum(['locale', 'flyer', 'tipografica']);
+// `sostitutiva`: l'immagine dell'evento è nascosta in attesa della revisione (ADR-0023).
+const SchemaCopertina = z.enum(['locale', 'flyer', 'tipografica', 'sostitutiva']);
 export type TipoCopertina = z.infer<typeof SchemaCopertina>;
 
 const SchemaEvento = z.object({
@@ -158,7 +159,7 @@ export async function segnala(dati: {
 
 export type Copertina = { tipo: TipoCopertina; path: string | null };
 
-const BUCKET: Record<Exclude<TipoCopertina, 'tipografica'>, string> = {
+const BUCKET: Record<Exclude<TipoCopertina, 'tipografica' | 'sostitutiva'>, string> = {
   locale: 'immagini-locali',
   flyer: 'flyer-pubblicati',
 };
@@ -174,7 +175,8 @@ export const DURATA_LINK_SECONDI = 3600;
 export async function firmaCopertine(copertine: Copertina[]): Promise<Record<string, string>> {
   const perBucket = new Map<string, Set<string>>();
   for (const copertina of copertine) {
-    if (copertina.tipo === 'tipografica' || !copertina.path) continue;
+    if (copertina.tipo === 'tipografica' || copertina.tipo === 'sostitutiva' || !copertina.path)
+      continue;
     const bucket = BUCKET[copertina.tipo];
     const percorsi = perBucket.get(bucket) ?? new Set<string>();
     percorsi.add(copertina.path);

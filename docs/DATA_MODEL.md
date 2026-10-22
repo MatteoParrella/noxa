@@ -86,17 +86,18 @@ erDiagram
 | `tipo_consenso` | `termini`, `privacy` |
 | `stato_amicizia` | `in_attesa`, `accettata` |
 | `canale_amicizia` | `ricerca`, `codice_invito` |
-| `tipo_oggetto_segnalabile` | `profilo`, `evento`, `caricamento_flyer`, `gruppo`, `serata_gruppo`, `immagine_locale`; dall'iterazione 5 anche `locale`, `fonte`, `candidato_locale`, usati solo dal registro di `azioni_moderazione` (la policy INSERT di `segnalazioni` non li ammette) |
+| `tipo_oggetto_segnalabile` | `profilo`, `evento`, `caricamento_flyer`, `gruppo`, `serata_gruppo`, `immagine_locale`; dall'iterazione 5 anche `locale`, `fonte`, `candidato_locale`, usati solo dal registro di `azioni_moderazione` (la policy INSERT di `segnalazioni` non li ammette); dall'iterazione 6 `foto_profilo` (segnalazione della sola foto, R-52) |
 | `fonte_immagine_locale` | `autorizzazione_locale`, `noxa`, `licenza_libera` |
 | `motivo_segnalazione` | `contenuto_inappropriato`, `molestie`, `adescamento_o_rischio_minore`, `spam`, `evento_falso`, `eta_errata`, `alcol_a_minori`, `altro`, `dati_errati` (orari, luogo o età sbagliati di un evento, dall'iterazione 4) |
 | `stato_segnalazione` | `aperta`, `in_lavorazione`, `chiusa` |
-| `azione_moderazione` | `nessuna_violazione`, `rimuovi_contenuto`, `modifica_evento`, `approva_flyer`, `rifiuta_flyer`, `sospendi_account`, `riattiva_account`, `correggi_data_nascita`, `escalation_autorita`, `accesso_segnalazione`; dall'iterazione 5 `crea_locale`, `modifica_locale`, `approva_immagine_locale`, `rimuovi_immagine_locale`, `crea_fonte`, `modifica_fonte`, `esegui_fonte`, `unisci_duplicato`, `separa_duplicato`, `pubblica_evento`, `annulla_evento`, `rifiuta_evento`, `correggi_eta_alcol`, `conferma_in_programma`, `verifica_candidato_locale`, `unisci_candidato_locale`, `scarta_candidato_locale` |
+| `azione_moderazione` | `nessuna_violazione`, `rimuovi_contenuto`, `modifica_evento`, `approva_flyer`, `rifiuta_flyer`, `sospendi_account`, `riattiva_account`, `correggi_data_nascita`, `escalation_autorita`, `accesso_segnalazione`; dall'iterazione 5 `crea_locale`, `modifica_locale`, `approva_immagine_locale`, `rimuovi_immagine_locale`, `crea_fonte`, `modifica_fonte`, `esegui_fonte`, `unisci_duplicato`, `separa_duplicato`, `pubblica_evento`, `annulla_evento`, `rifiuta_evento`, `correggi_eta_alcol`, `conferma_in_programma`, `verifica_candidato_locale`, `unisci_candidato_locale`, `scarta_candidato_locale`; dall'iterazione 6 `unisci_flyer`, `prendi_in_carico`, `occulta_contenuto`, `ripristina_contenuto`, `conferma_decisione`, `cambia_decisione` |
 | `tipo_fonte` | `sito_locale`, `instagram`, `resident_advisor`, `xceed`, `dice` |
 | `stato_conformita` | `da_verificare`, `consentita`, `vietata` |
 | `stato_evento` | `in_revisione`, `pubblicato`, `rifiutato`, `annullato` |
 | `stato_grezzo` | `nuovo`, `normalizzato`, `unito`, `in_revisione_dedup`, `scartato`, `errore` |
 | `stato_caricamento` | `caricato`, `in_analisi`, `in_revisione`, `approvato`, `unito`, `rifiutato`, `errore` |
 | `stato_partecipazione_evento` | `interessato`, `partecipo` |
+| `stato_reclamo` | `inviato`, `in_esame`, `deciso` |
 | `ruolo_gruppo` | `admin`, `membro` |
 | `stato_membro` | `invitato`, `attivo` |
 | `stato_serata` | `proposta`, `confermata`, `annullata` |
@@ -141,6 +142,22 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `chiudi_operazione()` | `void` | Azzera `noxa.azione_registrata` e `noxa.operazione_moderazione` alla fine di ogni RPC, così il permesso non vale per le istruzioni successive della stessa transazione. |
 | `e_possibile_annullamento(evento uuid)` | `boolean` | Evento `pubblicato` a più di 48 ore dall'inizio, con una sola riga in `eventi_fonti` e quella riga assente da almeno due esecuzioni (`assenze_consecutive >= 2`) (EVENT_INGESTION.md §7). |
 | `normalizza_nome(testo text)` | `text` | Minuscole senza accenti né punteggiatura (`unaccent`), per `locali.nome_normalizzato` (EVENT_INGESTION.md §6.1); `immutable`, non `security definer`. |
+| `account_attivo(utente uuid)` | `boolean` | Il profilo è `attivo`: un account sospeso non vede altri profili, non invia richieste né crea codici invito (R-55). |
+| `e_occultato(tipo, oggetto uuid)` | `boolean` | Esiste una riga in `contenuti_occultati` per l'immagine (ADR-0023). Usata dalle policy dei bucket e dalle copertine. |
+| `bersaglio_occultamento(tipo, oggetto uuid)` | `tipo_oggetto_segnalabile` | Immagine da nascondere per un oggetto segnalato: `foto_profilo` per profili e foto profilo con una foto, `evento` per un evento con copertina, `immagine_locale` per un locale con foto; null altrimenti (ADR-0023, R-55). |
+| `scadenza_segnalazione(priorita, creata)` | `timestamptz` | Scadenza di R-53: priorità 1 entro 4 ore se ricevuta tra le 08:00 e le 02:00 (ora di Roma), entro le 10:00 se ricevuta di notte; priorità 2 entro 24 ore; priorità 3 entro 72. |
+| `registra_decisione(tipo, oggetto, azione, motivazione, segnalazione)` | `uuid` | Come `registra_azione`, con la segnalazione collegata; restituisce la riga del registro, che diventa l'`azione_id` delle notifiche e dei reclami. |
+| `crea_notifica(utente, tipo, dati)` | `void` | Unico punto che scrive in `notifiche`; ignora gli utenti eliminati. |
+| `notifica_esito(utente, esito, dati)` | `void` | Notifica `esito_moderazione` con `dati.esito` (`segnalazione_decisa`, `contenuto_rimosso`, `contenuto_nascosto`, `contenuto_ripristinato`, `account_sospeso`, `flyer_pubblicato`, `flyer_unito`, `flyer_rifiutato`, `reclamo_deciso`) e la motivazione del moderatore o di sistema, mai testi di altri utenti (R-53, DSA art. 17). |
+| `interessati_azione(azione uuid)` | `table (utente, ruolo)` | Chi ha diritto alla motivazione e al reclamo: chi ha segnalato (`segnalante`) e chi subisce la decisione (`coinvolto`, titolare del profilo o del flyer). Nessuno per un'escalation (R-55). |
+| `descrivi_oggetto(tipo, oggetto uuid)` | `text` | Descrizione per chi conosceva già l'oggetto: `@username`, titolo dell'evento, nome del locale. |
+| `reclamabile(azione uuid, utente uuid)` | `boolean` | La decisione si può reclamare: tra quelle previste, entro 6 mesi, dall'interessato, senza un reclamo già presentato (DSA art. 20). |
+| `evento_json(evento uuid)` | `jsonb` | Dati di un evento per la revisione dei flyer e il dettaglio delle segnalazioni. |
+| `copertina_evento(evento, locale, immagine_locale, immagine_evento, attribuzione)` | `table (tipo, percorso, attribuzione_copertina)` | Copertina di ADR-0018 (foto del locale, flyer, fondo tipografico) con `sostitutiva` quando l'immagine è nascosta e non c'è un'alternativa (ADR-0023). |
+| `file_flyer_recenti(utente uuid)` | `integer` | File caricati nelle ultime 24 ore nella propria cartella di `flyer-caricati` (R-54 anche sullo storage). |
+| `flyer_in_conservazione(percorso text)` | `boolean` | Il file appartiene a un caricamento con `conservazione_legale` e non si elimina (R-55). |
+| `applica_escalation(tipo, oggetto, segnalazione, motivazione)` | `void` | Escalation di R-55: account sospeso, immagine inaccessibile e conservata (`contenuti_occultati` e righe del registro con `conservazione_legale`), segnalazioni chiuse con un testo generico per chi ha segnalato, nessuna notifica all'account coinvolto. |
+| `immagini_da_eliminare()` | `table (bucket, percorso)` | File da eliminare per il job `pulizia_flyer` (SAFETY_PRIVACY.md §10): flyer caricati 30 giorni dopo la decisione, immagini pubblicate 12 mesi dopo la serata, foto profilo non più in uso; mai le immagini conservate come prova. |
 | `e_titolare_checkin(checkin uuid)` | `boolean` | `auth.uid()` è l'autore del check-in. |
 | `e_destinatario_checkin(checkin uuid)` | `boolean` | `auth.uid()` è in `checkin_destinatari` del check-in. |
 | `e_titolare_ritorno(ritorno uuid)` | `boolean` | `auth.uid()` è il titolare del ritorno sicuro. |
@@ -159,9 +176,12 @@ Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `verifica_invariante_gruppi`, `verifica_trasporto`, `verifica_categoria_spesa`,
 `limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `calcola_data_serata`,
 `imposta_aggiornato_il`, `imposta_nome_normalizzato`, `prepara_fonte`,
-`registra_modifica_moderatore`) sono descritte insieme alle tabelle a cui si applicano; quelle
+`registra_modifica_moderatore`, `notifica_amicizia`, `rimuovi_notifiche_amicizia`,
+`verifica_codice_invito`, `accoda_analisi_flyer`, `proteggi_caricamento_flyer`,
+`ritira_evento_del_flyer`, `esito_caricamento_flyer`, `sincronizza_avatar_nascosto`,
+`occulta_in_attesa`) sono descritte insieme alle tabelle a cui si applicano; quelle
 pianificate (`elimina_account_non_confermati`, `elimina_codici_invito_scaduti`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`,
-`assegna_badge`, `genera_riepiloghi`) nel §8.
+`assegna_badge`, `genera_riepiloghi`, `accoda_pulizia_flyer`) nel §8.
 
 ## 5. Tabelle
 
@@ -180,7 +200,8 @@ Dati pubblici minimi dell'utente. Non contiene informazioni sull'età (R-05).
 | `id` | `uuid` | PK, FK → `auth.users(id)` `on delete cascade`, differita (il trigger di registrazione crea il profilo prima della riga di `auth.users`) |
 | `username` | `citext` | unico, `^[a-z0-9_.]{3,20}$` (solo minuscole) |
 | `nome_visualizzato` | `text` | 1–40 caratteri, senza spazi iniziali o finali |
-| `avatar_path` | `text` | nullable, percorso nel bucket `avatar` |
+| `avatar_path` | `text` | nullable, percorso nel bucket `avatar`: sempre `<id>/<uuid>.webp` (vincolo `profili_avatar_percorso`) |
+| `avatar_nascosto` | `boolean` | default `false`; vero mentre la foto è in `contenuti_occultati` (trigger `private.sincronizza_avatar_nascosto`, ADR-0023): l'app mostra le iniziali |
 | `stato_account` | `stato_account` | default `attivo` |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
@@ -271,7 +292,8 @@ Unico su (`utente_id`, `tipo`, `versione`).
 
 - **S**: `utente_id = auth.uid()`.
 - **U**: `utente_id = auth.uid()`; `GRANT UPDATE (letta_il)`.
-- **I**: nessuna per `authenticated`; le righe sono create da funzioni `security definer` e dai trigger. Un webhook del database sull'`INSERT` chiama l'Edge Function `invia-push`.
+- **I**: nessuna per `authenticated`; le righe sono create solo da `private.crea_notifica`, chiamata dai trigger e dalle RPC. Dall'iterazione 6: `richiesta_amicizia` e `amicizia_accettata` (trigger `private.notifica_amicizia`, che `private.rimuovi_notifiche_amicizia` toglie se la richiesta viene rifiutata o annullata), `esito_moderazione` (`private.notifica_esito`). Dopo un blocco spariscono le notifiche che riguardano l'altra persona (R-17). Dall'iterazione 9 un webhook del database sull'`INSERT` chiama l'Edge Function `invia-push`.
+- Realtime: tabella nella pubblicazione `supabase_realtime` (§7).
 - Conservazione: 90 giorni.
 
 ### 5.2 Relazioni tra utenti
@@ -346,10 +368,11 @@ Vincolo: `accettata_il` è valorizzata se e solo se `stato = 'accettata'`.
 | `creata_il`, `chiusa_il` | `timestamptz` | |
 
 - **S**: `segnalante_id = auth.uid()` (stato della propria segnalazione) oppure `private.e_moderatore()`.
-- **I**: `segnalante_id = auth.uid()` e uno tra: `tipo_oggetto = 'profilo'` con un profilo diverso dal proprio che si può vedere o che si è bloccato; `tipo_oggetto = 'evento'` con un evento visibile (sottoquery soggetta alla RLS di `eventi`); `tipo_oggetto = 'immagine_locale'` con un locale visibile che ha una foto (`oggetto_id` = id del locale). `GRANT INSERT (segnalante_id, tipo_oggetto, oggetto_id, motivo, dettagli)`. Gli altri tipi si aggiungono con le loro tabelle (flyer, gruppi).
+- **I**: `segnalante_id = auth.uid()` e uno tra: `tipo_oggetto = 'profilo'` con un profilo diverso dal proprio che si può vedere o che si è bloccato; `tipo_oggetto = 'evento'` con un evento visibile (sottoquery soggetta alla RLS di `eventi`); `tipo_oggetto = 'immagine_locale'` con un locale visibile che ha una foto (`oggetto_id` = id del locale); dall'iterazione 6 `tipo_oggetto = 'foto_profilo'` con un profilo altrui visibile che ha una foto (R-52). `GRANT INSERT (segnalante_id, tipo_oggetto, oggetto_id, motivo, dettagli)`. Gli altri tipi si aggiungono con le loro tabelle (flyer, gruppi).
 - **U**: `private.e_moderatore()`; `GRANT UPDATE (stato, gestita_da, conservazione_legale, chiusa_il)`.
-- Trigger `private.prepara_segnalazione` (`before insert`): priorità 1 per `adescamento_o_rischio_minore`, 2 se il segnalante o il profilo segnalato è minorenne, 3 per le altre (R-53); al massimo 20 segnalazioni ogni 24 ore per utente (`NX015`).
-- RPC `public.mie_segnalazioni()`: le proprie segnalazioni con stato, oggetto (l'username per i profili, il titolo per gli eventi, il nome del locale per le foto) e l'ultima decisione motivata da `azioni_moderazione` (DSA art. 17).
+- Trigger `private.prepara_segnalazione` (`before insert`): priorità 1 per `adescamento_o_rischio_minore`, 2 se il segnalante o il profilo segnalato è minorenne, 3 per le altre (R-53); al massimo 20 segnalazioni ogni 24 ore per utente (`NX015`). Trigger `private.occulta_in_attesa` (`after insert`): per `adescamento_o_rischio_minore` da un account con almeno 7 giorni nasconde subito l'immagine segnalata (ADR-0023).
+- RPC `public.mie_segnalazioni()`: le proprie segnalazioni con stato, oggetto (l'username per i profili, il titolo per gli eventi, il nome del locale per le foto) e l'ultima decisione motivata da `azioni_moderazione` (DSA art. 17); dall'iterazione 6 anche `azione_id`, se è reclamabile e lo stato e l'esito del reclamo. Di un'escalation chi ha segnalato riceve solo un testo generico (R-55).
+- Moderazione: `coda_segnalazioni`, `dettaglio_segnalazione`, `prendi_in_carico_segnalazione`, `decidi_segnalazione`, `escalation_segnalazione` (§5.10). La decisione chiude tutte le segnalazioni aperte sullo stesso oggetto e le notifica.
 - **D**: nessuna.
 
 #### `azioni_moderazione`
@@ -372,7 +395,45 @@ Registro di sola aggiunta delle decisioni e degli accessi (DSA art. 17, R-53, R-
 - **S**: `private.e_moderatore()`.
 - **I**: `private.e_moderatore()` e `moderatore_id = auth.uid()`.
 - **U/D**: nessuna.
-- Dall'iterazione 5 il registro si riempie anche da solo: il trigger `private.registra_modifica_moderatore` registra le modifiche dei moderatori a locali, fonti ed eventi, e le RPC di moderazione registrano le loro decisioni con `private.registra_azione` (`tipo_oggetto` `locale`, `fonte`, `evento` o `candidato_locale`). Nessuna azione dell'area di moderazione è silenziosa.
+- Dall'iterazione 5 il registro si riempie anche da solo: il trigger `private.registra_modifica_moderatore` registra le modifiche dei moderatori a locali, fonti ed eventi, e le RPC di moderazione registrano le loro decisioni con `private.registra_azione` (`tipo_oggetto` `locale`, `fonte`, `evento` o `candidato_locale`). Nessuna azione dell'area di moderazione è silenziosa. Dall'iterazione 6 le decisioni sulle segnalazioni, sui flyer e sui reclami passano da `private.registra_decisione`; l'occultamento automatico si registra con autore nullo ("Sistema").
+
+#### `contenuti_occultati`
+*Funzionalità: F-40. ADR-0023, R-55.*
+
+Immagini nascoste in attesa della decisione di un moderatore o conservate come prova.
+
+| Colonna | Tipo | Vincoli |
+|---|---|---|
+| `tipo_oggetto` | `tipo_oggetto_segnalabile` | solo `foto_profilo`, `evento`, `immagine_locale` |
+| `oggetto_id` | `uuid` | PK (`tipo_oggetto`, `oggetto_id`) |
+| `segnalazione_id` | `uuid` | nullable, FK → `segnalazioni(id)` `on delete set null` |
+| `automatico` | `boolean` | `true` per l'occultamento automatico, `false` per l'escalation |
+| `conservazione_legale` | `boolean` | default `false`; con `true` la riga non si toglie con una decisione |
+| `creato_il` | `timestamptz` | |
+
+- **S**: `private.e_moderatore()`. Gli utenti non leggono la tabella: l'effetto si vede nelle copertine (`sostitutiva`), in `profili.avatar_nascosto` e nelle policy dei bucket, che non consegnano l'immagine.
+- **I/U/D**: nessuna; scrivono `private.occulta_in_attesa`, `private.applica_escalation` e `decidi_segnalazione` (che la toglie quando l'immagine è rimossa o quando non resta nessuna segnalazione aperta sull'oggetto).
+
+#### `reclami`
+*Funzionalità: F-06, F-12, F-40. DSA art. 20.*
+
+| Colonna | Tipo | Vincoli |
+|---|---|---|
+| `id` | `uuid` | PK |
+| `azione_id` | `uuid` | FK → `azioni_moderazione(id)` `on delete cascade` |
+| `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade` |
+| `testo` | `text` | 1–1000 caratteri |
+| `stato` | `stato_reclamo` | default `inviato` |
+| `esito` | `text` | nullable, `confermata` o `cambiata` |
+| `motivazione_esito` | `text` | nullable, al massimo 500 caratteri |
+| `preso_da`, `deciso_da` | `uuid` | nullable, FK → `profili(id)` `on delete set null` |
+| `creato_il`, `deciso_il` | `timestamptz` | |
+
+Vincoli: unico su (`azione_id`, `utente_id`); `stato = 'deciso'` se e solo se esito, motivazione e data della decisione ci sono.
+
+- **S**: `utente_id = auth.uid()`, con `GRANT SELECT` su tutte le colonne tranne `preso_da` e `deciso_da`: chi presenta il reclamo vede stato ed esito, non chi lo ha deciso.
+- **I/U/D**: nessuna diretta. `presenta_reclamo(azione, testo)`: solo gli interessati (`private.interessati_azione`), entro 6 mesi (`NX028`), uno per decisione (`NX029`), decisioni previste (`NX030`). `esamina_reclamo` e `decidi_reclamo` per i moderatori; `decidi_reclamo` rifiuta chi ha preso la decisione contestata (`NX031`). Cambiare la decisione annulla l'effetto dove si può: il flyer rifiutato torna in revisione, l'account torna attivo, la segnalazione chiusa senza violazione si riapre.
+- Conservazione: 12 mesi dalla decisione, salvo che la decisione contestata sia conservata come prova (`private.applica_conservazione`, SAFETY_PRIVACY.md §10).
 
 ### 5.3 Locali, fonti, eventi
 
@@ -601,7 +662,9 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 
 - **S**: `utente_id = auth.uid()` oppure `private.e_moderatore()`, con `GRANT SELECT (id, stato, evento_id, motivo_rifiuto, creato_il)` al ruolo `authenticated`: l'utente vede lo stato, non l'output grezzo del modello. I permessi di colonna valgono per tutto il ruolo `authenticated`, moderatori compresi: i moderatori leggono le altre colonne (`risultato_estrazione`, `confidenza`, `storage_path`) solo tramite la RPC `public.coda_flyer()`, che non restituisce `utente_id` (R-69).
 - **I**: `utente_id = auth.uid()` e `stato = 'caricato'` e `storage_path like auth.uid()::text || '/%'`. Trigger `private.limita_caricamenti_flyer` (R-54) e accodamento del job `analizza_flyer`.
-- **U**: nessuna diretta; le decisioni passano dalla RPC `public.decidi_flyer(caricamento uuid, esito text, correzioni jsonb, motivazione text)`, che aggiorna caricamento ed evento e registra l'azione.
+- **U**: nessuna diretta; le decisioni passano dalla RPC `public.decidi_flyer(caricamento uuid, esito text, dati jsonb, motivazione text, evento_esistente uuid)` (`approva`, `unisci`, `rifiuta`), che aggiorna caricamento ed evento e registra l'azione. Trigger `private.proteggi_caricamento_flyer`: il worker non approva mai e unisce solo a un evento già pubblicato (R-51); `private.esito_caricamento_flyer` notifica l'esito a chi ha caricato (mai dopo un'escalation) e registra le decisioni automatiche del worker; `private.ritira_evento_del_flyer` elimina l'evento in revisione nato solo da una richiesta cancellata.
+- R-54: il limite di 10 caricamenti in 24 ore conta le righe di `private.registro_caricamenti_flyer` (24 ore di conservazione), che la cancellazione di una richiesta non svuota; `flyer_disponibili()` dice quanti ne restano e quando se ne libera uno.
+- RPC `miei_flyer()`: i propri caricamenti con stato, motivo del rifiuto, ultima decisione e reclamo.
 - **D**: `utente_id = auth.uid()`: elimina la richiesta e l'immagine, ma non l'evento già approvato.
 - Worker: `SELECT`, `UPDATE (stato, risultato_estrazione, modello, versione_prompt, confidenza, phash, evento_id, motivo_rifiuto)`.
 
@@ -927,16 +990,23 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `crea_codice_invito()` | definer | utenti | Codice monouso di 15 minuti (R-12, R-14) |
 | `anteprima_codice_invito(codice text)` | definer | utenti | Stato del codice (`valido`, `scaduto`, `usato`, `non_valido`, `gia_amici`, `in_attesa`); identificativo, username e nome del titolare solo se il codice è utilizzabile o se siete già in contatto; blocchi, account sospesi e il proprio codice danno `non_valido`; `avviso_fasce = true` solo se chi chiama è minorenne e il titolare è maggiorenne |
 | `miei_bloccati()` | definer | utenti | Persone bloccate da chi chiama (F-42) |
-| `mie_segnalazioni()` | definer | utenti | Proprie segnalazioni (profili, eventi, foto dei locali) con stato e decisione motivata |
+| `mie_segnalazioni()` | definer | utenti | Proprie segnalazioni (profili, foto profilo, eventi, foto dei locali) con stato, decisione motivata e reclamo |
+| `presenta_reclamo(azione uuid, testo text)` | definer | interessati della decisione | Reclamo su una decisione di moderazione entro 6 mesi (DSA art. 20), §5.2 `reclami` |
+| `flyer_disponibili()` | definer | utenti | Caricamenti di flyer ancora disponibili nelle 24 ore e quando se ne libera uno (R-54) |
+| `miei_flyer()` | definer | utenti | Propri flyer con stato, decisione e reclamo (F-06) |
 | `usa_codice_invito(codice text)` | definer | utenti | Crea la richiesta di amicizia verso il titolare (R-12) |
 | `avviso_richiesta(amicizia uuid)` | definer | destinatario della richiesta | `avviso_fasce = true` solo se il destinatario è minorenne e il richiedente maggiorenne, per mostrare l'avviso prima dell'accettazione (R-12) |
 | `rigenera_mio_riepilogo()` | definer | utenti | Rigenera il proprio riepilogo annuale (F-33) |
-| `coda_flyer()` | definer | moderatori | Caricamenti in revisione con estrazione e percorso dell'immagine, senza `utente_id` né dati del profilo di chi ha caricato (il percorso contiene solo l'uuid pseudonimo usato per la cartella) (F-40, R-69) |
-| `decidi_flyer(...)` | definer | moderatori | Approvazione, correzione o rifiuto di un flyer (R-51); se l'immagine è approvata per la pubblicazione accoda `copia_immagine_flyer` |
+| `coda_flyer()` | definer | moderatori | Caricamenti in revisione o non leggibili con estrazione, percorso dell'immagine, evento in revisione e possibile corrispondenza con un evento pubblicato, senza `utente_id` né dati del profilo di chi ha caricato (il percorso contiene solo l'uuid pseudonimo usato per la cartella) (F-40, R-69) |
+| `decidi_flyer(caricamento, esito, dati, motivazione, evento_esistente)` | definer | moderatori | Approvazione con le due conferme e la scelta esplicita sull'alcol (R-23), unione a un evento pubblicato o rifiuto motivato (R-51); sotto i 18 anni serve la motivazione (R-22); se l'immagine è adatta accoda `copia_immagine_flyer` |
+| `escalation_flyer(caricamento, motivazione, conferma)`, `escalation_segnalazione(segnalazione, motivazione, conferma)` | definer | moderatori | Escalation alle autorità con la parola `ESCALATION` (R-55, `private.applica_escalation`) |
+| `coda_segnalazioni()` | definer | moderatori | Segnalazioni aperte per priorità e scadenza di R-53, poi le chiuse degli ultimi 30 giorni; nessun contenuto né chi ha segnalato (R-69) |
+| `prendi_in_carico_segnalazione(segnalazione uuid)` | definer | moderatori | Segnalazione in lavorazione a nome di chi chiama; `NX033` se è in carico a un altro |
+| `reclami_moderazione()`, `esamina_reclamo(reclamo)`, `decidi_reclamo(reclamo, cambia, motivazione)` | definer | moderatori | Reclami con la decisione contestata; decide un moderatore diverso da chi l'ha presa (DSA art. 20) |
 | `esegui_fonte_ora(fonte uuid)` | definer | moderatori | Accoda subito un job `esegui_fonte` per una fonte `consentita`, anche non ancora attiva, per la prova in staging (skill `add-event-source`) |
 | `decidi_duplicato(grezzo uuid, stesso_evento boolean)` | definer | moderatori | Revisione dei duplicati (EVENT_INGESTION.md §6.4) |
 | `coda_duplicati()` | definer | moderatori | Grezzi in revisione con l'evento candidato per il confronto affiancato |
-| `contatori_moderazione()` | definer | moderatori | Duplicati, possibili annullamenti e candidati da verificare (navigazione laterale) |
+| `contatori_moderazione()` | definer | moderatori | Duplicati, possibili annullamenti, candidati da verificare, flyer, segnalazioni aperte e di priorità 1 con la prima scadenza, reclami non ancora decisi (navigazione laterale e avviso urgente) |
 | `locali_moderazione()`, `locale_moderazione(locale uuid)` | definer | moderatori | Elenco e scheda dei locali, anche non attivi, con coordinate e conteggi |
 | `candidati_da_verificare()`, `decidi_candidato_locale(candidato, esito, locale, motivazione)` | definer | moderatori | Candidati del bootstrap e loro verifica (EVENT_INGESTION.md §2.1) |
 | `salva_foto_locale(…)`, `rimuovi_foto_locale(locale, motivazione)` | definer | moderatori | Foto del locale con fonte, conferme e motivazione (R-56) |
@@ -945,8 +1015,8 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `cambia_stato_evento(evento, stato, motivazione)` | definer | moderatori | Pubblicazione, annullamento e rifiuto motivati |
 | `possibili_annullamenti()`, `decidi_possibile_annullamento(evento, annullato, motivazione)` | definer | moderatori | Eventi spariti dalla loro unica fonte (EVENT_INGESTION.md §7) |
 | `registro_moderazione(tipo, oggetto)` | definer | moderatori | Ultime 50 azioni su un locale, una fonte, un evento o un candidato, con il nome del moderatore e, per gli eventi, le operazioni della raccolta |
-| `dettaglio_segnalazione(id uuid)` | definer | moderatori | Oggetto segnalato con registrazione dell'accesso (R-69) |
-| `decidi_segnalazione(id uuid, azione azione_moderazione, motivazione text)` | definer | moderatori | Azione motivata e notifiche (R-53) |
+| `dettaglio_segnalazione(id uuid)` | definer | moderatori | Oggetto segnalato com'è per gli utenti, testo di chi ha segnalato senza la sua identità, altre segnalazioni sullo stesso oggetto e registro; ogni lettura registra un `accesso_segnalazione` (R-69) |
+| `decidi_segnalazione(segnalazione uuid, azione azione_moderazione, motivazione text, contenuto text)` | definer | moderatori | `nessuna_violazione`, `rimuovi_contenuto` (per un profilo `contenuto` = `foto`, `nome` o `username`), `modifica_evento`, `sospendi_account`; chiude le segnalazioni aperte sullo stesso oggetto, notifica chi ha segnalato e chi è coinvolto (R-53), toglie o conferma l'occultamento automatico (ADR-0023); restituisce il percorso di una foto del locale rimossa, che l'app elimina |
 | `correggi_data_nascita(utente uuid, data date, motivazione text)` | definer | amministratori (`private.e_amministratore()`) | Correzione verificata (R-02) |
 | `leggi_metriche()` | definer | amministratori (`private.e_amministratore()`) | Metriche aggregate (§5.8) |
 
@@ -957,10 +1027,10 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 
 | Bucket | Pubblico | Percorso | Lettura | Scrittura |
 |---|---|---|---|---|
-| `avatar` | no | `<utente_id>/<file>` | `private.puo_vedere_profilo(<utente_id dal percorso>)` | titolare, solo nella propria cartella; WebP fino a 2 MB, ritagliata e senza dati EXIF (rimossi sul dispositivo); un solo file per utente, quello precedente si elimina alla sostituzione; i moderatori lo rimuovono con `decidi_segnalazione` (R-52) |
-| `flyer-caricati` | no | `<utente_id>/<uuid>.<ext>` | titolare e moderatori; il worker con `service_role` (ADR-0003) | titolare, solo nella propria cartella; JPEG/PNG/WebP fino a 10 MB (R-54) |
-| `flyer-pubblicati` | no | `eventi/<evento_id>.webp` | `exists` su `eventi` con `immagine_path = name` (soggetta alla RLS di `eventi`, R-20, R-23) | solo il worker con `service_role`, con il job `copia_immagine_flyer` accodato da `decidi_flyer` dopo l'approvazione (iterazione 6); WebP fino a 2 MB. Bucket creato nell'iterazione 4 |
-| `immagini-locali` | no | `<locale_id>.webp` o `<locale_id>-<versione>.webp` | `authenticated`: solo la foto approvata (`exists` su `locali` con `immagine_path = name`, soggetta alla RLS di `locali`, quindi solo locali attivi); moderatori con due fattori: tutti i file | solo moderatori con due fattori (insert, update, delete); WebP fino a 1 MB, EXIF rimosso (ADR-0018, R-56) |
+| `avatar` | no | `<utente_id>/<uuid>.webp` | la foto in uso di un profilo che `private.puo_vedere_profilo` mostra e non nascosta (ADR-0023); il titolare tutti i propri file; i moderatori le foto dei profili segnalati (R-69) | titolare, solo nella propria cartella; WebP fino a 2 MB, ritagliata e senza dati EXIF (rimossi sul dispositivo); un solo file per utente, quello precedente si elimina alla sostituzione; i moderatori lo rimuovono con `decidi_segnalazione` (R-52) |
+| `flyer-caricati` | no | `<utente_id>/<uuid>.<ext>` | titolare e moderatori; il worker con `service_role` (ADR-0003) | titolare, solo nella propria cartella e al massimo 10 file in 24 ore (`private.file_flyer_recenti`); JPEG/PNG/WebP fino a 10 MB (R-54); il titolare elimina i propri file tranne quelli conservati come prova (R-55) |
+| `flyer-pubblicati` | no | `eventi/<evento_id>.webp` | `exists` su `eventi` con `immagine_path = name` (soggetta alla RLS di `eventi`, R-20, R-23) e immagine non nascosta (ADR-0023); moderatori: tutti i file | solo il worker con `service_role`, con il job `copia_immagine_flyer` accodato da `decidi_flyer` dopo l'approvazione (iterazione 6); WebP fino a 2 MB. Bucket creato nell'iterazione 4 |
+| `immagini-locali` | no | `<locale_id>.webp` o `<locale_id>-<versione>.webp` | `authenticated`: solo la foto approvata e non nascosta (`exists` su `locali` con `immagine_path = name`, soggetta alla RLS di `locali`, quindi solo locali attivi; ADR-0023); moderatori con due fattori: tutti i file | solo moderatori con due fattori (insert, update, delete); WebP fino a 1 MB, EXIF rimosso (ADR-0018, R-56) |
 | `mappe` | sì | `milano-brianza.pmtiles`, `assets/` (font e icone di Protomaps) | tutti | solo durante il deploy (ADR-0016) |
 
 ## 7. Realtime
@@ -978,13 +1048,13 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 | Codici invito scaduti | ogni ora, al minuto 23 | `private.elimina_codici_invito_scaduti()`: elimina i codici scaduti da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Account non confermati | ogni ora, al minuto 17 | `private.elimina_account_non_confermati()`: elimina gli account senza email confermata creati da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Ritorni scaduti | ogni minuto | `private.verifica_ritorni_scaduti()` |
-| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; l'iterazione 8 aggiunge le altre scadenze di SAFETY_PRIVACY.md §10, compresi gli account inattivi |
+| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); l'iterazione 8 aggiunge le altre scadenze di SAFETY_PRIVACY.md §10, compresi gli account inattivi |
 | Invariante dei gruppi | ogni giorno alle 04:00 | `private.verifica_invariante_gruppi()` |
 | Accodamento job del worker | ogni 5 minuti | `private.accoda_fonti_da_eseguire()`: inserisce `esegui_fonte` per le fonti attive scadute; dopo un errore l'intervallo raddoppia (fino a 8 volte la frequenza), che è il backoff delle fonti |
 | Metriche | ogni giorno alle 02:00 | `refresh materialized view private.metriche_settimanali` |
 | Badge | ogni giorno alle 05:00 | `private.assegna_badge()` |
 | Riepiloghi annuali | 1° dicembre alle 03:00 | `private.genera_riepiloghi(extract(year from now())::smallint)` |
-| Pulizia flyer | ogni giorno alle 03:30 | inserisce `pulizia_flyer` in `coda_job` (eliminazione delle immagini secondo SAFETY_PRIVACY.md §10) |
+| Pulizia flyer | ogni giorno alle 03:30 | `private.accoda_pulizia_flyer()`: inserisce `pulizia_flyer` in `coda_job`; il worker elimina i file di `private.immagini_da_eliminare()` (SAFETY_PRIVACY.md §10) |
 
 `pg_cron` è l'**unico scheduler** del sistema: il worker si limita a consumare `coda_job`
 (ADR-0003).

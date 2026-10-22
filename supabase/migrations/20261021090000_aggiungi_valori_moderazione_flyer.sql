@@ -1,5 +1,5 @@
 -- Migrazione: valori di enum per i flyer, la foto profilo, l'occultamento automatico (D-15,
--- ADR-0022) e i reclami (DSA art. 20)
+-- ADR-0023) e i reclami (DSA art. 20)
 -- Documentazione: docs/DATA_MODEL.md §3, §5.2; regole: R-50, R-51, R-52, R-53, R-55
 --
 -- I nuovi valori stanno in una migrazione a sé: Postgres non permette di usare un valore di

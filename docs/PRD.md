@@ -54,7 +54,7 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 | F-03 | Dettaglio evento | P0 | 1 | Foto del locale come immagine di copertina, con attribuzione se richiesta dalla licenza (in mancanza: flyer approvato, poi fondo tipografico; ADR-0018). Titolo, data, orari, locale, età minima (con l'indicazione "età non dichiarata, considerata 18+" se `eta_minima_dichiarata = false`), generi, artisti, prezzo minimo, link alla fonte originale sempre presente, link ai biglietti se disponibile, "Apri in Mappe". Un evento annullato resta visibile con il badge "Annullato" e senza azioni; un evento non visibile mostra lo stesso testo per tutti i casi (R-20). Menu ⋯ con "Condividi il link" e "Segnala" (evento o foto del locale, R-50). |
 | F-04 | Amici che partecipano in evidenza | P0 | 1 | Nell'elenco e nel dettaglio compaiono il numero e gli avatar degli amici confermati con partecipazione visibile (R-67); filtro "solo eventi con amici". |
 | F-05 | "Mi interessa" / "Partecipo" | P0 | 1 | Si imposta in un tocco; la visibilità è regolabile per evento (predefinita dalle impostazioni di privacy, R-67); si annulla in un tocco o con "Annulla" nel messaggio di conferma. Solo per eventi visibili e pubblicati. |
-| F-06 | Caricamento flyer | P0 | 1 | Foto o screenshot (JPEG, PNG, WebP fino a 10 MB); EXIF rimosso; stato visibile a chi ha caricato ("in analisi", "in revisione", "pubblicato", "unito a un evento esistente", "rifiutato" con motivo); pubblicazione solo dopo revisione (R-51); 10 caricamenti al giorno (R-54). |
+| F-06 | Caricamento flyer | P0 | 1 | Foto o screenshot (JPEG, PNG, WebP fino a 10 MB); EXIF rimosso; stato visibile a chi ha caricato ("in analisi", "in revisione", "pubblicato", "unito a un evento esistente", "rifiutato" con motivo); pubblicazione solo dopo revisione (R-51); 10 caricamenti al giorno (R-54), con quanti ne restano; reclamo contro il rifiuto entro 6 mesi (DSA art. 20). |
 | F-07 | Eventi dagli aggregatori (Resident Advisor, Xceed, Dice) | P2 | 3 | Solo con accordo scritto o API ufficiale (ADR-0008, D-05). |
 
 ### 4.2 Organizza
@@ -63,7 +63,7 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 |---|---|---|---|---|
 | F-10 | Registrazione e profilo | P0 | 1 | Email e password (almeno 10 caratteri) con verifica dell'email tramite link valido un'ora; CAPTCHA (ADR-0020); data di nascita obbligatoria e immutabile, chiesta per prima (R-01, R-02); username e nome visualizzato, con lo username verificato all'invio; consenso a termini e informativa con versione, riassunto in una schermata (R-63); senza account si vedono solo Benvenuto, termini e informativa (R-07); onboarding che spiega le regole di sicurezza in 3 schermate, una sola volta e senza "Salta"; account non confermati eliminati dopo 24 ore; foto profilo facoltativa (JPEG, PNG o WebP fino a 2 MB, ritagliata e convertita in WebP senza dati EXIF), visibile solo a chi può vedere il profilo, segnalabile e rimovibile dai moderatori (R-52); senza foto, le iniziali. |
 | F-11 | Amicizie | P0 | 1 | Ricerca per username nella propria fascia, dopo 3 caratteri e con al massimo 20 risultati, senza suggerimenti (R-10); richiesta e accettazione esplicita (R-11); codice invito QR o link di 15 minuti, monouso, per qualsiasi amicizia e unico canale tra fasce diverse, con scansione dalla fotocamera o codice scritto (R-12); avviso a chi ha 14–17 anni prima di aggiungere o accettare una persona maggiorenne (R-12); limiti di 20 richieste al giorno, 50 in attesa, 10 codici al giorno (R-14); elenco di amici, richieste ricevute e inviate; rimozione; profilo con solo avatar, nome e username; modifica di nome e username. |
-| F-12 | Blocco e segnalazione | P0 | 1 | Blocco da profilo, gruppo e serata con conferma e «Annulla» (R-17); segnalazione di ogni contenuto in al massimo due tocchi, con testo facoltativo e «Blocca anche» (R-50), priorità secondo R-53 e il 112 ricordato per il rischio a un minorenne; stato delle proprie segnalazioni con la decisione motivata. |
+| F-12 | Blocco e segnalazione | P0 | 1 | Blocco da profilo, gruppo e serata con conferma e «Annulla» (R-17); segnalazione di ogni contenuto in al massimo due tocchi, con testo facoltativo e «Blocca anche» (R-50), priorità secondo R-53 e il 112 ricordato per il rischio a un minorenne; stato delle proprie segnalazioni con la decisione motivata e il reclamo, che esamina un moderatore diverso (DSA art. 17 e 20); foto profilo segnalabile a parte (R-52). |
 | F-13 | Gruppi | P0 | 1 | Creazione, invito di amici confermati, accettazione, uscita, ruoli admin e membro; massimo 30 membri; invariante delle fasce (R-15). |
 | F-14 | Serata di gruppo con conferme | P0 | 1 | Proposta legata a un evento adatto a tutti i membri (R-24) oppure libera; risposte sì, forse, no aggiornate in tempo reale; riepilogo "chi c'è". |
 | F-15 | Prevendite e liste | P0 | 1 | Link esterni a prevendita e lista sulla serata; stato del biglietto per ogni membro (nessuno, prevendita, lista, alla cassa). Nessun pagamento nell'app. |
@@ -76,7 +76,7 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 |---|---|---|---|---|
 | F-20 | Check-in "sono qui" | P0 | 2 | Disattivato di default; si attiva nelle impostazioni; indica solo il locale; destinatari scelti tra gli amici confermati (proposti di default: i membri della serata di gruppo che sono anche amici confermati); scade dopo 6 ore; si termina in un tocco (R-30). |
 | F-21 | Ritorno sicuro | P0 | 2 | Avvio esplicito con arrivo previsto e da 1 a 5 amici confermati; posizione condivisa anche con l'app in background (app native, ADR-0006); indicatore permanente; "sono arrivato" in un tocco oppure arrivo automatico in un'area salvata solo sul dispositivo; allerta push ai destinatari se l'arrivo previsto passa senza conferma; fine automatica (R-31, R-32). Nella PWA la funzione è disponibile solo in primo piano e lo dichiara chiaramente. |
-| F-22 | Notifiche push | P0 | 2 | iOS e Android tramite FCM/APNs, Web Push per la PWA; consenso esplicito; nessun testo scritto da altri utenti nelle notifiche (solo testi di sistema). Nella Fase 1 le notifiche sono solo nell'app. |
+| F-22 | Notifiche push | P0 | 2 | iOS e Android tramite FCM/APNs, Web Push per la PWA; consenso esplicito; nessun testo scritto da altri utenti nelle notifiche (solo testi di sistema). Nella Fase 1 le notifiche sono solo nell'app: campanella con il numero delle non lette, elenco aggiornato in tempo reale (Realtime), esiti di moderazione con la motivazione. |
 
 ### 4.4 Ricorda
 
@@ -91,7 +91,7 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 
 | ID | Funzionalità | Priorità | Fase | Criteri di accettazione |
 |---|---|---|---|---|
-| F-40 | Moderazione | P0 | 1 | Area riservata con autenticazione a due fattori: coda dei flyer, coda dei duplicati, coda delle segnalazioni ordinate per priorità (R-53); azioni motivate e registrate; gestione dei locali e delle fonti con verifica di conformità. |
+| F-40 | Moderazione | P0 | 1 | Area riservata con autenticazione a due fattori: coda dei flyer, coda dei duplicati, coda delle segnalazioni ordinate per priorità con il tempo rimanente e l'avviso delle urgenti (R-53); dettaglio con apertura registrata e immagini sfocate fino a «Mostra» (R-69); azioni motivate e registrate con l'anteprima del messaggio alle persone interessate; reclami (DSA art. 20); escalation alle autorità in due passaggi (R-55); occultamento automatico delle immagini segnalate per rischio a un minorenne (ADR-0023); gestione dei locali e delle fonti con verifica di conformità. |
 | F-41 | Diritti privacy | P0 | 1 | Esportazione JSON ed eliminazione dell'account self-service (R-64); informativa a livelli (R-63). |
 | F-42 | Impostazioni di privacy | P0 | 1 | Visibilità predefinita delle partecipazioni, check-in (attivabile dalla Fase 2), notifiche, elenco dei bloccati. |
 | F-43 | App installabile | P0 | 1–2 | Fase 1: PWA installabile e build interne iOS (TestFlight) e Android (test interno). Fase 2: pubblicazione su App Store e Google Play. |
@@ -138,11 +138,11 @@ fase della roadmap. La matrice va aggiornata insieme alla funzionalità (skill `
 | F-03 | App | `eventi`, `eventi_fonti`, `locali` | R-20, R-21 | 1 |
 | F-04 | App · RPC `cerca_eventi` | `partecipazioni_evento`, `amicizie` | R-67 | 1 |
 | F-05 | App | `partecipazioni_evento` | R-67 | 1 |
-| F-06 | App · Storage · Worker (flyer) · Claude API | `caricamenti_flyer`, `eventi_grezzi`, `coda_job`, bucket `flyer-caricati` e `flyer-pubblicati` | R-51, R-54, R-66 | 1 |
+| F-06 | App · Storage · Worker (flyer) · Claude API | `caricamenti_flyer`, `eventi_grezzi`, `coda_job`, `reclami`, bucket `flyer-caricati` e `flyer-pubblicati` | R-51, R-54, R-66 | 1 |
 | F-07 | Worker (adattatori aggregatori) | `fonti`, `eventi_grezzi` | ADR-0008 | 3 |
-| F-10 | App · Supabase Auth (hook dell'età, Turnstile) | `profili`, `profili_privati`, `consensi`, bucket `avatar` | R-01, R-02, R-05, R-07, R-60, R-63 | 1 |
+| F-10 | App · Supabase Auth (hook dell'età, Turnstile) | `profili`, `profili_privati`, `consensi`, bucket `avatar` | R-01, R-02, R-05, R-07, R-52, R-60, R-63 | 1 |
 | F-11 | App · RPC `cerca_utenti`, `crea_codice_invito`, `anteprima_codice_invito`, `usa_codice_invito`, `avviso_richiesta` | `amicizie`, `codici_invito` | R-10…R-14 | 1 |
-| F-12 | App · area di moderazione · RPC `mie_segnalazioni` | `blocchi`, `segnalazioni`, `azioni_moderazione` | R-17, R-50, R-53 | 1 |
+| F-12 | App · area di moderazione · RPC `mie_segnalazioni` | `blocchi`, `segnalazioni`, `azioni_moderazione`, `reclami` | R-17, R-50, R-53 | 1 |
 | F-13 | App | `gruppi`, `membri_gruppo` | R-15 | 1 |
 | F-14 | App · Realtime | `serate_gruppo`, `partecipazioni_serata` | R-16, R-24 | 1 |
 | F-15 | App | `serate_gruppo`, `partecipazioni_serata` | — | 1 |
@@ -155,7 +155,7 @@ fase della roadmap. La matrice va aggiornata insieme alla funzionalità (skill `
 | F-31 | App · viste SQL | come F-30 | R-40 | 2 |
 | F-32 | `pg_cron` · funzione SQL `private.assegna_badge()` | `badge`, `badge_utente` | R-41 | 2 |
 | F-33 | `pg_cron` · funzione SQL `private.genera_riepiloghi()` · App | `riepiloghi_annuali` | R-42 | 2 |
-| F-40 | App (area di moderazione) · RPC di moderazione | `segnalazioni`, `azioni_moderazione`, `caricamenti_flyer`, `eventi_grezzi`, `locali`, `fonti`, `esecuzioni_fonte`, `candidati_locali` | R-06, R-53, R-55, R-69 | 1 |
+| F-40 | App (area di moderazione) · RPC di moderazione | `segnalazioni`, `azioni_moderazione`, `contenuti_occultati`, `reclami`, `caricamenti_flyer`, `eventi_grezzi`, `locali`, `fonti`, `esecuzioni_fonte`, `candidati_locali` | R-06, R-51, R-53, R-55, R-69 | 1 |
 | F-41 | Edge Functions `esporta-dati`, `elimina-account` | tutte le tabelle personali | R-64 | 1 |
 | F-42 | App | `profili_privati`, `blocchi` | R-30, R-67 | 1 |
 | F-43 | App (Next.js export statico + Capacitor) · service worker | — | — | 1–2 |

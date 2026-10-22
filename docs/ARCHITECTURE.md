@@ -269,6 +269,29 @@ flowchart TD
     MODF -->|approva| PUB
 ```
 
+### 4.6 Segnalazioni, decisioni e reclami
+
+```mermaid
+sequenceDiagram
+    participant U as Utente
+    participant DB as Postgres
+    participant M as Moderatore (aal2)
+    U->>DB: insert segnalazioni
+    DB->>DB: prepara_segnalazione: priorità R-53
+    DB->>DB: occulta_in_attesa: immagine nascosta (solo rischio minore, ADR-0023)
+    M->>DB: coda_segnalazioni (senza contenuto né segnalante)
+    M->>DB: dettaglio_segnalazione (accesso registrato, R-69)
+    M->>DB: decidi_segnalazione con motivazione
+    DB->>DB: chiude le segnalazioni sullo stesso oggetto, toglie o conferma l'occultamento
+    DB-->>U: notifiche esito_moderazione (Realtime)
+    U->>DB: presenta_reclamo entro 6 mesi
+    M->>DB: decidi_reclamo (moderatore diverso, DSA art. 20)
+```
+
+Le immagini segnalate si mostrano al moderatore con URL firmati e sfocate fino a «Mostra»;
+nessuna funzione le scarica o le inoltra. L'escalation (R-55) sospende l'account, conserva
+l'immagine come prova e non notifica l'account coinvolto.
+
 ## 5. Dettagli trasversali
 
 ### 5.1 Autorizzazione
@@ -303,7 +326,9 @@ flowchart TD
 Le notifiche sono righe in `notifiche` create da trigger e funzioni. Un webhook del database
 sull'`INSERT` invoca `invia-push`, che legge `dispositivi_push` e invia il messaggio con un
 testo di sistema localizzato, senza testi scritti da altri utenti, poi imposta
-`inviata_push_il`. Nella Fase 1 le notifiche sono mostrate solo nell'app tramite Realtime.
+`inviata_push_il`. Nella Fase 1 le notifiche sono mostrate solo nell'app: la campanella delle
+aree si iscrive alle `INSERT` su `notifiche` dell'utente (Postgres Changes, filtrate dalla
+RLS) e aggiorna il numero delle non lette; l'elenco `/notifiche/` le segna come lette.
 
 ### 5.5 Offline
 
@@ -391,7 +416,7 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | F-07 Aggregatori | Worker `fonti` (nuovi adattatori) | §4.5, ADR-0008 |
 | F-10 Registrazione e profilo | App, Supabase Auth (CAPTCHA), trigger di registrazione | §4.1 |
 | F-11 Amicizie | App, RPC `cerca_utenti`, `crea_codice_invito`, `usa_codice_invito` | §3.2, §5.1 |
-| F-12 Blocco e segnalazione | App, area di moderazione | §3.2 |
+| F-12 Blocco e segnalazione | App, area di moderazione, RPC `mie_segnalazioni` e `presenta_reclamo` | §3.2, §4.6 |
 | F-13 Gruppi | App, policy con `private.puo_entrare_nel_gruppo` | §5.1 |
 | F-14 Serata di gruppo | App, Realtime Postgres Changes | §4.3 |
 | F-15 Prevendite e liste | App (link esterni) | §4.3 |
@@ -399,12 +424,12 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | F-17 Accesso con Apple e Google | Supabase Auth (provider OAuth) | §3.2 |
 | F-20 Check-in | App, Realtime | §5.3 |
 | F-21 Ritorno sicuro | App nativa (posizione in background), Realtime Broadcast, `pg_cron`, `invia-push` | §4.4, ADR-0006 |
-| F-22 Notifiche push | Edge Function `invia-push`, FCM/APNs, Web Push | §5.4 |
+| F-22 Notifiche push | Nella Fase 1 campanella e `/notifiche/` con Realtime; dalla Fase 2 Edge Function `invia-push`, FCM/APNs, Web Push | §5.4 |
 | F-30 Tracker | App (offline con coda di scritture) | §5.5 |
 | F-31 Statistiche | Vista `statistiche_personali` | §3.2 |
 | F-32 Badge | Funzione SQL `private.assegna_badge()` con `pg_cron` | §3.2 |
 | F-33 Wrapped | Funzione SQL `private.genera_riepiloghi()` con `pg_cron`, App (immagine generata sul dispositivo) | §3.2 |
-| F-40 Moderazione | App (area `/moderazione/` con navigazione propria, attivazione e codice TOTP, accesso di 8 ore; `src/features/moderazione/`), RPC di moderazione con registro delle azioni | §5.1, SAFETY_PRIVACY.md §11, DATA_MODEL.md §5.10 |
+| F-40 Moderazione | App (area `/moderazione/` con navigazione propria, attivazione e codice TOTP, accesso di 8 ore; `src/features/moderazione/`), RPC di moderazione con registro delle azioni; code di flyer, segnalazioni e reclami con avviso delle urgenti | §4.5, §4.6, §5.1, SAFETY_PRIVACY.md §11, DATA_MODEL.md §5.10 |
 | F-41 Diritti privacy | Edge Functions `esporta-dati`, `elimina-account` | §3.2 |
 | F-42 Impostazioni di privacy | App | §3.1 |
 | F-43 App installabile | Export statico, service worker, Capacitor, store | §3.1, §6, ADR-0001 |

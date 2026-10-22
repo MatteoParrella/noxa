@@ -779,3 +779,18 @@
     animation-duration: var(--movimento-ridotto);
   }
 }
+
+/* Copertina sostitutiva: immagine nascosta in attesa della revisione (ADR-0023). */
+.copertina-sostitutiva {
+  background: var(--colore-superficie-3);
+}
+.illustrazione-notte {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* Il testo del dettaglio resta sopra l'illustrazione, che è posizionata. */
+.copertina-sostitutiva .cop-tipo {
+  position: relative;
+}

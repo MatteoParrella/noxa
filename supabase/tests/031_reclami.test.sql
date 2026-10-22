@@ -1,7 +1,7 @@
 -- reclami (DATA_MODEL.md §5.2; DSA art. 20). Regole: R-06, R-53, R-69.
 -- Amici del seed: 15-16, 20-21, 18-17 (codice invito).
 begin;
-select plan(30);
+select plan(34);
 
 -- Letta senza la RLS: gli utenti non vedono il registro, ma il reclamo ne riceve l'id dalla
 -- notifica o da mie_segnalazioni.
@@ -198,6 +198,37 @@ select is(
 );
 select throws_ok($$ select deciso_da from public.reclami $$, '42501', null,
                  'Chi ha presentato il reclamo non vede chi lo ha deciso');
+
+-- Conservazione (SAFETY_PRIVACY.md §10): un reclamo deciso si elimina dopo 12 mesi, salvo
+-- che la decisione contestata sia conservata come prova (R-55).
+select tests.esci();
+insert into public.reclami (azione_id, utente_id, testo, stato, esito, motivazione_esito, deciso_il)
+values (tests.azione('Nessuna violazione A.'), tests.id('adulto_18'), 'Vecchio.', 'deciso',
+        'confermata', 'Confermata.', now() - interval '13 months'),
+       (tests.azione('Nessuna violazione A.'), tests.id('adulto_21'), 'Recente.', 'deciso',
+        'confermata', 'Confermata.', now() - interval '11 months');
+select private.applica_conservazione();
+select is(
+  (select array_agg(testo order by testo) from public.reclami where testo in ('Vecchio.', 'Recente.')),
+  array['Recente.'],
+  'R-65: un reclamo deciso da più di 12 mesi si elimina, uno più recente resta'
+);
+update public.azioni_moderazione set conservazione_legale = true
+where id = tests.azione('Nessuna violazione A.');
+update public.reclami set deciso_il = now() - interval '13 months' where testo = 'Recente.';
+select private.applica_conservazione();
+select is(
+  (select count(*)::int from public.reclami where testo = 'Recente.'),
+  1,
+  'R-55: il reclamo su una decisione conservata come prova non si elimina'
+);
+
+select tests.autentica_come('minore_17');
+select throws_ok($$ select * from public.reclami_moderazione() $$, '42501', null,
+                 'A 17 anni la coda dei reclami non si apre');
+select is((select count(*)::int from public.reclami), 0,
+          'A 17 anni non si leggono i reclami di altri');
+select tests.esci();
 
 select * from finish();
 rollback;

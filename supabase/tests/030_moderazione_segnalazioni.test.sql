@@ -1,8 +1,8 @@
 -- Coda, dettaglio e decisioni delle segnalazioni; escalation (DATA_MODEL.md §5.2, §5.10;
--- SAFETY_PRIVACY.md §11). Regole: R-06, R-50, R-53, R-55, R-69; D-15 (ADR-0022).
+-- SAFETY_PRIVACY.md §11). Regole: R-06, R-50, R-53, R-55, R-69; D-15 (ADR-0023).
 -- Amici del seed: 15-16, 20-21, 18-17 (codice invito).
 begin;
-select plan(52);
+select plan(53);
 
 create function tests.s(motivo text, segnalante text) returns uuid language sql stable as $$
   select x.id from public.segnalazioni x
@@ -309,6 +309,11 @@ select throws_ok(
   'NX036', null,
   'R-55: l''account sospeso non carica flyer'
 );
+
+select tests.autentica_come('minore_14');
+select throws_ok($$ select * from public.coda_segnalazioni() $$, '42501', null,
+                 'A 14 anni la coda delle segnalazioni non si apre');
+select tests.esci();
 
 select * from finish();
 rollback;

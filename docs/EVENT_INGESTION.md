@@ -263,10 +263,13 @@ l'import diretto di `httpx` e `playwright` nei moduli degli adattatori).
    caricamento diventa `unito`: si aggiunge una riga in `eventi_fonti` e i campi non vengono
    modificati (R-51). Altrimenti si crea l'evento `in_revisione` e il caricamento passa a
    `in_revisione`.
-6. In moderazione il revisore vede flyer ed estrazione affiancati, corregge, imposta
-   `riferimenti_alcol` ed `eta_minima`, poi approva (l'evento diventa `pubblicato` e
-   l'immagine, se adatta, viene copiata in `flyer-pubblicati` dal job `copia_immagine_flyer`
-   del worker) o rifiuta con motivo.
+6. In moderazione il revisore vede flyer ed estrazione affiancati. I campi con confidenza
+   sotto 0,7 hanno il segno «da controllare», e la stessa soglia vale per il filtro
+   «Confidenza bassa» della coda (`SOGLIA_CONFIDENZA_BASSA` in
+   `apps/web/src/features/moderazione/Flyer.tsx`). Il revisore corregge, imposta
+   `riferimenti_alcol` (scelta sempre esplicita, mai precompilata) ed `eta_minima`, poi
+   approva (l'evento diventa `pubblicato` e l'immagine, se adatta, viene copiata in
+   `flyer-pubblicati` dal job `copia_immagine_flyer` del worker) o rifiuta con motivo.
 
 ## 6. Deduplicazione
 

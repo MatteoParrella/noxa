@@ -31,3 +31,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0020](0020-captcha-cloudflare-turnstile.md) | CAPTCHA con Cloudflare Turnstile | Accettato |
 | [0021](0021-infrastruttura-a-costo-minimo.md) | Infrastruttura a costo minimo | Accettato |
 | [0022](0022-layout-responsive.md) | Layout responsive con sidebar di navigazione | Accettato |
+| [0023](0023-occultamento-automatico.md) | Occultamento automatico delle immagini segnalate per rischio a un minorenne | Accettato |

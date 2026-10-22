@@ -1,7 +1,7 @@
 -- Migrazione: foto profilo (bucket avatar), contenuti nascosti in attesa della revisione
--- (D-15, ADR-0022) e copertine sostitutive; avatar degli amici nelle ricerche degli eventi
+-- (D-15, ADR-0023) e copertine sostitutive; avatar degli amici nelle ricerche degli eventi
 -- Documentazione: docs/DATA_MODEL.md §5.1 (profili), §5.2 (contenuti_occultati), §5.3, §6;
--- ADR-0018, ADR-0022; regole: R-20, R-23, R-50, R-52, R-53, R-55, R-56
+-- ADR-0018, ADR-0023; regole: R-20, R-23, R-50, R-52, R-53, R-55, R-56
 
 -- ---------------------------------------------------------------------------------------------
 -- profili: foto profilo (R-52)
@@ -16,7 +16,7 @@ alter table public.profili
 create index profili_avatar_path_idx on public.profili (avatar_path) where avatar_path is not null;
 
 -- ---------------------------------------------------------------------------------------------
--- contenuti_occultati (D-15, ADR-0022, R-55): immagini rese inaccessibili in attesa della
+-- contenuti_occultati (D-15, ADR-0023, R-55): immagini rese inaccessibili in attesa della
 -- decisione di un moderatore, o come prova in un'escalation
 -- ---------------------------------------------------------------------------------------------
 create table public.contenuti_occultati (
@@ -147,7 +147,7 @@ create policy "immagini-locali: foto dei locali visibili"
 
 -- ---------------------------------------------------------------------------------------------
 -- Ricerca e dettaglio degli eventi: copertina sostitutiva al posto di un'immagine nascosta
--- (ADR-0022) e foto degli amici che partecipano (R-52: sono amici, quindi visibili)
+-- (ADR-0023) e foto degli amici che partecipano (R-52: sono amici, quindi visibili)
 -- ---------------------------------------------------------------------------------------------
 create or replace function private.copertina_evento(
   evento uuid,
