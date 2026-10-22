@@ -34,6 +34,14 @@ class Impostazioni(BaseSettings):
     meta_access_token: SecretStr = SecretStr("")
     # Google Places, solo per il bootstrap dei locali (EVENT_INGESTION.md §2.1).
     google_places_api_key: SecretStr = SecretStr("")
+    # Supabase Storage (solo lato worker, per i bucket dei flyer). ADR-0003.
+    supabase_url: str = ""
+    supabase_service_role_key: SecretStr = SecretStr("")
+    # Claude API per l'estrazione dei flyer (ADR-0007, D-03, skill `flyer-parser`).
+    anthropic_api_key: SecretStr = SecretStr("")
+    claude_modello_flyer: str = "claude-opus-5-5"
+    flyer_lato_max_px: int = Field(default=1568, ge=256, le=4096)
+    flyer_budget_giornaliero_eur: float = Field(default=10.0, ge=0)
 
     def url_database(self) -> str:
         """URL del database validato come DSN Postgres."""

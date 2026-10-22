@@ -1,0 +1,24 @@
+{
+  "e_un_evento": false,
+  "contenuto_inappropriato": false,
+  "titolo": null,
+  "nome_locale": null,
+  "comune": null,
+  "indirizzo": null,
+  "data": null,
+  "ora_inizio": null,
+  "ora_fine": null,
+  "anno_inferito": false,
+  "eta_minima": null,
+  "riferimenti_alcol": false,
+  "generi": [],
+  "artisti": [],
+  "prezzo_min_centesimi": null,
+  "confidenza": {
+    "titolo": 0.0,
+    "nome_locale": 0.0,
+    "data": 0.0,
+    "ora_inizio": 0.0,
+    "eta_minima": 0.0
+  }
+}

@@ -22,6 +22,9 @@ from noxa_worker.coda import EsecutoreCoda, GestoreJob, TipoJob
 from noxa_worker.coda_postgres import ArchivioJobPostgres
 from noxa_worker.configurazione import Impostazioni, leggi_impostazioni
 from noxa_worker.database import VerificaDatabase, crea_pool, verifica_con_pool
+from noxa_worker.flyer.archivio import ArchivioFlyerPostgres
+from noxa_worker.flyer.jobs import GestoreFlyer
+from noxa_worker.flyer.storage import ClientStorage
 from noxa_worker.fonti.http import ClientHttpConforme, StatoCondiviso, crea_client_httpx
 from noxa_worker.fonti.registro import crea_registro
 from noxa_worker.osservabilita import configura_log
@@ -135,9 +138,23 @@ async def _risorse_postgres(impostazioni: Impostazioni) -> AsyncIterator[Risorse
             crea_http,
             adesso=lambda: datetime.now(UTC),
         )
+        flyer = GestoreFlyer(
+            ArchivioFlyerPostgres(pool),
+            ClientStorage(
+                impostazioni.supabase_url,
+                impostazioni.supabase_service_role_key.get_secret_value(),
+            ),
+            anthropic_api_key=impostazioni.anthropic_api_key.get_secret_value(),
+            modello=impostazioni.claude_modello_flyer,
+            lato_max=impostazioni.flyer_lato_max_px,
+            adesso=lambda: datetime.now(UTC),
+        )
         gestori: dict[TipoJob, GestoreJob] = {
             TipoJob.ESEGUI_FONTE: raccolta.esegui_fonte,
             TipoJob.DEDUPLICA_GREZZO: raccolta.applica_decisione,
+            TipoJob.ANALIZZA_FLYER: flyer.analizza_flyer,
+            TipoJob.COPIA_IMMAGINE_FLYER: flyer.copia_immagine_flyer,
+            TipoJob.PULIZIA_FLYER: flyer.pulizia_flyer,
         }
         archivio_job = ArchivioJobPostgres(pool)
         esecutori = [

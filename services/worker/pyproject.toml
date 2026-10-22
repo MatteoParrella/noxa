@@ -15,6 +15,8 @@ dependencies = [
     "rapidfuzz==3.14.6",
     "structlog==26.1.0",
     "uvicorn==0.54.0",
+    "anthropic==1.17.0",
+    "pillow==13.0.0",
 ]
 
 [dependency-groups]
@@ -50,6 +52,8 @@ ignore = ["RUF001", "RUF002", "RUF003", "TRY003", "N818"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "ANN"]
+# valuta.py è uno strumento CLI interattivo: usa print() per output all'utente.
+"src/noxa_worker/flyer/valuta.py" = ["T201"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"

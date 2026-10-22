@@ -1,0 +1,26 @@
+{
+  "e_un_evento": true,
+  "contenuto_inappropriato": false,
+  "titolo": "House Marathon",
+  "nome_locale": "Tunnel Club",
+  "comune": "Milano",
+  "indirizzo": null,
+  "data": "2026-12-19",
+  "ora_inizio": "21:00:00",
+  "ora_fine": null,
+  "anno_inferito": false,
+  "eta_minima": 18,
+  "riferimenti_alcol": false,
+  "generi": [
+    "house"
+  ],
+  "artisti": [],
+  "prezzo_min_centesimi": null,
+  "confidenza": {
+    "titolo": 0.9,
+    "nome_locale": 0.9,
+    "data": 0.9,
+    "ora_inizio": 0.0,
+    "eta_minima": 0.9
+  }
+}
