@@ -240,9 +240,7 @@ class GestoreFlyer:
         w, h = img_pub.size
         if max(w, h) > _LATO_MAX_PUBBLICATO:
             scala = _LATO_MAX_PUBBLICATO / max(w, h)
-            img_pub = img_pub.resize(
-                (int(w * scala), int(h * scala)), Image.Resampling.LANCZOS
-            )
+            img_pub = img_pub.resize((int(w * scala), int(h * scala)), Image.Resampling.LANCZOS)
         output = BytesIO()
         img_pub.convert("RGB").save(output, format="WEBP", quality=88, exif=b"")
         dati_webp = output.getvalue()

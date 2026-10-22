@@ -59,9 +59,7 @@ def prepara_immagine(dati: bytes, lato_max: int) -> tuple[bytes, str]:
     try:
         img = Image.open(BytesIO(dati))
     except Exception as errore:
-        raise ErroreEstrazione(
-            f"immagine non leggibile: {errore}", recuperabile=False
-        ) from errore
+        raise ErroreEstrazione(f"immagine non leggibile: {errore}", recuperabile=False) from errore
 
     img_lavoro: Image.Image = ImageOps.exif_transpose(img)
     if img_lavoro.mode not in ("RGB", "RGBA"):
@@ -74,9 +72,7 @@ def prepara_immagine(dati: bytes, lato_max: int) -> tuple[bytes, str]:
     w, h = img_lavoro.size
     if max(w, h) > lato_max:
         scala = lato_max / max(w, h)
-        img_lavoro = img_lavoro.resize(
-            (int(w * scala), int(h * scala)), Image.Resampling.LANCZOS
-        )
+        img_lavoro = img_lavoro.resize((int(w * scala), int(h * scala)), Image.Resampling.LANCZOS)
 
     output = BytesIO()
     # exif=b"" rimuove tutti i metadati EXIF (Pillow 9+).

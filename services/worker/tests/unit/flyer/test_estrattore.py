@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import base64
 from datetime import date
 from io import BytesIO
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from PIL import Image
-from pydantic import ValidationError
 
 from noxa_worker.flyer.estrattore import (
     ErroreEstrazione,
@@ -20,7 +18,6 @@ from noxa_worker.flyer.estrattore import (
     stima_costo_eur,
 )
 from noxa_worker.flyer.schema import ConfidenzaCampi, FlyerEstratto
-
 
 # ─── Fixture immagini sintetiche ────────────────────────────────────────────
 
@@ -66,7 +63,9 @@ def _flyer_evento() -> FlyerEstratto:
         generi=["techno"],
         artisti=["DJ Marco"],
         prezzo_min_centesimi=1500,
-        confidenza=ConfidenzaCampi(titolo=0.9, nome_locale=0.95, data=0.9, ora_inizio=0.0, eta_minima=0.8),
+        confidenza=ConfidenzaCampi(
+            titolo=0.9, nome_locale=0.95, data=0.9, ora_inizio=0.0, eta_minima=0.8
+        ),
     )
 
 

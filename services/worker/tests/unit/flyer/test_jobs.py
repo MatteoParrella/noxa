@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, date, datetime
 from io import BytesIO
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 from uuid import UUID
 
 import pytest
@@ -66,7 +66,9 @@ def _flyer_estratto() -> FlyerEstratto:
         generi=[],
         artisti=[],
         prezzo_min_centesimi=None,
-        confidenza=ConfidenzaCampi(titolo=0.9, nome_locale=0.9, data=0.9, ora_inizio=0.0, eta_minima=0.9),
+        confidenza=ConfidenzaCampi(
+            titolo=0.9, nome_locale=0.9, data=0.9, ora_inizio=0.0, eta_minima=0.9
+        ),
     )
 
 
@@ -158,23 +160,14 @@ async def test_analizza_flyer_con_api_key_crea_evento() -> None:
     gestore = _gestore(archivio=archivio, storage=storage, api_key="sk-test")
 
     estratto = _flyer_estratto()
-    with MagicMock() as mock_client_ctx:
-        gestore._client = AsyncMock()
-        gestore._client.messages.parse = AsyncMock(
-            return_value=MagicMock(
-                stop_reason="end_turn",
-                parsed_output=estratto,
-                usage=MagicMock(input_tokens=100, output_tokens=50),
-            )
+    # L'estrattore restituisce il flyer pre-costruito: nessuna chiamata all'API.
+    with pytest.MonkeyPatch().context() as mp:
+        mp.setattr(
+            "noxa_worker.flyer.jobs.estrai_da_immagine",
+            AsyncMock(return_value=(estratto, 0.01)),
         )
-        # Patch estrai_da_immagine per restituire il flyer pre-costruito
-        with pytest.MonkeyPatch().context() as mp:
-            mp.setattr(
-                "noxa_worker.flyer.jobs.estrai_da_immagine",
-                AsyncMock(return_value=(estratto, 0.01)),
-            )
-            job = _job(TipoJob.ANALIZZA_FLYER, {"caricamento_id": str(CARICAMENTO_ID)})
-            await gestore.analizza_flyer(job)
+        job = _job(TipoJob.ANALIZZA_FLYER, {"caricamento_id": str(CARICAMENTO_ID)})
+        await gestore.analizza_flyer(job)
 
     kw = archivio.aggiorna_analisi.call_args.kwargs
     assert kw["stato"] == "in_revisione"

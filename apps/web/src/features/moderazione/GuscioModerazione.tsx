@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  AlertTriangle,
   ArrowLeft,
   CalendarDays,
   Copy,
@@ -31,7 +32,8 @@ import { useOnline } from '@/lib/connessione';
 import { messaggi } from '@/lib/messaggi/it';
 import { AttivaDueFattori, InserisciCodice, SenzaRuolo, SenzaSessione } from './AccessoDueFattori';
 import { DURATA_ACCESSO_MS, leggiMieiRuoli, leggiMioNome, leggiStatoDueFattori } from './api';
-import { CHIAVI, useContatori } from './dati';
+import { CHIAVI, useAdesso, useContatori } from './dati';
+import { oraBreve, tempoRimanente } from './formato';
 
 const testi = messaggi.moderazione;
 
@@ -48,6 +50,7 @@ export const PERCORSI_MODERAZIONE = {
   annullamenti: '/moderazione/eventi/?vista=annullamenti',
   evento: (id: string) => `/moderazione/evento/?id=${id}`,
   flyer: '/moderazione/flyer/',
+  revisioneFlyer: (id: string) => `/moderazione/flyer/?id=${id}`,
   segnalazioni: '/moderazione/segnalazioni/',
   segnalazione: (id: string) => `/moderazione/segnalazione/?id=${id}`,
   reclami: '/moderazione/reclami/',
@@ -174,9 +177,40 @@ function Area({ utenteId, children }: { utenteId: string; children: ReactNode })
         <NavigazioneLaterale utenteId={utenteId} aperta={menuAperto} />
         <main className="md-main" id="contenuto" tabIndex={-1}>
           {!online && <StrisciaOffline testo={testi.comune.offline} />}
+          <AvvisoUrgente />
           {children}
         </main>
       </div>
+    </div>
+  );
+}
+
+/** Avviso in cima a tutte le sezioni quando c'è una segnalazione di priorità 1 aperta (R-53). */
+function AvvisoUrgente() {
+  const contatori = useContatori();
+  const adesso = useAdesso();
+  const urgenti = contatori.data?.segnalazioni_urgenti ?? 0;
+  const scadenza = contatori.data?.scadenza_urgente ?? null;
+  if (urgenti === 0) return null;
+  const u = testi.urgente;
+  const resta = scadenza ? new Date(scadenza).getTime() - adesso : null;
+  return (
+    <div className="md-urgente" role="status">
+      <Icona icona={AlertTriangle} dimensione="s" />
+      <span>
+        <b>{u.testo(urgenti)}</b> · {u.dettaglio}
+        {scadenza && resta !== null && (
+          <>
+            {' · '}
+            <span className="mono">
+              {resta > 0
+                ? u.scade(oraBreve(scadenza), tempoRimanente(resta))
+                : u.scaduta(oraBreve(scadenza))}
+            </span>
+          </>
+        )}
+      </span>
+      <Link href={PERCORSI_MODERAZIONE.segnalazioni}>{u.apri}</Link>
     </div>
   );
 }
@@ -222,6 +256,8 @@ function NavigazioneLaterale({ utenteId, aperta }: { utenteId: string; aperta: b
   });
   const nav = testi.navigazione;
   const sezione = percorso.split('/')[2] ?? '';
+  const segnalazioniAperte = contatori.data?.segnalazioni ?? 0;
+  const segnalazioniUrgenti = contatori.data?.segnalazioni_urgenti ?? 0;
   const duplicati = contatori.data?.duplicati ?? 0;
   const annullamenti = contatori.data?.possibili_annullamenti ?? 0;
   const flyerDaRevisionare = contatori.data?.flyer ?? 0;
@@ -282,6 +318,20 @@ function NavigazioneLaterale({ utenteId, aperta }: { utenteId: string; aperta: b
         icona={Flag}
         etichetta={nav.segnalazioni}
         attiva={sezione === 'segnalazioni' || sezione === 'segnalazione'}
+        contatore={
+          <>
+            <Contatore
+              valore={segnalazioniAperte}
+              descrizione={nav.contatoreSegnalazioni(segnalazioniAperte)}
+            />
+            {segnalazioniUrgenti > 0 && (
+              <span className="badge badge-errore p1">
+                <span aria-hidden="true">{testi.urgente.p1(segnalazioniUrgenti)}</span>
+                <span className="sr-only">{testi.urgente.p1Descrizione(segnalazioniUrgenti)}</span>
+              </span>
+            )}
+          </>
+        }
       />
       <VoceNavigazione
         href={PERCORSI_MODERAZIONE.reclami}

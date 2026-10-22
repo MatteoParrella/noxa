@@ -173,8 +173,13 @@ def _confronta_file(prima: Path, dopo: Path) -> None:
     tutti = sorted(c1.keys() | c2.keys())
 
     metriche = [
-        "e_un_evento", "eta_minima_ok", "eta_minima_sicura",
-        "riferimenti_alcol_ok", "data_ok", "nome_locale_ok", "titolo_ok",
+        "e_un_evento",
+        "eta_minima_ok",
+        "eta_minima_sicura",
+        "riferimenti_alcol_ok",
+        "data_ok",
+        "nome_locale_ok",
+        "titolo_ok",
     ]
     print(f"\nConfronfo: {prima.name}  →  {dopo.name}")
     print(f"{'─' * 70}")

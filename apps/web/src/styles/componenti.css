@@ -89,6 +89,12 @@
 .c-3 {
   color: var(--colore-testo-terziario);
 }
+.c-errore {
+  color: var(--colore-errore);
+}
+.c-accento {
+  color: var(--colore-accento);
+}
 
 /* Dettaglio 1 — "etichetta da pensilina": maiuscoletto + filo che corre */
 .etichetta-riga {

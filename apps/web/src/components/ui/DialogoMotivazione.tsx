@@ -25,6 +25,8 @@ type Props = {
   etichettaConferma: string;
   etichettaAnnulla: string;
   variante?: VariantePulsante;
+  /** Anteprima di ciò che riceveranno le persone, aggiornata mentre si scrive (DSA art. 17). */
+  anteprima?: ((motivazione: string) => ReactNode) | undefined;
   /** Esegue l'azione; un errore resta nel dialogo con la motivazione scritta. */
   onConferma: (motivazione: string) => Promise<void>;
   testoErrore: (errore: unknown) => string;
@@ -50,6 +52,7 @@ export function DialogoMotivazione({
   etichettaConferma,
   etichettaAnnulla,
   variante = 'principale',
+  anteprima,
   onConferma,
   testoErrore,
 }: Props) {
@@ -116,6 +119,7 @@ export function DialogoMotivazione({
             {aiutoMotivazione}
           </span>
         </div>
+        {anteprima?.(motivazione.trim())}
         {errore && (
           <Avviso tipo="errore" portaInVista>
             {errore}

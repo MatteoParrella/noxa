@@ -82,7 +82,9 @@ select ok(
 );
 select is(
   (select array_agg(priorita order by n) from (
-     select priorita, row_number() over () as n from public.coda_segnalazioni()) c),
+     -- Solo le segnalazioni di questo test: il database locale può averne fatte a mano.
+     select priorita, row_number() over () as n from public.coda_segnalazioni()
+     where creata_il = now()) c),
   array[1, 1, 2, 3, 3, 3]::smallint[],
   'R-53: la coda è ordinata per priorità'
 );

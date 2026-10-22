@@ -21,6 +21,16 @@ const ID = {
   evento: '00000000-0000-4000-8000-00000000e003',
   candidatoOsm: '00000000-0000-4000-8000-0000000000a1',
   candidatoGoogle: '00000000-0000-4000-8000-0000000000a3',
+  flyerBozza: '00000000-0000-4000-8000-0000000000b1',
+  flyerCorrispondenza: '00000000-0000-4000-8000-0000000000b2',
+  flyerErrore: '00000000-0000-4000-8000-0000000000b3',
+  eventoBozza: '00000000-0000-4000-8000-00000000e101',
+  eventoPubblicato: '00000000-0000-4000-8000-00000000e102',
+  segnalazioneP1: '00000000-0000-4000-8000-00000000b101',
+  segnalazioneP2: '00000000-0000-4000-8000-00000000b102',
+  profiloSegnalato: '00000000-0000-4000-8000-0000000000f7',
+  reclamoMio: '00000000-0000-4000-8000-00000000b201',
+  reclamoAltrui: '00000000-0000-4000-8000-00000000b202',
 } as const;
 export const ID_MODERAZIONE = ID;
 
@@ -435,6 +445,237 @@ const REGISTRO = [
   },
 ];
 
+function eventoJson(dati: {
+  id: string;
+  titolo: string;
+  locale_id: string;
+  locale_nome: string;
+  inizio: string;
+  stato: 'in_revisione' | 'pubblicato';
+}) {
+  return {
+    locale_comune: 'Monza',
+    fine: null,
+    eta_minima: 18,
+    eta_minima_dichiarata: false,
+    riferimenti_alcol: false,
+    generi: ['techno'],
+    artisti: [],
+    prezzo_min_centesimi: 1500,
+    url_biglietti: null,
+    ...dati,
+  };
+}
+
+const ESTRAZIONE = {
+  e_un_evento: true,
+  contenuto_inappropriato: false,
+  titolo: 'Luci Basse',
+  nome_locale: 'Officina Lambro',
+  comune: 'Monza',
+  indirizzo: null,
+  data: '2026-11-01',
+  ora_inizio: '23:00:00',
+  ora_fine: '04:00:00',
+  anno_inferito: false,
+  eta_minima: null,
+  riferimenti_alcol: true,
+  generi: ['techno', 'house'],
+  artisti: ['Nera Vale'],
+  prezzo_min_centesimi: 1200,
+  confidenza: { titolo: 0.95, nome_locale: 0.9, data: 0.88, ora_inizio: 0.9, eta_minima: 0.41 },
+};
+
+/** Coda dei flyer: una bozza, una corrispondenza con un evento pubblicato, uno illeggibile. */
+export const CODA_FLYER = [
+  {
+    id: ID.flyerBozza,
+    stato: 'in_revisione',
+    creato_il: '2026-10-21T18:02:00Z',
+    storage_path: 'a1/b1.webp',
+    risultato_estrazione: ESTRAZIONE,
+    modello: 'claude-di-prova',
+    versione_prompt: 'v1',
+    confidenza: 0.88,
+    contenuto_sospetto: false,
+    nota_revisione: null,
+    evento: null,
+    candidato: null,
+  },
+  {
+    id: ID.flyerCorrispondenza,
+    stato: 'in_revisione',
+    creato_il: '2026-10-21T19:10:00Z',
+    storage_path: 'a1/b2.webp',
+    risultato_estrazione: {
+      ...ESTRAZIONE,
+      titolo: 'Notte Ferrovia',
+      nome_locale: 'Club Binario 7',
+      data: '2026-10-23',
+      ora_inizio: '23:30:00',
+      confidenza: { titolo: 0.5, nome_locale: 0.95, data: 0.9, ora_inizio: 0.9, eta_minima: 0.9 },
+    },
+    modello: 'claude-di-prova',
+    versione_prompt: 'v1',
+    confidenza: 0.5,
+    contenuto_sospetto: false,
+    nota_revisione: null,
+    evento: eventoJson({
+      id: ID.eventoBozza,
+      titolo: 'Notte Ferrovia',
+      locale_id: ID.binario,
+      locale_nome: 'Club Binario 7',
+      inizio: '2026-10-23T21:30:00Z',
+      stato: 'in_revisione',
+    }),
+    candidato: eventoJson({
+      id: ID.eventoPubblicato,
+      titolo: 'Notte Ferrovia',
+      locale_id: ID.binario,
+      locale_nome: 'Club Binario 7',
+      inizio: '2026-10-23T21:30:00Z',
+      stato: 'pubblicato',
+    }),
+  },
+  {
+    id: ID.flyerErrore,
+    stato: 'errore',
+    creato_il: '2026-10-21T20:00:00Z',
+    storage_path: 'a1/b3.webp',
+    risultato_estrazione: null,
+    modello: null,
+    versione_prompt: null,
+    confidenza: null,
+    contenuto_sospetto: false,
+    nota_revisione: 'Estrazione non disponibile: revisione manuale.',
+    evento: null,
+    candidato: null,
+  },
+];
+
+/** Una segnalazione di priorità 1 che scade tra due ore e una di priorità 2 in carico ad altri. */
+export function codaSegnalazioni() {
+  const adesso = Date.now();
+  return [
+    {
+      id: ID.segnalazioneP1,
+      tipo_oggetto: 'profilo',
+      oggetto_id: ID.profiloSegnalato,
+      motivo: 'adescamento_o_rischio_minore',
+      priorita: 1,
+      stato: 'aperta',
+      creata_il: new Date(adesso - 2 * 3600_000).toISOString(),
+      scadenza: new Date(adesso + 2 * 3600_000 + 15 * 60_000).toISOString(),
+      chiusa_il: null,
+      presa_da_me: false,
+      presa_da: null,
+      stesso_oggetto: 2,
+      in_escalation: false,
+    },
+    {
+      id: ID.segnalazioneP2,
+      tipo_oggetto: 'foto_profilo',
+      oggetto_id: ID.profiloSegnalato,
+      motivo: 'contenuto_inappropriato',
+      priorita: 2,
+      stato: 'in_lavorazione',
+      creata_il: new Date(adesso - 3600_000).toISOString(),
+      scadenza: new Date(adesso + 30 * 60_000).toISOString(),
+      chiusa_il: null,
+      presa_da_me: false,
+      presa_da: 'Moderatore Due',
+      stesso_oggetto: 1,
+      in_escalation: false,
+    },
+  ];
+}
+
+export function dettaglioSegnalazione(id: string) {
+  const riga = codaSegnalazioni().find((s) => s.id === id);
+  if (!riga) return [];
+  return [
+    {
+      segnalazione_id: riga.id,
+      tipo_oggetto: riga.tipo_oggetto,
+      oggetto_id: riga.oggetto_id,
+      motivo: riga.motivo,
+      dettagli: 'Ha chiesto l’amicizia a mia sorella di 14 anni e le ha scritto altrove.',
+      priorita: riga.priorita,
+      stato: riga.stato,
+      creata_il: riga.creata_il,
+      scadenza: riga.scadenza,
+      presa_da_me: riga.presa_da_me,
+      presa_da: riga.presa_da,
+      in_escalation: false,
+      occultato: false,
+      oggetto: {
+        id: ID.profiloSegnalato,
+        username: 'teo.m.night',
+        nome_visualizzato: 'Teo M.',
+        avatar_path: `${ID.profiloSegnalato}/00000000-0000-4000-8000-000000000a01.webp`,
+        avatar_nascosto: false,
+        stato_account: 'attivo',
+      },
+      altre: [
+        {
+          id: '00000000-0000-4000-8000-00000000b103',
+          motivo: 'adescamento_o_rischio_minore',
+          dettagli: null,
+          stato: 'aperta',
+          creata_il: riga.creata_il,
+        },
+      ],
+      registro: [
+        {
+          creata_il: riga.creata_il,
+          autore: null,
+          azione: 'occulta_contenuto',
+          motivazione: 'Priorità 1 assegnata in automatico.',
+        },
+      ],
+    },
+  ];
+}
+
+export const RECLAMI = [
+  {
+    id: ID.reclamoAltrui,
+    stato: 'inviato',
+    testo: 'Il flyer era leggibile: la data è scritta in basso.',
+    creato_il: '2026-10-21T10:00:00Z',
+    ruolo: 'caricamento',
+    decisione_id: '00000000-0000-4000-8000-00000000b301',
+    decisione_azione: 'rifiuta_flyer',
+    decisione_motivazione: 'Data e orario non si leggono con sicurezza.',
+    decisione_il: '2026-10-20T21:00:00Z',
+    decisione_autore: 'Moderatore Due',
+    tipo_oggetto: 'caricamento_flyer',
+    descrizione: 'Flyer di Luci Basse',
+    puo_decidere: true,
+    esito: null,
+    motivazione_esito: null,
+    deciso_il: null,
+  },
+  {
+    id: ID.reclamoMio,
+    stato: 'inviato',
+    testo: 'La foto è mia e non viola nulla.',
+    creato_il: '2026-10-21T11:00:00Z',
+    ruolo: 'coinvolto',
+    decisione_id: '00000000-0000-4000-8000-00000000b302',
+    decisione_azione: 'rimuovi_contenuto',
+    decisione_motivazione: 'Foto di un’altra persona usata senza consenso.',
+    decisione_il: '2026-10-20T22:00:00Z',
+    decisione_autore: 'Moderatore Uno',
+    tipo_oggetto: 'foto_profilo',
+    descrizione: '@giulia.r',
+    puo_decidere: false,
+    esito: null,
+    motivazione_esito: null,
+    deciso_il: null,
+  },
+];
+
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
 export type OpzioniModerazione = {
@@ -529,6 +770,11 @@ export class ModerazioneSimulata {
               duplicati: DUPLICATI.length,
               possibili_annullamenti: ANNULLAMENTI.length,
               candidati_locali: CANDIDATI.length,
+              flyer: CODA_FLYER.length,
+              segnalazioni: 2,
+              segnalazioni_urgenti: 1,
+              scadenza_urgente: codaSegnalazioni()[0]?.scadenza ?? null,
+              reclami: RECLAMI.length,
             },
           ],
         };
@@ -546,6 +792,26 @@ export class ModerazioneSimulata {
         return { stato: 200, corpo: EVENTI };
       case 'POST /rest/v1/rpc/possibili_annullamenti':
         return { stato: 200, corpo: ANNULLAMENTI };
+      case 'POST /rest/v1/rpc/coda_flyer':
+        return { stato: 200, corpo: CODA_FLYER };
+      case 'POST /rest/v1/rpc/coda_segnalazioni':
+        return { stato: 200, corpo: codaSegnalazioni() };
+      case 'POST /rest/v1/rpc/dettaglio_segnalazione': {
+        const corpo = (richiesta.postDataJSON() ?? {}) as { id?: string };
+        return { stato: 200, corpo: dettaglioSegnalazione(corpo.id ?? '') };
+      }
+      case 'POST /rest/v1/rpc/reclami_moderazione':
+        return { stato: 200, corpo: RECLAMI };
+      case 'POST /rest/v1/rpc/decidi_flyer':
+        return { stato: 200, corpo: ID.eventoBozza };
+      case 'POST /rest/v1/rpc/decidi_segnalazione':
+        return { stato: 200, corpo: null };
+      case 'POST /rest/v1/rpc/prendi_in_carico_segnalazione':
+      case 'POST /rest/v1/rpc/escalation_segnalazione':
+      case 'POST /rest/v1/rpc/escalation_flyer':
+      case 'POST /rest/v1/rpc/esamina_reclamo':
+      case 'POST /rest/v1/rpc/decidi_reclamo':
+        return { stato: 204 };
       case 'POST /rest/v1/rpc/esegui_fonte_ora':
         return { stato: 200, corpo: 42 };
       case 'POST /rest/v1/rpc/decidi_candidato_locale':
@@ -589,6 +855,22 @@ export class ModerazioneSimulata {
         if (chiave.startsWith('POST /storage/v1/object/immagini-locali/')) {
           return { stato: 200, corpo: { Key: 'immagini-locali/x.webp' } };
         }
+        if (
+          /^POST \/storage\/v1\/object\/sign\/(flyer-caricati|flyer-pubblicati|avatar)$/.test(
+            chiave,
+          )
+        ) {
+          const bucket = chiave.split('/').pop() as string;
+          const { paths } = (richiesta.postDataJSON() ?? { paths: [] }) as { paths: string[] };
+          return {
+            stato: 200,
+            corpo: paths.map((path) => ({
+              path,
+              signedURL: `/object/sign/${bucket}/${path}?token=t`,
+              error: null,
+            })),
+          };
+        }
         if (chiave.startsWith('POST /storage/v1/object/sign/immagini-locali')) {
           return {
             stato: 200,
@@ -613,7 +895,11 @@ export class ModerazioneSimulata {
       if (richiesta.method() === 'OPTIONS') return route.fallback();
       const url = new URL(richiesta.url());
       const chiave = `${richiesta.method()} ${url.pathname}`;
-      if (chiave.startsWith('GET /storage/v1/object/sign/immagini-locali/')) {
+      if (
+        /^GET \/storage\/v1\/object\/sign\/(immagini-locali|flyer-caricati|flyer-pubblicati|avatar)\//.test(
+          chiave,
+        )
+      ) {
         return route.fulfill({ status: 200, contentType: 'image/png', body: PIXEL_PNG });
       }
       const risposta = this.risposte.get(chiave) ?? this.predefinita(chiave, richiesta);

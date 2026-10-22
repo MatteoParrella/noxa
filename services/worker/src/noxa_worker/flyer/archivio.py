@@ -88,9 +88,7 @@ class ArchivioFlyer(Protocol):
         """Segna `immagine_eliminata_il = now()` per i caricamenti flyer elencati."""
         ...
 
-    async def pubblica_immagine_flyer(
-        self, evento_id: UUID, immagine_path: str
-    ) -> None:
+    async def pubblica_immagine_flyer(self, evento_id: UUID, immagine_path: str) -> None:
         """Aggiorna `eventi.immagine_path` e `immagine_fonte` dopo la copia del flyer."""
         ...
 

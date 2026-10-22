@@ -7,8 +7,10 @@ select plan(45);
 create function tests.foto(utente text) returns text language sql stable as $$
   select tests.id(utente)::text || '/00000000-0000-4000-8000-0000000a0001.webp';
 $$;
+-- Solo le foto create da questo test: il database locale può avere foto caricate a mano.
 create function tests.foto_visibili() returns text[] language sql as $$
-  select coalesce(array_agg(name order by name), '{}') from storage.objects where bucket_id = 'avatar';
+  select coalesce(array_agg(name order by name), '{}') from storage.objects
+  where bucket_id = 'avatar' and created_at = now();
 $$;
 grant execute on function tests.foto(text), tests.foto_visibili() to authenticated;
 

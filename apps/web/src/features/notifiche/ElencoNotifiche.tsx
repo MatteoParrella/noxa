@@ -25,6 +25,7 @@ import { Entra } from '@/components/ui/Movimento';
 import { Caricamento, ElencoVuoto, ErroreConAzione } from '@/components/ui/Stati';
 import { messaggi } from '@/lib/messaggi/it';
 import { segnaLetteTutte, type TipoNotifica } from './api';
+import { testoNotifica } from './testo';
 import { CHIAVI, useNotifiche } from './dati';
 
 const testi = messaggi.notifiche;
@@ -162,7 +163,7 @@ export function ElencoNotifiche() {
                 if (!n) return null;
                 const IcoComponente = ICONE[n.tipo];
                 const href = LINK[n.tipo];
-                const testo = testi.tipi[n.tipo];
+                const { titolo, motivazione } = testoNotifica(n.tipo, n.dati);
                 const nonLetta = n.letta_il === null;
                 return (
                   <li key={n.id}>
@@ -182,8 +183,9 @@ export function ElencoNotifiche() {
                       </span>
                       <div className="flex flex-col gap-0.5 min-w-0">
                         <p className={`m-0 t-corpo-piccolo ${nonLetta ? 'font-medium' : 'c-2'}`}>
-                          {testo}
+                          {titolo}
                         </p>
+                        {motivazione && <p className="m-0 t-didascalia c-2">{motivazione}</p>}
                         <time dateTime={n.creata_il} className="t-didascalia c-3">
                           {inizioGiorno(new Date(n.creata_il)) >= inizioGiorno(new Date())
                             ? formattaOrario(n.creata_il)

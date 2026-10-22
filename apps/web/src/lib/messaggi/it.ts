@@ -846,6 +846,19 @@ export const messaggi = {
       badge_ottenuto: 'Hai ottenuto un nuovo badge.',
       riepilogo_pronto: 'Il tuo Wrapped è pronto.',
     } as const,
+    /** Titoli degli esiti di moderazione (`dati.esito`); la motivazione segue sotto. */
+    esiti: {
+      segnalazione_decisa: 'Abbiamo esaminato la tua segnalazione',
+      contenuto_rimosso: 'Abbiamo rimosso un tuo contenuto',
+      contenuto_rimosso_foto: 'Abbiamo rimosso la tua foto profilo',
+      contenuto_nascosto: 'La tua foto profilo è nascosta in attesa di un controllo',
+      contenuto_ripristinato: 'La tua foto profilo è di nuovo visibile',
+      account_sospeso: 'Il tuo account è sospeso',
+      flyer_pubblicato: 'Il tuo flyer è stato pubblicato',
+      flyer_unito: 'Il tuo flyer è stato aggiunto a un evento',
+      flyer_rifiutato: 'Il tuo flyer non è stato pubblicato',
+      reclamo_deciso: 'Abbiamo deciso sul tuo reclamo',
+    } as Record<string, string>,
   },
 
   moderazione,

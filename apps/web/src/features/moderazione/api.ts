@@ -327,12 +327,22 @@ export async function rimuoviFotoLocale(id: string, motivazione: string): Promis
   }
 }
 
+/** Bucket privati che l'area di moderazione mostra con URL firmati. */
+export type BucketModerazione =
+  'immagini-locali' | 'flyer-caricati' | 'flyer-pubblicati' | 'avatar';
+
 /** URL firmati delle foto dei locali, validi un'ora. */
-export async function firmaFoto(percorsi: string[]): Promise<Record<string, string>> {
+export function firmaFoto(percorsi: string[]): Promise<Record<string, string>> {
+  return firmaFile('immagini-locali', percorsi);
+}
+
+/** URL firmati validi un'ora; lo storage applica le policy (i moderatori vedono i flyer). */
+export async function firmaFile(
+  bucket: BucketModerazione,
+  percorsi: string[],
+): Promise<Record<string, string>> {
   if (percorsi.length === 0) return {};
-  const { data, error } = await supabase()
-    .storage.from('immagini-locali')
-    .createSignedUrls(percorsi, 3600);
+  const { data, error } = await supabase().storage.from(bucket).createSignedUrls(percorsi, 3600);
   if (error) throw converti(error);
   const risultato: Record<string, string> = {};
   for (const voce of data) {
@@ -796,19 +806,74 @@ export async function leggiGeneri(): Promise<Genere[]> {
 // Coda dei flyer (R-51, R-69)
 // ---------------------------------------------------------------------------------------------
 
+/** Evento come lo restituisce `private.evento_json` (bozza del flyer o corrispondenza). */
+const SchemaEventoJson = z.object({
+  id: z.uuid(),
+  titolo: z.string(),
+  locale_id: z.uuid(),
+  locale_nome: z.string(),
+  locale_comune: z.string().nullable(),
+  inizio: z.string(),
+  fine: z.string().nullable(),
+  eta_minima: z.number().int(),
+  eta_minima_dichiarata: z.boolean(),
+  riferimenti_alcol: z.boolean(),
+  generi: z.array(z.string()),
+  artisti: z.array(z.string()).nullable(),
+  prezzo_min_centesimi: z.number().int().nullable(),
+  url_biglietti: z.string().nullable(),
+  stato: z.enum(['in_revisione', 'pubblicato', 'rifiutato', 'annullato']),
+});
+export type EventoJson = z.infer<typeof SchemaEventoJson>;
+
+/**
+ * Output del modello (`FlyerEstratto` del worker): tutti i campi sono facoltativi perché un
+ * flyer non leggibile non ha estrazione e il contratto può crescere.
+ */
+const SchemaEstrazione = z
+  .object({
+    e_un_evento: z.boolean(),
+    contenuto_inappropriato: z.boolean(),
+    titolo: z.string().nullable(),
+    nome_locale: z.string().nullable(),
+    comune: z.string().nullable(),
+    data: z.string().nullable(),
+    ora_inizio: z.string().nullable(),
+    ora_fine: z.string().nullable(),
+    anno_inferito: z.boolean(),
+    eta_minima: z.number().int().nullable(),
+    riferimenti_alcol: z.boolean(),
+    generi: z.array(z.string()),
+    artisti: z.array(z.string()),
+    prezzo_min_centesimi: z.number().int().nullable(),
+    confidenza: z
+      .object({
+        titolo: z.number(),
+        nome_locale: z.number(),
+        data: z.number(),
+        ora_inizio: z.number(),
+        eta_minima: z.number(),
+      })
+      .partial(),
+  })
+  .partial();
+export type Estrazione = z.infer<typeof SchemaEstrazione>;
+
 const SchemaCodaFlyer = z.object({
   id: z.uuid(),
   stato: z.enum(['in_revisione', 'errore']),
   creato_il: z.string(),
   storage_path: z.string(),
-  risultato_estrazione: z.record(z.string(), z.unknown()).nullable(),
+  risultato_estrazione: z
+    .unknown()
+    .transform((valore) => SchemaEstrazione.safeParse(valore).data ?? null),
   modello: z.string().nullable(),
   versione_prompt: z.string().nullable(),
   confidenza: z.number().nullable(),
   contenuto_sospetto: z.boolean(),
   nota_revisione: z.string().nullable(),
-  evento: z.record(z.string(), z.unknown()).nullable(),
-  candidato: z.record(z.string(), z.unknown()).nullable(),
+  evento: SchemaEventoJson.nullable(),
+  candidato: SchemaEventoJson.nullable(),
 });
 export type FlyerCoda = z.infer<typeof SchemaCodaFlyer>;
 
@@ -869,6 +934,45 @@ export async function leggiCodaSegnalazioni(): Promise<SegnalazioneCoda[]> {
   return verifica(z.array(SchemaCodaSegnalazione), data);
 }
 
+const SchemaAltraSegnalazione = z.object({
+  id: z.uuid(),
+  motivo: z.string(),
+  dettagli: z.string().nullable(),
+  stato: z.enum(['aperta', 'in_lavorazione', 'chiusa']),
+  creata_il: z.string(),
+});
+
+const SchemaVoceRegistroSegnalazione = z.object({
+  creata_il: z.string(),
+  autore: z.string().nullable(),
+  azione: z.string(),
+  motivazione: z.string().nullable(),
+});
+
+/** Oggetto segnalato com'è per gli utenti, secondo il tipo (`dettaglio_segnalazione`). */
+export const SchemaOggettoProfilo = z.object({
+  id: z.uuid(),
+  username: z.string(),
+  nome_visualizzato: z.string(),
+  avatar_path: z.string().nullable(),
+  avatar_nascosto: z.boolean(),
+  stato_account: z.enum(['attivo', 'sospeso']),
+});
+export const SchemaOggettoEvento = SchemaEventoJson.extend({
+  immagine_path: z.string().nullable(),
+});
+export const SchemaOggettoLocale = z.object({
+  id: z.uuid(),
+  nome: z.string(),
+  comune: z.string().nullable(),
+  immagine_path: z.string().nullable(),
+});
+export const SchemaOggettoFlyer = z.object({
+  id: z.uuid(),
+  storage_path: z.string(),
+  stato: z.string(),
+});
+
 const SchemaDettaglioSegnalazione = z.object({
   segnalazione_id: z.uuid(),
   tipo_oggetto: z.string(),
@@ -884,8 +988,8 @@ const SchemaDettaglioSegnalazione = z.object({
   in_escalation: z.boolean(),
   occultato: z.boolean(),
   oggetto: z.record(z.string(), z.unknown()).nullable(),
-  altre: z.array(z.record(z.string(), z.unknown())),
-  registro: z.array(z.record(z.string(), z.unknown())),
+  altre: z.array(SchemaAltraSegnalazione),
+  registro: z.array(SchemaVoceRegistroSegnalazione),
 });
 export type DettaglioSegnalazione = z.infer<typeof SchemaDettaglioSegnalazione>;
 
@@ -903,19 +1007,29 @@ export async function prendiInCaricoSegnalazione(id: string): Promise<void> {
   if (error) throw converti(error);
 }
 
+export type AzioneSegnalazione =
+  'nessuna_violazione' | 'rimuovi_contenuto' | 'modifica_evento' | 'sospendi_account';
+
 export async function decidiSegnalazione(
   id: string,
-  azione: 'nessuna_violazione' | 'rimuovi_contenuto' | 'modifica_evento' | 'sospendi_account',
+  azione: AzioneSegnalazione,
   motivazione: string,
-  contenuto?: string,
+  contenuto?: 'foto' | 'nome' | 'username',
 ): Promise<void> {
-  const { error } = await supabase().rpc('decidi_segnalazione', {
+  const client = supabase();
+  const { data: percorso, error } = await client.rpc('decidi_segnalazione', {
     segnalazione: id,
     azione,
     motivazione,
     ...(contenuto !== undefined ? { contenuto } : {}),
   });
   if (error) throw converti(error);
+  // La foto di un locale rimossa non è più leggibile dagli utenti: si elimina subito, come in
+  // rimuoviFotoLocale.
+  if (typeof percorso === 'string' && percorso) {
+    const rimozione = await client.storage.from('immagini-locali').remove([percorso]);
+    if (rimozione.error) throw converti(rimozione.error);
+  }
 }
 
 export async function escalationSegnalazione(id: string, motivazione: string): Promise<void> {

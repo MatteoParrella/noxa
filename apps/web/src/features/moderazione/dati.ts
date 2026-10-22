@@ -1,9 +1,11 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import {
   decidiReclamo,
   esamiReclamo,
+  firmaFile,
   firmaFoto,
   leggiCandidati,
   leggiCodaFlyer,
@@ -22,6 +24,7 @@ import {
   leggiPossibiliAnnullamenti,
   leggiReclamiModerazione,
   leggiRegistro,
+  type BucketModerazione,
   type FiltriEventi,
   type TipoRegistro,
 } from './api';
@@ -155,11 +158,29 @@ export function useCodaSegnalazioni() {
   });
 }
 
+/**
+ * Ogni lettura del dettaglio registra un accesso (R-69): niente riletture automatiche, solo
+ * dopo un'azione del moderatore.
+ */
 export function useDettaglioSegnalazione(id: string | null) {
   return useQuery({
     queryKey: CHIAVI.segnalazione(id ?? ''),
     queryFn: () => leggiDettaglioSegnalazione(id as string),
     enabled: id !== null,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
+  });
+}
+
+/** URL firmati (un'ora) di immagini private: flyer, foto dei locali e degli eventi, avatar. */
+export function useFirme(bucket: BucketModerazione, percorsi: string[]) {
+  return useQuery({
+    queryKey: [...CHIAVI.tutto, 'firme', bucket, ...percorsi],
+    queryFn: () => firmaFile(bucket, percorsi),
+    enabled: percorsi.length > 0,
+    staleTime: 50 * 60_000,
   });
 }
 
@@ -172,3 +193,13 @@ export function useReclamiModerazione() {
 }
 
 export { decidiReclamo, esamiReclamo };
+
+/** Ora corrente aggiornata ogni mezzo minuto, per i tempi rimanenti delle segnalazioni. */
+export function useAdesso(intervallo = 30_000): number {
+  const [adesso, setAdesso] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setAdesso(Date.now()), intervallo);
+    return () => window.clearInterval(timer);
+  }, [intervallo]);
+  return adesso;
+}
