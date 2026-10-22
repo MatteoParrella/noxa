@@ -7,11 +7,20 @@ import { supabase } from '@/lib/supabase';
  * database (R-10…R-17, R-50): qui solo chiamate e conversione degli errori.
  */
 
-const SchemaPersona = z.object({
+const SchemaProfilo = z.object({
   id: z.uuid(),
   username: z.string(),
   nome_visualizzato: z.string(),
 });
+
+// Una foto nascosta in attesa della revisione (D-15) non si mostra.
+const SchemaPersona = SchemaProfilo.extend({
+  avatar_path: z.string().nullable(),
+  avatar_nascosto: z.boolean(),
+}).transform(({ avatar_nascosto, avatar_path, ...persona }) => ({
+  ...persona,
+  avatar_path: avatar_nascosto ? null : avatar_path,
+}));
 export type Persona = z.infer<typeof SchemaPersona>;
 
 const SchemaAmicizia = z.object({
@@ -38,7 +47,7 @@ export type ElencoAmici = {
   inviate: Relazione[];
 };
 
-const PROFILO = 'id, username, nome_visualizzato';
+const PROFILO = 'id, username, nome_visualizzato, avatar_path, avatar_nascosto';
 
 export async function leggiAmici(io: string): Promise<ElencoAmici> {
   const { data, error } = await supabase()
@@ -69,7 +78,8 @@ export async function leggiAmici(io: string): Promise<ElencoAmici> {
   return elenco;
 }
 
-const SchemaRisultato = SchemaPersona.extend({
+// La ricerca non restituisce la foto (R-10).
+const SchemaRisultato = SchemaProfilo.extend({
   relazione: z.enum(['nessuna', 'amici', 'inviata', 'ricevuta']),
 });
 export type RisultatoRicerca = z.infer<typeof SchemaRisultato>;
@@ -195,7 +205,7 @@ export async function sblocca(io: string, altro: string): Promise<void> {
   if (error) throw converti(error);
 }
 
-const SchemaBloccato = SchemaPersona.extend({ bloccato_il: z.string() });
+const SchemaBloccato = SchemaProfilo.extend({ bloccato_il: z.string() });
 export type Bloccato = z.infer<typeof SchemaBloccato>;
 
 export async function mieiBloccati(): Promise<Bloccato[]> {
@@ -217,6 +227,7 @@ export type MotivoSegnalazione =
 export async function segnalaProfilo(dati: {
   io: string;
   profilo: string;
+  tipoOggetto?: 'profilo' | 'foto_profilo';
   motivo: MotivoSegnalazione;
   dettagli: string;
 }): Promise<void> {
@@ -225,7 +236,7 @@ export async function segnalaProfilo(dati: {
     .from('segnalazioni')
     .insert({
       segnalante_id: dati.io,
-      tipo_oggetto: 'profilo',
+      tipo_oggetto: dati.tipoOggetto ?? 'profilo',
       oggetto_id: dati.profilo,
       motivo: dati.motivo,
       dettagli: dettagli === '' ? null : dettagli,
@@ -241,8 +252,14 @@ const SchemaSegnalazione = z.object({
   stato: z.enum(['aperta', 'in_lavorazione', 'chiusa']),
   creata_il: z.string(),
   chiusa_il: z.string().nullable(),
+  azione_id: z.uuid().nullable(),
+  decisione_azione: z.string().nullable(),
   decisione: z.string().nullable(),
   decisa_il: z.string().nullable(),
+  reclamabile: z.boolean(),
+  reclamo_stato: z.enum(['inviato', 'in_esame', 'deciso']).nullable(),
+  reclamo_esito: z.string().nullable(),
+  reclamo_motivazione: z.string().nullable(),
 });
 export type MiaSegnalazione = z.infer<typeof SchemaSegnalazione>;
 
@@ -252,6 +269,11 @@ export async function mieSegnalazioni(): Promise<MiaSegnalazione[]> {
   const esito = z.array(SchemaSegnalazione).safeParse(data);
   if (!esito.success) throw converti(esito.error);
   return esito.data;
+}
+
+export async function presentaReclamo(azioneId: string, testo: string): Promise<void> {
+  const { error } = await supabase().rpc('presenta_reclamo', { azione: azioneId, testo });
+  if (error) throw converti(error);
 }
 
 export async function aggiornaProfilo(

@@ -61,9 +61,14 @@ select throws_ok($$ delete from public.coda_job $$, '42501', null, 'Il worker no
 reset role;
 
 -- Conservazione: job conclusi da più di 14 giorni, grezzi da più di 30.
+insert into public.caricamenti_flyer (id, utente_id, storage_path)
+values ('00000000-0000-4000-8000-0000000c0001', tests.id('adulto_20'),
+        tests.id('adulto_20') || '/00000000-0000-4000-8000-0000000c0001.jpg'),
+       ('00000000-0000-4000-8000-0000000c0002', tests.id('adulto_20'),
+        tests.id('adulto_20') || '/00000000-0000-4000-8000-0000000c0002.jpg');
 insert into public.eventi_grezzi (fonte_id, caricamento_flyer_id, payload, hash_contenuto, stato, creato_il)
-values (null, gen_random_uuid(), '{}', repeat('e', 64), 'errore', now() - interval '31 days'),
-       (null, gen_random_uuid(), '{}', repeat('f', 64), 'errore', now() - interval '29 days');
+values (null, '00000000-0000-4000-8000-0000000c0001', '{}', repeat('e', 64), 'errore', now() - interval '31 days'),
+       (null, '00000000-0000-4000-8000-0000000c0002', '{}', repeat('f', 64), 'errore', now() - interval '29 days');
 select private.applica_conservazione();
 select is(
   (select count(*)::int from public.coda_job where chiave_idempotenza = 'esegui_fonte:a'),

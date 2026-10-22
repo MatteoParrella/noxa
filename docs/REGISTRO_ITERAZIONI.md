@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 6 su 15.
+Iterazioni completate: 7 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -26,7 +26,7 @@ Iterazioni completate: 6 su 15.
 | 3 | completata | 2026-10-16 | 2026-10-16 | 3 | `iterazione-03-amicizie` | Notifiche delle richieste e reclamo nell'iterazione 6, gruppi nella 7 (ROADMAP) |
 | 4 | completata | 2026-10-19 | 2026-10-19 | 2 | `iterazione-04-catalogo-eventi` | Eventi reali dall'iterazione 5; foto dei locali caricate dai moderatori nell'iterazione 5; flyer nell'iterazione 6 |
 | 5 | completata con attese esterne | 2026-10-19 | 2026-10-19 | 2 | `iterazione-05-raccolta-eventi` | Mancano App Review Meta e token, chiave Google Places, 40 locali verificati e il primo `sito_html_<locale>` in staging |
-| 6 | da iniziare | — | — | 0 | — | — |
+| 6 | completata con attese esterne | 2026-10-21 | 2026-10-22 | 4 | `iterazione-06-flyer-moderazione` | Mancano la chiave Claude API con limite di spesa, la valutazione sul golden set dei flyer e il DPA di Anthropic (D-12) |
 | 7 | da iniziare | — | — | 0 | — | — |
 | 8 | da iniziare | — | — | 0 | — | — |
 | 9 | da iniziare | — | — | 0 | — | — |
@@ -650,3 +650,141 @@ annullamenti dicono solo se qualcuno si è segnato (R-69).
 - Restano quelle delle iterazioni 0–2.
 
 **Commit**: `99c6827` … commit finale di chiusura sul branch `iterazione-05-raccolta-eventi`.
+
+### Iterazione 6 — Flyer e moderazione
+
+**Piano**
+- Funzionalità: F-06 (caricamento e stato dei flyer), F-40 (code dei flyer, delle
+  segnalazioni e dei reclami, escalation R-55), F-10 (foto profilo), F-12 (stato delle
+  proprie segnalazioni con decisione e reclamo), F-22 limitata alle notifiche nell'app
+  (Realtime). Regole: R-50…R-55, R-66, R-69; DSA art. 17 e 20. Design:
+  `design/F-06-flyer/`, `design/F-40-moderazione/`, `design/F-10-foto-profilo/`.
+- Decisione D-15 chiusa all'avvio dal product owner (nuovo ADR): occultamento automatico in
+  attesa della revisione solo per il motivo `adescamento_o_rischio_minore` segnalato da un
+  account non nuovo; il contenuto nascosto è sostituito da un'immagine senza copyright a
+  tema serata, così l'app non mostra mai vuoti o "in lavorazione"; revisione entro i tempi di
+  R-53, ripristino se infondata, mezzo automatico dichiarato nella motivazione.
+- Database: valori nuovi degli enum; `notifiche` con trigger sulle amicizie e Realtime;
+  `caricamenti_flyer` con bucket `flyer-caricati`, limite R-54, job `analizza_flyer` e
+  chiavi esterne da `eventi_grezzi` ed `eventi_fonti`; bucket `avatar` (R-52);
+  `contenuti_occultati` (D-15); `reclami` (DSA art. 20); RPC `coda_flyer`, `decidi_flyer`,
+  `coda_segnalazioni`, `dettaglio_segnalazione`, `prendi_in_carico_segnalazione`,
+  `decidi_segnalazione`, `escalation_segnalazione`, `presenta_reclamo`, `reclami_moderazione`,
+  `decidi_reclamo`; contatori dell'area estesi; conservazione delle notifiche (90 giorni).
+- Worker: modulo `flyer` (schema `FlyerEstratto`, prompt versionato, estrattore con l'SDK
+  `anthropic` e `messages.parse`, immagini con EXIF rimosso, ridimensionamento e pHash,
+  client Storage con `service_role`, risoluzione del locale, deduplicazione), job
+  `analizza_flyer`, `copia_immagine_flyer`, `pulizia_flyer`; comando `valuta`; golden set
+  iniziale di 50 flyer sintetici creati internamente; estrattore in modalità testo e immagine
+  per le didascalie Instagram. Senza `ANTHROPIC_API_KEY` il flyer va in revisione manuale
+  con i campi vuoti (scelta del product owner).
+- App: "Carica un flyer" (Scopri e stato vuoto), caricamento con EXIF rimosso, "I miei
+  flyer"; campanella e notifiche in tempo reale; decisione motivata e reclamo nelle
+  segnalazioni; foto profilo con ritaglio e conversione WebP sul dispositivo, segnalazione
+  della foto; area di moderazione: Flyer, Segnalazioni (con escalation) e Reclami.
+- Passi: database e test pgTAP → worker e test → app e test unitari/e2e → documenti →
+  cicli di revisione e `safety-review`.
+- Criteri dell'iterazione: soglie della skill `flyer-parser` (valutazione con la chiave:
+  attesa esterna); test pgTAP di R-51, R-54, R-69 e delle policy del bucket `avatar` per
+  tutte le età del seed.
+
+**Cicli di revisione**
+- Durante lo sviluppo: la chiave esterna da `eventi_grezzi` ed `eventi_fonti` verso
+  `caricamenti_flyer`, rimandata dalle iterazioni 4 e 5, è stata aggiunta con la tabella;
+  `mie_segnalazioni` è stata ricreata per restituire decisione e reclamo.
+- Ciclo 1 (prova del product owner): la foto profilo si vedeva solo in "Modifica profilo"
+  → `Avatar` riceve il percorso della foto e la mostra con un URL firmato, con le iniziali
+  come ripiego (foto assente, nascosta o non visibile); foto in Profilo, area di moderazione,
+  amici, richieste, profilo di una persona e amici agli eventi; mai nei risultati della
+  ricerca (R-10). Un caricamento fallito lasciava l'anteprima → si toglie. Dalla rilettura:
+  le schermate Flyer e Segnalazioni dell'area erano solo elenchi e i Reclami usavano classi
+  inesistenti → revisione del flyer, dettaglio della segnalazione, reclami, avviso urgente
+  e badge P1 secondo le tavole di `design/F-40-moderazione/`. Il Supabase simulato degli e2e
+  non aveva i campi nuovi (foto, decisione e reclamo) → aggiornato.
+- Ciclo 2 (segnalazione del product owner): i titoli delle aree erano in monospaziato →
+  la classe `.parola` della parola di conferma dell'escalation si scontrava con quella dei
+  titoli animati; rinominata in `.parola-conferma`, e `.passi` (indicatore della
+  registrazione) in `.passi-escalation`; nuovo controllo del carattere dei titoli in
+  `movimento.spec.ts`. Quattro test pgTAP contavano anche i dati creati a mano nel database
+  locale → filtrano le righe della propria transazione. Ruff e formato del worker non
+  passavano → corretti, semplificato un test con un mock inutile.
+- Ciclo 3 (documenti): DATA_MODEL non descriveva `reclami`, `contenuti_occultati`, le nuove
+  RPC e le funzioni `private.*`; D-15 era ancora aperta e le migrazioni citavano ADR-0022 (che
+  è il layout responsive) → ADR-0023, D-15 chiusa, R-53 aggiornata, riferimenti corretti. Il
+  database può restituire la copertina `sostitutiva`, che l'app non conosceva (l'elenco degli
+  eventi sarebbe fallito alla validazione) → illustrazione notturna disegnata per Noxa, con
+  test unitario.
+- Ciclo 4 (`safety-review`): `reclami` non aveva la cancellazione automatica → migrazione
+  `20261022090000_conserva_reclami` (12 mesi dalla decisione, salvo prove R-55) con test;
+  i test di `notifiche`, `segnalazioni` e `reclami` non coprivano tutte le età del seed →
+  aggiunti. Poi tutti i controlli verdi.
+
+**Esito dei test**
+- pgTAP 739/739 (24 file; nuovi `027_notifiche`, `028_caricamenti_flyer`,
+  `029_avatar_occultamenti`, `030_moderazione_segnalazioni`, `031_reclami`);
+  `verifica_documentazione.py` e `verifica_migrazioni.py` verdi (24 tabelle con RLS e test).
+- Worker: Ruff, formato, mypy strict, pytest 210 unitari + 4 di integrazione su Postgres
+  reale; golden set iniziale di 50 flyer sintetici in `tests/dati/flyer_golden`.
+- App: Vitest 86/86; ESLint, TypeScript e Prettier verdi. Playwright con Supabase simulato
+  294/294 (nuovo `moderazione-segnalazioni.spec.ts`, 32 test: avviso urgente, coda e
+  revisione dei flyer, età e alcol, rifiuto con anteprima, unione, escalation in due
+  passaggi, coda e dettaglio delle segnalazioni, presa in carico, reclami, axe nei due temi,
+  390 px). Con Supabase reale 8/9: il test dei due fattori richiede un database appena
+  creato, mentre nel database locale l'account `moderatore` ha già il fattore attivato dalle
+  prove a mano; passa dopo `supabase db reset` e in CI.
+
+**Criteri di completamento**
+| Criterio | Esito | Evidenza |
+|---|---|---|
+| Soglie della skill `flyer-parser` sul golden set | ATTESA | Serve `ANTHROPIC_API_KEY`; estrattore testato con fixture (`tests/unit/flyer`), golden set di 50 flyer pronto |
+| Test pgTAP di R-51, R-54, R-69 per tutte le età | SÌ | `028_caricamenti_flyer` (62), `030_moderazione_segnalazioni` (53) |
+| Policy del bucket `avatar` per tutte le età | SÌ | `029_avatar_occultamenti` (45) |
+| PRD F-06: caricamento con EXIF rimosso, stato, limite R-54, reclamo | SÌ | `CaricaFlyer.tsx`, `MieiFlyer.tsx`, `028`, `031` |
+| PRD F-10: foto profilo visibile solo a chi vede il profilo, segnalabile e rimovibile | SÌ | `029`, `avatar.test.tsx`, `amici.spec.ts` |
+| PRD F-12: decisione motivata e reclamo | SÌ | `031`, `amici.spec.ts` ("le mie segnalazioni") |
+| PRD F-22 (Fase 1): notifiche nell'app in tempo reale | SÌ | `027`, campanella e `/notifiche/`, `segnalazioni.test.ts` |
+| PRD F-40: code di flyer, segnalazioni e reclami, escalation R-55, accessi registrati | SÌ | `030`, `031`, `moderazione-segnalazioni.spec.ts` |
+
+**Safety review — Iterazione 6 (F-06, F-10, F-12, F-22, F-40)**
+Esito: SUPERATA
+
+| Dato | Chi lo vede | Regole |
+|---|---|---|
+| Foto profilo (`profili.avatar_path`, bucket `avatar`) | chi può vedere il profilo; il titolare; i moderatori solo dei profili segnalati | R-13, R-52, R-69 |
+| Flyer caricati (`caricamenti_flyer`, bucket `flyer-caricati`) | chi li ha caricati (stato e motivo); i moderatori senza sapere chi li ha caricati | R-51, R-54, R-69 |
+| Notifiche (`notifiche`) | solo il destinatario | R-17, R-53, R-65 |
+| Reclami (`reclami`) | chi lo presenta (senza chi lo decide); i moderatori | DSA art. 20, R-69 |
+| Immagini nascoste (`contenuti_occultati`) | solo i moderatori | ADR-0023, R-55 |
+
+Superfici di contatto: foto profilo degli amici negli eventi e nelle liste degli amici (già
+visibili per R-13); notifiche di amicizia e di esito, solo con testi di sistema o dei
+moderatori; nessun nuovo modo di trovare persone.
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | RLS e policy per operazione su `notifiche`, `caricamenti_flyer`, `contenuti_occultati`, `reclami`; RPC `security definer` con `richiedi_moderatore()` e `search_path` vuoto; chi ha deciso non decide il reclamo nel database (NX031); test per 14, 15, 16, 17, 18, 20, 21, `moderatore`, `moderatore_senza_mfa` in `027`…`031`; nessuna `service_role` nell'app |
+| B. Contatti tra utenti | SÌ | Foto solo dove il profilo è visibile (policy del bucket, `029`); ricerca senza foto (R-10); blocco: notifiche dell'altra persona eliminate (`027`); nessun testo libero nelle notifiche |
+| C. Eventi e contenuti | SÌ | Flyer pubblicato solo dopo revisione con alcol scelto esplicitamente ed età non dichiarata = 18 (`decidi_flyer`, `028`, e2e); copertina sostitutiva senza alcol; nuovi eventi dalla policy di `eventi` |
+| D. Posizione | N/A | Nessuna posizione; EXIF (che può contenere la posizione) rimosso |
+| E. Contenuti caricati e moderazione | SÌ | Foto profilo e flyer segnalabili; limiti R-54 e 2 MB/10 MB nei bucket; EXIF rimosso sul dispositivo e nel worker; ogni decisione e ogni apertura di segnalazione in `azioni_moderazione`; immagini sfocate fino a «Mostra», nessun download (R-55) |
+| F. Privacy | SÌ | Notifiche 90 giorni, registro dei caricamenti 24 ore, reclami 12 mesi (`applica_conservazione`, `027`, `031`), immagini con `pulizia_flyer`; righe in SAFETY_PRIVACY §10; cancellazione a cascata con l'account; nessun SDK nuovo |
+| G. Documentazione | SÌ | ADR-0023, D-15 chiusa, R-53; DATA_MODEL §3, §4, §5, §6, §8; PRD §4 e §7; ARCHITECTURE §4.6, §5.4; EVENT_INGESTION §5 |
+
+**Scelte fatte durante l'iterazione**
+- D-15 chiusa con ADR-0023: si nasconde solo l'immagine, solo per rischio a un minore da un
+  account con almeno 7 giorni; al suo posto un'illustrazione notturna o le iniziali.
+- Layout responsive con barra laterale (ADR-0022), chiesto dal product owner.
+- Soglia di confidenza bassa dei flyer: 0,7 (EVENT_INGESTION §5).
+- Chi presenta un reclamo non vede chi lo ha deciso; cambiare decisione annulla gli effetti
+  dove si può (flyer di nuovo in revisione, account attivo, segnalazione riaperta).
+- Il dettaglio di una segnalazione non si ricarica da solo, perché ogni lettura registra un
+  accesso (R-69).
+- Senza chiave Claude API il flyer va in revisione manuale con i campi vuoti.
+
+**Attese esterne**
+- Chiave `ANTHROPIC_API_KEY` con limite di spesa e DPA di Anthropic (D-12), da proporre
+  insieme allo staging; poi `noxa_worker.flyer.valuta` sul golden set con le soglie della
+  skill `flyer-parser`.
+- Restano quelle delle iterazioni 0–2 e 5.
+
+**Commit**: `c04685c` … commit finale di chiusura sul branch `iterazione-06-flyer-moderazione`.

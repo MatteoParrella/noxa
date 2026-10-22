@@ -1,4 +1,3 @@
-
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -133,6 +132,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"caricamenti_flyer": {
+                  Row: {
+                    "aggiornato_il": string,"confidenza": number | null,"conservazione_legale": boolean,"contenuto_sospetto": boolean,"costo_stimato_eur": number | null,"creato_il": string,"deciso_il": string | null,"evento_candidato_id": string | null,"evento_id": string | null,"id": string,"immagine_eliminata_il": string | null,"modello": string | null,"motivo_rifiuto": string | null,"nota_revisione": string | null,"phash": string | null,"risultato_estrazione": Json | null,"stato": Database["public"]['Enums']["stato_caricamento"],"storage_path": string,"utente_id": string | null,"versione_prompt": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aggiornato_il"?: string,"confidenza"?: number | null,"conservazione_legale"?: boolean,"contenuto_sospetto"?: boolean,"costo_stimato_eur"?: number | null,"creato_il"?: string,"deciso_il"?: string | null,"evento_candidato_id"?: string | null,"evento_id"?: string | null,"id"?: string,"immagine_eliminata_il"?: string | null,"modello"?: string | null,"motivo_rifiuto"?: string | null,"nota_revisione"?: string | null,"phash"?: string | null,"risultato_estrazione"?: Json | null,"stato"?: Database["public"]['Enums']["stato_caricamento"],"storage_path": string,"utente_id"?: string | null,"versione_prompt"?: string | null
+                  }
+                  Update: {
+                    "aggiornato_il"?: string,"confidenza"?: number | null,"conservazione_legale"?: boolean,"contenuto_sospetto"?: boolean,"costo_stimato_eur"?: number | null,"creato_il"?: string,"deciso_il"?: string | null,"evento_candidato_id"?: string | null,"evento_id"?: string | null,"id"?: string,"immagine_eliminata_il"?: string | null,"modello"?: string | null,"motivo_rifiuto"?: string | null,"nota_revisione"?: string | null,"phash"?: string | null,"risultato_estrazione"?: Json | null,"stato"?: Database["public"]['Enums']["stato_caricamento"],"storage_path"?: string,"utente_id"?: string | null,"versione_prompt"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "caricamenti_flyer_evento_candidato_id_fkey"
+      columns: ["evento_candidato_id"]
+isOneToOne: false
+      referencedRelation: "eventi"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "caricamenti_flyer_evento_id_fkey"
+      columns: ["evento_id"]
+isOneToOne: false
+      referencedRelation: "eventi"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "caricamenti_flyer_utente_id_fkey"
+      columns: ["utente_id"]
+isOneToOne: false
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"coda_job": {
                   Row: {
                     "bloccato_fino": string | null,"chiave_concorrenza": string | null,"chiave_idempotenza": string,"completato_il": string | null,"creato_il": string,"errore": string | null,"esegui_dopo": string,"id": number,"payload": NonNullable<Json>,"stato": Database["public"]['Enums']["stato_job"],"tentativi": number,"tipo": Database["public"]['Enums']["tipo_job"]
@@ -193,6 +224,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"contenuti_occultati": {
+                  Row: {
+                    "automatico": boolean,"conservazione_legale": boolean,"creato_il": string,"oggetto_id": string,"segnalazione_id": string | null,"tipo_oggetto": Database["public"]['Enums']["tipo_oggetto_segnalabile"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "automatico": boolean,"conservazione_legale"?: boolean,"creato_il"?: string,"oggetto_id": string,"segnalazione_id"?: string | null,"tipo_oggetto": Database["public"]['Enums']["tipo_oggetto_segnalabile"]
+                  }
+                  Update: {
+                    "automatico"?: boolean,"conservazione_legale"?: boolean,"creato_il"?: string,"oggetto_id"?: string,"segnalazione_id"?: string | null,"tipo_oggetto"?: Database["public"]['Enums']["tipo_oggetto_segnalabile"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "contenuti_occultati_segnalazione_id_fkey"
+      columns: ["segnalazione_id"]
+isOneToOne: false
+      referencedRelation: "segnalazioni"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"esecuzioni_fonte": {
                   Row: {
                     "codice_errore": string | null,"durata_ms": number,"eventi_in_revisione": number,"eventi_letti": number,"eventi_nuovi": number,"eventi_scartati": number,"eventi_uniti": number,"fonte_id": string,"id": number,"iniziata_il": string,"messaggio_errore": string | null,"pagine_lette": number,"prova": boolean
@@ -246,6 +297,12 @@ isOneToOne: false
                   }
                   Relationships: [
                     {
+      foreignKeyName: "eventi_fonti_caricamento_flyer_id_fkey"
+      columns: ["caricamento_flyer_id"]
+isOneToOne: false
+      referencedRelation: "caricamenti_flyer"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "eventi_fonti_evento_id_fkey"
       columns: ["evento_id"]
 isOneToOne: false
@@ -298,6 +355,12 @@ isOneToOne: false
                   }
                   Relationships: [
                     {
+      foreignKeyName: "eventi_grezzi_caricamento_flyer_id_fkey"
+      columns: ["caricamento_flyer_id"]
+isOneToOne: false
+      referencedRelation: "caricamenti_flyer"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "eventi_grezzi_deciso_da_fkey"
       columns: ["deciso_da"]
 isOneToOne: false
@@ -383,6 +446,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"notifiche": {
+                  Row: {
+                    "creata_il": string,"dati": NonNullable<Json>,"id": string,"inviata_push_il": string | null,"letta_il": string | null,"tipo": string,"utente_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "creata_il"?: string,"dati"?: NonNullable<Json>,"id"?: string,"inviata_push_il"?: string | null,"letta_il"?: string | null,"tipo": string,"utente_id": string
+                  }
+                  Update: {
+                    "creata_il"?: string,"dati"?: NonNullable<Json>,"id"?: string,"inviata_push_il"?: string | null,"letta_il"?: string | null,"tipo"?: string,"utente_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notifiche_utente_id_fkey"
+      columns: ["utente_id"]
+isOneToOne: false
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"partecipazioni_evento": {
                   Row: {
                     "aggiornato_il": string,"creato_il": string,"evento_id": string,"stato": Database["public"]['Enums']["stato_partecipazione_evento"],"utente_id": string,"visibile_agli_amici": boolean
@@ -411,14 +494,14 @@ isOneToOne: false
                   ]
                 },"profili": {
                   Row: {
-                    "aggiornato_il": string,"avatar_path": string | null,"creato_il": string,"id": string,"nome_visualizzato": string,"stato_account": Database["public"]['Enums']["stato_account"],"username": string
+                    "aggiornato_il": string,"avatar_nascosto": boolean,"avatar_path": string | null,"creato_il": string,"id": string,"nome_visualizzato": string,"stato_account": Database["public"]['Enums']["stato_account"],"username": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "aggiornato_il"?: string,"avatar_path"?: string | null,"creato_il"?: string,"id": string,"nome_visualizzato": string,"stato_account"?: Database["public"]['Enums']["stato_account"],"username": string
+                    "aggiornato_il"?: string,"avatar_nascosto"?: boolean,"avatar_path"?: string | null,"creato_il"?: string,"id": string,"nome_visualizzato": string,"stato_account"?: Database["public"]['Enums']["stato_account"],"username": string
                   }
                   Update: {
-                    "aggiornato_il"?: string,"avatar_path"?: string | null,"creato_il"?: string,"id"?: string,"nome_visualizzato"?: string,"stato_account"?: Database["public"]['Enums']["stato_account"],"username"?: string
+                    "aggiornato_il"?: string,"avatar_nascosto"?: boolean,"avatar_path"?: string | null,"creato_il"?: string,"id"?: string,"nome_visualizzato"?: string,"stato_account"?: Database["public"]['Enums']["stato_account"],"username"?: string
                   }
                   Relationships: [
                     
@@ -439,6 +522,44 @@ isOneToOne: false
       foreignKeyName: "profili_privati_utente_id_fkey"
       columns: ["utente_id"]
 isOneToOne: true
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"reclami": {
+                  Row: {
+                    "azione_id": string,"creato_il": string,"deciso_da": string | null,"deciso_il": string | null,"esito": string | null,"id": string,"motivazione_esito": string | null,"preso_da": string | null,"stato": Database["public"]['Enums']["stato_reclamo"],"testo": string,"utente_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "azione_id": string,"creato_il"?: string,"deciso_da"?: string | null,"deciso_il"?: string | null,"esito"?: string | null,"id"?: string,"motivazione_esito"?: string | null,"preso_da"?: string | null,"stato"?: Database["public"]['Enums']["stato_reclamo"],"testo": string,"utente_id": string
+                  }
+                  Update: {
+                    "azione_id"?: string,"creato_il"?: string,"deciso_da"?: string | null,"deciso_il"?: string | null,"esito"?: string | null,"id"?: string,"motivazione_esito"?: string | null,"preso_da"?: string | null,"stato"?: Database["public"]['Enums']["stato_reclamo"],"testo"?: string,"utente_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "reclami_azione_id_fkey"
+      columns: ["azione_id"]
+isOneToOne: false
+      referencedRelation: "azioni_moderazione"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "reclami_deciso_da_fkey"
+      columns: ["deciso_da"]
+isOneToOne: false
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "reclami_preso_da_fkey"
+      columns: ["preso_da"]
+isOneToOne: false
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "reclami_utente_id_fkey"
+      columns: ["utente_id"]
+isOneToOne: false
       referencedRelation: "profili"
       referencedColumns: ["id"]
     }
@@ -526,9 +647,19 @@ isOneToOne: false
               "candidato": Json,"creato_il": string,"fonte_tipo": Database["public"]['Enums']["tipo_fonte"],"fonte_url": string,"grezzo_id": string,"nota_revisione": string,"payload": Json,"punteggio": number
             }[]
                            },
+"coda_flyer":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "candidato": Json,"confidenza": number,"contenuto_sospetto": boolean,"creato_il": string,"evento": Json,"id": string,"modello": string,"nota_revisione": string,"risultato_estrazione": Json,"stato": Database["public"]['Enums']["stato_caricamento"],"storage_path": string,"versione_prompt": string
+            }[]
+                           },
+"coda_segnalazioni":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "chiusa_il": string,"creata_il": string,"id": string,"in_escalation": boolean,"motivo": Database["public"]['Enums']["motivo_segnalazione"],"oggetto_id": string,"presa_da": string,"presa_da_me": boolean,"priorita": number,"scadenza": string,"stato": Database["public"]['Enums']["stato_segnalazione"],"stesso_oggetto": number,"tipo_oggetto": Database["public"]['Enums']["tipo_oggetto_segnalabile"]
+            }[]
+                           },
 "contatori_moderazione":
 { Args: Record<PropertyKey, never>; Returns: {
-              "candidati_locali": number,"duplicati": number,"possibili_annullamenti": number
+              "candidati_locali": number,"duplicati": number,"flyer": number,"possibili_annullamenti": number,"reclami": number,"scadenza_urgente": string,"segnalazioni": number,"segnalazioni_urgenti": number
             }[]
                            },
 "correggi_eta_alcol_evento":
@@ -545,13 +676,36 @@ isOneToOne: false
 "decidi_duplicato":
 { Args: { "grezzo": string,"stesso_evento": boolean }; Returns: undefined
                            },
+"decidi_flyer":
+{ Args: { "caricamento": string,"dati"?: Json,"esito": string,"evento_esistente"?: string,"motivazione"?: string }; Returns: string
+                           },
 "decidi_possibile_annullamento":
 { Args: { "annullato": boolean,"evento": string,"motivazione"?: string }; Returns: undefined
+                           },
+"decidi_reclamo":
+{ Args: { "cambia": boolean,"motivazione": string,"reclamo": string }; Returns: undefined
+                           },
+"decidi_segnalazione":
+{ Args: { "azione": Database["public"]['Enums']["azione_moderazione"],"contenuto"?: string,"motivazione": string,"segnalazione": string }; Returns: string
                            },
 "dettaglio_evento":
 { Args: { "evento": string }; Returns: {
               "amici": Json,"artisti": (string)[],"copertina_attribuzione": string,"copertina_path": string,"copertina_tipo": string,"data_serata": string,"descrizione": string,"eta_minima": number,"eta_minima_dichiarata": boolean,"fine": string,"fonte_tipo": string,"fonte_url": string,"generi_evento": (string)[],"id": string,"inizio": string,"locale_comune": string,"locale_id": string,"locale_indirizzo": string,"locale_lat": number,"locale_lon": number,"locale_nome": string,"mia_partecipazione": Database["public"]['Enums']["stato_partecipazione_evento"],"mia_visibilita": boolean,"prezzo_min_centesimi": number,"stato": Database["public"]['Enums']["stato_evento"],"titolo": string,"url_biglietti": string
             }[]
+                           },
+"dettaglio_segnalazione":
+{ Args: { "id": string }; Returns: {
+              "altre": Json,"creata_il": string,"dettagli": string,"in_escalation": boolean,"motivo": Database["public"]['Enums']["motivo_segnalazione"],"occultato": boolean,"oggetto": Json,"oggetto_id": string,"presa_da": string,"presa_da_me": boolean,"priorita": number,"registro": Json,"scadenza": string,"segnalazione_id": string,"stato": Database["public"]['Enums']["stato_segnalazione"],"tipo_oggetto": Database["public"]['Enums']["tipo_oggetto_segnalabile"]
+            }[]
+                           },
+"esamina_reclamo":
+{ Args: { "reclamo": string }; Returns: undefined
+                           },
+"escalation_flyer":
+{ Args: { "caricamento": string,"conferma": string,"motivazione": string }; Returns: undefined
+                           },
+"escalation_segnalazione":
+{ Args: { "conferma": string,"motivazione": string,"segnalazione": string }; Returns: undefined
                            },
 "esegui_fonte_ora":
 { Args: { "fonte": string }; Returns: number
@@ -559,6 +713,11 @@ isOneToOne: false
 "eventi_moderazione":
 { Args: { "al"?: string,"dal"?: string,"locale"?: string,"stati"?: (Database["public"]['Enums']["stato_evento"])[],"testo"?: string }; Returns: {
               "data_serata": string,"eta_minima": number,"eta_minima_dichiarata": boolean,"fonti": number,"id": string,"inizio": string,"locale_comune": string,"locale_id": string,"locale_nome": string,"riferimenti_alcol": boolean,"stato": Database["public"]['Enums']["stato_evento"],"titolo": string
+            }[]
+                           },
+"flyer_disponibili":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "prossimo_il": string,"rimasti": number
             }[]
                            },
 "locale_moderazione":
@@ -573,12 +732,17 @@ isOneToOne: false
                            },
 "mie_segnalazioni":
 { Args: Record<PropertyKey, never>; Returns: {
-              "chiusa_il": string,"creata_il": string,"decisa_il": string,"decisione": string,"descrizione": string,"id": string,"motivo": Database["public"]['Enums']["motivo_segnalazione"],"stato": Database["public"]['Enums']["stato_segnalazione"],"tipo_oggetto": Database["public"]['Enums']["tipo_oggetto_segnalabile"]
+              "azione_id": string,"chiusa_il": string,"creata_il": string,"decisa_il": string,"decisione": string,"decisione_azione": Database["public"]['Enums']["azione_moderazione"],"descrizione": string,"id": string,"motivo": Database["public"]['Enums']["motivo_segnalazione"],"reclamabile": boolean,"reclamo_esito": string,"reclamo_motivazione": string,"reclamo_stato": Database["public"]['Enums']["stato_reclamo"],"stato": Database["public"]['Enums']["stato_segnalazione"],"tipo_oggetto": Database["public"]['Enums']["tipo_oggetto_segnalabile"]
             }[]
                            },
 "miei_bloccati":
 { Args: Record<PropertyKey, never>; Returns: {
               "bloccato_il": string,"id": string,"nome_visualizzato": string,"username": string
+            }[]
+                           },
+"miei_flyer":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "azione_id": string,"creato_il": string,"evento_id": string,"id": string,"motivo_rifiuto": string,"reclamabile": boolean,"reclamo_esito": string,"reclamo_motivazione": string,"reclamo_stato": Database["public"]['Enums']["stato_reclamo"],"stato": Database["public"]['Enums']["stato_caricamento"],"storage_path": string
             }[]
                            },
 "mio_account":
@@ -587,6 +751,17 @@ isOneToOne: false
 "possibili_annullamenti":
 { Args: Record<PropertyKey, never>; Returns: {
               "data_serata": string,"evento_id": string,"fonte_url": string,"ha_partecipanti": boolean,"inizio": string,"locale_comune": string,"locale_nome": string,"titolo": string,"ultima_conferma_il": string
+            }[]
+                           },
+"prendi_in_carico_segnalazione":
+{ Args: { "segnalazione": string }; Returns: undefined
+                           },
+"presenta_reclamo":
+{ Args: { "azione": string,"testo": string }; Returns: string
+                           },
+"reclami_moderazione":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "creato_il": string,"decisione_autore": string,"decisione_azione": Database["public"]['Enums']["azione_moderazione"],"decisione_id": string,"decisione_il": string,"decisione_motivazione": string,"deciso_il": string,"descrizione": string,"esito": string,"id": string,"motivazione_esito": string,"puo_decidere": boolean,"ruolo": string,"stato": Database["public"]['Enums']["stato_reclamo"],"testo": string,"tipo_oggetto": Database["public"]['Enums']["tipo_oggetto_segnalabile"]
             }[]
                            },
 "registro_moderazione":
@@ -605,7 +780,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "azione_moderazione": "nessuna_violazione"|"rimuovi_contenuto"|"modifica_evento"|"approva_flyer"|"rifiuta_flyer"|"sospendi_account"|"riattiva_account"|"correggi_data_nascita"|"escalation_autorita"|"accesso_segnalazione"|"crea_locale"|"modifica_locale"|"approva_immagine_locale"|"rimuovi_immagine_locale"|"crea_fonte"|"modifica_fonte"|"esegui_fonte"|"unisci_duplicato"|"separa_duplicato"|"pubblica_evento"|"annulla_evento"|"rifiuta_evento"|"correggi_eta_alcol"|"conferma_in_programma"|"verifica_candidato_locale"|"unisci_candidato_locale"|"scarta_candidato_locale","canale_amicizia": "ricerca"|"codice_invito","fonte_immagine_locale": "autorizzazione_locale"|"noxa"|"licenza_libera","motivo_segnalazione": "contenuto_inappropriato"|"molestie"|"adescamento_o_rischio_minore"|"spam"|"evento_falso"|"eta_errata"|"alcol_a_minori"|"altro"|"dati_errati","ruolo_utente": "moderatore"|"amministratore","stato_account": "attivo"|"sospeso","stato_amicizia": "in_attesa"|"accettata","stato_conformita": "da_verificare"|"consentita"|"vietata","stato_evento": "in_revisione"|"pubblicato"|"rifiutato"|"annullato","stato_grezzo": "nuovo"|"normalizzato"|"unito"|"in_revisione_dedup"|"scartato"|"errore","stato_job": "in_coda"|"in_esecuzione"|"completato"|"fallito","stato_partecipazione_evento": "interessato"|"partecipo","stato_segnalazione": "aperta"|"in_lavorazione"|"chiusa","tipo_consenso": "termini"|"privacy","tipo_fonte": "sito_locale"|"instagram"|"resident_advisor"|"xceed"|"dice","tipo_job": "esegui_fonte"|"analizza_flyer"|"deduplica_grezzo"|"copia_immagine_flyer"|"pulizia_flyer","tipo_oggetto_segnalabile": "profilo"|"evento"|"caricamento_flyer"|"gruppo"|"serata_gruppo"|"immagine_locale"|"locale"|"fonte"|"candidato_locale"
+            "azione_moderazione": "nessuna_violazione"|"rimuovi_contenuto"|"modifica_evento"|"approva_flyer"|"rifiuta_flyer"|"sospendi_account"|"riattiva_account"|"correggi_data_nascita"|"escalation_autorita"|"accesso_segnalazione"|"crea_locale"|"modifica_locale"|"approva_immagine_locale"|"rimuovi_immagine_locale"|"crea_fonte"|"modifica_fonte"|"esegui_fonte"|"unisci_duplicato"|"separa_duplicato"|"pubblica_evento"|"annulla_evento"|"rifiuta_evento"|"correggi_eta_alcol"|"conferma_in_programma"|"verifica_candidato_locale"|"unisci_candidato_locale"|"scarta_candidato_locale"|"unisci_flyer"|"prendi_in_carico"|"occulta_contenuto"|"ripristina_contenuto"|"conferma_decisione"|"cambia_decisione","canale_amicizia": "ricerca"|"codice_invito","fonte_immagine_locale": "autorizzazione_locale"|"noxa"|"licenza_libera","motivo_segnalazione": "contenuto_inappropriato"|"molestie"|"adescamento_o_rischio_minore"|"spam"|"evento_falso"|"eta_errata"|"alcol_a_minori"|"altro"|"dati_errati","ruolo_utente": "moderatore"|"amministratore","stato_account": "attivo"|"sospeso","stato_amicizia": "in_attesa"|"accettata","stato_caricamento": "caricato"|"in_analisi"|"in_revisione"|"approvato"|"unito"|"rifiutato"|"errore","stato_conformita": "da_verificare"|"consentita"|"vietata","stato_evento": "in_revisione"|"pubblicato"|"rifiutato"|"annullato","stato_grezzo": "nuovo"|"normalizzato"|"unito"|"in_revisione_dedup"|"scartato"|"errore","stato_job": "in_coda"|"in_esecuzione"|"completato"|"fallito","stato_partecipazione_evento": "interessato"|"partecipo","stato_reclamo": "inviato"|"in_esame"|"deciso","stato_segnalazione": "aperta"|"in_lavorazione"|"chiusa","tipo_consenso": "termini"|"privacy","tipo_fonte": "sito_locale"|"instagram"|"resident_advisor"|"xceed"|"dice","tipo_job": "esegui_fonte"|"analizza_flyer"|"deduplica_grezzo"|"copia_immagine_flyer"|"pulizia_flyer","tipo_oggetto_segnalabile": "profilo"|"evento"|"caricamento_flyer"|"gruppo"|"serata_gruppo"|"immagine_locale"|"locale"|"fonte"|"candidato_locale"|"foto_profilo"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -725,7 +900,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "azione_moderazione": ["nessuna_violazione", "rimuovi_contenuto", "modifica_evento", "approva_flyer", "rifiuta_flyer", "sospendi_account", "riattiva_account", "correggi_data_nascita", "escalation_autorita", "accesso_segnalazione", "crea_locale", "modifica_locale", "approva_immagine_locale", "rimuovi_immagine_locale", "crea_fonte", "modifica_fonte", "esegui_fonte", "unisci_duplicato", "separa_duplicato", "pubblica_evento", "annulla_evento", "rifiuta_evento", "correggi_eta_alcol", "conferma_in_programma", "verifica_candidato_locale", "unisci_candidato_locale", "scarta_candidato_locale"],"canale_amicizia": ["ricerca", "codice_invito"],"fonte_immagine_locale": ["autorizzazione_locale", "noxa", "licenza_libera"],"motivo_segnalazione": ["contenuto_inappropriato", "molestie", "adescamento_o_rischio_minore", "spam", "evento_falso", "eta_errata", "alcol_a_minori", "altro", "dati_errati"],"ruolo_utente": ["moderatore", "amministratore"],"stato_account": ["attivo", "sospeso"],"stato_amicizia": ["in_attesa", "accettata"],"stato_conformita": ["da_verificare", "consentita", "vietata"],"stato_evento": ["in_revisione", "pubblicato", "rifiutato", "annullato"],"stato_grezzo": ["nuovo", "normalizzato", "unito", "in_revisione_dedup", "scartato", "errore"],"stato_job": ["in_coda", "in_esecuzione", "completato", "fallito"],"stato_partecipazione_evento": ["interessato", "partecipo"],"stato_segnalazione": ["aperta", "in_lavorazione", "chiusa"],"tipo_consenso": ["termini", "privacy"],"tipo_fonte": ["sito_locale", "instagram", "resident_advisor", "xceed", "dice"],"tipo_job": ["esegui_fonte", "analizza_flyer", "deduplica_grezzo", "copia_immagine_flyer", "pulizia_flyer"],"tipo_oggetto_segnalabile": ["profilo", "evento", "caricamento_flyer", "gruppo", "serata_gruppo", "immagine_locale", "locale", "fonte", "candidato_locale"]
+            "azione_moderazione": ["nessuna_violazione", "rimuovi_contenuto", "modifica_evento", "approva_flyer", "rifiuta_flyer", "sospendi_account", "riattiva_account", "correggi_data_nascita", "escalation_autorita", "accesso_segnalazione", "crea_locale", "modifica_locale", "approva_immagine_locale", "rimuovi_immagine_locale", "crea_fonte", "modifica_fonte", "esegui_fonte", "unisci_duplicato", "separa_duplicato", "pubblica_evento", "annulla_evento", "rifiuta_evento", "correggi_eta_alcol", "conferma_in_programma", "verifica_candidato_locale", "unisci_candidato_locale", "scarta_candidato_locale", "unisci_flyer", "prendi_in_carico", "occulta_contenuto", "ripristina_contenuto", "conferma_decisione", "cambia_decisione"],"canale_amicizia": ["ricerca", "codice_invito"],"fonte_immagine_locale": ["autorizzazione_locale", "noxa", "licenza_libera"],"motivo_segnalazione": ["contenuto_inappropriato", "molestie", "adescamento_o_rischio_minore", "spam", "evento_falso", "eta_errata", "alcol_a_minori", "altro", "dati_errati"],"ruolo_utente": ["moderatore", "amministratore"],"stato_account": ["attivo", "sospeso"],"stato_amicizia": ["in_attesa", "accettata"],"stato_caricamento": ["caricato", "in_analisi", "in_revisione", "approvato", "unito", "rifiutato", "errore"],"stato_conformita": ["da_verificare", "consentita", "vietata"],"stato_evento": ["in_revisione", "pubblicato", "rifiutato", "annullato"],"stato_grezzo": ["nuovo", "normalizzato", "unito", "in_revisione_dedup", "scartato", "errore"],"stato_job": ["in_coda", "in_esecuzione", "completato", "fallito"],"stato_partecipazione_evento": ["interessato", "partecipo"],"stato_reclamo": ["inviato", "in_esame", "deciso"],"stato_segnalazione": ["aperta", "in_lavorazione", "chiusa"],"tipo_consenso": ["termini", "privacy"],"tipo_fonte": ["sito_locale", "instagram", "resident_advisor", "xceed", "dice"],"tipo_job": ["esegui_fonte", "analizza_flyer", "deduplica_grezzo", "copia_immagine_flyer", "pulizia_flyer"],"tipo_oggetto_segnalabile": ["profilo", "evento", "caricamento_flyer", "gruppo", "serata_gruppo", "immagine_locale", "locale", "fonte", "candidato_locale", "foto_profilo"]
           }
         }
 } as const

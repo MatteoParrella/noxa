@@ -366,7 +366,10 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
           {testoAmiciEvento && (
             <AmiciPartecipano
               className="riga-amici-dettaglio"
-              persone={amiciMostrati.map((amico) => ({ nome: amico.nome_visualizzato }))}
+              persone={amiciMostrati.map((amico) => ({
+                nome: amico.nome_visualizzato,
+                foto: amico.avatar_path,
+              }))}
               altri={
                 dati.amici.filter((amico) => amico.stato === (vanno ? 'partecipo' : 'interessato'))
                   .length - amiciMostrati.length
@@ -449,6 +452,7 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
                 key={amico.id}
                 nome={amico.nome_visualizzato}
                 username={amico.username ?? ''}
+                foto={amico.avatar_path}
                 href={`/persona/?id=${amico.id}`}
                 nota={amico.stato === 'partecipo' ? testi.amici.partecipa : testi.amici.interessato}
               />

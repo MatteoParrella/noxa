@@ -13,7 +13,7 @@ import { PulsanteEsci } from '@/features/account/PulsanteEsci';
 import { useMioAccount, useSessione } from '@/features/account/sessione';
 import { leggiMieiRuoli } from '@/features/moderazione/api';
 import { messaggi } from '@/lib/messaggi/it';
-import { useAmici } from './dati';
+import { useAmici, useMioAvatar } from './dati';
 
 /** Area Profilo: chi sei per gli altri e le voci di amici, blocchi e segnalazioni. */
 export function MioProfilo() {
@@ -21,6 +21,7 @@ export function MioProfilo() {
   const sessione = useSessione();
   const account = useMioAccount(sessione);
   const amici = useAmici();
+  const mioAvatar = useMioAvatar();
   const richieste = amici.data?.ricevute.length ?? 0;
   const utenteId = sessione.stato === 'presente' ? sessione.utenteId : null;
   // La voce compare solo a chi ha un ruolo; l'area chiede comunque i due fattori (R-06).
@@ -46,7 +47,12 @@ export function MioProfilo() {
   return (
     <div className="flex flex-col gap-6">
       <Entra className="persona-grande" indice={1}>
-        <Avatar nome={account.data.nome_visualizzato} dimensione="xl" decorativo />
+        <Avatar
+          nome={account.data.nome_visualizzato}
+          foto={mioAvatar.data}
+          dimensione="xl"
+          decorativo
+        />
         <p className="pg-nome">{account.data.nome_visualizzato}</p>
         <p className="pg-user m-0">@{account.data.username}</p>
         <Link className="btn btn-secondario btn-s mt-2" href="/profilo/modifica/">

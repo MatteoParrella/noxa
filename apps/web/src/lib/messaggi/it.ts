@@ -290,6 +290,16 @@ export const messaggi = {
     salva: 'Salva',
     salvato: 'Profilo aggiornato',
     usernameInUso: 'Questo username è già in uso: provane un altro.',
+    fotoTitolo: 'Foto profilo',
+    fotoAiuto: 'Verrà mostrata ai tuoi amici.',
+    fotoSeleziona: 'Seleziona una foto',
+    fotoCambia: 'Cambia foto',
+    fotoRimuovi: 'Rimuovi foto',
+    fotoCaricamento: 'Carico la foto…',
+    fotoSuccesso: 'Foto aggiornata',
+    fotoErrore: 'Non riusciamo a caricare la foto. Riprova.',
+    fotoRimossaSuccesso: 'Foto rimossa',
+    fotoRimossaErrore: 'Non riusciamo a rimuovere la foto. Riprova.',
   },
 
   amici: {
@@ -409,6 +419,7 @@ export const messaggi = {
 
   segnala: {
     titolo: (username: string) => `Segnala @${username}`,
+    titoloFoto: (username: string) => `Segnala la foto di @${username}`,
     spiegazione: 'Tocca un motivo: la segnalazione parte subito. Resta anonima.',
     motivi: [
       { valore: 'contenuto_inappropriato', etichetta: 'Contenuto inappropriato' },
@@ -597,6 +608,70 @@ export const messaggi = {
       apriEvento: (titolo: string) => `Apri ${titolo}`,
       chiudiAnteprima: 'Chiudi l’anteprima',
     },
+    caricaFlyer: {
+      titolo: 'Carica un flyer',
+      sottotitolo: 'Scopri',
+      indietro: 'Scopri',
+      descrizione:
+        'Hai trovato il flyer di un evento a Milano o in Brianza? Caricalo: un moderatore lo esamina e, se tutto è a posto, lo pubblichiamo.',
+      seleziona: 'Scegli un’immagine',
+      cambia: 'Cambia immagine',
+      dati: {
+        titolo: 'Che cosa trovi nel flyer?',
+        titoloCampo: 'Titolo evento',
+        dataCampo: 'Data',
+        localeCampo: 'Locale o luogo',
+      },
+      carica: 'Carica il flyer',
+      caricamento: 'Carico il flyer…',
+      successo: {
+        titolo: 'Flyer ricevuto, grazie!',
+        testo: 'Un moderatore lo esamina. Ti avvisiamo quando è pronto.',
+        azione: 'Vai a "I miei flyer"',
+      },
+      errori: {
+        tipoNonValido: 'Scegli un file JPEG, PNG o WebP.',
+        troppoGrande: 'Il file è troppo grande: massimo 10 MB.',
+        troppiOggi: 'Hai già caricato 10 flyer nelle ultime 24 ore. Riprova domani.',
+        generico: 'Qualcosa non ha funzionato. Riprova tra poco.',
+      },
+      note: 'L’immagine viene esaminata da una persona del team prima della pubblicazione.',
+    },
+    mieiFlyer: {
+      titolo: 'I miei flyer',
+      sottotitolo: 'Scopri',
+      indietro: 'Scopri',
+      caricaFlyer: 'Carica un flyer',
+      caricamento: 'Carico i tuoi flyer',
+      vuoto: {
+        titolo: 'Nessun flyer caricato',
+        testo:
+          'Carica un flyer di un evento di Milano o della Brianza: lo esaminiamo e, se è tutto a posto, lo pubblichiamo.',
+        azione: 'Carica un flyer',
+      },
+      errore: {
+        titolo: 'I flyer non si sono caricati',
+        testo: 'Controlla la connessione e riprova.',
+      },
+      stati: {
+        caricato: 'Caricato',
+        in_analisi: 'In analisi',
+        in_revisione: 'In revisione',
+        approvato: 'Approvato',
+        unito: 'Pubblicato',
+        rifiutato: 'Rifiutato',
+        errore: 'Errore',
+      } as const,
+      motivoRifiuto: 'Motivo:',
+      vaiAllevento: 'Vedi l’evento',
+      elimina: 'Elimina richiesta',
+      eliminaConferma: 'Eliminare la richiesta?',
+      eliminaConfermaTesto: 'Il flyer verrà rimosso e l’evento in attesa sarà annullato.',
+      eliminaConfermaAzione: 'Elimina',
+      eliminaAnnulla: 'Annulla',
+      eliminaSuccesso: 'Richiesta eliminata.',
+      eliminaErrore: 'Non è stato possibile eliminare la richiesta.',
+    },
   },
 
   evento: {
@@ -704,6 +779,86 @@ export const messaggi = {
     dsa: 'art. 17 DSA',
     persona: 'Decisione presa da una persona del team, non da un sistema automatico.',
     caricamento: 'Carico le tue segnalazioni',
+    reclamo: {
+      presenta: 'Presenta reclamo',
+      stati: {
+        inviato: 'Reclamo inviato',
+        in_esame: 'In esame',
+        deciso: 'Deciso',
+      },
+      esiti: {
+        confermata: 'Decisione confermata',
+        cambiata: 'Decisione cambiata',
+      },
+    },
+  },
+
+  reclamo: {
+    titolo: 'Presenta reclamo',
+    sottotitolo: 'La tua motivazione',
+    descrizione: 'Spiega perché non sei d’accordo con la decisione.',
+    campo: 'Motivazione',
+    aiuto: 'Massimo 1000 caratteri.',
+    invia: 'Invia reclamo',
+    invio: 'Invio…',
+    successo: {
+      titolo: 'Reclamo inviato',
+      testo: 'Un altro moderatore lo esaminerà entro i tempi previsti.',
+    },
+    errori: {
+      vuoto: 'Scrivi perché non sei d’accordo.',
+      scaduto: 'Il termine di 6 mesi è scaduto.',
+      giaInviato: 'Hai già inviato un reclamo per questa decisione.',
+      generico: 'Non è andata: controlla la connessione e riprova.',
+    },
+  },
+
+  notifiche: {
+    titolo: 'Notifiche',
+    caricamento: 'Carico le notifiche',
+    apriNotifiche: 'Notifiche',
+    campanella: (n: number) => (n === 1 ? '1 notifica non letta' : `${n} notifiche non lette`),
+    vuoto: {
+      titolo: 'Nessuna notifica',
+      testo: 'Le richieste di amicizia, i badge e gli aggiornamenti importanti arrivano qui.',
+    },
+    errore: {
+      titolo: 'Non riesco a caricare le notifiche',
+      testo: 'Controlla la connessione e riprova.',
+    },
+    gruppi: {
+      oggi: 'Oggi',
+      settimana: 'Questa settimana',
+      prima: 'Prima',
+    },
+    tipi: {
+      richiesta_amicizia: 'Hai ricevuto una richiesta di amicizia.',
+      amicizia_accettata: 'La tua richiesta di amicizia è stata accettata.',
+      invito_gruppo: 'Sei stato invitato a un gruppo.',
+      nuova_serata: 'È stata creata una nuova serata di gruppo.',
+      aggiornamento_serata: 'Una serata di gruppo è stata aggiornata.',
+      checkin_amico: 'Un amico ha fatto il check-in a un evento.',
+      ritorno_avviato: 'Un amico ha avviato il ritorno sicuro.',
+      ritorno_allerta: 'Allerta: un amico non è ancora rientrato.',
+      ritorno_arrivato: 'Un amico è rientrato sano e salvo.',
+      esito_moderazione: 'Il tuo contenuto è stato esaminato.',
+      rimozione_gruppo: 'Sei stato rimosso da un gruppo.',
+      badge_ottenuto: 'Hai ottenuto un nuovo badge.',
+      riepilogo_pronto: 'Il tuo Wrapped è pronto.',
+    } as const,
+    /** Titoli degli esiti di moderazione (`dati.esito`); la motivazione segue sotto. */
+    esiti: {
+      segnalazione_decisa: 'Abbiamo esaminato la tua segnalazione',
+      contenuto_rimosso: 'Abbiamo rimosso un tuo contenuto',
+      contenuto_rimosso_foto: 'Abbiamo rimosso la tua foto profilo',
+      contenuto_nascosto: 'La tua foto profilo è nascosta in attesa di un controllo',
+      contenuto_ripristinato: 'La tua foto profilo è di nuovo visibile',
+      account_sospeso: 'Il tuo account è sospeso',
+      flyer_pubblicato: 'Il tuo flyer è stato pubblicato',
+      flyer_unito: 'Il tuo flyer è stato aggiunto a un evento',
+      flyer_rifiutato: 'Il tuo flyer non è stato pubblicato',
+      reclamo_deciso: 'Abbiamo deciso sul tuo reclamo',
+    } as Record<string, string>,
   },
 
   moderazione,

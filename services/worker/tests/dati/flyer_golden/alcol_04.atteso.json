@@ -1,0 +1,24 @@
+{
+  "e_un_evento": true,
+  "contenuto_inappropriato": false,
+  "titolo": "Open Bar Night #4",
+  "nome_locale": "The Club",
+  "comune": "Milano",
+  "indirizzo": null,
+  "data": "2026-12-05",
+  "ora_inizio": null,
+  "ora_fine": null,
+  "anno_inferito": false,
+  "eta_minima": 18,
+  "riferimenti_alcol": true,
+  "generi": [],
+  "artisti": [],
+  "prezzo_min_centesimi": null,
+  "confidenza": {
+    "titolo": 0.9,
+    "nome_locale": 0.9,
+    "data": 0.9,
+    "ora_inizio": 0.0,
+    "eta_minima": 0.9
+  }
+}

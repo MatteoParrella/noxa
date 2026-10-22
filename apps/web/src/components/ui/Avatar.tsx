@@ -1,6 +1,14 @@
+'use client';
+
+import { useState } from 'react';
+import { useUrlAvatar } from '@/lib/avatar';
 import { classi } from '@/lib/classi';
 
-type Persona = { nome: string };
+type Persona = {
+  nome: string;
+  /** Percorso della foto profilo nel bucket `avatar`; senza foto restano le iniziali. */
+  foto?: string | null | undefined;
+};
 
 const TINTE = ['avatar-t1', 'avatar-t2', 'avatar-t3'] as const;
 
@@ -25,7 +33,7 @@ type Props = Persona & {
   decorativo?: boolean;
 };
 
-export function Avatar({ nome, dimensione = 'm', decorativo = false }: Props) {
+export function Avatar({ nome, foto, dimensione = 'm', decorativo = false }: Props) {
   return (
     <span
       className={classi(
@@ -39,8 +47,19 @@ export function Avatar({ nome, dimensione = 'm', decorativo = false }: Props) {
       aria-label={decorativo ? undefined : nome}
       aria-hidden={decorativo || undefined}
     >
-      {iniziali(nome)}
+      {foto ? <Foto percorso={foto} nome={nome} /> : iniziali(nome)}
     </span>
+  );
+}
+
+/** Foto profilo; finché non è pronta, o se non si carica, restano le iniziali. */
+function Foto({ percorso, nome }: { percorso: string; nome: string }) {
+  const url = useUrlAvatar(percorso);
+  const [urlNonCaricato, setUrlNonCaricato] = useState<string | null>(null);
+  if (url === null || url === urlNonCaricato) return iniziali(nome);
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img className="avatar-foto" src={url} alt="" onError={() => setUrlNonCaricato(url)} />
   );
 }
 
@@ -67,7 +86,7 @@ export function GruppoAvatar({ persone, massimo = 3, altri, decorativo = false }
       aria-hidden={decorativo || undefined}
     >
       {visibili.map((p) => (
-        <Avatar key={p.nome} nome={p.nome} dimensione="s" decorativo />
+        <Avatar key={p.nome} nome={p.nome} foto={p.foto} dimensione="s" decorativo />
       ))}
       {nonMostrate > 0 && (
         <span className="avatar avatar-s avatar-piu" aria-hidden="true">

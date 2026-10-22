@@ -5,7 +5,7 @@ import { Icona } from './Icona';
 
 type Props = {
   /** Primi amici da mostrare (al massimo 2 avatar più "+N"). */
-  persone: Array<{ nome: string }>;
+  persone: Array<{ nome: string; foto?: string | null | undefined }>;
   /** Amici non mostrati negli avatar. */
   altri: number;
   /** "Marco, Sara e altri 2 ci vanno" */

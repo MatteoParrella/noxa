@@ -106,6 +106,7 @@ export function ElencoAmici() {
                   key={relazione.amiciziaId}
                   nome={relazione.persona.nome_visualizzato}
                   username={relazione.persona.username}
+                  foto={relazione.persona.avatar_path}
                   href={percorsoPersona(relazione.persona.id)}
                   {...(relazione.canale === 'codice_invito'
                     ? { nota: testi.arrivataConCodice }
@@ -162,6 +163,7 @@ export function ElencoAmici() {
                   key={relazione.amiciziaId}
                   nome={relazione.persona.nome_visualizzato}
                   username={relazione.persona.username}
+                  foto={relazione.persona.avatar_path}
                   href={percorsoPersona(relazione.persona.id)}
                   azioni={
                     <>
@@ -200,6 +202,7 @@ export function ElencoAmici() {
                   key={relazione.amiciziaId}
                   nome={relazione.persona.nome_visualizzato}
                   username={relazione.persona.username}
+                  foto={relazione.persona.avatar_path}
                   href={percorsoPersona(relazione.persona.id)}
                   azioni={
                     <AzioniPersona

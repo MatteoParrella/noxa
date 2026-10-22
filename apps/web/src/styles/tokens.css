@@ -192,3 +192,15 @@
   --mirino-testo: #edeae4;
   --avatar-grande: 96px;
 }
+
+/*
+  Layout responsive (ADR-0022): sidebar di navigazione a ≥ 768 px (solo icone) e
+  ≥ 1024 px (icone + etichette). Valori consultabili per riferimento; non vengono
+  usati in Tailwind ma sono disponibili per le media query di componenti.css.
+*/
+:root {
+  --bp-tablet: 48rem; /* 768 px: sidebar stretta (sole icone) */
+  --bp-desktop: 64rem; /* 1024 px: sidebar larga (icone + etichette) */
+  --sidebar-stretta: 68px;
+  --sidebar-larga: 200px;
+}

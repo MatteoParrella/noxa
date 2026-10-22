@@ -1,12 +1,15 @@
 'use client';
 
-import { CircleCheck, Clock, Flag, Send } from 'lucide-react';
+import { CircleCheck, Clock, Flag, MessageSquare, Send } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { Icona } from '@/components/ui/Icona';
+import { Pulsante } from '@/components/ui/Pulsante';
 import { Caricamento, ElencoVuoto, ErroreConAzione } from '@/components/ui/Stati';
 import { messaggi } from '@/lib/messaggi/it';
 import type { MiaSegnalazione } from './api';
 import { useMieSegnalazioni } from './dati';
+import { FoglioReclamo } from './FoglioReclamo';
 
 const testi = messaggi.mieSegnalazioni;
 
@@ -77,6 +80,8 @@ function descrizioneOggetto(voce: MiaSegnalazione): string {
 
 function Voce({ voce }: { voce: MiaSegnalazione }) {
   const cosa = descrizioneOggetto(voce);
+  const [reclamo, setReclamo] = useState(false);
+
   return (
     <li className="segn">
       <div className="segn-testa">
@@ -96,7 +101,40 @@ function Voce({ voce }: { voce: MiaSegnalazione }) {
           </span>
           <p className="m-0">{voce.decisione}</p>
           <p className="t-didascalia c-2 m-0">{testi.persona}</p>
+          {voce.reclamabile && (
+            <Pulsante
+              variante="testo"
+              dimensione="s"
+              onClick={() => setReclamo(true)}
+              className="-ml-2 mt-1"
+            >
+              <MessageSquare aria-hidden="true" className="ico ico-s" strokeWidth={1.75} />
+              {testi.reclamo.presenta}
+            </Pulsante>
+          )}
+          {voce.reclamo_stato && (
+            <div className="mt-2">
+              <Badge variante={voce.reclamo_stato === 'deciso' ? 'successo' : 'accento'}>
+                {testi.reclamo.stati[voce.reclamo_stato]}
+              </Badge>
+              {voce.reclamo_stato === 'deciso' && voce.reclamo_esito && (
+                <p className="t-corpo-piccolo c-2 m-0 mt-1">
+                  <span className="font-medium">
+                    {testi.reclamo.esiti[voce.reclamo_esito as 'confermata' | 'cambiata']}
+                  </span>
+                  {voce.reclamo_motivazione && ` — ${voce.reclamo_motivazione}`}
+                </p>
+              )}
+            </div>
+          )}
         </div>
+      )}
+      {reclamo && voce.azione_id && (
+        <FoglioReclamo
+          azioneId={voce.azione_id}
+          onFatto={() => setReclamo(false)}
+          onChiudi={() => setReclamo(false)}
+        />
       )}
     </li>
   );

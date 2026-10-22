@@ -1,0 +1,29 @@
+{
+  "e_un_evento": true,
+  "contenuto_inappropriato": false,
+  "titolo": "Reggaeton Night",
+  "nome_locale": "Fabrique",
+  "comune": "Milano",
+  "indirizzo": null,
+  "data": "2026-12-12",
+  "ora_inizio": "23:00:00",
+  "ora_fine": null,
+  "anno_inferito": false,
+  "eta_minima": 18,
+  "riferimenti_alcol": false,
+  "generi": [
+    "reggaeton"
+  ],
+  "artisti": [
+    "DJ Salsa",
+    "MC Latino"
+  ],
+  "prezzo_min_centesimi": null,
+  "confidenza": {
+    "titolo": 0.95,
+    "nome_locale": 0.9,
+    "data": 0.9,
+    "ora_inizio": 0.0,
+    "eta_minima": 0.9
+  }
+}

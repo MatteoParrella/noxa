@@ -1,10 +1,17 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import {
+  decidiReclamo,
+  esamiReclamo,
+  firmaFile,
   firmaFoto,
   leggiCandidati,
+  leggiCodaFlyer,
+  leggiCodaSegnalazioni,
   leggiContatori,
+  leggiDettaglioSegnalazione,
   leggiDuplicati,
   leggiEsecuzioni,
   leggiEvento,
@@ -15,7 +22,9 @@ import {
   leggiLocale,
   leggiLocali,
   leggiPossibiliAnnullamenti,
+  leggiReclamiModerazione,
   leggiRegistro,
+  type BucketModerazione,
   type FiltriEventi,
   type TipoRegistro,
 } from './api';
@@ -37,6 +46,10 @@ export const CHIAVI = {
   registro: (tipo: TipoRegistro, id: string) => ['moderazione', 'registro', tipo, id] as const,
   foto: (percorsi: string[]) => ['moderazione', 'foto', ...percorsi] as const,
   generi: ['moderazione', 'generi'] as const,
+  codaFlyer: ['moderazione', 'coda-flyer'] as const,
+  codaSegnalazioni: ['moderazione', 'coda-segnalazioni'] as const,
+  segnalazione: (id: string) => ['moderazione', 'segnalazione', id] as const,
+  reclamiMod: ['moderazione', 'reclami'] as const,
 };
 
 export function useContatori() {
@@ -131,4 +144,62 @@ export function useFotoFirmate(percorsi: string[]) {
 
 export function useGeneri() {
   return useQuery({ queryKey: CHIAVI.generi, queryFn: leggiGeneri, staleTime: Infinity });
+}
+
+export function useCodaFlyer() {
+  return useQuery({ queryKey: CHIAVI.codaFlyer, queryFn: leggiCodaFlyer, refetchInterval: 60_000 });
+}
+
+export function useCodaSegnalazioni() {
+  return useQuery({
+    queryKey: CHIAVI.codaSegnalazioni,
+    queryFn: leggiCodaSegnalazioni,
+    refetchInterval: 60_000,
+  });
+}
+
+/**
+ * Ogni lettura del dettaglio registra un accesso (R-69): niente riletture automatiche, solo
+ * dopo un'azione del moderatore.
+ */
+export function useDettaglioSegnalazione(id: string | null) {
+  return useQuery({
+    queryKey: CHIAVI.segnalazione(id ?? ''),
+    queryFn: () => leggiDettaglioSegnalazione(id as string),
+    enabled: id !== null,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
+  });
+}
+
+/** URL firmati (un'ora) di immagini private: flyer, foto dei locali e degli eventi, avatar. */
+export function useFirme(bucket: BucketModerazione, percorsi: string[]) {
+  return useQuery({
+    queryKey: [...CHIAVI.tutto, 'firme', bucket, ...percorsi],
+    queryFn: () => firmaFile(bucket, percorsi),
+    enabled: percorsi.length > 0,
+    staleTime: 50 * 60_000,
+  });
+}
+
+export function useReclamiModerazione() {
+  return useQuery({
+    queryKey: CHIAVI.reclamiMod,
+    queryFn: leggiReclamiModerazione,
+    refetchInterval: 60_000,
+  });
+}
+
+export { decidiReclamo, esamiReclamo };
+
+/** Ora corrente aggiornata ogni mezzo minuto, per i tempi rimanenti delle segnalazioni. */
+export function useAdesso(intervallo = 30_000): number {
+  const [adesso, setAdesso] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setAdesso(Date.now()), intervallo);
+    return () => window.clearInterval(timer);
+  }, [intervallo]);
+  return adesso;
 }

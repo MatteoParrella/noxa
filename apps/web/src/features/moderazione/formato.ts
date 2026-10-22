@@ -61,6 +61,20 @@ export function oraBreve(istante: string): string {
   return formatoOra.format(new Date(istante));
 }
 
+/** Sotto quest'ora una scadenza di segnalazione è "vicina" e si scrive in evidenza (R-53). */
+export const SCADENZA_VICINA_MS = 60 * 60_000;
+
+/** "2 h 15 min", "45 min", "3 g 4 h": tempo che resta fino a una scadenza (mai negativo). */
+export function tempoRimanente(millisecondi: number): string {
+  const minuti = Math.max(0, Math.floor(millisecondi / 60_000));
+  const giorni = Math.floor(minuti / 1440);
+  const ore = Math.floor((minuti % 1440) / 60);
+  const resto = minuti % 60;
+  if (giorni > 0) return `${giorni} g ${ore} h`;
+  if (ore > 0) return `${ore} h ${resto} min`;
+  return `${resto} min`;
+}
+
 /** "8,4 s" per la durata di un'esecuzione. */
 export function durata(millisecondi: number): string {
   return `${(millisecondi / 1000).toLocaleString('it-IT', { maximumFractionDigits: 1 })} s`;

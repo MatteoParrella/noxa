@@ -89,6 +89,8 @@ test('accettare e rifiutare una richiesta dalla ricerca', async ({ page, supabas
         id: '00000000-0000-4000-8000-0000000000e2',
         username: 'giulia.rota',
         nome_visualizzato: 'Giulia',
+        avatar_path: null,
+        avatar_nascosto: false,
       },
     },
   ];

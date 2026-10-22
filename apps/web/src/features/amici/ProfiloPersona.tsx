@@ -98,7 +98,12 @@ function Scheda({ io, dati, onBloccata }: { io: string; dati: Dati; onBloccata: 
         />
       </div>
       <Entra className="persona-grande" indice={1}>
-        <Avatar nome={persona.nome_visualizzato} dimensione="xl" decorativo />
+        <Avatar
+          nome={persona.nome_visualizzato}
+          foto={persona.avatar_path}
+          dimensione="xl"
+          decorativo
+        />
         <h2 className="pg-nome">{persona.nome_visualizzato}</h2>
         <p className="pg-user m-0">@{persona.username}</p>
       </Entra>

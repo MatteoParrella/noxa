@@ -68,9 +68,16 @@ flowchart LR
   rispettano i contrasti del §4.
 - Movimento: transizioni funzionali di 150–250 ms e ingressi espressivi di 700–900 ms con la
   curva `cubic-bezier(.2,.7,.2,1)` (titoli che salgono, contenuti dal sfocato al nitido,
-  bagliore dell'intestazione, indicatore della barra che scorre). Nessuna animazione
-  infinita; con `prefers-reduced-motion` solo dissolvenze brevi (ADR-0019,
-  `src/styles/movimento.css`).
+  bagliore dell'intestazione, indicatore della barra che scorre). Transizioni di navigazione
+  tra route con View Transitions API (fade + leggero traslato, 180/280 ms). Nessuna
+  animazione infinita; con `prefers-reduced-motion` solo dissolvenze brevi (ADR-0019,
+  ADR-0022, `src/styles/movimento.css`).
+- Layout responsive (ADR-0022): l'app è portrait-first ma funziona pienamente in landscape e
+  su browser desktop. A **≥ 768 px** la barra di navigazione diventa una sidebar sinistra
+  (68 px, sole icone); a **≥ 1024 px** la sidebar si allarga a 200 px con icone e etichette.
+  L'area di moderazione usa container query e si adatta a qualsiasi larghezza, compreso il
+  portrait su tablet. Token di riferimento: `--bp-tablet` (768 px), `--bp-desktop` (1024 px),
+  `--sidebar-stretta` (68 px), `--sidebar-larga` (200 px) in `tokens.css`.
 - Una modifica ai token si fa prima in Claude Design, poi in `tokens.css`, nella stessa PR.
 
 ## 3. Componenti e schermate

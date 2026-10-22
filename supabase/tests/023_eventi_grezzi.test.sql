@@ -94,7 +94,9 @@ select is_empty(
 );
 select is(
   (select motivazione from public.azioni_moderazione
-   where oggetto_id = '00000000-0000-4000-8000-00000000e001' and azione = 'unisci_duplicato'),
+   where oggetto_id = '00000000-0000-4000-8000-00000000e001' and azione = 'unisci_duplicato'
+     -- Solo la riga di questo test: il database locale può avere decisioni prese a mano.
+     and creata_il = now()),
   'Stesso evento: dati della nuova fonte uniti (punteggio 82).',
   'La decisione è nel registro dell''evento'
 );
@@ -103,7 +105,7 @@ select lives_ok($$ select public.decidi_duplicato(tests.g('003'), false) $$,
 select tests.esci();
 select is(
   (select array_agg(payload ->> 'grezzo_id' order by id) from public.coda_job
-   where tipo = 'deduplica_grezzo'),
+   where tipo = 'deduplica_grezzo' and creato_il = now()),
   array[tests.g('001')::text, tests.g('003')::text],
   'Ogni decisione accoda il job deduplica_grezzo per il worker'
 );

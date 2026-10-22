@@ -60,7 +60,10 @@ export function useCopertine(copertine: Copertina[]) {
   const percorsi = [
     ...new Set(
       copertine
-        .filter((copertina) => copertina.tipo !== 'tipografica' && copertina.path)
+        .filter(
+          (copertina) =>
+            copertina.tipo !== 'tipografica' && copertina.tipo !== 'sostitutiva' && copertina.path,
+        )
         .map((copertina) => `${copertina.tipo}:${copertina.path}`),
     ),
   ].sort();

@@ -1,0 +1,24 @@
+{
+  "e_un_evento": true,
+  "contenuto_inappropriato": false,
+  "titolo": "Open Night #5",
+  "nome_locale": "Alcatraz",
+  "comune": "Milano",
+  "indirizzo": null,
+  "data": "2026-11-28",
+  "ora_inizio": null,
+  "ora_fine": null,
+  "anno_inferito": false,
+  "eta_minima": null,
+  "riferimenti_alcol": false,
+  "generi": [],
+  "artisti": [],
+  "prezzo_min_centesimi": null,
+  "confidenza": {
+    "titolo": 0.9,
+    "nome_locale": 0.9,
+    "data": 0.9,
+    "ora_inizio": 0.0,
+    "eta_minima": 0.0
+  }
+}
