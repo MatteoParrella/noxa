@@ -27,7 +27,7 @@ Iterazioni completate: 7 su 15.
 | 4 | completata | 2026-10-19 | 2026-10-19 | 2 | `iterazione-04-catalogo-eventi` | Eventi reali dall'iterazione 5; foto dei locali caricate dai moderatori nell'iterazione 5; flyer nell'iterazione 6 |
 | 5 | completata con attese esterne | 2026-10-19 | 2026-10-19 | 2 | `iterazione-05-raccolta-eventi` | Mancano App Review Meta e token, chiave Google Places, 40 locali verificati e il primo `sito_html_<locale>` in staging |
 | 6 | completata con attese esterne | 2026-10-21 | 2026-10-22 | 4 | `iterazione-06-flyer-moderazione` | Mancano la chiave Claude API con limite di spesa, la valutazione sul golden set dei flyer e il DPA di Anthropic (D-12) |
-| 7 | da iniziare | — | — | 0 | — | — |
+| 7 | in corso | 2026-10-23 | — | 0 | `iterazione-07-gruppi` | — |
 | 8 | da iniziare | — | — | 0 | — | — |
 | 9 | da iniziare | — | — | 0 | — | — |
 | 10 | da iniziare | — | — | 0 | — | — |
@@ -788,3 +788,32 @@ moderatori; nessun nuovo modo di trovare persone.
 - Restano quelle delle iterazioni 0–2 e 5.
 
 **Commit**: `c04685c` … commit finale di chiusura sul branch `iterazione-06-flyer-moderazione`.
+
+### Iterazione 7 — Gruppi e serate di gruppo
+
+**Piano**
+- Funzionalità: F-13 (gruppi, inviti, ruoli, limite di 30, invariante delle fasce), F-14
+  (serata di gruppo legata a un evento adatto a tutti o libera, risposte in tempo reale),
+  F-15 (link a prevendita e lista, stato del biglietto), F-16 (andata e ritorno, chi guida e
+  posti, passaggi, avviso del ritorno). Regole: R-11, R-15, R-16, R-17, R-24, R-43, R-50.
+  Design: `design/F-13-gruppi/`, `design/F-14-serata/`.
+- Database: enum dei gruppi e delle serate; `gruppi`, `membri_gruppo`, `serate_gruppo`,
+  `partecipazioni_serata` con RLS e funzioni `e_membro`, `e_membro_attivo`,
+  `e_admin_gruppo`, `puo_entrare_nel_gruppo`, `evento_adatto_al_gruppo`; trigger
+  `verifica_trasporto`, protezione di ruoli e stati dei membri, nuovo admin quando esce
+  l'ultimo; invariante R-15 con i trigger su `amicizie` e `blocchi` e il job giornaliero
+  `verifica_invariante_gruppi`; `puo_vedere_profilo` estesa ai membri dello stesso gruppo;
+  notifiche `invito_gruppo`, `nuova_serata`, `aggiornamento_serata`, `rimozione_gruppo`;
+  segnalazione del nome del gruppo e di titolo e note della serata con la decisione dei
+  moderatori; RPC di lettura (gruppi, dettaglio, anteprima dell'invito, amici invitabili,
+  eventi adatti al gruppo, dettaglio della serata); Realtime.
+- App: Organizza con le schede Amici e Gruppi, inviti ricevuti, crea gruppo con il
+  selettore degli amici, dettaglio del gruppo con membri, ruoli e conferme, invito,
+  informativa di rimozione; proponi una serata, dettaglio della serata con risposta, chi
+  c'è, biglietti, trasporto e aggiornamento dal vivo; segnalazioni di gruppi e serate
+  nell'area di moderazione.
+- Passi: migrazione e test pgTAP → tipi generati → API, hook e schermate → test unitari ed
+  e2e (simulati e di integrazione) → documenti → cicli di revisione e `safety-review`.
+- Criteri dell'iterazione: test pgTAP di R-15, R-16, R-24 e del trigger `verifica_trasporto`
+  per tutte le età del seed; e2e di gruppo misto valido e rifiutato; aggiornamento in tempo
+  reale tra due sessioni.
