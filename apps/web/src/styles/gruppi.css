@@ -197,6 +197,16 @@
 .gr-barra-fondo .btn {
   flex: none;
 }
+/* Sul telefono la navigazione è una barra fissa in fondo (componenti.css, «Guscio dell'app»):
+   la barra delle azioni si ferma sopra di lei, alla stessa altezza che il contenuto le lascia. */
+.guscio .gr-barra-fondo {
+  bottom: calc(80px + env(safe-area-inset-bottom));
+}
+@media (min-width: 48rem) {
+  .guscio .gr-barra-fondo {
+    bottom: 0;
+  }
+}
 
 /* serate del gruppo */
 .gr-compressa {

@@ -137,3 +137,22 @@ test('proporre una serata libera controlla titolo e link https', async ({ page, 
     url_lista: 'https://binario7.example/lista',
   });
 });
+
+test('le azioni in fondo ai moduli restano sopra la barra di navigazione', async ({ page }) => {
+  for (const [indirizzo, nome] of [
+    [`/serata/nuova/?gruppo=${ID_GRUPPO}`, 'Proponi'],
+    ['/gruppi/nuovo/', 'Crea il gruppo'],
+  ] as const) {
+    await page.goto(indirizzo);
+    const pulsante = page.getByRole('button', { name: nome, exact: true });
+    await pulsante.scrollIntoViewIfNeeded();
+    await expect(pulsante).toBeInViewport();
+    // Il punto centrale del pulsante appartiene al pulsante, non alla barra fissa sopra.
+    const libero = await pulsante.evaluate((elemento) => {
+      const r = elemento.getBoundingClientRect();
+      const sopra = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return sopra !== null && elemento.contains(sopra);
+    });
+    expect(libero).toBe(true);
+  }
+});
