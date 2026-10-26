@@ -2,7 +2,7 @@
 -- notifica a chi li ha scritti e reclamo (DATA_MODEL.md §5.4, §5.10; SAFETY_PRIVACY.md §11).
 -- Regole: R-16, R-50, R-52, R-53, R-55, R-69. Amici del seed: 15-16, 20-21, 18-17.
 begin;
-select plan(21);
+select plan(23);
 
 create function tests.s(tipo text, segnalante text) returns uuid language sql stable as $$
   select x.id from public.segnalazioni x
@@ -73,6 +73,16 @@ select results_eq(
 -- ---------------------------------------------------------------------------------------------
 -- Dettaglio e decisione (R-69, DSA art. 17)
 -- ---------------------------------------------------------------------------------------------
+-- R-06: senza due fattori nessun accesso ai testi segnalati né decisione.
+select tests.autentica_come('moderatore_senza_mfa');
+select throws_ok(
+  $$ select * from public.dettaglio_segnalazione(tests.s('gruppo', 'minore_17')) $$,
+  '42501', null, 'R-06: senza due fattori non si apre la segnalazione di un gruppo'
+);
+select throws_ok(
+  $$ select public.decidi_segnalazione(tests.s('serata_gruppo', 'minore_17'), 'rimuovi_contenuto', 'Note offensive', 'note') $$,
+  '42501', null, 'R-06: senza due fattori non si rimuovono i testi di una serata'
+);
 select tests.autentica_come('moderatore');
 select results_eq(
   $$ select oggetto ->> 'nome', oggetto ->> 'autore', (oggetto ->> 'membri')::integer
