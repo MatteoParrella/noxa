@@ -25,7 +25,7 @@ import { Entra } from '@/components/ui/Movimento';
 import { Caricamento, ElencoVuoto, ErroreConAzione } from '@/components/ui/Stati';
 import { messaggi } from '@/lib/messaggi/it';
 import { segnaLetteTutte, type TipoNotifica } from './api';
-import { testoNotifica } from './testo';
+import { linkNotifica, testoNotifica } from './testo';
 import { CHIAVI, useNotifiche } from './dati';
 
 const testi = messaggi.notifiche;
@@ -44,22 +44,6 @@ const ICONE: Record<TipoNotifica, LucideIcon> = {
   rimozione_gruppo: UserMinus,
   badge_ottenuto: Award,
   riepilogo_pronto: Sparkles,
-};
-
-const LINK: Record<TipoNotifica, string> = {
-  richiesta_amicizia: '/amici/',
-  amicizia_accettata: '/amici/',
-  invito_gruppo: '/organizza/',
-  nuova_serata: '/organizza/',
-  aggiornamento_serata: '/organizza/',
-  checkin_amico: '/vivi/',
-  ritorno_avviato: '/vivi/',
-  ritorno_allerta: '/vivi/',
-  ritorno_arrivato: '/vivi/',
-  esito_moderazione: '/profilo/segnalazioni/',
-  rimozione_gruppo: '/organizza/',
-  badge_ottenuto: '/ricorda/badge/',
-  riepilogo_pronto: '/ricorda/wrapped/',
 };
 
 function formattaOrario(iso: string): string {
@@ -162,7 +146,7 @@ export function ElencoNotifiche() {
                 const n = mappa.get(id);
                 if (!n) return null;
                 const IcoComponente = ICONE[n.tipo];
-                const href = LINK[n.tipo];
+                const href = linkNotifica(n.tipo, n.dati);
                 const { titolo, motivazione } = testoNotifica(n.tipo, n.dati);
                 const nonLetta = n.letta_il === null;
                 return (

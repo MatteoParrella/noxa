@@ -24,14 +24,18 @@ import {
   prendiInCaricoSegnalazione,
   SchemaOggettoEvento,
   SchemaOggettoFlyer,
+  SchemaOggettoGruppo,
   SchemaOggettoLocale,
   SchemaOggettoProfilo,
+  SchemaOggettoSerata,
   type AzioneSegnalazione,
+  type ContenutoRimovibile,
   type BucketModerazione,
   type DettaglioSegnalazione as Dettaglio,
 } from './api';
 import { CHIAVI, useAdesso, useDettaglioSegnalazione, useFirme } from './dati';
 import { BadgeAlcol, BadgeEta } from './Eventi';
+import { dataBreve } from '@/features/gruppi/formato';
 import { dataOra, testoErrore } from './formato';
 import { PERCORSI_MODERAZIONE } from './GuscioModerazione';
 import { AnteprimaMessaggio, DialogoEscalation, ImmagineSfocata } from './Riservato';
@@ -42,7 +46,6 @@ const d = testi.dettaglioSegnalazione;
 const c = testi.codaSegnalazioni;
 const esiti = messaggi.notifiche.esiti;
 
-type Contenuto = 'foto' | 'nome' | 'username';
 type Dialogo = AzioneSegnalazione | 'escalation' | null;
 
 function codice(id: string): string {
@@ -91,12 +94,36 @@ function Scheda({ s, apertaIl }: { s: Dettaglio; apertaIl: number }) {
   const [dialogo, setDialogo] = useState<Dialogo>(null);
   const profilo = SchemaOggettoProfilo.safeParse(s.oggetto).data ?? null;
   // Per un profilo senza foto la prima scelta è il nome.
-  const [contenuto, setContenuto] = useState<Contenuto>(
-    s.tipo_oggetto === 'profilo' && !profilo?.avatar_path ? 'nome' : 'foto',
+  // Gruppi e serate: solo i testi scritti dagli utenti (R-16), mai l'elenco dei membri (R-69).
+  const gruppo =
+    s.tipo_oggetto === 'gruppo' ? (SchemaOggettoGruppo.safeParse(s.oggetto).data ?? null) : null;
+  const serata =
+    s.tipo_oggetto === 'serata_gruppo'
+      ? (SchemaOggettoSerata.safeParse(s.oggetto).data ?? null)
+      : null;
+  const [contenuto, setContenuto] = useState<ContenutoRimovibile>(
+    serata
+      ? serata.note
+        ? 'note'
+        : serata.luogo_ritrovo
+          ? 'luogo'
+          : 'titolo'
+      : gruppo || (s.tipo_oggetto === 'profilo' && !profilo?.avatar_path)
+        ? 'nome'
+        : 'foto',
   );
-  const evento = SchemaOggettoEvento.safeParse(s.oggetto).data ?? null;
-  const locale = SchemaOggettoLocale.safeParse(s.oggetto).data ?? null;
-  const flyer = SchemaOggettoFlyer.safeParse(s.oggetto).data ?? null;
+  const evento =
+    s.tipo_oggetto === 'evento' ? (SchemaOggettoEvento.safeParse(s.oggetto).data ?? null) : null;
+  const locale =
+    s.tipo_oggetto === 'immagine_locale'
+      ? (SchemaOggettoLocale.safeParse(s.oggetto).data ?? null)
+      : null;
+  const flyer =
+    s.tipo_oggetto === 'caricamento_flyer'
+      ? (SchemaOggettoFlyer.safeParse(s.oggetto).data ?? null)
+      : null;
+  const testoSerata = (campo: 'titolo' | 'luogo' | 'note') =>
+    campo === 'titolo' ? serata?.titolo : campo === 'luogo' ? serata?.luogo_ritrovo : serata?.note;
   const eProfilo = s.tipo_oggetto === 'profilo' || s.tipo_oggetto === 'foto_profilo';
 
   const aggiorna = async (testo: string) => {
@@ -121,11 +148,20 @@ function Scheda({ s, apertaIl }: { s: Dettaglio; apertaIl: number }) {
 
   // Azioni previste dal database per ogni tipo di oggetto (decidi_segnalazione).
   const azioni: AzioneSegnalazione[] = ['nessuna_violazione'];
-  if (eProfilo || evento?.immagine_path || locale?.immagine_path) azioni.push('rimuovi_contenuto');
+  if (
+    eProfilo ||
+    evento?.immagine_path ||
+    locale?.immagine_path ||
+    gruppo ||
+    (['titolo', 'luogo', 'note'] as const).some((campo) => testoSerata(campo))
+  )
+    azioni.push('rimuovi_contenuto');
   if (s.tipo_oggetto === 'evento') azioni.push('modifica_evento');
   if (eProfilo) azioni.push('sospendi_account');
 
   const titoloCoinvolto = (azione: AzioneSegnalazione): string | null => {
+    if (azione === 'rimuovi_contenuto' && gruppo) return esiti.contenuto_rimosso_gruppo ?? null;
+    if (azione === 'rimuovi_contenuto' && serata) return esiti.contenuto_rimosso_serata ?? null;
     if (!eProfilo) return null;
     if (azione === 'sospendi_account') return esiti.account_sospeso ?? null;
     if (azione === 'rimuovi_contenuto') {
@@ -157,12 +193,15 @@ function Scheda({ s, apertaIl }: { s: Dettaglio; apertaIl: number }) {
       );
     };
 
-  const effettoRimozione = eProfilo
-    ? d.dialoghi.rimuovi_contenuto.effetto[contenuto]
-    : d.dialoghi.rimuovi_contenuto.effetto.immagine;
-  const confermaRimozione = eProfilo
-    ? d.dialoghi.rimuovi_contenuto.conferma[contenuto]
-    : d.dialoghi.rimuovi_contenuto.conferma.immagine;
+  const chiaveRimozione = gruppo
+    ? 'nome_gruppo'
+    : serata && (contenuto === 'titolo' || contenuto === 'luogo' || contenuto === 'note')
+      ? contenuto
+      : eProfilo && (contenuto === 'foto' || contenuto === 'nome' || contenuto === 'username')
+        ? contenuto
+        : 'immagine';
+  const effettoRimozione = d.dialoghi.rimuovi_contenuto.effetto[chiaveRimozione];
+  const confermaRimozione = d.dialoghi.rimuovi_contenuto.conferma[chiaveRimozione];
 
   return (
     <>
@@ -236,6 +275,35 @@ function Scheda({ s, apertaIl }: { s: Dettaglio; apertaIl: number }) {
               {!s.oggetto && <p className="guida m-0">{d.oggettoRimosso}</p>}
               {profilo && <OggettoProfilo profilo={profilo} tipo={s.tipo_oggetto} />}
               {evento && <OggettoEvento evento={evento} />}
+              {gruppo && (
+                <div className="flex flex-col gap-1">
+                  <b className="t-titolo-2">{gruppo.nome}</b>
+                  <span className="c-2">
+                    {d.gruppo.membri(gruppo.membri)}
+                    {gruppo.autore ? ` · ${d.gruppo.autore(gruppo.autore)}` : ''}
+                  </span>
+                  <p className="guida m-0">{d.gruppo.nota}</p>
+                </div>
+              )}
+              {serata && (
+                <div className="flex flex-col gap-2">
+                  <span className="c-2">
+                    {d.serata.gruppo(serata.gruppo_nome)} · {dataBreve(serata.data_serata)}
+                    {serata.evento_titolo ? ` · ${d.serata.evento(serata.evento_titolo)}` : ''}
+                  </span>
+                  <dl className="m-0 flex flex-col gap-2">
+                    {(['titolo', 'luogo', 'note'] as const).map((campo) => (
+                      <div key={campo}>
+                        <dt className="etichetta">{d.serata[campo]}</dt>
+                        <dd className="md-testo-libero m-0">
+                          {testoSerata(campo) ?? d.serata.vuoto}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {serata.autore && <span className="c-2">{d.serata.autore(serata.autore)}</span>}
+                </div>
+              )}
               {locale && (
                 <>
                   <p className="m-0">
@@ -371,7 +439,13 @@ function Scheda({ s, apertaIl }: { s: Dettaglio; apertaIl: number }) {
       <DialogoMotivazione
         aperto={dialogo === 'rimuovi_contenuto'}
         onChiudi={() => setDialogo(null)}
-        titolo={d.dialoghi.rimuovi_contenuto.titolo(nome || (d.titolo[s.tipo_oggetto] ?? ''))}
+        titolo={d.dialoghi.rimuovi_contenuto.titolo(
+          nome ||
+            gruppo?.nome ||
+            serata?.titolo ||
+            serata?.evento_titolo ||
+            (d.titolo[s.tipo_oggetto] ?? ''),
+        )}
         sopratitolo={`${d.decisione} · ${codice(s.segnalazione_id)}`}
         effetto={effettoRimozione}
         etichettaMotivazione={testi.comune.motivazione}
@@ -387,7 +461,11 @@ function Scheda({ s, apertaIl }: { s: Dettaglio; apertaIl: number }) {
             s.segnalazione_id,
             'rimuovi_contenuto',
             motivazione,
-            s.tipo_oggetto === 'profilo' ? contenuto : undefined,
+            s.tipo_oggetto === 'profilo' || s.tipo_oggetto === 'serata_gruppo'
+              ? contenuto
+              : s.tipo_oggetto === 'gruppo'
+                ? 'nome'
+                : undefined,
           );
           await aggiorna(d.fatto.decisa);
         }}
@@ -405,6 +483,23 @@ function Scheda({ s, apertaIl }: { s: Dettaglio; apertaIl: number }) {
                     onChange={() => setContenuto(scelta)}
                   />
                   {d.dialoghi.rimuovi_contenuto.scelte[scelta]}
+                </label>
+              ))}
+          </fieldset>
+        )}
+        {serata && (
+          <fieldset className="scelte-radio una">
+            {(['titolo', 'luogo', 'note'] as const)
+              .filter((campo) => testoSerata(campo))
+              .map((campo) => (
+                <label key={campo}>
+                  <input
+                    type="radio"
+                    name="contenuto-da-rimuovere"
+                    checked={contenuto === campo}
+                    onChange={() => setContenuto(campo)}
+                  />
+                  {d.dialoghi.rimuovi_contenuto.scelte[campo]}
                 </label>
               ))}
           </fieldset>

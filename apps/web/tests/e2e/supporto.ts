@@ -141,7 +141,23 @@ export type Endpoint =
   | 'partecipazioni_crea'
   | 'partecipazioni_aggiorna'
   | 'partecipazioni_elimina'
-  | 'firma_immagini';
+  | 'firma_immagini'
+  | 'miei_gruppi'
+  | 'prossime_serate'
+  | 'dettaglio_gruppo'
+  | 'anteprima_invito_gruppo'
+  | 'amici_invitabili'
+  | 'crea_gruppo'
+  | 'invita_nel_gruppo'
+  | 'eventi_adatti_al_gruppo'
+  | 'dettaglio_serata'
+  | 'membri_aggiorna'
+  | 'membri_elimina'
+  | 'gruppi_aggiorna'
+  | 'gruppi_elimina'
+  | 'serate_crea'
+  | 'serate_aggiorna'
+  | 'partecipazioni_serata_salva';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
@@ -461,6 +477,125 @@ export const PIXEL_PNG = Buffer.from(
   'base64',
 );
 
+// ---------------------------------------------------------------------------------------------
+// Gruppi e serate di gruppo (iterazione 7)
+// ---------------------------------------------------------------------------------------------
+
+export const ID_GRUPPO = '00000000-0000-4000-8000-00000000d101';
+export const ID_INVITO = '00000000-0000-4000-8000-00000000d102';
+export const ID_SERATA = '00000000-0000-4000-8000-00000000d201';
+
+const personaGruppo = (p: PersonaProva) => ({
+  id: p.id,
+  username: p.username,
+  nome_visualizzato: p.nome_visualizzato,
+  avatar_path: null,
+});
+
+export const MIEI_GRUPPI_DI_PROVA = [
+  {
+    id: ID_INVITO,
+    nome: 'Live del venerdì',
+    mio_ruolo: 'membro',
+    mio_stato: 'invitato',
+    membri: 8,
+    primi: [],
+    invitato_da: personaGruppo(PERSONE.marco),
+    prossima: null,
+  },
+  {
+    id: ID_GRUPPO,
+    nome: 'Calcetto del giovedì',
+    mio_ruolo: 'admin',
+    mio_stato: 'attivo',
+    membri: 4,
+    primi: [personaGruppo(IO), personaGruppo(PERSONE.marco), personaGruppo(PERSONE.sara)],
+    invitato_da: null,
+    prossima: { id: ID_SERATA, data_serata: serataDiProva(1), titolo: 'Pizza e poi da Marco' },
+  },
+];
+
+export const DETTAGLIO_GRUPPO_DI_PROVA = {
+  id: ID_GRUPPO,
+  nome: 'Calcetto del giovedì',
+  mio_ruolo: 'admin',
+  creato_da: personaGruppo(IO),
+  membri_totale: 4,
+  membri: [
+    { ...personaGruppo(IO), ruolo: 'admin', stato: 'attivo' },
+    { ...personaGruppo(PERSONE.marco), ruolo: 'membro', stato: 'attivo' },
+    { ...personaGruppo(PERSONE.sara), ruolo: 'membro', stato: 'invitato' },
+  ],
+  altri: 1,
+  serate: [
+    {
+      id: ID_SERATA,
+      titolo: 'Pizza e poi da Marco',
+      data_serata: serataDiProva(1),
+      ora_ritrovo: '20:00:00',
+      stato: 'proposta',
+      locale_nome: null,
+      locale_comune: null,
+      passata: false,
+      si: 2,
+      forse: 1,
+      mia_risposta: 'si',
+    },
+  ],
+};
+
+export const AMICI_INVITABILI_DI_PROVA = [
+  { ...personaGruppo(PERSONE.davide), motivo: null },
+  { ...personaGruppo(PERSONE.marco), motivo: 'gia_nel_gruppo' },
+  { ...personaGruppo(PERSONE.marta), motivo: 'fasce' },
+];
+
+const partecipante = (p: PersonaProva | typeof IO, dati: Record<string, unknown>) => ({
+  ...personaGruppo(p),
+  io: p.id === IO.id,
+  risposta: null,
+  biglietto: null,
+  trasporto_andata: null,
+  trasporto_ritorno: null,
+  posti_liberi: null,
+  passaggio_da: null,
+  aggiornato_il: null,
+  ...dati,
+});
+
+export function serataDiGruppoDiProva(possoGuidare: boolean) {
+  return {
+    id: ID_SERATA,
+    gruppo_id: ID_GRUPPO,
+    gruppo_nome: 'Calcetto del giovedì',
+    titolo: 'Pizza e poi da Marco',
+    data_serata: serataDiProva(1),
+    ora_ritrovo: '20:00:00',
+    luogo_ritrovo: 'Pizzeria in piazza, Arcore',
+    url_prevendita: null,
+    url_lista: 'https://binario7.example/lista',
+    note: 'Portate le giacche: si torna tardi.',
+    stato: 'proposta',
+    creata_da: personaGruppo(PERSONE.marco),
+    posso_gestire: true,
+    posso_guidare: possoGuidare,
+    passata: false,
+    evento: null,
+    partecipanti: [
+      partecipante(IO, { risposta: 'si', biglietto: 'lista', trasporto_andata: 'mezzi_pubblici' }),
+      partecipante(PERSONE.marco, {
+        risposta: 'si',
+        biglietto: 'lista',
+        trasporto_andata: 'auto_guido',
+        trasporto_ritorno: 'auto_guido',
+        posti_liberi: 3,
+      }),
+      partecipante(PERSONE.sara, { risposta: 'forse' }),
+    ],
+    altri: 0,
+  };
+}
+
 export class SupabaseSimulato {
   readonly richieste: Array<{ endpoint: Endpoint; corpo: unknown; url: string }> = [];
   private readonly risposte = new Map<Endpoint, Risposta>();
@@ -468,6 +603,8 @@ export class SupabaseSimulato {
   amicizie: unknown[] = AMICIZIE_DI_PROVA;
   /** Partecipazione salvata all'evento del dettaglio, aggiornata dalle chiamate simulate. */
   partecipazione: { stato: string; visibile: boolean } | null = null;
+  /** Chi guarda la serata di gruppo può guidare (maggiorenne, deciso dal database). */
+  possoGuidare = false;
   /** Profili visibili per `profili_leggi` (la RLS reale decide chi si vede). */
   profiliVisibili: PersonaProva[] = Object.values(PERSONE);
 
@@ -613,6 +750,60 @@ export class SupabaseSimulato {
         return { stato: 204 };
       case 'firma_immagini':
         return { stato: 200, corpo: [] };
+      case 'miei_gruppi':
+        return { stato: 200, corpo: MIEI_GRUPPI_DI_PROVA };
+      case 'prossime_serate':
+        return {
+          stato: 200,
+          corpo: [
+            {
+              id: ID_SERATA,
+              gruppo_id: ID_GRUPPO,
+              gruppo_nome: 'Calcetto del giovedì',
+              titolo: 'Pizza e poi da Marco',
+              data_serata: serataDiProva(1),
+              ora_ritrovo: '20:00:00',
+              stato: 'proposta',
+              mia_risposta: null,
+            },
+          ],
+        };
+      case 'dettaglio_gruppo':
+        return { stato: 200, corpo: [DETTAGLIO_GRUPPO_DI_PROVA] };
+      case 'anteprima_invito_gruppo':
+        return {
+          stato: 200,
+          corpo: [
+            {
+              stato: 'valido',
+              nome: 'Live del venerdì',
+              invitato_da: personaGruppo(PERSONE.marco),
+              membri: 8,
+              conosciuti: [personaGruppo(PERSONE.marco), personaGruppo(PERSONE.sara)],
+              altri: 5,
+            },
+          ],
+        };
+      case 'amici_invitabili':
+        return { stato: 200, corpo: AMICI_INVITABILI_DI_PROVA };
+      case 'crea_gruppo':
+        return { stato: 200, corpo: ID_GRUPPO };
+      case 'invita_nel_gruppo':
+        return { stato: 200, corpo: 1 };
+      case 'eventi_adatti_al_gruppo':
+        return { stato: 200, corpo: [] };
+      case 'dettaglio_serata':
+        return { stato: 200, corpo: [serataDiGruppoDiProva(this.possoGuidare)] };
+      case 'serate_crea':
+        return { stato: 201, corpo: { id: ID_SERATA } };
+      case 'membri_aggiorna':
+      case 'membri_elimina':
+      case 'gruppi_aggiorna':
+      case 'gruppi_elimina':
+      case 'serate_aggiorna':
+        return { stato: 204 };
+      case 'partecipazioni_serata_salva':
+        return { stato: 201 };
       default:
         return { stato: 200, corpo: {} };
     }
@@ -681,6 +872,10 @@ export class SupabaseSimulato {
       '/rest/v1/codici_invito': { GET: 'codici_invito_leggi' },
       '/rest/v1/generi_musicali': { GET: 'generi_musicali' },
       '/rest/v1/profili_privati': { GET: 'profili_privati_leggi' },
+      '/rest/v1/membri_gruppo': { PATCH: 'membri_aggiorna', DELETE: 'membri_elimina' },
+      '/rest/v1/gruppi': { PATCH: 'gruppi_aggiorna', DELETE: 'gruppi_elimina' },
+      '/rest/v1/serate_gruppo': { POST: 'serate_crea', PATCH: 'serate_aggiorna' },
+      '/rest/v1/partecipazioni_serata': { POST: 'partecipazioni_serata_salva' },
       '/rest/v1/partecipazioni_evento': {
         POST: 'partecipazioni_crea',
         PATCH: 'partecipazioni_aggiorna',
@@ -700,6 +895,15 @@ export class SupabaseSimulato {
       'mie_segnalazioni',
       'cerca_eventi',
       'dettaglio_evento',
+      'miei_gruppi',
+      'prossime_serate',
+      'dettaglio_gruppo',
+      'anteprima_invito_gruppo',
+      'amici_invitabili',
+      'crea_gruppo',
+      'invita_nel_gruppo',
+      'eventi_adatti_al_gruppo',
+      'dettaglio_serata',
     ];
     if (rpc && rpcSimulate.includes(rpc)) return rpc as Endpoint;
     if (percorso.startsWith('/storage/v1/object/sign/') && metodo === 'POST')

@@ -880,6 +880,8 @@ export const moderazione = {
       evento: 'Evento',
       immagine_locale: 'Foto del locale',
       caricamento_flyer: 'Flyer',
+      gruppo: 'Gruppo',
+      serata_gruppo: 'Serata di gruppo',
     } as Record<string, string>,
     motivi: {
       contenuto_inappropriato: 'Contenuto inappropriato',
@@ -918,7 +920,23 @@ export const moderazione = {
       evento: 'Evento segnalato',
       immagine_locale: 'Foto del locale segnalata',
       caricamento_flyer: 'Flyer segnalato',
+      gruppo: 'Nome del gruppo segnalato',
+      serata_gruppo: 'Serata di gruppo segnalata',
     } as Record<string, string>,
+    gruppo: {
+      membri: (n: number) => (n === 1 ? '1 membro' : `${n} membri`),
+      autore: (username: string) => `Nome scritto da ${username}`,
+      nota: 'Non mostriamo i membri del gruppo: decidi solo sul nome (R-69).',
+    },
+    serata: {
+      titolo: 'Titolo',
+      luogo: 'Luogo del ritrovo',
+      note: 'Note',
+      evento: (titolo: string) => `Legata all’evento «${titolo}»`,
+      gruppo: (nome: string) => `Gruppo «${nome}»`,
+      autore: (username: string) => `Testi scritti da ${username}`,
+      vuoto: '—',
+    },
     caricamento: 'Apro la segnalazione…',
     registrata: (nome: string, quando: string) =>
       `L’apertura di questa segnalazione è stata registrata · ${nome} · ${quando}`,
@@ -966,17 +984,30 @@ export const moderazione = {
           nome: 'Il nome visualizzato diventa «Utente Noxa». La persona può sceglierne un altro.',
           username: 'Lo username diventa uno casuale. La persona può sceglierne un altro.',
           immagine: 'L’immagine sparisce: al suo posto torna la copertina predefinita.',
+          nome_gruppo:
+            'Il nome del gruppo diventa «Gruppo». Chi l’ha scritto riceve la motivazione e può presentare reclamo; gli admin possono sceglierne un altro.',
+          titolo:
+            'Il titolo sparisce (una serata libera diventa «Serata di gruppo»). Chi l’ha scritto riceve la motivazione.',
+          luogo: 'Il luogo del ritrovo sparisce. Chi l’ha scritto riceve la motivazione.',
+          note: 'Le note spariscono. Chi le ha scritte riceve la motivazione.',
         },
         scelte: {
           foto: 'Foto profilo · tornano le iniziali (R-52)',
           nome: 'Nome visualizzato',
           username: 'Username',
+          titolo: 'Titolo della serata',
+          luogo: 'Luogo del ritrovo',
+          note: 'Note',
         },
         conferma: {
           foto: 'Rimuovi la foto',
           nome: 'Rimuovi il nome',
           username: 'Rimuovi lo username',
           immagine: 'Rimuovi l’immagine',
+          nome_gruppo: 'Rimuovi il nome',
+          titolo: 'Rimuovi il titolo',
+          luogo: 'Rimuovi il luogo',
+          note: 'Rimuovi le note',
         },
       },
       modifica_evento: {
