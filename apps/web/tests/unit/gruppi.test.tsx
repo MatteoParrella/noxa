@@ -120,24 +120,21 @@ describe('RigaSerata', () => {
 });
 
 describe('notifiche di gruppi e serate', () => {
-  it('l’uscita dal gruppo dice il motivo senza dire chi (R-15, R-17)', () => {
+  it('l’uscita dal gruppo dice il motivo senza dire chi né testi di altri (R-15, R-17)', () => {
+    // Anche una vecchia notifica con il nome non lo mostra: lo scrive un altro utente.
     const fasce = testoNotifica('rimozione_gruppo', { nome_gruppo: 'Terza B', motivo: 'fasce' });
-    expect(fasce.titolo).toContain('«Terza B»');
+    expect(fasce.titolo).not.toContain('Terza B');
     expect(fasce.titolo).toContain('minorenni che non sono tue amiche confermate');
     expect(fasce.motivazione).toContain('codice invito');
-    expect(
-      testoNotifica('rimozione_gruppo', { nome_gruppo: 'Terza B', motivo: 'compleanno' }).titolo,
-    ).toMatch(/^Hai compiuto 18 anni/);
-    expect(
-      testoNotifica('rimozione_gruppo', { nome_gruppo: 'Terza B', motivo: 'tolto' }).titolo,
-    ).toBe('Non fai più parte di «Terza B».');
-    expect(
-      testoNotifica('rimozione_gruppo', {
-        nome_gruppo: 'Terza B',
-        motivo: 'fasce',
-        era_invitato: true,
-      }).titolo,
-    ).toBe('L’invito in «Terza B» non è più valido.');
+    expect(testoNotifica('rimozione_gruppo', { motivo: 'compleanno' }).titolo).toMatch(
+      /^Hai compiuto 18 anni/,
+    );
+    expect(testoNotifica('rimozione_gruppo', { motivo: 'tolto' }).titolo).toBe(
+      'Non fai più parte di un gruppo.',
+    );
+    expect(testoNotifica('rimozione_gruppo', { motivo: 'fasce', era_invitato: true }).titolo).toBe(
+      'Un invito in un gruppo non è più valido.',
+    );
   });
 
   it('una serata cambiata dice cosa è cambiato e porta alla serata', () => {

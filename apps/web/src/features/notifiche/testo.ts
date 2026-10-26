@@ -7,19 +7,16 @@ const testo = (valore: unknown) => (typeof valore === 'string' ? valore : '');
 
 /**
  * Titolo e motivazione di una notifica. Gli esiti di moderazione hanno un titolo per esito; le
- * uscite da un gruppo dicono il motivo con il nome del gruppo, che la persona conosceva già
- * (R-15); le serate cambiate dicono cosa è cambiato.
+ * uscite da un gruppo dicono il motivo, senza il nome del gruppo scritto da altri (R-15); le serate cambiate dicono cosa è cambiato.
  */
 export function testoNotifica(tipo: TipoNotifica, dati: Record<string, unknown>) {
   if (tipo === 'rimozione_gruppo') {
-    const gruppo = testo(dati.nome_gruppo);
     const motivo = testo(dati.motivo);
-    if (!gruppo) return { titolo: testi.tipi.rimozione_gruppo, motivazione: null };
     if (dati.era_invitato === true)
-      return { titolo: testi.rimozione.invitoScaduto(gruppo), motivazione: null };
+      return { titolo: testi.rimozione.invitoScaduto, motivazione: null };
     if (motivo === 'fasce' || motivo === 'compleanno')
-      return { titolo: testi.rimozione[motivo](gruppo), motivazione: testi.rimozione.cosaFare };
-    return { titolo: testi.rimozione.tolto(gruppo), motivazione: null };
+      return { titolo: testi.rimozione[motivo], motivazione: testi.rimozione.cosaFare };
+    return { titolo: testi.rimozione.tolto, motivazione: null };
   }
   if (tipo === 'aggiornamento_serata') {
     return {

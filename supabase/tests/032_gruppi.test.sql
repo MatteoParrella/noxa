@@ -248,8 +248,9 @@ select tests.autentica_come('adulto_18');
 select isnt_empty(
   $$ select 1 from public.notifiche where tipo = 'rimozione_gruppo'
        and dati @> jsonb_build_object('gruppo_id', tests.gruppo('Quelli del sabato'),
-                                      'motivo', 'fasce', 'nome_gruppo', 'Quelli del sabato') $$,
-  'R-15: l''adulto tolto riceve una notifica con il motivo'
+                                      'motivo', 'fasce')
+       and not dati ? 'nome_gruppo' $$,
+  'R-15: l''adulto tolto riceve una notifica con il motivo, senza il nome scritto da altri'
 );
 select is_empty($$ select 1 from public.gruppi where nome = 'Quelli del sabato' $$,
                 'L''adulto tolto non vede più il gruppo');

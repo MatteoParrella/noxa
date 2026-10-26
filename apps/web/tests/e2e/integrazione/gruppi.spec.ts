@@ -84,4 +84,16 @@ test('R-15: gruppo misto valido tra amici, invito rifiutato a chi non è amico d
   await expect(andata.getByRole('radio', { name: 'Mezzi pubblici' })).toBeVisible();
   await expect(andata.getByRole('radio', { name: 'Guido' })).toHaveCount(0);
   await expect(adulto.getByText('1 sì · 0 forse · 0 no')).toBeVisible({ timeout: 15_000 });
+
+  // Pulizia: i test pgTAP partono dalle relazioni del seed.
+  await adulto.goto(indirizzoGruppo);
+  await adulto.getByRole('button', { name: `Altre azioni per ${nome}` }).click();
+  await adulto.getByRole('menuitem', { name: 'Elimina il gruppo' }).click();
+  await adulto.getByRole('dialog').getByRole('button', { name: 'Elimina il gruppo' }).click();
+  await expect(adulto).toHaveURL(/\/organizza\/$/);
+  await adulto.goto('/amici/');
+  await adulto.getByRole('button', { name: 'Altre azioni per @adulto_21' }).click();
+  await adulto.getByRole('menuitem', { name: 'Rimuovi dall’elenco' }).click();
+  await adulto.getByRole('dialog').getByRole('button', { name: 'Rimuovi' }).click();
+  await expect(adulto.getByText('@adulto_21')).toHaveCount(0);
 });

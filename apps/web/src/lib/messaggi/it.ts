@@ -868,14 +868,17 @@ export const messaggi = {
       annullata: 'Una serata del tuo gruppo è stata annullata.',
       modificata: 'Ritrovo o data di una serata del tuo gruppo sono cambiati.',
     } as Record<string, string>,
-    /** Uscita da un gruppo (`dati.motivo`, R-15), con il nome del gruppo che si conosceva. */
+    /**
+     * Uscita da un gruppo (`dati.motivo`, R-15). Senza il nome del gruppo: è scritto da un
+     * altro utente e le notifiche non contengono testi di altri.
+     */
     rimozione: {
-      fasce: (gruppo: string) =>
-        `Non fai più parte di «${gruppo}»: nel gruppo ci sono persone minorenni che non sono tue amiche confermate.`,
-      compleanno: (gruppo: string) =>
-        `Hai compiuto 18 anni: non fai più parte di «${gruppo}», perché nel gruppo ci sono persone minorenni che non sono tue amiche confermate.`,
-      tolto: (gruppo: string) => `Non fai più parte di «${gruppo}».`,
-      invitoScaduto: (gruppo: string) => `L’invito in «${gruppo}» non è più valido.`,
+      fasce:
+        'Non fai più parte di un gruppo: ci sono persone minorenni che non sono tue amiche confermate.',
+      compleanno:
+        'Hai compiuto 18 anni: non fai più parte di un gruppo in cui ci sono persone minorenni che non sono tue amiche confermate.',
+      tolto: 'Non fai più parte di un gruppo.',
+      invitoScaduto: 'Un invito in un gruppo non è più valido.',
       cosaFare:
         'Se vi conoscete di persona, potete diventare amici con un codice invito e poi chiedere un nuovo invito.',
     },
