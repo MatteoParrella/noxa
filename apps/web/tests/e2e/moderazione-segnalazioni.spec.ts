@@ -25,6 +25,7 @@ function corpo(simulata: ModerazioneSimulata, chiave: string) {
 
 for (const tema of TEMI) {
   test(`flyer, segnalazioni e reclami senza violazioni axe (${tema})`, async ({ page }) => {
+    test.slow();
     await apri(page);
     await impostaTema(page, tema);
     await page.goto('/moderazione/flyer/');

@@ -39,6 +39,20 @@ export const CODICI_DATABASE = {
   NX029: 'reclamo_gia_presentato',
   NX030: 'reclamo_non_ammesso',
   NX031: 'reclamo_stesso_moderatore',
+  NX032: 'conferma_escalation_errata',
+  NX033: 'segnalazione_in_carico_ad_altri',
+  NX034: 'conferme_flyer_mancanti',
+  NX035: 'approvazione_flyer_riservata',
+  NX036: 'account_sospeso',
+  NX037: 'gruppo_pieno',
+  NX038: 'non_invitabile',
+  NX039: 'passaggio_non_disponibile',
+  NX040: 'guida_solo_maggiorenni',
+  NX041: 'posti_esauriti',
+  NX042: 'data_passata',
+  NX043: 'evento_non_adatto',
+  NX044: 'modifica_membri_non_prevista',
+  NX045: 'troppi_gruppi_oggi',
 } as const;
 
 export type CodiceDatabase = (typeof CODICI_DATABASE)[keyof typeof CODICI_DATABASE];

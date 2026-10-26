@@ -25,7 +25,12 @@ type Voce = {
 /** Le cinque aree dell'app (PRD: scopri → organizza → vivi → ricorda, più il profilo). */
 export const VOCI: readonly Voce[] = [
   { href: '/scopri/', etichetta: 'Scopri', icona: Compass },
-  { href: '/organizza/', etichetta: 'Organizza', icona: Users },
+  {
+    href: '/organizza/',
+    etichetta: 'Organizza',
+    icona: Users,
+    anche: ['/gruppo/', '/gruppi/', '/serata/'],
+  },
   { href: '/vivi/', etichetta: 'Vivi', icona: ShieldCheck },
   { href: '/ricorda/', etichetta: 'Ricorda', icona: BookOpen },
   {

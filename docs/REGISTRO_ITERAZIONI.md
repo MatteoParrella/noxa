@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 7 su 15.
+Iterazioni completate: 8 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -27,7 +27,7 @@ Iterazioni completate: 7 su 15.
 | 4 | completata | 2026-10-19 | 2026-10-19 | 2 | `iterazione-04-catalogo-eventi` | Eventi reali dall'iterazione 5; foto dei locali caricate dai moderatori nell'iterazione 5; flyer nell'iterazione 6 |
 | 5 | completata con attese esterne | 2026-10-19 | 2026-10-19 | 2 | `iterazione-05-raccolta-eventi` | Mancano App Review Meta e token, chiave Google Places, 40 locali verificati e il primo `sito_html_<locale>` in staging |
 | 6 | completata con attese esterne | 2026-10-21 | 2026-10-22 | 4 | `iterazione-06-flyer-moderazione` | Mancano la chiave Claude API con limite di spesa, la valutazione sul golden set dei flyer e il DPA di Anthropic (D-12) |
-| 7 | da iniziare | — | — | 0 | — | — |
+| 7 | completata | 2026-10-23 | 2026-10-26 | 3 | `iterazione-07-gruppi` | Avvisi dal vivo su canali privati (ADR-0024); notifica di uscita senza il nome del gruppo |
 | 8 | da iniziare | — | — | 0 | — | — |
 | 9 | da iniziare | — | — | 0 | — | — |
 | 10 | da iniziare | — | — | 0 | — | — |
@@ -788,3 +788,115 @@ moderatori; nessun nuovo modo di trovare persone.
 - Restano quelle delle iterazioni 0–2 e 5.
 
 **Commit**: `c04685c` … commit finale di chiusura sul branch `iterazione-06-flyer-moderazione`.
+
+### Iterazione 7 — Gruppi e serate di gruppo
+
+**Piano**
+- Funzionalità: F-13 (gruppi, inviti, ruoli, limite di 30, invariante delle fasce), F-14
+  (serata di gruppo legata a un evento adatto a tutti o libera, risposte in tempo reale),
+  F-15 (link a prevendita e lista, stato del biglietto), F-16 (andata e ritorno, chi guida e
+  posti, passaggi, avviso del ritorno). Regole: R-11, R-15, R-16, R-17, R-24, R-43, R-50.
+  Design: `design/F-13-gruppi/`, `design/F-14-serata/`.
+- Database: enum dei gruppi e delle serate; `gruppi`, `membri_gruppo`, `serate_gruppo`,
+  `partecipazioni_serata` con RLS e funzioni `e_membro`, `e_membro_attivo`,
+  `e_admin_gruppo`, `puo_entrare_nel_gruppo`, `evento_adatto_al_gruppo`; trigger
+  `verifica_trasporto`, protezione di ruoli e stati dei membri, nuovo admin quando esce
+  l'ultimo; invariante R-15 con i trigger su `amicizie` e `blocchi` e il job giornaliero
+  `verifica_invariante_gruppi`; `puo_vedere_profilo` estesa ai membri dello stesso gruppo;
+  notifiche `invito_gruppo`, `nuova_serata`, `aggiornamento_serata`, `rimozione_gruppo`;
+  segnalazione del nome del gruppo e di titolo e note della serata con la decisione dei
+  moderatori; RPC di lettura (gruppi, dettaglio, anteprima dell'invito, amici invitabili,
+  eventi adatti al gruppo, dettaglio della serata); Realtime.
+- App: Organizza con le schede Amici e Gruppi, inviti ricevuti, crea gruppo con il
+  selettore degli amici, dettaglio del gruppo con membri, ruoli e conferme, invito,
+  informativa di rimozione; proponi una serata, dettaglio della serata con risposta, chi
+  c'è, biglietti, trasporto e aggiornamento dal vivo; segnalazioni di gruppi e serate
+  nell'area di moderazione.
+- Passi: migrazione e test pgTAP → tipi generati → API, hook e schermate → test unitari ed
+  e2e (simulati e di integrazione) → documenti → cicli di revisione e `safety-review`.
+- Criteri dell'iterazione: test pgTAP di R-15, R-16, R-24 e del trigger `verifica_trasporto`
+  per tutte le età del seed; e2e di gruppo misto valido e rifiutato; aggiornamento in tempo
+  reale tra due sessioni.
+
+**Cicli di revisione**
+
+- Ciclo 1 (revisione del diff e documenti): Postgres Changes non applica la RLS agli eventi
+  `DELETE` e li invia con la chiave primaria, quindi `membri_gruppo` e
+  `partecipazioni_serata` avrebbero rivelato a ogni sessione chi esce da quale gruppo e chi
+  toglie la risposta a quale serata → avvisi senza dati su canali Broadcast privati
+  `serata:<id>` e `gruppi:<utente_id>` con policy su `realtime.messages`
+  (`private.puo_ascoltare`), tabelle tolte dalla pubblicazione, ADR-0024, test `035`.
+  DATA_MODEL non descriveva policy, trigger e RPC reali dei gruppi → §4, §5.4, §5.10, §7
+  allineati alle migrazioni. Test axe della moderazione delle segnalazioni in timeout sotto
+  carico → `test.slow()` come negli altri test axe.
+- Ciclo 2 (Supabase locale): ogni risposta alla serata falliva con 403, perché l'upsert di
+  PostgREST aggiornava anche la chiave e il database concede `UPDATE` solo sulle colonne
+  della risposta → aggiornamento e, se la riga manca, inserimento; il trigger degli avvisi
+  leggeva una colonna assente nell'altra tabella → riga letta come JSON; il test di
+  integrazione controllava l'assenza di «Guido» prima che il trasporto comparisse → attende
+  le opzioni; il test lasciava un'amicizia e un gruppo che rompevano i pgTAP → li elimina.
+- Ciclo 3 (`safety-review`): la notifica `rimozione_gruppo` conteneva il nome del gruppo,
+  scritto da un altro utente; un admin poteva rinominarlo e togliere subito una persona, che
+  non avrebbe più potuto segnalarlo → notifica con il solo motivo e testi senza nome
+  (migrazione `20261026090100`, `032`, `gruppi.test.tsx`). Mancavano test con
+  `moderatore_senza_mfa` sulle segnalazioni di gruppi e serate → due casi negativi in `034`.
+
+**Esito dei test**
+
+- pgTAP dopo `supabase db reset`: 935/935 (`032_gruppi` 80, `033_serate_gruppo` 61,
+  `034_segnalazioni_gruppi` 23, `035_realtime_gruppi` 29). Prima del reset fallivano 7 test
+  di file non toccati dall'iterazione per dati rimasti nel database locale; il test di
+  integrazione delle amicizie ora toglie il blocco che lasciava. Resta che il test di
+  integrazione della moderazione (iterazioni 5–6) attiva il TOTP del moderatore e scrive nel
+  registro: passa una volta per reset e, dopo di lui, `024` non trova il registro atteso.
+- Unitari: 95/95. E2e simulati: 308/308 (5 rilanciati da soli dopo un timeout per carico).
+  E2e di integrazione dopo il reset: 10/10, compreso `gruppi.spec.ts` (gruppo misto valido,
+  invito rifiutato, risposta dal vivo tra due sessioni), che elimina ciò che crea.
+- Worker: ruff, format e mypy puliti; pytest 210 passati, 4 saltati (integrazione con il
+  database, non toccata).
+
+**Criteri di completamento**
+
+| Criterio | Esito | Evidenza |
+|---|---|---|
+| Test pgTAP di R-15 per tutte le età del seed | SÌ | `032_gruppi` (invito, accettazione, amicizia rimossa, blocco, compleanno) |
+| Test pgTAP di R-16 e R-24 | SÌ | `033` (lunghezze dei testi, evento adatto a tutti, serata nascosta a chi non vede l'evento), `034` |
+| Trigger `verifica_trasporto` per tutte le età | SÌ | `033` (`auto_guido` solo dai 18 anni, posti, passaggi, blocchi) |
+| E2e di gruppo misto valido e rifiutato | SÌ | `integrazione/gruppi.spec.ts`, `gruppi.spec.ts` (NX038) |
+| Aggiornamento in tempo reale tra due sessioni | SÌ | `integrazione/gruppi.spec.ts` (canale privato `serata:<id>`) |
+| PRD F-13…F-16 | SÌ | `gruppi.spec.ts`, `gruppi.test.tsx`, schermate in `features/gruppi` |
+
+**Safety review — Iterazione 7 (F-13, F-14, F-15, F-16)**
+
+Esito: SUPERATA (dopo le correzioni dei cicli 1–3).
+
+| Dato | Chi lo vede | Regole |
+|---|---|---|
+| Gruppo (`gruppi.nome`) | membri e invitati; i moderatori se segnalato | R-11, R-50, R-69 |
+| Membri (`membri_gruppo`) | membri attivi; l'invitato solo la propria riga e, nell'anteprima, chi conosce già | R-13, R-15, R-17 |
+| Serata (`serate_gruppo`, titolo, ritrovo, link, note) | membri attivi che vedono l'evento; i moderatori i soli testi segnalati | R-16, R-24, R-69 |
+| Risposte, biglietto, trasporto (`partecipazioni_serata`) | membri attivi della serata, esclusi i bloccati | R-17, R-24 |
+| Notifiche dei gruppi | solo il destinatario, con soli identificativi e motivo | R-15, R-17 |
+| Avvisi Realtime | nessun dato; solo chi vede la serata o il titolare del canale | ADR-0024 |
+
+Superfici di contatto: invito (solo amici confermati compatibili con tutti, `puo_entrare_nel_gruppo`); anteprima dell'invito (solo persone già conosciute, gli altri come numero); elenco dei membri (solo membri attivi; tra fasce diverse sempre amici per R-15); risposte e passaggi alla serata (blocchi esclusi); notifiche (nessun testo di altri); canali Realtime (policy).
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | RLS e policy per operazione sulle quattro tabelle (migrazione `20261023090000`); età solo da `eta_di` (`posso_guidare`, `verifica_trasporto`); funzioni `security definer` in `private` o RPC documentate con `search_path` vuoto; test per 14, 15, 16, 17, 18, 20, 21, `moderatore`, `moderatore_senza_mfa` in `032`…`035`; nessuna `service_role` nell'app |
+| B. Contatti tra utenti | SÌ | Nessuna ricerca nuova; inviti solo ad amici (policy e `amici_invitabili`, motivo senza dire con chi); `puo_vedere_profilo` estesa ai soli membri attivi; R-15 con trigger su `amicizie`, blocchi e job giornaliero (`032`); blocco: inviti tolti, risposte e passaggi nascosti (`033`); niente chat, testi fino a 80/120/500 caratteri e segnalabili (`034`); notifiche senza testi di altri (ciclo 3) |
+| C. Eventi e contenuti | SÌ | Serate solo con eventi visibili a tutti i membri attivi (`evento_adatto_al_gruppo`, `eventi_adatti_al_gruppo`, `033`); alcol filtrato da `evento_visibile_a`; «Guido» solo dai 18 anni; nessun pagamento, link esterni con avviso; risposte senza pressione (R-43); nessuna condivisione esterna |
+| D. Posizione | N/A | Nessuna posizione; il ritrovo è un testo breve visibile ai soli membri |
+| E. Contenuti caricati e moderazione | SÌ | Nome del gruppo e testi della serata segnalabili con priorità 2 se ci sono minorenni; rimozione motivata con reclamo per chi li ha scritti; decisioni in `azioni_moderazione`; limiti: 10 gruppi al giorno, 30 membri; i moderatori non vedono l'elenco dei membri (R-69) |
+| F. Privacy | SÌ | Nessun dato personale nuovo oltre a quelli già previsti da SAFETY_PRIVACY §10 (gruppi, serate, partecipazioni fino all'eliminazione dell'account, a cascata); esportazione ed eliminazione self-service nell'iterazione 8 (ROADMAP); nessun SDK nuovo |
+| G. Documentazione | SÌ | ADR-0024; DATA_MODEL §4, §5.2, §5.4, §5.10, §7; ARCHITECTURE §3.2, §4.3, §5.3; SAFETY_PRIVACY R-68 |
+
+**Scelte fatte durante l'iterazione**
+
+- Avvisi dal vivo senza dati su canali privati invece di Postgres Changes (ADR-0024).
+- La notifica di uscita da un gruppo non riporta il nome del gruppo (diverge dalla tavola
+  F-13 §5, che lo mostrava, per la regola sui testi di altri utenti nelle notifiche).
+
+**Attese esterne**: nessuna.
+
+**Commit**: `b7276a0` … commit finale di chiusura sul branch `iterazione-07-gruppi`.

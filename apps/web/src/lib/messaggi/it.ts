@@ -1,3 +1,4 @@
+import { gruppi } from './gruppi';
 import { moderazione } from './moderazione';
 
 /**
@@ -834,15 +835,15 @@ export const messaggi = {
     tipi: {
       richiesta_amicizia: 'Hai ricevuto una richiesta di amicizia.',
       amicizia_accettata: 'La tua richiesta di amicizia è stata accettata.',
-      invito_gruppo: 'Sei stato invitato a un gruppo.',
-      nuova_serata: 'È stata creata una nuova serata di gruppo.',
-      aggiornamento_serata: 'Una serata di gruppo è stata aggiornata.',
+      invito_gruppo: 'Hai un invito in un gruppo.',
+      nuova_serata: 'Nel tuo gruppo c’è una nuova serata.',
+      aggiornamento_serata: 'Una serata del tuo gruppo è cambiata.',
       checkin_amico: 'Un amico ha fatto il check-in a un evento.',
       ritorno_avviato: 'Un amico ha avviato il ritorno sicuro.',
       ritorno_allerta: 'Allerta: un amico non è ancora rientrato.',
       ritorno_arrivato: 'Un amico è rientrato sano e salvo.',
       esito_moderazione: 'Il tuo contenuto è stato esaminato.',
-      rimozione_gruppo: 'Sei stato rimosso da un gruppo.',
+      rimozione_gruppo: 'Non fai più parte di un gruppo.',
       badge_ottenuto: 'Hai ottenuto un nuovo badge.',
       riepilogo_pronto: 'Il tuo Wrapped è pronto.',
     } as const,
@@ -858,8 +859,31 @@ export const messaggi = {
       flyer_unito: 'Il tuo flyer è stato aggiunto a un evento',
       flyer_rifiutato: 'Il tuo flyer non è stato pubblicato',
       reclamo_deciso: 'Abbiamo deciso sul tuo reclamo',
+      contenuto_rimosso_gruppo: 'Abbiamo rimosso il nome di un tuo gruppo',
+      contenuto_rimosso_serata: 'Abbiamo rimosso un testo di una tua serata di gruppo',
     } as Record<string, string>,
+    /** Serate di gruppo cambiate (`dati.cambio`). */
+    serata: {
+      confermata: 'Una serata del tuo gruppo è confermata.',
+      annullata: 'Una serata del tuo gruppo è stata annullata.',
+      modificata: 'Ritrovo o data di una serata del tuo gruppo sono cambiati.',
+    } as Record<string, string>,
+    /**
+     * Uscita da un gruppo (`dati.motivo`, R-15). Senza il nome del gruppo: è scritto da un
+     * altro utente e le notifiche non contengono testi di altri.
+     */
+    rimozione: {
+      fasce:
+        'Non fai più parte di un gruppo: ci sono persone minorenni che non sono tue amiche confermate.',
+      compleanno:
+        'Hai compiuto 18 anni: non fai più parte di un gruppo in cui ci sono persone minorenni che non sono tue amiche confermate.',
+      tolto: 'Non fai più parte di un gruppo.',
+      invitoScaduto: 'Un invito in un gruppo non è più valido.',
+      cosaFare:
+        'Se vi conoscete di persona, potete diventare amici con un codice invito e poi chiedere un nuovo invito.',
+    },
   },
 
+  gruppi,
   moderazione,
 } as const;

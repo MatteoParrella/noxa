@@ -967,6 +967,22 @@ export const SchemaOggettoLocale = z.object({
   comune: z.string().nullable(),
   immagine_path: z.string().nullable(),
 });
+export const SchemaOggettoGruppo = z.object({
+  id: z.uuid(),
+  nome: z.string(),
+  membri: z.number().int(),
+  autore: z.string().nullable(),
+});
+export const SchemaOggettoSerata = z.object({
+  id: z.uuid(),
+  titolo: z.string().nullable(),
+  evento_titolo: z.string().nullable(),
+  luogo_ritrovo: z.string().nullable(),
+  note: z.string().nullable(),
+  data_serata: z.string(),
+  gruppo_nome: z.string(),
+  autore: z.string().nullable(),
+});
 export const SchemaOggettoFlyer = z.object({
   id: z.uuid(),
   storage_path: z.string(),
@@ -1010,11 +1026,14 @@ export async function prendiInCaricoSegnalazione(id: string): Promise<void> {
 export type AzioneSegnalazione =
   'nessuna_violazione' | 'rimuovi_contenuto' | 'modifica_evento' | 'sospendi_account';
 
+/** Contenuto da rimuovere: di un profilo, del nome di un gruppo o dei testi di una serata. */
+export type ContenutoRimovibile = 'foto' | 'nome' | 'username' | 'titolo' | 'luogo' | 'note';
+
 export async function decidiSegnalazione(
   id: string,
   azione: AzioneSegnalazione,
   motivazione: string,
-  contenuto?: 'foto' | 'nome' | 'username',
+  contenuto?: ContenutoRimovibile,
 ): Promise<void> {
   const client = supabase();
   const { data: percorso, error } = await client.rpc('decidi_segnalazione', {

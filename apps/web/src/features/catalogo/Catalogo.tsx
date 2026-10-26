@@ -24,6 +24,7 @@ import { LinkEsterno } from '@/components/ui/LinkEsterno';
 import { MenuAzioni } from '@/components/ui/MenuAzioni';
 import { RigaPersona } from '@/components/ui/RigaPersona';
 import { Rivela } from '@/components/ui/Movimento';
+import { Pillole } from '@/components/ui/Pillole';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { RigaEvento, SchedaEvidenza, type DatiSchedaEvento } from '@/components/ui/SchedaEvento';
 import {
@@ -72,6 +73,9 @@ function Sezione({ titolo, children }: { titolo: string; children: React.ReactNo
 export function Catalogo({ tema }: { tema: Tema }) {
   const [interruttore, setInterruttore] = useState(true);
   const [quando, setQuando] = useState<'stasera' | 'domani' | 'weekend'>('stasera');
+  const [biglietto, setBiglietto] = useState<'nessuno' | 'prevendita' | 'lista' | 'alla_cassa'>(
+    'prevendita',
+  );
   const [tab, setTab] = useState<'prossime' | 'passate'>('prossime');
   const [foglio, setFoglio] = useState(false);
   const [data, setData] = useState('14.03.2009');
@@ -252,6 +256,17 @@ export function Catalogo({ tema }: { tema: Tema }) {
           ]}
           valore={quando}
           onCambia={setQuando}
+        />
+        <Pillole
+          etichetta="Il mio biglietto"
+          opzioni={[
+            { valore: 'nessuno', etichetta: 'Nessuno' },
+            { valore: 'prevendita', etichetta: 'Prevendita' },
+            { valore: 'lista', etichetta: 'In lista' },
+            { valore: 'alla_cassa', etichetta: 'Alla cassa', disattivata: true },
+          ]}
+          valore={biglietto}
+          onCambia={setBiglietto}
         />
         <Schede
           etichetta="Serate"

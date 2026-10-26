@@ -96,7 +96,7 @@ flowchart LR
 | Postgres + PostGIS | Tutte le tabelle di [DATA_MODEL.md](DATA_MODEL.md) e le RPC elencate in DATA_MODEL.md §5.10 (ricerca eventi e utenti, codici invito, moderazione, metriche). |
 | Auth | Email e password (almeno 10 caratteri) con verifica, CAPTCHA (Cloudflare Turnstile, ADR-0020), protezione dalle password compromesse, MFA TOTP obbligatoria per i moderatori (R-06); hook "before user created" per il controllo dell'età (§4.1); modelli delle email in italiano. |
 | Storage | Bucket `avatar`, `flyer-caricati`, `flyer-pubblicati`, `immagini-locali` (foto dei locali, ADR-0018), `mappe` (DATA_MODEL.md §6). |
-| Realtime | Postgres Changes per serate di gruppo e notifiche; Broadcast privato per le posizioni del ritorno sicuro. |
+| Realtime | Postgres Changes per le notifiche; Broadcast privato per gli avvisi di gruppi e serate e per le posizioni del ritorno sicuro. |
 | Edge Functions (Deno) | `invia-push` (FCM HTTP v1 per Android e iOS, Web Push VAPID), `esporta-dati`, `elimina-account`. |
 | `pg_cron` | Job di DATA_MODEL.md §8, compresi il calcolo dei badge e dei riepiloghi annuali con funzioni SQL. |
 
@@ -204,11 +204,13 @@ sequenceDiagram
     S->>DB: insert serate_gruppo(evento_id)
     DB->>DB: policy: evento_adatto_al_gruppo (R-24)
     DB->>DB: trigger: notifiche nuova_serata ai membri
-    L->>RT: sottoscrizione a partecipazioni_serata (filtrata dalla RLS)
+    S->>RT: ingresso nel canale privato serata:<id> (policy su realtime.messages)
     L->>DB: upsert partecipazioni_serata(risposta = si, trasporto_andata = passaggio, passaggio_da = Sara)
     DB->>DB: trigger verifica_trasporto
-    DB-->>RT: modifica
-    RT-->>S: aggiornamento in tempo reale "Luca: sì, passaggio da Sara"
+    DB-->>RT: trigger avvisa_cambio_serata: avviso "cambio" senza dati
+    RT-->>S: avviso
+    S->>DB: dettaglio_serata(id) (RLS)
+    DB-->>S: "Luca: sì, passaggio da Sara"
 ```
 
 ### 4.4 Ritorno sicuro
@@ -316,8 +318,12 @@ l'immagine come prova e non notifica l'account coinvolto.
 
 ### 5.3 Realtime
 
-- Postgres Changes solo su tabelle con RLS e con filtri per l'identificativo dell'oggetto
-  (`serata_id=eq.<id>`), per limitare il carico.
+- Postgres Changes solo su tabelle con RLS, con filtri per l'identificativo dell'oggetto, e
+  solo se la chiave primaria non rivela relazioni tra persone: la RLS non vale per gli
+  eventi `DELETE`, che arrivano a ogni sessione con la chiave (oggi solo `notifiche`).
+- Gruppi e serate usano avvisi senza dati su canali Broadcast privati (`serata:<id>`,
+  `gruppi:<utente_id>`) autorizzati dalla policy di `realtime.messages`; l'app ricarica con
+  le RPC (DATA_MODEL.md §7).
 - Le posizioni del ritorno sicuro usano Broadcast privato perché sono ad alta frequenza e non
   devono passare dalla replica delle modifiche.
 

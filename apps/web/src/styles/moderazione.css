@@ -1604,3 +1604,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Testi liberi di gruppi e serate (R-16): a capo come li ha scritti l'autore. */
+.md-testo-libero {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

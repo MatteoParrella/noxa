@@ -32,3 +32,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0021](0021-infrastruttura-a-costo-minimo.md) | Infrastruttura a costo minimo | Accettato |
 | [0022](0022-layout-responsive.md) | Layout responsive con sidebar di navigazione | Accettato |
 | [0023](0023-occultamento-automatico.md) | Occultamento automatico delle immagini segnalate per rischio a un minorenne | Accettato |
+| [0024](0024-realtime-avvisi-privati.md) | Aggiornamenti dal vivo con avvisi senza dati su canali privati | Accettato |
