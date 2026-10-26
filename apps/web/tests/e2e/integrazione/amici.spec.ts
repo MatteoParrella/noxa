@@ -52,7 +52,10 @@ test('R-10 e R-12: un adulto non trova un minorenne, ma diventano amici con il c
 
   // Pulizia: i test pgTAP partono dalle relazioni del seed (nessun blocco).
   await minore.goto('/profilo/bloccati/');
-  await minore.getByRole('button', { name: /Sblocca/ }).first().click();
+  await minore
+    .getByRole('button', { name: /Sblocca/ })
+    .first()
+    .click();
   await minore.getByRole('dialog').getByRole('button', { name: 'Sblocca' }).click();
   await expect(minore.getByText('@adulto_20')).toHaveCount(0);
 });
