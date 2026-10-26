@@ -350,15 +350,28 @@ export type MiaPartecipazione = {
   passaggio_da: string | null;
 };
 
-/** Salva la propria risposta con biglietto e trasporto (F-14, F-15, F-16). */
+/**
+ * Salva la propria risposta con biglietto e trasporto (F-14, F-15, F-16). Niente upsert:
+ * PostgREST aggiornerebbe anche la chiave, che il database non permette di cambiare
+ * (`GRANT UPDATE` solo sulle colonne della risposta). Si aggiorna e, se la riga non c'è
+ * ancora, si inserisce.
+ */
 export async function salvaPartecipazione(
   io: string,
   serata: string,
   dati: MiaPartecipazione,
 ): Promise<void> {
+  const aggiornate = await supabase()
+    .from('partecipazioni_serata')
+    .update(dati)
+    .eq('serata_id', serata)
+    .eq('utente_id', io)
+    .select('serata_id');
+  if (aggiornate.error) throw converti(aggiornate.error);
+  if (aggiornate.data.length > 0) return;
   const { error } = await supabase()
     .from('partecipazioni_serata')
-    .upsert({ serata_id: serata, utente_id: io, ...dati }, { onConflict: 'serata_id,utente_id' });
+    .insert({ serata_id: serata, utente_id: io, ...dati });
   if (error) throw converti(error);
 }
 

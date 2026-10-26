@@ -70,15 +70,15 @@ select ok(not private.puo_ascoltare('serata:non-un-uuid'), 'Un argomento non val
 select ok(not private.puo_ascoltare('notifiche:' || tests.id('adulto_18')), 'Un altro canale non dà accesso');
 select tests.esci();
 
--- Gli avvisi non contengono dati.
+-- Gli avvisi non contengono dati: realtime.send aggiunge solo un id casuale del messaggio.
 select ok(
   exists (select 1 from realtime.messages m
-          where m.topic = tests.argomento_serata() and m.private and m.payload = '{}'::jsonb),
+          where m.topic = tests.argomento_serata() and m.private and m.payload - 'id' = '{}'::jsonb),
   'Una risposta invia un avviso vuoto sul canale privato della serata'
 );
 select ok(
   exists (select 1 from realtime.messages m
-          where m.topic = 'gruppi:' || tests.id('minore_17') and m.private and m.payload = '{}'::jsonb),
+          where m.topic = 'gruppi:' || tests.id('minore_17') and m.private and m.payload - 'id' = '{}'::jsonb),
   'Un invito invia un avviso vuoto sul canale privato dell''invitato'
 );
 

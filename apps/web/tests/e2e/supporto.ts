@@ -157,6 +157,7 @@ export type Endpoint =
   | 'gruppi_elimina'
   | 'serate_crea'
   | 'serate_aggiorna'
+  | 'partecipazioni_serata_aggiorna'
   | 'partecipazioni_serata_salva';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
@@ -802,6 +803,9 @@ export class SupabaseSimulato {
       case 'gruppi_elimina':
       case 'serate_aggiorna':
         return { stato: 204 };
+      case 'partecipazioni_serata_aggiorna':
+        // Nessuna riga ancora: l'app inserisce la risposta.
+        return { stato: 200, corpo: [] };
       case 'partecipazioni_serata_salva':
         return { stato: 201 };
       default:
@@ -875,7 +879,10 @@ export class SupabaseSimulato {
       '/rest/v1/membri_gruppo': { PATCH: 'membri_aggiorna', DELETE: 'membri_elimina' },
       '/rest/v1/gruppi': { PATCH: 'gruppi_aggiorna', DELETE: 'gruppi_elimina' },
       '/rest/v1/serate_gruppo': { POST: 'serate_crea', PATCH: 'serate_aggiorna' },
-      '/rest/v1/partecipazioni_serata': { POST: 'partecipazioni_serata_salva' },
+      '/rest/v1/partecipazioni_serata': {
+        PATCH: 'partecipazioni_serata_aggiorna',
+        POST: 'partecipazioni_serata_salva',
+      },
       '/rest/v1/partecipazioni_evento': {
         POST: 'partecipazioni_crea',
         PATCH: 'partecipazioni_aggiorna',

@@ -24,12 +24,12 @@ security definer
 set search_path = ''
 as $$
 declare
-  serata uuid := case
-    when tg_table_name = 'serate_gruppo' then coalesce(new.id, old.id)
-    else coalesce(new.serata_id, old.serata_id)
-  end;
+  -- Le due tabelle hanno colonne diverse: si legge la riga come JSON.
+  riga jsonb := case when tg_op = 'DELETE' then to_jsonb(old) else to_jsonb(new) end;
+  serata text := case when tg_table_name = 'serate_gruppo' then riga ->> 'id'
+                      else riga ->> 'serata_id' end;
 begin
-  perform realtime.send('{}'::jsonb, 'cambio', 'serata:' || serata::text, true);
+  perform realtime.send('{}'::jsonb, 'cambio', 'serata:' || serata, true);
   return null;
 end;
 $$;

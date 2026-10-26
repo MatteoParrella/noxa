@@ -80,8 +80,8 @@ test('R-15: gruppo misto valido tra amici, invito rifiutato a chi non è amico d
     .getByRole('radiogroup', { name: 'La mia risposta' })
     .getByRole('radio', { name: 'Sì' })
     .click();
-  await expect(
-    minore.getByRole('radiogroup', { name: 'Come vai?' }).getByRole('radio', { name: 'Guido' }),
-  ).toHaveCount(0);
+  const andata = minore.getByRole('radiogroup', { name: 'Come vai?' });
+  await expect(andata.getByRole('radio', { name: 'Mezzi pubblici' })).toBeVisible();
+  await expect(andata.getByRole('radio', { name: 'Guido' })).toHaveCount(0);
   await expect(adulto.getByText('1 sì · 0 forse · 0 no')).toBeVisible({ timeout: 15_000 });
 });
