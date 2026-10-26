@@ -386,12 +386,12 @@ select is_empty(
        and not exists (select 1 from public.serate_gruppo s where s.id = (n.dati ->> 'serata_id')::uuid) $$,
   'Le notifiche della serata eliminata spariscono'
 );
-select is(
-  (select array_agg(tablename::text order by tablename::text) from pg_publication_tables
-   where pubname = 'supabase_realtime'
-     and tablename in ('membri_gruppo', 'partecipazioni_serata', 'serate_gruppo')),
-  array['membri_gruppo', 'partecipazioni_serata', 'serate_gruppo'],
-  'Le tabelle della serata sono pubblicate in Realtime'
+-- Postgres Changes non applica la RLS ai DELETE: le serate usano Broadcast privato (035).
+select is_empty(
+  $$ select 1 from pg_publication_tables
+     where pubname = 'supabase_realtime'
+       and tablename in ('membri_gruppo', 'partecipazioni_serata', 'serate_gruppo') $$,
+  'Le tabelle dei gruppi non sono pubblicate con Postgres Changes'
 );
 
 select * from finish();

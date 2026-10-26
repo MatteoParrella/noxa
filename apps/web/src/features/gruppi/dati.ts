@@ -86,8 +86,29 @@ export function useEventiAdatti(gruppo: string | null, testo: string) {
 }
 
 /**
+ * Avvisi senza dati su un canale Broadcast privato (DATA_MODEL.md §7): la policy di
+ * `realtime.messages` decide chi ascolta; chi riceve un avviso ricarica con le RPC, soggette
+ * alla RLS. Restituisce la funzione che chiude il canale.
+ */
+function ascoltaAvvisi(argomento: string, onAvviso: () => void): () => void {
+  const client = supabase();
+  const canale = client
+    .channel(argomento, { config: { private: true } })
+    .on('broadcast', { event: 'cambio' }, onAvviso);
+  let chiuso = false;
+  // Il token deve arrivare a Realtime prima dell'ingresso in un canale privato.
+  void client.realtime.setAuth().then(() => {
+    if (!chiuso) canale.subscribe();
+  });
+  return () => {
+    chiuso = true;
+    void client.removeChannel(canale);
+  };
+}
+
+/**
  * Dettaglio della serata con l'aggiornamento dal vivo (ARCHITECTURE.md §4.3): ogni modifica
- * a risposte o serata, filtrata dalla RLS, ricarica il dettaglio.
+ * a risposte o serata arriva come avviso sul canale `serata:<id>` e ricarica il dettaglio.
  */
 export function useDettaglioSerata(id: string | null) {
   const io = useIo();
@@ -95,28 +116,10 @@ export function useDettaglioSerata(id: string | null) {
 
   useEffect(() => {
     if (!io || !id) return;
-    const ricarica = () => void client.invalidateQueries({ queryKey: CHIAVI.serata(io, id) });
-    const canale = supabase()
-      .channel(`serata-${id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'partecipazioni_serata',
-          filter: `serata_id=eq.${id}`,
-        },
-        ricarica,
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'serate_gruppo', filter: `id=eq.${id}` },
-        ricarica,
-      )
-      .subscribe();
-    return () => {
-      void supabase().removeChannel(canale);
-    };
+    return ascoltaAvvisi(
+      `serata:${id}`,
+      () => void client.invalidateQueries({ queryKey: CHIAVI.serata(io, id) }),
+    );
   }, [io, id, client]);
 
   return useQuery({
@@ -132,16 +135,9 @@ export function useGruppiDalVivo() {
   const client = useQueryClient();
   useEffect(() => {
     if (!io) return;
-    const canale = supabase()
-      .channel(`gruppi-${io}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'membri_gruppo', filter: `utente_id=eq.${io}` },
-        () => void client.invalidateQueries({ queryKey: CHIAVI.gruppi }),
-      )
-      .subscribe();
-    return () => {
-      void supabase().removeChannel(canale);
-    };
+    return ascoltaAvvisi(
+      `gruppi:${io}`,
+      () => void client.invalidateQueries({ queryKey: CHIAVI.gruppi }),
+    );
   }, [io, client]);
 }

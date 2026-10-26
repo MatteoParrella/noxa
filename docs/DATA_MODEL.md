@@ -124,11 +124,16 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `c_e_blocco(a uuid, b uuid)` | `boolean` | Esiste una riga in `blocchi` in una delle due direzioni. |
 | `sono_amici(a uuid, b uuid)` | `boolean` | Esiste una riga in `amicizie` con stato `accettata` tra `a` e `b` e `not c_e_blocco(a, b)`. |
 | `c_e_richiesta(a uuid, b uuid)` | `boolean` | Esiste una richiesta `in_attesa` tra `a` e `b`, in una delle due direzioni. |
-| `puo_vedere_profilo(target uuid)` | `boolean` | Dall'iterazione 3 (la condizione sui gruppi arriva con `membri_gruppo`, iterazione 7): `target = auth.uid()` oppure (`not c_e_blocco(auth.uid(), target)` e il profilo è `attivo` e (`sono_amici(auth.uid(), target)` oppure esiste una richiesta di amicizia `in_attesa` tra i due oppure i due sono membri dello stesso gruppo)). Non esiste visibilità per "stessa fascia": la tabella `profili` non è elencabile e la ricerca passa solo da `cerca_utenti`. Grazie all'invariante R-15, due membri dello stesso gruppo di fasce diverse sono sempre amici. Applica R-10, R-13, R-17. |
+| `puo_vedere_profilo(target uuid)` | `boolean` | `target = auth.uid()` oppure (chi guarda e il profilo sono `attivi`, `not c_e_blocco(auth.uid(), target)` e (`sono_amici(auth.uid(), target)` oppure esiste una richiesta di amicizia `in_attesa` tra i due oppure, dall'iterazione 7, chi guarda è membro **attivo** di un gruppo in cui `target` è membro o invitato)). Un invitato non vede gli altri membri finché non accetta: l'anteprima dell'invito mostra solo chi conosce già (R-13). Non esiste visibilità per "stessa fascia": la tabella `profili` non è elencabile e la ricerca passa solo da `cerca_utenti`. Grazie all'invariante R-15, due membri dello stesso gruppo di fasce diverse sono sempre amici. Applica R-10, R-13, R-17. |
 | `e_membro_attivo(gruppo uuid)` | `boolean` | `auth.uid()` è in `membri_gruppo` del gruppo con stato `attivo`. |
 | `e_membro(gruppo uuid)` | `boolean` | Come sopra, con stato `invitato` oppure `attivo`. |
 | `e_admin_gruppo(gruppo uuid)` | `boolean` | `auth.uid()` è membro attivo con ruolo `admin`. |
-| `puo_entrare_nel_gruppo(gruppo uuid, utente uuid)` | `boolean` | Per ogni membro `m` (invitato o attivo) diverso da `utente`: `not c_e_blocco(m, utente)` e (`stessa_fascia(m, utente)` oppure `sono_amici(m, utente)`); il gruppo ha meno di 30 membri. Applica R-15. |
+| `puo_entrare_nel_gruppo(gruppo uuid, utente uuid)` | `boolean` | `account_attivo(utente)`; per ogni membro `m` (invitato o attivo) diverso da `utente`: `not c_e_blocco(m, utente)` e (`stessa_fascia(m, utente)` oppure `sono_amici(m, utente)`); gli altri membri, invitati compresi, sono meno di 30. Applica R-15. |
+| `conta_membri(gruppo uuid)` | `integer` | Membri del gruppo, invitati compresi, solo se chi chiama è membro o invitato (null altrimenti): l'invito mostra quante persone ci sono senza mostrare le righe. |
+| `persona_json(p profili)` | `jsonb` | Identificativo, username, nome visualizzato e foto (null se nascosta, ADR-0023) per le RPC dei gruppi; non è `security definer`. |
+| `applica_invariante_gruppi(persone uuid[], motivo text)` | `integer` | Per ogni coppia di membri (invitati o attivi) di fasce diverse che non sono amici confermati toglie il maggiorenne, con `motivo` (`fasce`, `compleanno` se ha appena compiuto 18 anni); `persone` limita il controllo alle coppie che le contengono, null = tutti. Restituisce le rimozioni (R-15). |
+| `puo_ascoltare(argomento text)` | `boolean` | `security invoker`: `gruppi:<auth.uid()>` oppure `serata:<id>` di una serata che chi chiama vede (sottoquery soggetta alla RLS di `serate_gruppo`); falso per ogni altro argomento. Usata dalla policy di `realtime.messages` (§7). |
+| `garantisci_admin_gruppo(gruppo uuid)` | `void` | Un gruppo ha sempre un admin: se non ce n'è uno attivo diventa admin il membro attivo da più tempo; un gruppo senza membri attivi si elimina con inviti e serate. |
 | `evento_visibile_a(evento uuid, utente uuid)` | `boolean` | L'evento è `pubblicato` o `annullato` (un annullamento resta visibile per avvisare chi voleva andarci), `eta_di(utente) >= eta_minima` e (`not riferimenti_alcol` oppure `not e_minorenne(utente)`). Applica R-20 e R-23. La policy `SELECT` di `eventi` scrive la stessa regola con le funzioni valutate una volta per query; il test `018_eventi` verifica che coincidano per tutte le età. |
 | `evento_partecipabile(evento uuid)` | `boolean` | `evento_visibile_a(evento, auth.uid())` e l'evento è `pubblicato` (non ci si segna a un evento annullato o in revisione). F-05. |
 | `miei_amici()` | `uuid[]` | Amici confermati di `auth.uid()` senza blocchi in nessuna direzione (stessa regola di `sono_amici`), calcolati una volta per query nella policy di `partecipazioni_evento` (R-17, R-67). |
@@ -173,14 +178,18 @@ Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `verifica_dati_registrazione`, `prima_della_creazione_utente`, `rimuovi_dati_registrazione`,
 `rimuovi_dati_registrazione_identita`, `blocca_modifica_data_nascita`, `imposta_accettata_il`,
 `prepara_segnalazione`, `registra_approvazione_immagine`, `imposta_visibilita_partecipazione`, `nuovo_codice_invito`, `normalizza_codice`, `limita_richieste_amicizia`, `applica_blocco`,
-`verifica_invariante_gruppi`, `verifica_trasporto`, `verifica_categoria_spesa`,
+`verifica_trasporto`, `libera_passaggi`, `prepara_gruppo`, `aggiungi_creatore_gruppo`,
+`verifica_invito_gruppo`, `proteggi_membri_gruppo`, `notifica_invito_gruppo`,
+`dopo_accettazione_gruppo`, `dopo_uscita_gruppo`, `invariante_dopo_amicizia`,
+`prepara_serata_gruppo`, `imposta_aggiornata_il`, `notifica_serata_gruppo`,
+`rimuovi_notifiche_serata`, `avvisa_cambio_serata`, `avvisa_cambio_membri`, `verifica_categoria_spesa`,
 `limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `calcola_data_serata`,
 `imposta_aggiornato_il`, `imposta_nome_normalizzato`, `prepara_fonte`,
 `registra_modifica_moderatore`, `notifica_amicizia`, `rimuovi_notifiche_amicizia`,
 `verifica_codice_invito`, `accoda_analisi_flyer`, `proteggi_caricamento_flyer`,
 `ritira_evento_del_flyer`, `esito_caricamento_flyer`, `sincronizza_avatar_nascosto`,
 `occulta_in_attesa`) sono descritte insieme alle tabelle a cui si applicano; quelle
-pianificate (`elimina_account_non_confermati`, `elimina_codici_invito_scaduti`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`,
+pianificate (`elimina_account_non_confermati`, `elimina_codici_invito_scaduti`, `verifica_invariante_gruppi`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`,
 `assegna_badge`, `genera_riepiloghi`, `accoda_pulizia_flyer`) nel §8.
 
 ## 5. Tabelle
@@ -368,9 +377,9 @@ Vincolo: `accettata_il` è valorizzata se e solo se `stato = 'accettata'`.
 | `creata_il`, `chiusa_il` | `timestamptz` | |
 
 - **S**: `segnalante_id = auth.uid()` (stato della propria segnalazione) oppure `private.e_moderatore()`.
-- **I**: `segnalante_id = auth.uid()` e uno tra: `tipo_oggetto = 'profilo'` con un profilo diverso dal proprio che si può vedere o che si è bloccato; `tipo_oggetto = 'evento'` con un evento visibile (sottoquery soggetta alla RLS di `eventi`); `tipo_oggetto = 'immagine_locale'` con un locale visibile che ha una foto (`oggetto_id` = id del locale); dall'iterazione 6 `tipo_oggetto = 'foto_profilo'` con un profilo altrui visibile che ha una foto (R-52). `GRANT INSERT (segnalante_id, tipo_oggetto, oggetto_id, motivo, dettagli)`. Gli altri tipi si aggiungono con le loro tabelle (flyer, gruppi).
+- **I**: `segnalante_id = auth.uid()` e uno tra: `tipo_oggetto = 'profilo'` con un profilo diverso dal proprio che si può vedere o che si è bloccato; `tipo_oggetto = 'evento'` con un evento visibile (sottoquery soggetta alla RLS di `eventi`); `tipo_oggetto = 'immagine_locale'` con un locale visibile che ha una foto (`oggetto_id` = id del locale); dall'iterazione 6 `tipo_oggetto = 'foto_profilo'` con un profilo altrui visibile che ha una foto (R-52); dall'iterazione 7 `tipo_oggetto = 'gruppo'` per un gruppo di cui si è membri o invitati (il nome) e `tipo_oggetto = 'serata_gruppo'` per una serata visibile (titolo, luogo e note) (R-16, R-50). `GRANT INSERT (segnalante_id, tipo_oggetto, oggetto_id, motivo, dettagli)`. I flyer si segnalano dalla loro coda di revisione.
 - **U**: `private.e_moderatore()`; `GRANT UPDATE (stato, gestita_da, conservazione_legale, chiusa_il)`.
-- Trigger `private.prepara_segnalazione` (`before insert`): priorità 1 per `adescamento_o_rischio_minore`, 2 se il segnalante o il profilo segnalato è minorenne, 3 per le altre (R-53); al massimo 20 segnalazioni ogni 24 ore per utente (`NX015`). Trigger `private.occulta_in_attesa` (`after insert`): per `adescamento_o_rischio_minore` da un account con almeno 7 giorni nasconde subito l'immagine segnalata (ADR-0023).
+- Trigger `private.prepara_segnalazione` (`before insert`): priorità 1 per `adescamento_o_rischio_minore`, 2 se il segnalante o il profilo segnalato è minorenne o, dall'iterazione 7, se il gruppo o la serata segnalati hanno membri minorenni, 3 per le altre (R-53); al massimo 20 segnalazioni ogni 24 ore per utente (`NX015`). Trigger `private.occulta_in_attesa` (`after insert`): per `adescamento_o_rischio_minore` da un account con almeno 7 giorni nasconde subito l'immagine segnalata (ADR-0023).
 - RPC `public.mie_segnalazioni()`: le proprie segnalazioni con stato, oggetto (l'username per i profili, il titolo per gli eventi, il nome del locale per le foto) e l'ultima decisione motivata da `azioni_moderazione` (DSA art. 17); dall'iterazione 6 anche `azione_id`, se è reclamabile e lo stato e l'esito del reclamo. Di un'escalation chi ha segnalato riceve solo un testo generico (R-55).
 - Moderazione: `coda_segnalazioni`, `dettaglio_segnalazione`, `prendi_in_carico_segnalazione`, `decidi_segnalazione`, `escalation_segnalazione` (§5.10). La decisione chiude tutte le segnalazioni aperte sullo stesso oggetto e le notifica.
 - **D**: nessuna.
@@ -693,13 +702,17 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 | Colonna | Tipo | Vincoli |
 |---|---|---|
 | `id` | `uuid` | PK |
-| `nome` | `text` | 1–40 caratteri |
+| `nome` | `text` | 1–40 caratteri, senza spazi ai lati |
 | `creato_da` | `uuid` | FK → `profili(id)` `on delete set null` |
+| `nome_scritto_da` | `uuid` | FK → `profili(id)` `on delete set null`; chi ha scritto il nome attuale, riceve la decisione se un moderatore lo rimuove (R-52) |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
-- **S**: `private.e_membro(id)`.
-- **I**: `creato_da = auth.uid()`. Un trigger inserisce il creatore come `admin` attivo.
-- **U/D**: `private.e_admin_gruppo(id)`.
+- **S**: `private.e_membro(id)`: membri e invitati, nessun elenco di gruppi altrui (R-11).
+- **I**: `creato_da = auth.uid()` e `private.account_attivo(auth.uid())` (R-55); `GRANT INSERT (id, nome, creato_da)`. Il trigger `private.aggiungi_creatore_gruppo` (`after insert`) inserisce il creatore come `admin` attivo.
+- **U**: `private.e_admin_gruppo(id)` (using e with check); `GRANT UPDATE (nome)`.
+- **D**: `private.e_admin_gruppo(id)`; inviti, serate e risposte si eliminano a cascata.
+- Trigger `private.prepara_gruppo` (`before insert or update of nome`): al massimo 10 gruppi creati ogni 24 ore per utente (`NX045`, come R-14); imposta `nome_scritto_da`, che una rimozione dei moderatori conserva.
+- La rimozione del nome con `decidi_segnalazione` lo sostituisce con «Gruppo».
 
 #### `membri_gruppo`
 *Funzionalità: F-13.*
@@ -708,16 +721,17 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 |---|---|---|
 | `gruppo_id` | `uuid` | FK → `gruppi(id)` `on delete cascade` |
 | `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade`; PK composta |
-| `ruolo` | `ruolo_gruppo` | default `membro` |
+| `ruolo` | `ruolo_gruppo` | default `membro`; `admin` solo con stato `attivo` |
 | `stato` | `stato_membro` | default `invitato` |
-| `invitato_da` | `uuid` | nullable |
+| `invitato_da` | `uuid` | FK → `profili(id)` `on delete set null` |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
-- **S**: `private.e_membro(gruppo_id)`.
-- **I**: `private.e_membro_attivo(gruppo_id)` e `invitato_da = auth.uid()` e `stato = 'invitato'` e `ruolo = 'membro'` e `private.sono_amici(auth.uid(), utente_id)` e `private.puo_entrare_nel_gruppo(gruppo_id, utente_id)` (R-15).
-- **U**: l'invitato porta il proprio `stato` da `invitato` ad `attivo`; un admin modifica `ruolo`. Due policy distinte, con `GRANT UPDATE (stato, ruolo)`.
-- **D**: `utente_id = auth.uid()` (uscita) oppure `private.e_admin_gruppo(gruppo_id)`.
-- Il job giornaliero `private.verifica_invariante_gruppi()` applica R-15 dopo i compleanni.
+- **S**: la propria riga oppure `private.e_membro_attivo(gruppo_id)`: un invitato non vede gli altri membri finché non accetta (R-13).
+- **I**: `invitato_da = auth.uid()` e `stato = 'invitato'` e `ruolo = 'membro'` e `private.e_membro_attivo(gruppo_id)` e `private.account_attivo(auth.uid())` e `private.sono_amici(auth.uid(), utente_id)` e `private.puo_entrare_nel_gruppo(gruppo_id, utente_id)` (R-11, R-15). Il trigger `private.verifica_invito_gruppo` ripete i controlli con codici precisi per l'app: `NX037` gruppo pieno, `NX038` persona già nel gruppo o non invitabile.
+- **U**: due policy: l'invitato porta il proprio `stato` da `invitato` ad `attivo`; un admin cambia il `ruolo` di un membro attivo. `GRANT UPDATE (stato, ruolo)`. Il trigger `private.proteggi_membri_gruppo` rifiuta ogni altro cambio (`NX044`) e ricontrolla R-15 all'accettazione (`NX038`); solo le operazioni di sistema (`noxa.operazione_gruppi = 'sistema'`, nuovo admin) lo saltano.
+- **D**: `utente_id = auth.uid()` (uscita o rifiuto dell'invito) oppure `private.e_admin_gruppo(gruppo_id)`.
+- Trigger `after`: `private.notifica_invito_gruppo` (notifica `invito_gruppo` con i soli identificativi); `private.dopo_accettazione_gruppo` (toglie la notifica dell'invito accettato, garantisce un admin quando un admin torna membro); `private.dopo_uscita_gruppo` (toglie la notifica dell'invito, le risposte alle serate del gruppo e i passaggi offerti; notifica `rimozione_gruppo` con nome del gruppo e motivo `tolto`, `fasce` o `compleanno`, mai dopo un blocco né all'eliminazione del gruppo; poi `private.garantisci_admin_gruppo`).
+- Invariante R-15: `private.applica_invariante_gruppi` dopo la cancellazione di un'amicizia accettata (`private.invariante_dopo_amicizia`) e dopo un blocco (`private.applica_blocco`, che toglie prima senza notifica gli inviti in attesa nei gruppi dell'altra persona, R-17); il job giornaliero `private.verifica_invariante_gruppi()` la applica dopo i compleanni (§8).
 
 #### `serate_gruppo`
 *Funzionalità: F-14, F-15.*
@@ -726,21 +740,24 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 |---|---|---|
 | `id` | `uuid` | PK |
 | `gruppo_id` | `uuid` | FK → `gruppi(id)` `on delete cascade` |
-| `evento_id` | `uuid` | nullable, FK → `eventi(id)` |
-| `titolo` | `text` | 1–80 caratteri; obbligatorio solo se `evento_id` è null |
-| `data_serata` | `date` | |
+| `evento_id` | `uuid` | nullable, FK → `eventi(id)` `on delete set null` |
+| `titolo` | `text` | 1–80 caratteri; obbligatorio se `evento_id` è null |
+| `data_serata` | `date` | not null; con un evento la copia il trigger dall'evento |
 | `ora_ritrovo` | `time` | nullable |
 | `luogo_ritrovo` | `text` | al massimo 120 caratteri |
-| `url_prevendita`, `url_lista` | `text` | nullable, solo `https://` |
+| `url_prevendita`, `url_lista` | `text` | nullable, solo `https://`, al massimo 500 caratteri |
 | `note` | `text` | al massimo 500 caratteri (R-16) |
 | `stato` | `stato_serata` | default `proposta` |
 | `creata_da` | `uuid` | FK → `profili(id)` `on delete set null` |
+| `testi_scritti_da` | `uuid` | FK → `profili(id)` `on delete set null`; chi ha scritto gli ultimi titolo, luogo e note (R-52) |
 | `creata_il`, `aggiornata_il` | `timestamptz` | |
 
-- **S**: `private.e_membro(gruppo_id)` e (`evento_id is null` oppure `private.evento_visibile_a(evento_id, auth.uid())`) (R-24).
-- **I**: `private.e_membro_attivo(gruppo_id)` e `creata_da = auth.uid()` e (`evento_id is null` oppure `private.evento_adatto_al_gruppo(evento_id, gruppo_id)`).
-- **U**: (`creata_da = auth.uid()` oppure `private.e_admin_gruppo(gruppo_id)`) con lo stesso controllo sull'evento.
-- **D**: come **U**.
+- **S**: `private.e_membro_attivo(gruppo_id)` e (`evento_id is null` oppure `private.evento_visibile_a(evento_id, auth.uid())`) (R-24).
+- **I**: `creata_da = auth.uid()` e `private.e_membro_attivo(gruppo_id)` e `private.account_attivo(auth.uid())` e (`evento_id is null` oppure `private.evento_adatto_al_gruppo(evento_id, gruppo_id)`).
+- **U**: (`creata_da = auth.uid()` oppure `private.e_admin_gruppo(gruppo_id)`) con l'evento visibile a chi modifica; with check con `private.account_attivo(auth.uid())`. `GRANT UPDATE` di evento, titolo, data, ritrovo, link, note e stato.
+- **D**: come **U**, senza with check.
+- Trigger `private.prepara_serata_gruppo` (`before insert or update`): con un evento `pubblicato` copia la data e, se manca, il link ai biglietti dell'evento (`NX043` se l'evento non è disponibile o non è adatto al gruppo); niente date passate (`NX042`); stati `proposta → confermata`, `proposta | confermata → annullata`, una serata annullata o passata è in sola lettura (`NX026`); imposta `testi_scritti_da`. Una rimozione dei moderatori passa anche su una serata conclusa e sostituisce il titolo di una serata libera con «Serata di gruppo».
+- Trigger `private.notifica_serata_gruppo` (`after`): `nuova_serata` ai membri attivi che possono vedere l'evento, `aggiornamento_serata` con `cambio` (`confermata`, `annullata`, `modificata` per data, ritrovo o evento) a tutti tranne chi modifica; nessuna notifica per le rimozioni dei moderatori. `private.rimuovi_notifiche_serata` (`after delete`) toglie le notifiche della serata.
 
 #### `partecipazioni_serata`
 *Funzionalità: F-14, F-15, F-16.*
@@ -749,18 +766,19 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 |---|---|---|
 | `serata_id` | `uuid` | FK → `serate_gruppo(id)` `on delete cascade` |
 | `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade`; PK composta |
-| `risposta` | `risposta_serata` | |
+| `risposta` | `risposta_serata` | not null |
 | `biglietto` | `stato_biglietto` | default `nessuno` |
 | `trasporto_andata` | `mezzo_trasporto` | nullable |
 | `trasporto_ritorno` | `mezzo_trasporto` | nullable |
 | `posti_liberi` | `smallint` | 0–8, solo con `auto_guido` |
-| `passaggio_da` | `uuid` | nullable: membro con `auto_guido` |
+| `passaggio_da` | `uuid` | nullable, FK → `profili(id)` `on delete set null`; solo con `passaggio`, mai sé stessi |
 | `aggiornato_il` | `timestamptz` | |
 
-- **S**: `exists (select 1 from serate_gruppo s where s.id = serata_id)` (eredita R-24).
-- **I/U**: `utente_id = auth.uid()` e membro attivo del gruppo della serata. Il trigger `private.verifica_trasporto` controlla che `auto_guido` sia scelto solo da maggiorenni (età legale per la patente B) e che `passaggio_da` indichi un membro della stessa serata con `auto_guido`.
+- **S**: la serata è visibile (sottoquery soggetta alla RLS di `serate_gruppo`, R-24) e (`utente_id = auth.uid()` oppure `not c_e_blocco(auth.uid(), utente_id)`) (R-17).
+- **I/U**: `utente_id = auth.uid()` e `private.account_attivo(auth.uid())` e la serata è visibile.
 - **D**: `utente_id = auth.uid()`.
-- Realtime: pubblicata con Postgres Changes per aggiornare la serata dal vivo (ARCHITECTURE.md §5.3).
+- Trigger `private.verifica_trasporto` (`before insert or update`): serata non annullata né passata (`NX026`); `auto_guido` solo per i maggiorenni, età legale per la patente B (`NX040`); posti non inferiori ai passaggi già scelti (`NX041`); `passaggio_da` indica un membro della stessa serata che guida, non ha risposto `no`, non ha blocchi con chi chiede (R-17, `NX039`) e ha ancora posto (`NX041`). Trigger `private.libera_passaggi` (`after update or delete`): chi non guida più, risponde `no` o toglie la risposta libera i passaggi che offriva.
+- Realtime: i trigger `private.avvisa_cambio_serata` (su `serate_gruppo` e `partecipazioni_serata`) e `private.avvisa_cambio_membri` (su `membri_gruppo`) inviano un avviso senza dati su un canale Broadcast privato; le tabelle **non** sono in Postgres Changes, che non applica la RLS agli eventi `DELETE` (§7, ARCHITECTURE.md §5.3).
 
 ### 5.5 Vivi: check-in e ritorno sicuro
 
@@ -996,6 +1014,15 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `miei_flyer()` | definer | utenti | Propri flyer con stato, decisione e reclamo (F-06) |
 | `usa_codice_invito(codice text)` | definer | utenti | Crea la richiesta di amicizia verso il titolare (R-12) |
 | `avviso_richiesta(amicizia uuid)` | definer | destinatario della richiesta | `avviso_fasce = true` solo se il destinatario è minorenne e il richiedente maggiorenne, per mostrare l'avviso prima dell'accettazione (R-12) |
+| `crea_gruppo(nome text, invitati uuid[])` | invoker | utenti attivi | Crea il gruppo (il creatore diventa admin) e invita gli amici scelti in un'unica transazione; restituisce l'id (F-13), §5.4 `gruppi` |
+| `invita_nel_gruppo(gruppo uuid, invitati uuid[])` | invoker | membri attivi | Invita una persona alla volta, così ogni invito tiene conto dei precedenti (R-15); restituisce il numero di inviti |
+| `miei_gruppi()` | invoker | utenti | Gruppi e inviti di chi chiama con ruolo, stato, numero di membri, primi membri visibili, chi ha invitato e la prossima serata |
+| `dettaglio_gruppo(gruppo uuid)` | invoker | membri attivi | Nome, creatore, membri visibili con ruolo e stato, `altri` (membri che non si vedono per un blocco, R-17) e serate con i conteggi delle risposte |
+| `anteprima_invito_gruppo(gruppo uuid)` | definer | invitati | Stato dell'invito (`valido`, `non_valido`), nome, chi ha invitato, numero di membri e solo le persone che l'invitato conosce già, con il numero degli altri (R-13, R-15) |
+| `amici_invitabili(gruppo uuid, selezionati uuid[])` | definer | utenti | I propri amici confermati con il motivo per cui non si possono invitare (`fasce`, `non_disponibile`, `gia_nel_gruppo`, `invito_in_attesa`, `pieno`), senza dire con chi c'è l'incompatibilità (R-15, R-17) |
+| `eventi_adatti_al_gruppo(gruppo uuid, testo text)` | invoker | membri attivi | Eventi pubblicati dei prossimi 30 giorni visibili a tutti i membri attivi, con ricerca per titolo o locale (R-20, R-23, R-24) |
+| `dettaglio_serata(serata uuid)` | invoker | membri attivi | Serata con l'evento (se c'è e se visibile), membri attivi visibili con risposta, biglietto e trasporto, `altri`, `posso_gestire` e `posso_guidare` calcolato nel database (F-14…F-16, R-02) |
+| `prossime_serate()` | invoker | utenti | Prossime serate non annullate dei propri gruppi con la propria risposta (Organizza) |
 | `rigenera_mio_riepilogo()` | definer | utenti | Rigenera il proprio riepilogo annuale (F-33) |
 | `coda_flyer()` | definer | moderatori | Caricamenti in revisione o non leggibili con estrazione, percorso dell'immagine, evento in revisione e possibile corrispondenza con un evento pubblicato, senza `utente_id` né dati del profilo di chi ha caricato (il percorso contiene solo l'uuid pseudonimo usato per la cartella) (F-40, R-69) |
 | `decidi_flyer(caricamento, esito, dati, motivazione, evento_esistente)` | definer | moderatori | Approvazione con le due conferme e la scelta esplicita sull'alcol (R-23), unione a un evento pubblicato o rifiuto motivato (R-51); sotto i 18 anni serve la motivazione (R-22); se l'immagine è adatta accoda `copia_immagine_flyer` |
@@ -1016,7 +1043,7 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `possibili_annullamenti()`, `decidi_possibile_annullamento(evento, annullato, motivazione)` | definer | moderatori | Eventi spariti dalla loro unica fonte (EVENT_INGESTION.md §7) |
 | `registro_moderazione(tipo, oggetto)` | definer | moderatori | Ultime 50 azioni su un locale, una fonte, un evento o un candidato, con il nome del moderatore e, per gli eventi, le operazioni della raccolta |
 | `dettaglio_segnalazione(id uuid)` | definer | moderatori | Oggetto segnalato com'è per gli utenti, testo di chi ha segnalato senza la sua identità, altre segnalazioni sullo stesso oggetto e registro; ogni lettura registra un `accesso_segnalazione` (R-69) |
-| `decidi_segnalazione(segnalazione uuid, azione azione_moderazione, motivazione text, contenuto text)` | definer | moderatori | `nessuna_violazione`, `rimuovi_contenuto` (per un profilo `contenuto` = `foto`, `nome` o `username`), `modifica_evento`, `sospendi_account`; chiude le segnalazioni aperte sullo stesso oggetto, notifica chi ha segnalato e chi è coinvolto (R-53), toglie o conferma l'occultamento automatico (ADR-0023); restituisce il percorso di una foto del locale rimossa, che l'app elimina |
+| `decidi_segnalazione(segnalazione uuid, azione azione_moderazione, motivazione text, contenuto text)` | definer | moderatori | `nessuna_violazione`, `rimuovi_contenuto` (per un profilo `contenuto` = `foto`, `nome` o `username`; per un gruppo `nome`; per una serata di gruppo `titolo`, `luogo` o `note`), `modifica_evento`, `sospendi_account`; chiude le segnalazioni aperte sullo stesso oggetto, notifica chi ha segnalato e chi è coinvolto (R-53), toglie o conferma l'occultamento automatico (ADR-0023); restituisce il percorso di una foto del locale rimossa, che l'app elimina |
 | `correggi_data_nascita(utente uuid, data date, motivazione text)` | definer | amministratori (`private.e_amministratore()`) | Correzione verificata (R-02) |
 | `leggi_metriche()` | definer | amministratori (`private.e_amministratore()`) | Metriche aggregate (§5.8) |
 
@@ -1037,9 +1064,16 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 
 | Canale | Tipo | Autorizzazione |
 |---|---|---|
-| Modifiche a `partecipazioni_serata`, `serate_gruppo`, `membri_gruppo` | Postgres Changes | RLS delle tabelle |
+| `serata:<id>` | Broadcast privato, avviso `cambio` senza dati da `private.avvisa_cambio_serata` | policy su `realtime.messages` con `private.puo_ascoltare(topic)`: la serata si vede (RLS di `serate_gruppo`: membri attivi, evento visibile, R-24) |
+| `gruppi:<utente_id>` | Broadcast privato, avviso `cambio` senza dati da `private.avvisa_cambio_membri` (invito, ingresso, uscita, ruolo) | stessa policy: solo il titolare (`utente_id = auth.uid()`) |
 | Modifiche a `notifiche` dell'utente | Postgres Changes | RLS di `notifiche` |
 | `ritorno:<id>` | Broadcast privato | policy su `realtime.messages`: titolare o `private.e_destinatario_ritorno(id)` |
+
+Postgres Changes non applica la RLS agli eventi `DELETE` e li invia con la chiave primaria a
+ogni sessione in ascolto: si usa solo per tabelle la cui chiave non rivela relazioni tra
+persone (`notifiche`, chiave `id`). Le tabelle che collegano persone a gruppi o serate
+usano avvisi senza dati su canali privati; chi li riceve ricarica con le RPC, soggette alla
+RLS (iterazione 7).
 
 ## 8. Job pianificati (`pg_cron`)
 
