@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 7 su 15.
+Iterazioni completate: 8 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -27,7 +27,7 @@ Iterazioni completate: 7 su 15.
 | 4 | completata | 2026-10-19 | 2026-10-19 | 2 | `iterazione-04-catalogo-eventi` | Eventi reali dall'iterazione 5; foto dei locali caricate dai moderatori nell'iterazione 5; flyer nell'iterazione 6 |
 | 5 | completata con attese esterne | 2026-10-19 | 2026-10-19 | 2 | `iterazione-05-raccolta-eventi` | Mancano App Review Meta e token, chiave Google Places, 40 locali verificati e il primo `sito_html_<locale>` in staging |
 | 6 | completata con attese esterne | 2026-10-21 | 2026-10-22 | 4 | `iterazione-06-flyer-moderazione` | Mancano la chiave Claude API con limite di spesa, la valutazione sul golden set dei flyer e il DPA di Anthropic (D-12) |
-| 7 | in corso | 2026-10-23 | — | 3 | `iterazione-07-gruppi` | Manca l'esecuzione completa dei pgTAP su un database ricreato |
+| 7 | completata | 2026-10-23 | 2026-10-26 | 3 | `iterazione-07-gruppi` | Avvisi dal vivo su canali privati (ADR-0024); notifica di uscita senza il nome del gruppo |
 | 8 | da iniziare | — | — | 0 | — | — |
 | 9 | da iniziare | — | — | 0 | — | — |
 | 10 | da iniziare | — | — | 0 | — | — |
@@ -843,14 +843,15 @@ moderatori; nessun nuovo modo di trovare persone.
 
 **Esito dei test**
 
-- pgTAP: 935 test; `032_gruppi` 80/80, `033_serate_gruppo` 61/61,
-  `034_segnalazioni_gruppi` 23/23, `035_realtime_gruppi` 29/29. Sul database locale non
-  ricreato falliscono 7 test di file non toccati dall'iterazione (`013`, `014`, `015`, `026`)
-  per dati rimasti: il blocco lasciato dal test di integrazione delle amicizie, le date del
-  seed del 19/10 ormai passate, un account non confermato.
+- pgTAP dopo `supabase db reset`: 935/935 (`032_gruppi` 80, `033_serate_gruppo` 61,
+  `034_segnalazioni_gruppi` 23, `035_realtime_gruppi` 29). Prima del reset fallivano 7 test
+  di file non toccati dall'iterazione per dati rimasti nel database locale; il test di
+  integrazione delle amicizie ora toglie il blocco che lasciava. Resta che il test di
+  integrazione della moderazione (iterazioni 5–6) attiva il TOTP del moderatore e scrive nel
+  registro: passa una volta per reset e, dopo di lui, `024` non trova il registro atteso.
 - Unitari: 95/95. E2e simulati: 308/308 (5 rilanciati da soli dopo un timeout per carico).
-  E2e di integrazione `gruppi.spec.ts`: 1/1 (gruppo misto valido, invito rifiutato,
-  risposta dal vivo tra due sessioni).
+  E2e di integrazione dopo il reset: 10/10, compreso `gruppi.spec.ts` (gruppo misto valido,
+  invito rifiutato, risposta dal vivo tra due sessioni), che elimina ciò che crea.
 - Worker: ruff, format e mypy puliti; pytest 210 passati, 4 saltati (integrazione con il
   database, non toccata).
 
@@ -895,3 +896,7 @@ Superfici di contatto: invito (solo amici confermati compatibili con tutti, `puo
 - Avvisi dal vivo senza dati su canali privati invece di Postgres Changes (ADR-0024).
 - La notifica di uscita da un gruppo non riporta il nome del gruppo (diverge dalla tavola
   F-13 §5, che lo mostrava, per la regola sui testi di altri utenti nelle notifiche).
+
+**Attese esterne**: nessuna.
+
+**Commit**: `b7276a0` … commit finale di chiusura sul branch `iterazione-07-gruppi`.
