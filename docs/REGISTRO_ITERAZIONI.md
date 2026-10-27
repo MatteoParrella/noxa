@@ -28,7 +28,7 @@ Iterazioni completate: 8 su 15.
 | 5 | completata con attese esterne | 2026-10-19 | 2026-10-19 | 2 | `iterazione-05-raccolta-eventi` | Mancano App Review Meta e token, chiave Google Places, 40 locali verificati e il primo `sito_html_<locale>` in staging |
 | 6 | completata con attese esterne | 2026-10-21 | 2026-10-22 | 4 | `iterazione-06-flyer-moderazione` | Mancano la chiave Claude API con limite di spesa, la valutazione sul golden set dei flyer e il DPA di Anthropic (D-12) |
 | 7 | completata | 2026-10-23 | 2026-10-26 | 3 | `iterazione-07-gruppi` | Avvisi dal vivo su canali privati (ADR-0024); notifica di uscita senza il nome del gruppo |
-| 8 | da iniziare | — | — | 0 | — | — |
+| 8 | in corso | 2026-10-27 | — | 0 | `iterazione-08-tracker-privacy` | — |
 | 9 | da iniziare | — | — | 0 | — | — |
 | 10 | da iniziare | — | — | 0 | — | — |
 | 11 | da iniziare | — | — | 0 | — | — |
@@ -900,3 +900,45 @@ Superfici di contatto: invito (solo amici confermati compatibili con tutti, `puo
 **Attese esterne**: nessuna.
 
 **Commit**: `b7276a0` … commit finale di chiusura sul branch `iterazione-07-gruppi`.
+
+### Iterazione 8 — Tracker, privacy e beta
+
+**Piano**
+- Funzionalità: F-30 (diario delle serate: voce legata a un evento, a un locale o libera,
+  spese per categoria con R-40, amici confermati, DJ, voto, note; "Ero a questo evento"),
+  F-41 (esportazione JSON ed eliminazione dell'account self-service, informativa in breve),
+  F-42 (Privacy e dati: partecipazioni visibili, persone bloccate), F-43 (PWA installabile
+  con dati offline), F-45 (verifica di accessibilità delle schermate della fase). Regole:
+  R-40, R-43, R-55, R-62, R-63, R-64, R-65, R-66, R-67, R-69. Design:
+  `design/F-30-tracker/`, `design/F-42-privacy/`.
+- Decisioni prese all'avvio: D-14 chiusa con un backup notturno cifrato su Cloudflare R2
+  (finestra di 30 giorni, nessun piano a pagamento); D-13 resta aperta e passa a prima
+  dell'iterazione 10: la beta parte dalla sola PWA, quindi le build interne TestFlight e
+  Google Play e i link delle email aperti nell'app nativa (App Links e Universal Links, che
+  richiedono anche il dominio di D-01) escono da questa iterazione.
+- Database: `serate_tracker`, `tracker_spese`, `tracker_dj`, `tracker_amici` con RLS e
+  trigger `verifica_categoria_spesa` (R-40); RPC del diario (elenco, dettaglio,
+  salvataggio idempotente con l'identificativo creato sul dispositivo per la coda offline,
+  ricerca di eventi passati e locali, voce di un evento); esportazione dei propri dati con
+  limite di una richiesta all'ora; eliminazione dell'account con verifica della password
+  (e dei due fattori, se attivi) e tentativi limitati; `applica_conservazione` con
+  segnalazioni e azioni di moderazione a 12 mesi dalla chiusura (escluse le prove di R-55);
+  nuova versione dell'informativa con i fornitori di ADR-0021.
+- Backend: Edge Function `elimina-account` (cancella subito i file dello storage dopo
+  l'eliminazione nel database); worker in modalità a esaurimento e workflow `worker.yml`;
+  backup cifrato (`backup.yml`, script di ripristino provato in locale); mappa su R2
+  (`prepara_mappa.sh`, `mappa.yml`); `_headers` di Cloudflare Pages; SMTP Brevo nella
+  configurazione; Sentry nell'app e nel worker con `beforeSend` (attivo solo con il DSN).
+- App: Ricorda (diario, modulo, dettaglio, stati offline e "Da sincronizzare"), "Ero a
+  questo evento" nel dettaglio di un evento passato, Privacy e dati, Scarica i tuoi dati,
+  Elimina l'account in due passi, Informativa in breve; query in sola lettura salvate in
+  IndexedDB, coda delle scritture del diario, cache delle tile della mappa già viste.
+- Passi: migrazioni e pgTAP → tipi → Edge Function → API, coda offline e schermate → test
+  unitari ed e2e (simulati e di integrazione) → infrastruttura → documenti → cicli di
+  revisione e `safety-review`.
+- Criteri dell'iterazione: criteri della Fase 1 verificati per la parte tecnica (pgTAP per
+  ogni policy delle tabelle nuove con tutte le età del seed; e2e di voce del tracker,
+  esportazione ed eliminazione dell'account; axe senza violazioni sulle schermate della
+  fase); restano fuori i criteri che richiedono dati e utenti reali (locali, eventi, golden
+  set, beta, verifica manuale con VoiceOver e TalkBack).
+
