@@ -131,9 +131,11 @@ begin
                                   from public.tracker_spese sp where sp.serata_tracker_id = s.id), '[]'::jsonb),
                'dj', coalesce((select jsonb_agg(d.nome_dj)
                                from public.tracker_dj d where d.serata_tracker_id = s.id), '[]'::jsonb),
+               -- R-17: chi è bloccato, in una delle due direzioni, non compare.
                'amici', coalesce((select jsonb_agg(p.username)
                                   from public.tracker_amici ta join public.profili p on p.id = ta.amico_id
-                                  where ta.serata_tracker_id = s.id), '[]'::jsonb),
+                                  where ta.serata_tracker_id = s.id
+                                    and not private.c_e_blocco(io, ta.amico_id)), '[]'::jsonb),
                'creata_il', s.creato_il, 'aggiornata_il', s.aggiornato_il) order by s.data_serata)
       from public.serate_tracker s
       left join public.eventi e on e.id = s.evento_id

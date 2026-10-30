@@ -3,7 +3,7 @@
 -- se visibili; data mai nel futuro; amici solo confermati.
 -- Regole: R-17, R-20, R-23, R-40, R-69. Trigger: prepara_serata_tracker, verifica_categoria_spesa.
 begin;
-select plan(73);
+select plan(74);
 
 -- Eventi passati di prova, indipendenti dalla data del seed.
 insert into public.eventi (id, locale_id, titolo, inizio, fine, eta_minima, eta_minima_dichiarata,
@@ -298,6 +298,10 @@ select is(
   (select (x ->> 'amici_altri')::int from jsonb_array_elements(public.mio_diario()) x
    where (x ->> 'id')::uuid = tests.voce('181')),
   1, 'R-17: dopo un blocco la persona non si vede più, resta solo contata');
+select is(
+  (select x -> 'amici' from jsonb_array_elements(public.esporta_miei_dati() -> 'diario') x
+   where x ->> 'data_serata' = (current_date - 1)::text and jsonb_array_length(x -> 'amici') > 0),
+  null, 'R-17: chi ti ha bloccato non compare nemmeno nell''esportazione');
 select lives_ok(
   $$ select public.salva_serata_diario(jsonb_build_object('id', tests.voce('181'), 'data_serata', current_date - 1,
                                                           'voto', 2, 'amici', jsonb_build_array(tests.id('minore_17')))) $$,
