@@ -1,0 +1,46 @@
+# Worker in modalità a esaurimento (ADR-0021): ogni 15 minuti esegue i job pronti in coda_job e
+# termina. pg_cron resta l'unico scheduler: questo workflow sveglia solo l'esecutore.
+# I segreti stanno nell'environment `produzione`, limitato al branch main; i log sono pubblici
+# e il worker non vi scrive dati personali.
+name: Worker
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worker
+  cancel-in-progress: false
+
+jobs:
+  esaurisci:
+    name: Coda dei job
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: produzione
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - name: Immagine del worker
+        run: docker build --tag noxa-worker services/worker
+      - name: Esecuzione a esaurimento
+        env:
+          WORKER_DATABASE_URL: ${{ secrets.WORKER_DATABASE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          SENTRY_DSN_WORKER: ${{ secrets.SENTRY_DSN_WORKER }}
+        run: |
+          docker run --rm \
+            -e AMBIENTE=produzione -e LOG_FORMATO=json \
+            -e WORKER_DATABASE_URL -e SUPABASE_URL -e SUPABASE_SERVICE_ROLE_KEY \
+            -e ANTHROPIC_API_KEY -e META_IG_USER_ID -e META_ACCESS_TOKEN \
+            -e GOOGLE_PLACES_API_KEY -e SENTRY_DSN_WORKER \
+            noxa-worker uv run --no-sync python -m noxa_worker.esaurisci --durata-massima 600

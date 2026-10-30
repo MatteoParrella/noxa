@@ -1,0 +1,180 @@
+/**
+ * Testi del diario delle serate (design/F-30-tracker): "tu", frasi brevi, nessun giudizio su
+ * spese o numero di serate, nessuna pressione (R-43). Mai l'alcol negli esempi (R-40).
+ */
+
+const serate = (n: number) => (n === 1 ? '1 serata' : `${n} serate`);
+
+export const ricorda = {
+  area: {
+    titolo: 'Il mio diario',
+    sottotitolo: 'Ricorda · Il tuo diario',
+    privato: 'Lo vedi solo tu',
+    riservato: 'Qui arriveranno le tue statistiche e i badge',
+    aggiungi: 'Aggiungi una serata',
+    caricamento: 'Carico il tuo diario',
+    serate,
+    vuoto: {
+      titolo: 'Il tuo diario è vuoto',
+      testo: 'Quando torni da una serata, annotala qui: la vedi solo tu.',
+    },
+    errore: {
+      titolo: 'Il diario non si è caricato',
+      testo: 'Le tue serate sono al sicuro. Riprova tra un attimo.',
+    },
+    offline: 'Sei offline: vedi il diario salvato. Puoi aggiungere serate.',
+    con: (nomi: string) => `con ${nomi}`,
+    eAltri: (nome: string, altri: number) => `${nome} e altri ${altri}`,
+    voto: (voto: number) => `${voto}/5`,
+    votoLettura: (voto: number) => `Voto ${voto} su 5`,
+    apri: (titolo: string, data: string) => `${titolo}, ${data}`,
+  },
+  sincronizzazione: {
+    badge: 'Da sincronizzare',
+    titolo: 'Da sincronizzare',
+    motivoOffline: (ora: string) =>
+      `L’hai modificata senza rete alle ${ora}. È salvata sul telefono e parte appena torna la connessione.`,
+    motivoErrore: 'Non siamo riusciti a salvarla: aprila e controlla i campi, poi salva di nuovo.',
+    eliminazione: 'Eliminata sul telefono: la tolgo dal diario appena torna la rete.',
+    inviate: (n: number) =>
+      n === 1
+        ? 'Una serata del diario è stata sincronizzata'
+        : `${n} serate del diario sincronizzate`,
+  },
+  modulo: {
+    nuova: 'Aggiungi una serata',
+    modifica: 'Modifica la serata',
+    sopratitolo: 'Ricorda',
+    intro: 'Serve solo la data. Il resto lo aggiungi se ti va.',
+    chiudi: 'Chiudi senza salvare',
+    caricamento: 'Carico la serata',
+    facoltativo: 'facoltativo',
+    obbligatorio: 'obbligatorio',
+    dove: 'Dove',
+    cerca: 'Cerca un evento passato o un locale',
+    cercaCaricamento: 'Cerco eventi e locali',
+    cercaErrore: 'La ricerca non ha funzionato. Puoi scrivere il nome del locale.',
+    cercaNessuno: 'Nessun evento o locale con questo nome.',
+    eventi: 'Eventi passati',
+    locali: 'Locali',
+    scriviNome: 'Il locale non c’è? Scrivi il nome del locale',
+    cercaNelCatalogo: 'Cerca nel catalogo',
+    nomeLocale: 'Nome del locale',
+    nomeLocaleAiuto: 'Non lo aggiungiamo al catalogo: resta solo nel tuo diario.',
+    togli: (nome: string) => `Togli ${nome}`,
+    quando: 'Quando',
+    data: 'Data',
+    dataDaEvento: 'Presa dall’evento.',
+    conChi: 'Con chi',
+    selezionati: (n: number) => (n === 1 ? '1 selezionato' : `${n} selezionati`),
+    regolaAmici: 'Gli amici che indichi non ricevono niente e non vedono il tuo diario.',
+    cercaAmici: 'Cerca tra i tuoi amici',
+    nessunAmico: 'Non hai ancora amici confermati da indicare.',
+    nessunRisultatoAmici: 'Nessun amico con questo nome.',
+    amiciCaricamento: 'Carico i tuoi amici',
+    amiciErrore: 'Non riusciamo a caricare i tuoi amici. Puoi indicarli più tardi.',
+    altriAmici: (n: number) =>
+      n === 1
+        ? 'Un’altra persona indicata non è più tra i tuoi amici: resta nella serata.'
+        : `Altre ${n} persone indicate non sono più tra i tuoi amici: restano nella serata.`,
+    spese: 'Spese',
+    speseAiuto: 'facoltativo · fino a 1.000 € per riga',
+    aggiungiSpesa: 'Aggiungi una spesa',
+    importo: (categoria: string) => `Importo per ${categoria}, in euro`,
+    togliSpesa: (categoria: string) => `Togli la spesa ${categoria}`,
+    totale: 'Totale della serata',
+    totaleLettura: (totale: string) => `Totale della serata: ${totale}`,
+    musica: 'Musica',
+    dj: 'DJ o artista',
+    djAiuto: 'Premi Invio per aggiungerlo. Fino a 80 caratteri.',
+    aggiungiDj: 'Aggiungi',
+    togliDj: (nome: string) => `Togli ${nome}`,
+    comeAndata: 'Com’è andata',
+    voto: 'Voto',
+    votoPulsante: (n: number) => `Voto ${n} su 5`,
+    votoMin: 'così così',
+    votoMax: 'bellissima',
+    togliVoto: 'Togli il voto',
+    note: 'Note',
+    noteAiuto: 'Note private: restano solo nel tuo diario.',
+    piede: 'La vedi solo tu.',
+    salva: 'Salva',
+    errori: {
+      titolo: {
+        data: 'Manca la data',
+        futura: 'La data è nel futuro',
+        importo: 'Un importo non è valido',
+        nome: 'Il nome del locale è troppo lungo',
+        generico: 'Non siamo riusciti a salvare',
+      },
+      correggi: 'Correggi i campi segnati e salva di nuovo.',
+      dataMancante: 'Scegli la data della serata: è l’unico campo che serve.',
+      dataFutura: 'La data è nel futuro. Il diario è per le serate già passate.',
+      importo: (categoria: string) =>
+        `${categoria}: scrivi un importo da 0,01 a 1.000 €, con la virgola per i centesimi.`,
+      nomeLungo: (eccesso: number) =>
+        `Il nome può avere al massimo 80 caratteri: togline ${eccesso}.`,
+      eventoNonDisponibile:
+        'Questo evento non è più disponibile. Scegli un locale o scrivi il nome.',
+      amicoNonDisponibile: 'Una delle persone indicate non è tra i tuoi amici confermati.',
+      generico: 'Riprova tra un attimo: la serata non è andata persa.',
+    },
+    salvata: {
+      titolo: 'Serata salvata nel diario',
+      testo: (quando: string) => `${quando}. La vedi solo tu.`,
+      torna: 'Torna al diario',
+    },
+    salvataOffline: {
+      titolo: 'Salvata sul telefono',
+      testo:
+        'La sincronizzo quando torna la rete. Intanto la trovi nel diario, come tutte le altre.',
+    },
+    offline: 'Sei offline: le modifiche restano sul telefono.',
+  },
+  categorie: {
+    ingresso: 'Ingresso',
+    prevendita: 'Prevendita',
+    trasporto: 'Trasporto',
+    cibo: 'Cibo',
+    bevande_analcoliche: 'Bevande analcoliche',
+    alcolici: 'Alcolici',
+    guardaroba: 'Guardaroba',
+    altro: 'Altro',
+  },
+  dettaglio: {
+    caricamento: 'Carico la serata',
+    menu: 'Azioni sulla serata',
+    modifica: 'Modifica',
+    elimina: 'Elimina',
+    vediEvento: 'Vedi l’evento',
+    conChi: 'Con chi',
+    spese: 'Spese',
+    musica: 'Musica',
+    note: 'Note',
+    altri: (n: number) => (n === 1 ? 'e un’altra persona' : `e altre ${n} persone`),
+    nonTrovata: {
+      titolo: 'Questa serata non è nel diario',
+      testo: 'Forse l’hai eliminata da un altro dispositivo.',
+      torna: 'Torna al diario',
+    },
+    torna: 'Il mio diario',
+  },
+  elimina: {
+    titolo: 'Eliminare questa serata dal diario?',
+    testo: (quale: string) => `${quale}. Spese, voto e note spariscono. Non si può annullare.`,
+    annulla: 'Annulla',
+    conferma: 'Elimina',
+    fatto: 'Serata eliminata dal diario',
+    errore: 'Non siamo riusciti a eliminarla. Riprova tra un attimo.',
+  },
+  ero: {
+    passato: 'Passato',
+    titolo: 'C’eri anche tu?',
+    testo: 'Annotala nel tuo diario: evento, locale e data sono già compilati. La vedi solo tu.',
+    azione: 'Ero a questo evento',
+    giaTitolo: 'Nel tuo diario',
+    giaTesto: (data: string, voto: number | null) =>
+      voto ? `L’hai annotata il ${data} · voto ${voto}/5.` : `L’hai annotata il ${data}.`,
+    apri: 'Apri la voce del diario',
+  },
+};

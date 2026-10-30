@@ -97,7 +97,7 @@ flowchart LR
 | Auth | Email e password (almeno 10 caratteri) con verifica, CAPTCHA (Cloudflare Turnstile, ADR-0020), protezione dalle password compromesse, MFA TOTP obbligatoria per i moderatori (R-06); hook "before user created" per il controllo dell'età (§4.1); modelli delle email in italiano. |
 | Storage | Bucket `avatar`, `flyer-caricati`, `flyer-pubblicati`, `immagini-locali` (foto dei locali, ADR-0018), `mappe` (DATA_MODEL.md §6). |
 | Realtime | Postgres Changes per le notifiche; Broadcast privato per gli avvisi di gruppi e serate e per le posizioni del ritorno sicuro. |
-| Edge Functions (Deno) | `invia-push` (FCM HTTP v1 per Android e iOS, Web Push VAPID), `esporta-dati`, `elimina-account`. |
+| Edge Functions (Deno) | `invia-push` (FCM HTTP v1 per Android e iOS, Web Push VAPID), `elimina-account` (ADR-0025: chiama `elimina_mio_account` con il JWT dell'utente e usa `service_role` solo per cancellare i file della foto profilo). L'esportazione dei dati è la RPC `esporta_miei_dati`. |
 | `pg_cron` | Job di DATA_MODEL.md §8, compresi il calcolo dei badge e dei riepiloghi annuali con funzioni SQL. |
 
 ### 3.3 Worker (`services/worker`)
@@ -364,8 +364,9 @@ flowchart LR
 - Le migrazioni si applicano prima a staging, poi a produzione, solo dalla CI.
 - I segreti stanno nel gestore dei segreti di ciascun fornitore; `.env.example` elenca i nomi.
 - Piano Supabase Free in staging e produzione finché non si apre la beta (ADR-0021).
-- Backup: nessuno sul piano Free; prima della beta si attiva il piano Pro di Supabase oppure un
-  backup cifrato in proprio (D-14), con una finestra di al massimo 30 giorni.
+- Backup: il workflow `backup.yml` esporta ogni notte i dati con `pg_dump`, li cifra con
+  `age` e li carica su Cloudflare R2, dove restano 30 giorni; la chiave privata è fuori da
+  GitHub e il ripristino usa `scripts/ripristina_backup.sh` (ADR-0025).
 
 ## 7. Scalabilità
 
@@ -398,9 +399,10 @@ flowchart LR
   SHA-256 degli script inline (niente `'unsafe-inline'` né `'unsafe-eval'` per gli script);
   le connessioni sono ammesse solo verso l'app e Supabase, script e iframe esterni solo da
   Cloudflare Turnstile (ADR-0020). Gli attributi `style` di React richiedono
-  `'unsafe-inline'` negli stili. `apps/web/vercel.json` aggiunge gli header che un meta non
-  può esprimere (`frame-ancestors`, HSTS, `X-Content-Type-Options`, `Permissions-Policy`).
-  Sentry, quando arriverà (ADR-0014), sarà l'unica altra origine esterna.
+  `'unsafe-inline'` negli stili. `apps/web/public/_headers` di Cloudflare Pages aggiunge gli
+  header che un meta non può esprimere (`frame-ancestors`, HSTS, `X-Content-Type-Options`,
+  `Permissions-Policy`; ADR-0021). Sentry (ADR-0014) è ammesso nelle connessioni solo quando
+  `NEXT_PUBLIC_SENTRY_DSN` è configurato.
 - Dipendenze controllate con Dependabot e `pnpm audit` / `pip-audit` in CI.
 - Le chiavi pubbliche (`anon`) sono le uniche nel client; tutto il resto sta solo nel worker e
   nelle Edge Functions.
@@ -436,7 +438,7 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | F-32 Badge | Funzione SQL `private.assegna_badge()` con `pg_cron` | §3.2 |
 | F-33 Wrapped | Funzione SQL `private.genera_riepiloghi()` con `pg_cron`, App (immagine generata sul dispositivo) | §3.2 |
 | F-40 Moderazione | App (area `/moderazione/` con navigazione propria, attivazione e codice TOTP, accesso di 8 ore; `src/features/moderazione/`), RPC di moderazione con registro delle azioni; code di flyer, segnalazioni e reclami con avviso delle urgenti | §4.5, §4.6, §5.1, SAFETY_PRIVACY.md §11, DATA_MODEL.md §5.10 |
-| F-41 Diritti privacy | Edge Functions `esporta-dati`, `elimina-account` | §3.2 |
+| F-41 Diritti privacy | RPC `esporta_miei_dati`, `elimina_mio_account`; Edge Function `elimina-account` | §3.2 |
 | F-42 Impostazioni di privacy | App | §3.1 |
 | F-43 App installabile | Export statico, service worker, Capacitor, store | §3.1, §6, ADR-0001 |
 | F-44 Raccolta eventi | Worker (`coda`, `coda_postgres`, `fonti`, `normalizzazione`, `dedup`, `raccolta`), `pg_cron` (`accoda_fonti_da_eseguire`) | §4.5, EVENT_INGESTION.md |

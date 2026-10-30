@@ -9,6 +9,10 @@ import { messaggi } from '@/lib/messaggi/it';
 const TESTI_PER_PAGINA: Record<string, string> = {
   '/scopri/': messaggi.scopri.offline,
   '/evento/': messaggi.evento.offline,
+  '/ricorda/': messaggi.ricorda.area.offline,
+  '/ricorda/serata/': messaggi.ricorda.modulo.offline,
+  '/ricorda/modifica/': messaggi.ricorda.modulo.offline,
+  '/profilo/privacy/': messaggi.privacy.pagina.offline,
 };
 
 /** Mostra la striscia offline quando il dispositivo perde la connessione. */

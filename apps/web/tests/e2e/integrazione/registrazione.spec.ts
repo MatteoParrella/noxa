@@ -34,7 +34,7 @@ async function registraDallApi(email: string, username: string, dataNascita: str
         username,
         nome_visualizzato: 'Prova',
         data_nascita: dataNascita,
-        consensi: { termini: '2026-10', privacy: '2026-10' },
+        consensi: { termini: '2026-10', privacy: '2026-11' },
       },
     }),
   });

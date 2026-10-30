@@ -1,5 +1,5 @@
-# Aggiornamento trimestrale della basemap di Milano e Brianza nel bucket `mappe` (ADR-0016).
-# Usa la chiave service_role dei segreti di GitHub, mai disponibile all'app.
+# Aggiornamento trimestrale della basemap di Milano e Brianza su Cloudflare R2 (ADR-0016,
+# ADR-0021). Usa le chiavi R2 dei segreti di GitHub, mai disponibili all'app.
 name: Aggiornamento mappa
 
 on:
@@ -31,6 +31,8 @@ jobs:
           tar -xzf pmtiles.tgz pmtiles && sudo mv pmtiles /usr/local/bin/
       - name: Estrazione e caricamento
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_MAPPE_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_MAPPE_SECRET_ACCESS_KEY }}
+          R2_BUCKET_MAPPE: ${{ vars.R2_BUCKET_MAPPE }}
         run: scripts/prepara_mappa.sh

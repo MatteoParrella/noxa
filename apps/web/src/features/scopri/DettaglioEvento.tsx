@@ -46,6 +46,7 @@ import {
   useNomiGeneri,
   useVisibilitaPredefinita,
 } from './dati';
+import { EroAQuestoEvento } from '@/features/ricorda/EroAQuestoEvento';
 import { FoglioSegnalaEvento } from './FoglioSegnalaEvento';
 import {
   dominio,
@@ -185,6 +186,7 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
   const copertine = useCopertine([{ tipo: dati.copertina_tipo, path: dati.copertina_path }]);
   const [foglio, setFoglio] = useState<'amici' | 'segnala' | null>(null);
   const [visibilitaScelta, setVisibilitaScelta] = useState<boolean | null>(null);
+  const [adesso] = useState(() => Date.now());
 
   const chiave = CHIAVI.dettaglio(io, dati.id);
   const attuale: Partecipazione = dati.mia_partecipazione
@@ -278,6 +280,8 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
 
   const giorno = giornoBreve(daIso(dati.data_serata));
   const annullato = dati.stato === 'annullato';
+  // Una serata finita si annota nel diario invece di segnarsi (design/F-30-tracker §4).
+  const passato = new Date(dati.fine ?? dati.inizio).getTime() < adesso;
   const testoAmiciEvento = testoAmici(
     dati.amici,
     dati.amici.filter((amico) => amico.stato === 'partecipo').length,
@@ -336,6 +340,7 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
               {messaggi.scopri.annullato}
             </Badge>
           )}
+          {passato && !annullato && <Badge>{messaggi.ricorda.ero.passato}</Badge>}
           <Badge variante="eta">{etichettaEta(dati.eta_minima, dati.eta_minima_dichiarata)}</Badge>
           {dati.generi_evento.map((codice) => (
             <Genere key={codice}>{nomeGenere(nomiGeneri, codice)}</Genere>
@@ -378,7 +383,8 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
               onApri={() => setFoglio('amici')}
             />
           )}
-          {!annullato && (
+          {passato && !annullato && <EroAQuestoEvento eventoId={dati.id} />}
+          {!annullato && !passato && (
             <SelettorePartecipazione
               scelta={dati.mia_partecipazione}
               visibile={visibile}

@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 const porta = 4173;
 const ci = Boolean(process.env.CI);
 
-// I test e2e girano sull'export statico, lo stesso che va su Vercel e nelle app native.
+// I test e2e girano sull'export statico, lo stesso che va su Cloudflare Pages e nelle app native.
 export default defineConfig({
   testDir: './tests/e2e',
   // Il percorso con Supabase reale ha una configurazione a sé (playwright.integrazione.config.ts).

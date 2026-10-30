@@ -28,7 +28,7 @@ Iterazioni completate: 8 su 15.
 | 5 | completata con attese esterne | 2026-10-19 | 2026-10-19 | 2 | `iterazione-05-raccolta-eventi` | Mancano App Review Meta e token, chiave Google Places, 40 locali verificati e il primo `sito_html_<locale>` in staging |
 | 6 | completata con attese esterne | 2026-10-21 | 2026-10-22 | 4 | `iterazione-06-flyer-moderazione` | Mancano la chiave Claude API con limite di spesa, la valutazione sul golden set dei flyer e il DPA di Anthropic (D-12) |
 | 7 | completata | 2026-10-23 | 2026-10-26 | 3 | `iterazione-07-gruppi` | Avvisi dal vivo su canali privati (ADR-0024); notifica di uscita senza il nome del gruppo |
-| 8 | da iniziare | — | — | 0 | — | — |
+| 8 | completata con attese esterne | 2026-10-27 | 2026-10-30 | 3 | `iterazione-08-tracker-privacy` | Backup cifrato e diritti privacy (ADR-0025); mancano lo staging (segreti di R2, Brevo, Sentry e backup), la beta con utenti reali e la verifica con VoiceOver e TalkBack |
 | 9 | da iniziare | — | — | 0 | — | — |
 | 10 | da iniziare | — | — | 0 | — | — |
 | 11 | da iniziare | — | — | 0 | — | — |
@@ -900,3 +900,104 @@ Superfici di contatto: invito (solo amici confermati compatibili con tutti, `puo
 **Attese esterne**: nessuna.
 
 **Commit**: `b7276a0` … commit finale di chiusura sul branch `iterazione-07-gruppi`.
+
+### Iterazione 8 — Tracker, privacy e beta
+
+**Piano**
+- Funzionalità: F-30 (diario delle serate: voce legata a un evento, a un locale o libera,
+  spese per categoria con R-40, amici confermati, DJ, voto, note; "Ero a questo evento"),
+  F-41 (esportazione JSON ed eliminazione dell'account self-service, informativa in breve),
+  F-42 (Privacy e dati: partecipazioni visibili, persone bloccate), F-43 (PWA installabile
+  con dati offline), F-45 (verifica di accessibilità delle schermate della fase). Regole:
+  R-40, R-43, R-55, R-62, R-63, R-64, R-65, R-66, R-67, R-69. Design:
+  `design/F-30-tracker/`, `design/F-42-privacy/`.
+- Decisioni prese all'avvio: D-14 chiusa con un backup notturno cifrato su Cloudflare R2
+  (finestra di 30 giorni, nessun piano a pagamento); D-13 resta aperta e passa a prima
+  dell'iterazione 10: la beta parte dalla sola PWA, quindi le build interne TestFlight e
+  Google Play e i link delle email aperti nell'app nativa (App Links e Universal Links, che
+  richiedono anche il dominio di D-01) escono da questa iterazione.
+- Database: `serate_tracker`, `tracker_spese`, `tracker_dj`, `tracker_amici` con RLS e
+  trigger `verifica_categoria_spesa` (R-40); RPC del diario (elenco, dettaglio,
+  salvataggio idempotente con l'identificativo creato sul dispositivo per la coda offline,
+  ricerca di eventi passati e locali, voce di un evento); esportazione dei propri dati con
+  limite di una richiesta all'ora; eliminazione dell'account con verifica della password
+  (e dei due fattori, se attivi) e tentativi limitati; `applica_conservazione` con
+  segnalazioni e azioni di moderazione a 12 mesi dalla chiusura (escluse le prove di R-55);
+  nuova versione dell'informativa con i fornitori di ADR-0021.
+- Backend: Edge Function `elimina-account` (cancella subito i file dello storage dopo
+  l'eliminazione nel database); worker in modalità a esaurimento e workflow `worker.yml`;
+  backup cifrato (`backup.yml`, script di ripristino provato in locale); mappa su R2
+  (`prepara_mappa.sh`, `mappa.yml`); `_headers` di Cloudflare Pages; SMTP Brevo nella
+  configurazione; Sentry nell'app e nel worker con `beforeSend` (attivo solo con il DSN).
+- App: Ricorda (diario, modulo, dettaglio, stati offline e "Da sincronizzare"), "Ero a
+  questo evento" nel dettaglio di un evento passato, Privacy e dati, Scarica i tuoi dati,
+  Elimina l'account in due passi, Informativa in breve; query in sola lettura salvate in
+  IndexedDB, coda delle scritture del diario, cache delle tile della mappa già viste.
+- Passi: migrazioni e pgTAP → tipi → Edge Function → API, coda offline e schermate → test
+  unitari ed e2e (simulati e di integrazione) → infrastruttura → documenti → cicli di
+  revisione e `safety-review`.
+- Criteri dell'iterazione: criteri della Fase 1 verificati per la parte tecnica (pgTAP per
+  ogni policy delle tabelle nuove con tutte le età del seed; e2e di voce del tracker,
+  esportazione ed eliminazione dell'account; axe senza violazioni sulle schermate della
+  fase); restano fuori i criteri che richiedono dati e utenti reali (locali, eventi, golden
+  set, beta, verifica manuale con VoiceOver e TalkBack).
+
+**Cicli di revisione**
+
+- Ciclo 1 (Supabase locale e pgTAP): la migrazione del diario usava l'enum
+  `categoria_spesa`, documentato ma mai creato → creato nella migrazione con il commento di
+  R-40. Il salvataggio con `insert … on conflict do update` faceva scattare il trigger
+  `before insert` anche su una voce esistente, che rifiutava un evento ritirato dopo
+  l'annotazione → prima la modifica, poi l'inserimento; un identificativo di un'altra persona
+  dà `42501` come prima (R-69).
+- Ciclo 2 (test unitari ed e2e scritti in questo ciclo): le scritture del diario avevano il
+  `networkMode` predefinito di TanStack e senza rete restavano in pausa, quindi la coda
+  offline non partiva mai → `networkMode: 'always'`. L'app aperta senza rete restava su
+  «Carico il tuo account», e il ripristino della cache da IndexedDB mostrava la pagina e poi
+  la smontava, perdendo ciò che si era scritto (7 test preesistenti rotti) → il guardiano
+  aspetta il ripristino e non blocca una lettura in pausa per la rete. Dopo il ripristino la
+  cache non si rileggeva (un evento annullato restava pubblicato) → invalidazione
+  all'apertura. Dopo l'eliminazione la sessione si chiudeva prima della navigazione e si
+  tornava al Benvenuto senza conferma → la pulizia del dispositivo la fa la schermata di
+  uscita. Il totale delle spese non aveva il punto delle migliaia a quattro cifre; i link
+  nel testo di dettaglio ed eliminazione usavano una classe inesistente e axe li segnalava;
+  l'helper `attendiAnimazioni` poteva misurare prima dell'ingresso della pagina; il test del
+  calendario confondeva «1 novembre» con l'11 e il 21.
+- Ciclo 3 (`safety-review`): il blocco cancella l'amicizia ma non le persone indicate nel
+  diario; `mio_diario` le nasconde, l'esportazione ne elencava ancora lo username (R-17) →
+  filtro con `private.c_e_blocco` e test in `036`. Il test delle notifiche del diario
+  contava quelle dell'ultimo minuto e dopo il reset trovava quella del seed → conta solo le
+  notifiche all'amico indicato create nella transazione.
+
+**Esito dei test**
+
+- pgTAP dopo `supabase db reset`: 1059/1059 (`036_diario` 75, `037_diritti_privacy` 50;
+  `018` e `026` aggiornati per i tre eventi passati del seed).
+- Unitari: 108/108 (`ricorda.test.ts`: coda offline, diario mostrato, importi). E2e
+  simulati: 350/350 (`ricorda.spec.ts`, `privacy.spec.ts`; quello offline del diario e
+  quello della mappa su mobile vanno rilanciati da soli sotto carico). E2e di integrazione
+  dopo il reset: 12/12, compreso `integrazione/privacy.spec.ts` (diario, esportazione con il
+  limite orario, eliminazione con password sbagliata e giusta, nuovo accesso rifiutato) con
+  l'Edge Function servita da `supabase functions serve`.
+- Backup: `backup_database.sh` con `SOLO_FILE` e `ripristina_backup.sh` provati in un
+  container su un database nuovo con lo stesso schema: file cifrato con `age`, 43 tabelle,
+  stessi conteggi dopo il ripristino (account, identità, fattori, profili, consensi,
+  eventi, locali, amicizie, gruppi, file).
+- Worker: ruff, format e mypy puliti; pytest 215 passati, 4 saltati (integrazione con il
+  database). Documentazione: `verifica_documentazione.py` e `verifica_migrazioni.py` senza
+  problemi.
+
+**Criteri di completamento**
+
+| Criterio | Esito | Evidenza |
+|---|---|---|
+| pgTAP per ogni policy delle tabelle nuove con tutte le età del seed | SÌ | `036_diario` (14–21 anni, `moderatore`, `moderatore_senza_mfa`), `037_diritti_privacy` |
+| R-40: niente alcolici per i minorenni | SÌ | trigger `verifica_categoria_spesa` e `categorie_spesa_disponibili` (`036`), `ricorda.spec.ts`, `integrazione/privacy.spec.ts` |
+| E2e di voce del tracker | SÌ | `ricorda.spec.ts` (anche offline), `integrazione/privacy.spec.ts` |
+| E2e di esportazione ed eliminazione dell'account | SÌ | `privacy.spec.ts`, `integrazione/privacy.spec.ts` |
+| Axe senza violazioni sulle schermate della fase | SÌ | `ricorda.spec.ts`, `privacy.spec.ts` (due temi, foglio di conferma), `navigazione.spec.ts` |
+| Conservazione completa di SAFETY_PRIVACY.md §10 | SÌ, salvo gli account inattivi | `applica_conservazione` (`037`); gli account senza accessi da 24 mesi passano all'iterazione 12 (ROADMAP.md §5) |
+| Backup cifrato e ripristino provato | SÌ in locale | prova in «Esito dei test»; il workflow `backup.yml` gira quando ci sono i segreti dello staging |
+| `safety-review` | SÌ | rapporto nella PR |
+| Beta, dati reali, VoiceOver e TalkBack | attesa esterna | richiedono lo staging e utenti reali |
+

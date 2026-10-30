@@ -1,0 +1,44 @@
+# Backup notturno cifrato del database su Cloudflare R2 (D-14, ADR-0025): dati di public,
+# private, Auth e metadati dello Storage, cifrati con age, conservati 30 giorni. La chiave
+# privata di age non è mai su GitHub; il file in chiaro non tocca il disco.
+name: Backup del database
+
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Backup cifrato
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: produzione
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Strumenti (pg_dump 17, age)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl --fail --silent --show-error -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17 age >/dev/null
+      - name: Backup
+        env:
+          DATABASE_URL_BACKUP: ${{ secrets.DATABASE_URL_BACKUP }}
+          AGE_DESTINATARIO: ${{ vars.AGE_DESTINATARIO }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_BACKUP_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_BACKUP_SECRET_ACCESS_KEY }}
+          R2_BUCKET_BACKUP: ${{ vars.R2_BUCKET_BACKUP }}
+        run: PATH=/usr/lib/postgresql/17/bin:$PATH scripts/backup_database.sh

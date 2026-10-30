@@ -31,7 +31,7 @@ values ('00000000-0000-0000-0000-000000000000', '00000000-0000-4000-8000-0000000
         jsonb_build_object(
           'username', 'compleanno', 'nome_visualizzato', 'Compleanno',
           'data_nascita', ((now() at time zone 'Europe/Rome')::date - interval '18 years')::date,
-          'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-10')));
+          'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-11')));
 select is(private.eta_di('00000000-0000-4000-8000-0000000000a1'), 18,
           'R-04: chi compie 18 anni oggi ha 18 anni');
 select ok(not private.e_minorenne('00000000-0000-4000-8000-0000000000a1'),

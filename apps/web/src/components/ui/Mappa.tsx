@@ -98,10 +98,12 @@ export function Mappa({
     const segnaposto = new Map<string, Marker>();
 
     async function crea(url: string, nodo: HTMLDivElement) {
-      const [maplibre, { Protocol: ProtocolloPmtiles }] = await Promise.all([
-        import('maplibre-gl'),
-        import('pmtiles'),
-      ]);
+      const [maplibre, { Protocol: ProtocolloPmtiles, PMTiles }, { SorgenteInCache }] =
+        await Promise.all([
+          import('maplibre-gl'),
+          import('pmtiles'),
+          import('@/lib/mappa/sorgenteInCache'),
+        ]);
       if (annullato) return;
       maplibre.setWorkerUrl(URL_WORKER);
       // Un solo protocollo per tutta l'app: intestazione e indici del file PMTiles restano in
@@ -109,6 +111,10 @@ export function Mappa({
       if (!protocolloPmtiles) {
         protocolloPmtiles = new ProtocolloPmtiles();
         maplibre.addProtocol('pmtiles', protocolloPmtiles.tile);
+      }
+      // Le zone già viste restano sul dispositivo per l'uso offline (lib/mappa/sorgenteInCache.ts).
+      if (!protocolloPmtiles.tiles.has(url)) {
+        protocolloPmtiles.add(new PMTiles(new SorgenteInCache(url)));
       }
       const ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const creata = new maplibre.Map({

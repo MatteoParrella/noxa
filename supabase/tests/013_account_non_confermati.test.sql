@@ -13,7 +13,7 @@ select '00000000-0000-0000-0000-000000000000', n.id, 'authenticated', 'authentic
        now() - n.creato, case when n.confermato then now() - n.creato end,
        jsonb_build_object('username', n.username, 'nome_visualizzato', 'Prova',
          'data_nascita', '2008-01-01',
-         'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-10'))
+         'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-11'))
 from nuovi n;
 
 select is(private.elimina_account_non_confermati(), 1,

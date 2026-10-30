@@ -176,7 +176,7 @@ select '00000000-0000-0000-0000-000000000000',
        jsonb_build_object(
          'username', 'adulto.prova' || n, 'nome_visualizzato', 'Prova ' || n,
          'data_nascita', '1995-01-01',
-         'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-10'))
+         'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-11'))
 from generate_series(1, 52) n;
 
 -- 19 richieste nelle ultime 24 ore (più quella del seed di adulto_20, già accettata).

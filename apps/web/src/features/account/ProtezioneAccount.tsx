@@ -1,5 +1,6 @@
 'use client';
 
+import { useIsRestoring } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Caricamento } from '@/components/ui/Stati';
@@ -17,6 +18,7 @@ export function ProtezioneAccount({ children }: { children: ReactNode }) {
   const router = useRouter();
   const sessione = useSessione();
   const account = useMioAccount(sessione);
+  const ripristino = useIsRestoring();
 
   const daOnboarding = account.data?.onboarding_completato === false;
   // Una sessione c'è stata in questa pagina: se sparisce è un'uscita, non un link da riaprire.
@@ -34,7 +36,14 @@ export function ProtezioneAccount({ children }: { children: ReactNode }) {
     } else if (daOnboarding) router.replace(PERCORSI.sicurezza);
   }, [sessione.stato, daOnboarding, router]);
 
-  if (sessione.stato !== 'presente' || (account.isPending && account.fetchStatus !== 'idle')) {
+  // Si aspetta il ripristino della cache dal dispositivo, poi la lettura dell'account; una
+  // lettura in pausa perché manca la rete non blocca l'app. Mostrare la pagina prima del
+  // ripristino la smonterebbe subito dopo, perdendo ciò che si è già scritto.
+  if (
+    sessione.stato !== 'presente' ||
+    ripristino ||
+    (account.isPending && account.fetchStatus === 'fetching')
+  ) {
     return (
       <div className="pagina pt-8">
         <Caricamento descrizione={messaggi.comune.caricamentoAccount} />

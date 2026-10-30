@@ -180,7 +180,11 @@ test('quando: stasera, domani, weekend e una data dal calendario', async ({ page
   const mese = domani.toLocaleString('it-IT', { month: 'long', timeZone: 'UTC' });
   await page.getByRole('combobox', { name: 'Mese' }).selectOption(String(domani.getUTCMonth() + 1));
   await page
-    .getByRole('button', { name: `${domani.getUTCDate()} ${mese} ${domani.getUTCFullYear()}` })
+    .getByRole('button', {
+      name: `${domani.getUTCDate()} ${mese} ${domani.getUTCFullYear()}`,
+      // «1 novembre» non deve trovare anche l'11 e il 21.
+      exact: true,
+    })
     .click();
   await page.getByRole('button', { name: /^Mostra / }).click();
   await expect.poll(() => ultimaRicerca(supabase)?.['dal']).toBe(serataDiProva(2));

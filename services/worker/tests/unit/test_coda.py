@@ -1,4 +1,5 @@
 import asyncio
+import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
@@ -214,3 +215,37 @@ class TestEsecutore:
 def test_descrizione_errore_troncata_a_500_caratteri() -> None:
     assert len(descrivi_errore(RuntimeError("x" * 1000))) == 500
     assert descrivi_errore(RuntimeError()) == "RuntimeError"
+
+
+class TestEsaurimento:
+    """Modalità a esaurimento del worker su GitHub Actions (ADR-0021)."""
+
+    async def test_esegue_tutti_i_job_pronti_e_si_ferma_con_la_coda_vuota(self) -> None:
+        archivio = ArchivioFinto(job=[_job(), _job(), _job()])
+        esecutore = _esecutore(archivio, _ok)
+
+        eseguiti = await esecutore.esegui_fino_a_esaurimento(time.monotonic() + 60)
+
+        assert eseguiti == 3
+        assert archivio.completati == [7, 7, 7]
+        assert archivio.job == []
+
+    async def test_dopo_la_scadenza_non_preleva_altri_job(self) -> None:
+        archivio = ArchivioFinto(job=[_job(), _job()])
+        esecutore = _esecutore(archivio, _ok)
+
+        eseguiti = await esecutore.esegui_fino_a_esaurimento(time.monotonic() - 1)
+
+        assert eseguiti == 0
+        assert len(archivio.job) == 2
+
+    async def test_un_errore_dell_archivio_ferma_l_esecutore_senza_eccezioni(self) -> None:
+        class ArchivioRotto(ArchivioFinto):
+            async def preleva(
+                self, tipi: frozenset[TipoJob], durata_lease: timedelta
+            ) -> Job | None:
+                raise ConnectionError("database non raggiungibile")
+
+        esecutore = _esecutore(ArchivioRotto(), _ok)
+
+        assert await esecutore.esegui_fino_a_esaurimento(time.monotonic() + 60) == 0

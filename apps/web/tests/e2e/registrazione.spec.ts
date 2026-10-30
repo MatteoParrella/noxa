@@ -171,7 +171,7 @@ test('registrazione completa: i dati arrivano al database e si passa a "Controll
   expect(dati.data).toMatchObject({
     username: 'giulia.rota',
     nome_visualizzato: 'Giulia',
-    consensi: { termini: '2026-10', privacy: '2026-10' },
+    consensi: { termini: '2026-10', privacy: '2026-11' },
   });
   expect(dati.data['data_nascita']).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   expect(Object.keys(dati.data)).not.toContain('eta');

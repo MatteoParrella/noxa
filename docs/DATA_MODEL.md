@@ -163,6 +163,7 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `flyer_in_conservazione(percorso text)` | `boolean` | Il file appartiene a un caricamento con `conservazione_legale` e non si elimina (R-55). |
 | `applica_escalation(tipo, oggetto, segnalazione, motivazione)` | `void` | Escalation di R-55: account sospeso, immagine inaccessibile e conservata (`contenuti_occultati` e righe del registro con `conservazione_legale`), segnalazioni chiuse con un testo generico per chi ha segnalato, nessuna notifica all'account coinvolto. |
 | `immagini_da_eliminare()` | `table (bucket, percorso)` | File da eliminare per il job `pulizia_flyer` (SAFETY_PRIVACY.md §10): flyer caricati 30 giorni dopo la decisione, immagini pubblicate 12 mesi dopo la serata, foto profilo non più in uso; mai le immagini conservate come prova. |
+| `e_titolare_serata_tracker(serata uuid)` | `boolean` | `auth.uid()` è il titolare della serata del diario; usata dalle policy di `tracker_spese`, `tracker_dj` e `tracker_amici` (R-69). |
 | `e_titolare_checkin(checkin uuid)` | `boolean` | `auth.uid()` è l'autore del check-in. |
 | `e_destinatario_checkin(checkin uuid)` | `boolean` | `auth.uid()` è in `checkin_destinatari` del check-in. |
 | `e_titolare_ritorno(ritorno uuid)` | `boolean` | `auth.uid()` è il titolare del ritorno sicuro. |
@@ -183,6 +184,7 @@ Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `dopo_accettazione_gruppo`, `dopo_uscita_gruppo`, `invariante_dopo_amicizia`,
 `prepara_serata_gruppo`, `imposta_aggiornata_il`, `notifica_serata_gruppo`,
 `rimuovi_notifiche_serata`, `avvisa_cambio_serata`, `avvisa_cambio_membri`, `verifica_categoria_spesa`,
+`prepara_serata_tracker`, `registra_account_conservato`,
 `limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `calcola_data_serata`,
 `imposta_aggiornato_il`, `imposta_nome_normalizzato`, `prepara_fonte`,
 `registra_modifica_moderatore`, `notifica_amicizia`, `rimuovi_notifiche_amicizia`,
@@ -405,6 +407,7 @@ Registro di sola aggiunta delle decisioni e degli accessi (DSA art. 17, R-53, R-
 - **I**: `private.e_moderatore()` e `moderatore_id = auth.uid()`.
 - **U/D**: nessuna.
 - Dall'iterazione 5 il registro si riempie anche da solo: il trigger `private.registra_modifica_moderatore` registra le modifiche dei moderatori a locali, fonti ed eventi, e le RPC di moderazione registrano le loro decisioni con `private.registra_azione` (`tipo_oggetto` `locale`, `fonte`, `evento` o `candidato_locale`). Nessuna azione dell'area di moderazione è silenziosa. Dall'iterazione 6 le decisioni sulle segnalazioni, sui flyer e sui reclami passano da `private.registra_decisione`; l'occultamento automatico si registra con autore nullo ("Sistema").
+- Dall'iterazione 8 un'`escalation_autorita` attiva il trigger `private.registra_account_conservato`, che annota l'account coinvolto (profilo, foto profilo, autore del flyer, del nome del gruppo o dei testi della serata) in `private.account_conservati` (`utente_id`, `azione_id`, `conservato_il`, `dati`, `eliminato_il`). Se l'account viene eliminato, `elimina_mio_account` copia lì email, username, nome, data di nascita e date di registrazione e ultimo accesso. Nessun ruolo dell'app legge la tabella; la riga si elimina a mano a procedimento concluso (R-55, ADR-0025).
 
 #### `contenuti_occultati`
 *Funzionalità: F-40. ADR-0023, R-55.*
@@ -870,19 +873,23 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 
 | Colonna | Tipo | Vincoli |
 |---|---|---|
-| `id` | `uuid` | PK |
-| `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade` |
-| `data_serata` | `date` | |
+| `id` | `uuid` | PK; creato sul dispositivo, così la coda offline non crea doppioni |
+| `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade`, predefinito `auth.uid()` |
+| `data_serata` | `date` | dal 2000 a oggi (ora di Roma), `NX046` se nel futuro |
 | `evento_id` | `uuid` | nullable, FK → `eventi(id)` `on delete set null` |
-| `locale_id` | `uuid` | nullable, FK → `locali(id)` |
-| `nome_locale_libero` | `text` | nullable, per locali non presenti in catalogo; al massimo 80 caratteri |
+| `locale_id` | `uuid` | nullable, FK → `locali(id)` `on delete set null` |
+| `nome_locale_libero` | `text` | nullable, per locali non presenti in catalogo; al massimo 80 caratteri; mai insieme a `locale_id` |
 | `voto` | `smallint` | nullable, 1–5 |
 | `note` | `text` | al massimo 1000 caratteri, private |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
 - **S/U/D**: `utente_id = auth.uid()`.
 - **I**: `utente_id = auth.uid()` e (`evento_id is null` oppure `private.evento_visibile_a(evento_id, auth.uid())`).
-- Il tracker è privato: nessun altro utente lo vede.
+- Il trigger `private.prepara_serata_tracker` con un evento copia data e locale dell'evento;
+  un evento o un locale nuovo deve essere visibile a chi scrive, mentre in modifica si può
+  tenere quello già annotato anche se nel frattempo è stato ritirato (R-20, R-23).
+- Il tracker è privato: nessun altro utente lo vede, nemmeno i moderatori (R-69). Si scrive
+  con `salva_serata_diario` (§5.10).
 
 #### `tracker_spese`
 *Funzionalità: F-30, F-31.*
@@ -892,9 +899,9 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `id` | `uuid` | PK |
 | `serata_tracker_id` | `uuid` | FK → `serate_tracker(id)` `on delete cascade` |
 | `categoria` | `categoria_spesa` | trigger `private.verifica_categoria_spesa`: `alcolici` rifiutata se il titolare è minorenne (R-40) |
-| `importo_centesimi` | `integer` | 0–100000 |
+| `importo_centesimi` | `integer` | 1–100000; una sola riga per categoria e serata |
 
-- **S/I/U/D**: titolare della serata (`exists` su `serate_tracker` con `utente_id = auth.uid()`).
+- **S/I/U/D**: titolare della serata (`private.e_titolare_serata_tracker`); in modifica cambia solo `importo_centesimi`.
 
 #### `tracker_dj`
 *Funzionalità: F-30, F-31.*
@@ -992,7 +999,7 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | Funzionalità | Dove sono i dati |
 |---|---|
 | F-17 Accesso con Apple e Google (Fase 3) | Provider di Supabase Auth. Il trigger `private.gestisci_nuovo_utente` oggi richiede la data di nascita alla registrazione: l'ADR di F-17 dovrà introdurre un profilo "da completare" senza accesso ai dati finché la data di nascita non è inserita. |
-| F-41 Diritti privacy | Tutte le tabelle personali, lette da `esporta-dati` e cancellate da `elimina-account` (cascata da `auth.users`). |
+| F-41 Diritti privacy | Tutte le tabelle personali, lette da `esporta_miei_dati` e cancellate da `elimina_mio_account` (cascata da `auth.users`); limiti in `private.esportazioni_dati` e `private.tentativi_eliminazione`, identità conservate per R-55 in `private.account_conservati` (ADR-0025). |
 | F-43 App installabile | Nessun dato: riguarda la distribuzione dell'app. |
 | F-45 Accessibilità | Nessun dato. |
 | F-46 Nuove aree geografiche | `locali.provincia` (vincolo esteso con una migrazione). |
@@ -1023,6 +1030,12 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `eventi_adatti_al_gruppo(gruppo uuid, testo text)` | invoker | membri attivi | Eventi pubblicati dei prossimi 30 giorni visibili a tutti i membri attivi, con ricerca per titolo o locale (R-20, R-23, R-24) |
 | `dettaglio_serata(serata uuid)` | invoker | membri attivi | Serata con l'evento (se c'è e se visibile), membri attivi visibili con risposta, biglietto e trasporto, `altri`, `posso_gestire` e `posso_guidare` calcolato nel database (F-14…F-16, R-02) |
 | `prossime_serate()` | invoker | utenti | Prossime serate non annullate dei propri gruppi con la propria risposta (Organizza) |
+| `mio_diario()` | invoker | utenti | Le proprie serate del diario (al massimo 1000, dalla più recente) con spese, DJ, evento e locale solo se ancora visibili, amici di cui si vede il profilo e `amici_altri` (F-30) |
+| `salva_serata_diario(serata jsonb)` | invoker | utenti | Crea o modifica una serata con spese (al massimo 8), DJ (20) e amici (30) in un'unica transazione; l'`id` arriva dal dispositivo; un `id` di un'altra persona dà `42501` (F-30, R-40, R-69) |
+| `cerca_per_diario(testo text)` | invoker | utenti | Campo «Dove»: eventi pubblicati visibili dell'ultimo anno fino a oggi e locali attivi, almeno 2 caratteri, 10 risultati per tipo |
+| `categorie_spesa_disponibili()` | definer | utenti | Categorie di spesa per chi chiama, senza `alcolici` per i minorenni: l'app non decide da sé (R-40) |
+| `esporta_miei_dati()` | definer | utenti | Tutti i propri dati in un JSON (`formato` `noxa-esportazione-1`); delle altre persone solo username e nome di chi ha un legame con te; nessuna segnalazione ricevuta (R-50, R-69). Una richiesta all'ora (`private.esportazioni_dati`), `NX047` con l'ora della prossima (R-64, ADR-0025) |
+| `elimina_mio_account(password text)` | definer | utenti | Verifica la password (5 tentativi sbagliati all'ora in `private.tentativi_eliminazione`, poi `NX048`) e i due fattori se attivi (`serve_codice` senza `aal2`); conserva l'identità in `private.account_conservati` solo se c'è un'escalation (R-55); elimina `auth.users` e restituisce i file della foto profilo che l'Edge Function `elimina-account` cancella (R-64, ADR-0025) |
 | `rigenera_mio_riepilogo()` | definer | utenti | Rigenera il proprio riepilogo annuale (F-33) |
 | `coda_flyer()` | definer | moderatori | Caricamenti in revisione o non leggibili con estrazione, percorso dell'immagine, evento in revisione e possibile corrispondenza con un evento pubblicato, senza `utente_id` né dati del profilo di chi ha caricato (il percorso contiene solo l'uuid pseudonimo usato per la cartella) (F-40, R-69) |
 | `decidi_flyer(caricamento, esito, dati, motivazione, evento_esistente)` | definer | moderatori | Approvazione con le due conferme e la scelta esplicita sull'alcol (R-23), unione a un evento pubblicato o rifiuto motivato (R-51); sotto i 18 anni serve la motivazione (R-22); se l'immagine è adatta accoda `copia_immagine_flyer` |
@@ -1082,7 +1095,7 @@ RLS (iterazione 7).
 | Codici invito scaduti | ogni ora, al minuto 23 | `private.elimina_codici_invito_scaduti()`: elimina i codici scaduti da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Account non confermati | ogni ora, al minuto 17 | `private.elimina_account_non_confermati()`: elimina gli account senza email confermata creati da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Ritorni scaduti | ogni minuto | `private.verifica_ritorni_scaduti()` |
-| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); l'iterazione 8 aggiunge le altre scadenze di SAFETY_PRIVACY.md §10, compresi gli account inattivi |
+| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); dall'iterazione 8 `azioni_moderazione` e `segnalazioni` chiuse dopo 12 mesi (salvo prove e decisioni con un reclamo conservato), il riferimento alla foto dei locali disattivati da 7 giorni, `private.tentativi_eliminazione` e `private.esportazioni_dati` dopo 24 ore. Gli account inattivi da 24 mesi sono nell'iterazione 12 (ROADMAP.md §5) |
 | Invariante dei gruppi | ogni giorno alle 04:00 | `private.verifica_invariante_gruppi()` |
 | Accodamento job del worker | ogni 5 minuti | `private.accoda_fonti_da_eseguire()`: inserisce `esegui_fonte` per le fonti attive scadute; dopo un errore l'intervallo raddoppia (fino a 8 volte la frequenza), che è il backoff delle fonti |
 | Metriche | ogni giorno alle 02:00 | `refresh materialized view private.metriche_settimanali` |

@@ -52,6 +52,6 @@ test.describe('movimento espressivo (ADR-0019)', () => {
     page,
   }) => {
     await page.goto('/ricorda/');
-    await expect(page.getByRole('heading', { level: 1, name: 'Ricorda' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Il mio diario' })).toBeVisible();
   });
 });

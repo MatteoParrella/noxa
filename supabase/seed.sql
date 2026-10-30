@@ -42,7 +42,7 @@ begin
         'username', utente.username,
         'nome_visualizzato', utente.nome,
         'data_nascita', (oggi - make_interval(years => utente.eta) - interval '40 days')::date,
-        'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-10')
+        'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-11')
       ),
       now(), now(), '', '', '', ''
     );
@@ -165,6 +165,25 @@ begin
      'Pomeriggio in Cascina', 'Musica dal vivo in cortile, pomeriggio.',
      (v + 2 + time '16:00') at time zone ora, (v + 2 + time '20:00') at time zone ora,
      14, true, false, array['Lanterna'], 500, null, 'pubblicato');
+
+  -- Serate già passate, per il diario (iterazione 8): una 16+, una 18+ con riferimenti
+  -- all'alcol (mai visibile ai minorenni, R-23) e una 21+.
+  insert into public.eventi
+    (id, locale_id, titolo, descrizione, inizio, fine, eta_minima, eta_minima_dichiarata,
+     riferimenti_alcol, artisti, prezzo_min_centesimi, url_biglietti, stato)
+  values
+    ('00000000-0000-4000-8000-00000000e101', '00000000-0000-4000-8000-00000000c001',
+     'Indie al Binario · ottobre', 'Tre band della zona sul palco piccolo.',
+     (d - 10 + time '22:00') at time zone ora, (d - 9 + time '02:00') at time zone ora,
+     16, true, false, array['I Fili Scoperti', 'Lanterna'], 1200, null, 'pubblicato'),
+    ('00000000-0000-4000-8000-00000000e102', '00000000-0000-4000-8000-00000000c005',
+     'Open Bar al Magazzino', null,
+     (d - 12 + time '23:00') at time zone ora, (d - 11 + time '04:00') at time zone ora,
+     18, true, true, array['Otto Fili'], 1500, null, 'pubblicato'),
+    ('00000000-0000-4000-8000-00000000e103', '00000000-0000-4000-8000-00000000c004',
+     'Ventuno Club · ottobre', null,
+     (d - 8 + time '23:30') at time zone ora, (d - 7 + time '05:00') at time zone ora,
+     21, true, false, array['Corrado B.'], 2000, null, 'pubblicato');
 end
 $$;
 

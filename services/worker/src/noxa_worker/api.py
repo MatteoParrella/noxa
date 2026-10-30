@@ -1,8 +1,9 @@
 """API interna del worker: solo `/salute` e `/pronto` (ARCHITECTURE.md §3.3).
 
-Il worker non è raggiungibile da internet; questi endpoint servono ai controlli di Fly.io e
-di docker-compose. Nel ciclo di vita dell'applicazione partono `CODA_CONCORRENZA` esecutori
-della coda, fermati in modo ordinato all'arresto.
+Il worker non è raggiungibile da internet; questi endpoint servono ai controlli di
+docker-compose e di un'eventuale istanza sempre accesa (ADR-0021). Nel ciclo di vita
+dell'applicazione partono `CODA_CONCORRENZA` esecutori della coda, fermati in modo ordinato
+all'arresto. In staging e produzione il worker gira invece a esaurimento (`esaurisci.py`).
 """
 
 from __future__ import annotations
@@ -27,7 +28,7 @@ from noxa_worker.flyer.jobs import GestoreFlyer
 from noxa_worker.flyer.storage import ClientStorage
 from noxa_worker.fonti.http import ClientHttpConforme, StatoCondiviso, crea_client_httpx
 from noxa_worker.fonti.registro import crea_registro
-from noxa_worker.osservabilita import configura_log
+from noxa_worker.osservabilita import configura_log, configura_sentry
 from noxa_worker.raccolta.pipeline import GestoreRaccolta
 from noxa_worker.raccolta.postgres import ArchivioRaccoltaPostgres
 
@@ -61,11 +62,12 @@ def crea_app(
 ) -> FastAPI:
     """Crea l'applicazione. `crea_risorse` sostituisce database ed esecutori nei test."""
     impostazioni_effettive = impostazioni or leggi_impostazioni()
-    fabbrica = crea_risorse or _risorse_postgres
+    fabbrica = crea_risorse or risorse_postgres
 
     @asynccontextmanager
     async def ciclo_di_vita(app: FastAPI) -> AsyncIterator[None]:
         configura_log(impostazioni_effettive.log_formato, impostazioni_effettive.log_livello)
+        configura_sentry(impostazioni_effettive)
         async for risorse in fabbrica(impostazioni_effettive):
             app.state.verifica_database = risorse.verifica
             arresto = asyncio.Event()
@@ -115,7 +117,8 @@ def crea_app(
     return app
 
 
-async def _risorse_postgres(impostazioni: Impostazioni) -> AsyncIterator[Risorse]:
+async def risorse_postgres(impostazioni: Impostazioni) -> AsyncIterator[Risorse]:
+    """Pool, client HTTP, gestori ed esecutori della coda, chiusi all'uscita."""
     # Due connessioni per esecutore (coda e raccolta) più una per i controlli di salute.
     pool = crea_pool(impostazioni.url_database(), 2 * impostazioni.coda_concorrenza + 1)
     # wait=False: il worker parte anche se il database non è ancora pronto; /pronto lo segnala.

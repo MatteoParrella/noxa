@@ -10,7 +10,7 @@ export default function Pagina() {
     <>
       <IntestazioneArea
         titolo="Persone bloccate"
-        indietro={{ href: '/profilo/', etichetta: 'Profilo' }}
+        indietro={{ href: '/profilo/privacy/', etichetta: 'Privacy e dati' }}
       />
       <div className="pagina flex flex-col gap-4 pt-4 pb-8">
         <PersoneBloccate />

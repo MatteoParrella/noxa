@@ -112,8 +112,9 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Auth (con l'hook dell'età), Postgres, PostgREST e Mailpit; senza i servizi non usati.
-      - run: pnpm exec supabase start -x studio,imgproxy,vector,logflare,edge-runtime,supavisor
+      # Auth (con l'hook dell'età), Postgres, PostgREST, Mailpit e le Edge Functions
+      # (elimina-account); senza i servizi non usati.
+      - run: pnpm exec supabase start -x studio,imgproxy,vector,logflare,supavisor
       - name: Variabili di Supabase locale
         run: |
           pnpm exec supabase status -o json | jq -r '
