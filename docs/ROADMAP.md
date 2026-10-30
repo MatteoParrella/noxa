@@ -279,19 +279,18 @@ Ogni iterazione ha:
 ### Iterazione 8 — Tracker, privacy e beta
 - **Contenuto**: tabelle del tracker e trigger di R-40; offline con coda di scritture, eventi
   già visti salvati in IndexedDB (dall'iterazione 4 restano in memoria finché l'app è aperta)
-  e cache delle tile della mappa già viste (richieste PMTiles a intervalli, ADR-0016); Edge
-  Functions `esporta-dati` ed `elimina-account`; impostazioni di privacy;
+  e cache delle tile della mappa già viste (richieste PMTiles a intervalli, ADR-0016); RPC
+  `esporta_miei_dati` ed Edge Function `elimina-account` (ADR-0025); impostazioni di privacy;
   `applica_conservazione` completa (dall'iterazione 5 copre già grezzi, job ed esecuzioni
   delle fonti, dall'iterazione 6 notifiche e registro dei caricamenti; mancano tra l'altro
   segnalazioni e azioni di moderazione a 12 mesi dalla chiusura, SAFETY_PRIVACY.md
-  §10); verifica completa di accessibilità; build interne TestFlight e
-  Google Play; Sentry nell'app e nel worker con `beforeSend` (ADR-0014, R-62); link delle
-  email di conferma e di recupero aperti nell'app nativa con App Links e Universal Links sul
-  dominio di D-01. Infrastruttura di ADR-0021: worker in modalità a esaurimento con il
+  §10); verifica completa di accessibilità; Sentry nell'app e nel worker con `beforeSend`
+  (ADR-0014, R-62). Infrastruttura di ADR-0021: worker in modalità a esaurimento con il
   workflow `worker.yml`, mappa su Cloudflare R2 (`prepara_mappa.sh` e `mappa.yml`), header di
   sicurezza in `_headers` di Cloudflare Pages al posto di `vercel.json`, SMTP Brevo, fornitori
-  aggiornati nella pagina `/privacy` con una nuova versione dell'informativa; decisione sui
-  backup (D-14) e sugli account degli store (D-13).
+  aggiornati nella pagina `/privacy` con una nuova versione dell'informativa; backup notturno
+  cifrato su R2 (D-14 chiusa con ADR-0025). La beta parte dalla sola PWA: le build interne
+  e i link delle email nell'app nativa passano all'iterazione 10 (D-13).
 - **Criteri**: criteri della **Fase 1** (§Fase 1) verificati per la parte tecnica; la beta
   con utenti reali si avvia alla chiusura di questa iterazione.
 
@@ -304,7 +303,10 @@ Ogni iterazione ha:
 ### Iterazione 10 — Ritorno sicuro
 - **Contenuto**: plugin di posizione in background (D-04), `ritorni_sicuri`,
   `ritorni_destinatari`, `posizioni_ritorno`, Broadcast privato, `verifica_ritorni_scaduti`,
-  area di arrivo salvata solo sul dispositivo, modalità solo in primo piano nella PWA.
+  area di arrivo salvata solo sul dispositivo, modalità solo in primo piano nella PWA. Se
+  D-13 si chiude con gli account degli store: build interne TestFlight e Google Play e link
+  delle email di conferma e di recupero aperti nell'app nativa con App Links e Universal
+  Links sul dominio di D-01 (spostati dall'iterazione 8).
 - **Criteri**: test pgTAP di R-31 e R-32; prove su dispositivi reali secondo il criterio 1
   della Fase 2.
 
@@ -316,7 +318,9 @@ Ogni iterazione ha:
 
 ### Iterazione 12 — Preparazione al lancio
 - **Contenuto**: correzioni del penetration test, test di carico, DPIA e testi legali
-  definitivi, questionari degli store (D-06), pubblicazione su App Store e Google Play.
+  definitivi, questionari degli store (D-06), pubblicazione su App Store e Google Play;
+  eliminazione degli account senza accessi da 24 mesi, con l'avviso via email 30 giorni
+  prima (SAFETY_PRIVACY.md §10): nessun account della beta può arrivarci prima.
 - **Prerequisiti esterni**: penetration test esterno, consulente legale.
 - **Criteri**: criteri della **Fase 2** (§Fase 2) verificati.
 

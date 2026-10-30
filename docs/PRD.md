@@ -94,7 +94,7 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 | F-40 | Moderazione | P0 | 1 | Area riservata con autenticazione a due fattori: coda dei flyer, coda dei duplicati, coda delle segnalazioni ordinate per priorità con il tempo rimanente e l'avviso delle urgenti (R-53); dettaglio con apertura registrata e immagini sfocate fino a «Mostra» (R-69); azioni motivate e registrate con l'anteprima del messaggio alle persone interessate; reclami (DSA art. 20); escalation alle autorità in due passaggi (R-55); occultamento automatico delle immagini segnalate per rischio a un minorenne (ADR-0023); gestione dei locali e delle fonti con verifica di conformità. |
 | F-41 | Diritti privacy | P0 | 1 | Esportazione JSON ed eliminazione dell'account self-service (R-64); informativa a livelli (R-63). |
 | F-42 | Impostazioni di privacy | P0 | 1 | Visibilità predefinita delle partecipazioni, check-in (attivabile dalla Fase 2), notifiche, elenco dei bloccati. |
-| F-43 | App installabile | P0 | 1–2 | Fase 1: PWA installabile e build interne iOS (TestFlight) e Android (test interno). Fase 2: pubblicazione su App Store e Google Play. |
+| F-43 | App installabile | P0 | 1–2 | Fase 1: PWA installabile con dati offline; build interne iOS (TestFlight) e Android (test interno) quando ci sono gli account degli store (D-13). Fase 2: pubblicazione su App Store e Google Play. |
 | F-44 | Raccolta eventi automatica | P0 | 1 | Almeno 2 adattatori per siti dei locali (dati strutturati e HTML) e l'adattatore Instagram Business Discovery, più i flyer; deduplicazione; conformità ADR-0008. |
 | F-45 | Accessibilità | P0 | 1 | WCAG 2.2 livello AA su tutte le schermate; verifiche automatiche (axe) e manuali (VoiceOver, TalkBack) prima di ogni rilascio. |
 | F-46 | Nuove aree geografiche | P2 | 3 | Aggiunta di province tramite migrazione su `locali.provincia` e nuovo bootstrap dei locali. |
@@ -156,7 +156,7 @@ fase della roadmap. La matrice va aggiornata insieme alla funzionalità (skill `
 | F-32 | `pg_cron` · funzione SQL `private.assegna_badge()` | `badge`, `badge_utente` | R-41 | 2 |
 | F-33 | `pg_cron` · funzione SQL `private.genera_riepiloghi()` · App | `riepiloghi_annuali` | R-42 | 2 |
 | F-40 | App (area di moderazione) · RPC di moderazione | `segnalazioni`, `azioni_moderazione`, `contenuti_occultati`, `reclami`, `caricamenti_flyer`, `eventi_grezzi`, `locali`, `fonti`, `esecuzioni_fonte`, `candidati_locali` | R-06, R-51, R-53, R-55, R-69 | 1 |
-| F-41 | Edge Functions `esporta-dati`, `elimina-account` | tutte le tabelle personali | R-64 | 1 |
+| F-41 | RPC `esporta_miei_dati`, `elimina_mio_account`; Edge Function `elimina-account` | tutte le tabelle personali | R-64 | 1 |
 | F-42 | App | `profili_privati`, `blocchi` | R-30, R-67 | 1 |
 | F-43 | App (Next.js export statico + Capacitor) · service worker | — | — | 1–2 |
 | F-44 | `pg_cron` · Worker (coda, adattatori, normalizzazione, dedup) | `fonti`, `esecuzioni_fonte`, `eventi_grezzi`, `eventi`, `eventi_fonti`, `coda_job`, `candidati_locali` | R-21, R-22, ADR-0008 | 1 |

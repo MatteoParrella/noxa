@@ -77,7 +77,7 @@ anche un solo punto "NO" non è completa.
 ### F. Privacy (R-60…R-67)
 - [ ] Ogni nuovo dato personale è indispensabile; non si raccolgono telefono, rubrica, indirizzo, genere.
 - [ ] Il nuovo dato ha una riga nella tabella di conservazione (SAFETY_PRIVACY.md §10) e la cancellazione automatica.
-- [ ] Il nuovo dato è incluso in `esporta-dati` e cancellato da `elimina-account`.
+- [ ] Il nuovo dato è incluso in `esporta_miei_dati` e cancellato da `elimina-account`.
 - [ ] Nessun nuovo SDK di terze parti che tracci gli utenti; i nuovi fornitori trattano i dati nell'UE oppure sono in D-07/D-12.
 - [ ] Nessuna pubblicità; nessuna profilazione dei minorenni.
 - [ ] Le impostazioni predefinite sono le più protettive ragionevoli.

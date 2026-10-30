@@ -115,7 +115,7 @@ Regole obbligatorie:
 - `pg_cron`: `select cron.schedule('<nome>', '<cron>', $$select private.<funzione>()$$);`
   nella migrazione, con un nome univoco.
 - Nuovi dati personali: aggiungi la regola di conservazione in
-  `private.applica_conservazione()` e i dati a `esporta-dati` ed `elimina-account`.
+  `private.applica_conservazione()` e i dati a `esporta_miei_dati` ed `elimina-account`.
 
 ### 3. Scrivi i test pgTAP
 
