@@ -59,7 +59,7 @@ select throws_ok($$ select public.correggi_eta_alcol_evento(tests.e('001'), 14::
 select tests.autentica_come('moderatore');
 select is(
   (select array_agg(id order by id) from public.eventi_moderazione('binario')),
-  array[tests.e('001'), tests.e('004'), tests.e('020')],
+  array[tests.e('001'), tests.e('004'), tests.e('020'), tests.e('101')],
   'La ricerca trova gli eventi per titolo o per nome del locale'
 );
 select is(

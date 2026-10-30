@@ -28,7 +28,7 @@ Iterazioni completate: 8 su 15.
 | 5 | completata con attese esterne | 2026-10-19 | 2026-10-19 | 2 | `iterazione-05-raccolta-eventi` | Mancano App Review Meta e token, chiave Google Places, 40 locali verificati e il primo `sito_html_<locale>` in staging |
 | 6 | completata con attese esterne | 2026-10-21 | 2026-10-22 | 4 | `iterazione-06-flyer-moderazione` | Mancano la chiave Claude API con limite di spesa, la valutazione sul golden set dei flyer e il DPA di Anthropic (D-12) |
 | 7 | completata | 2026-10-23 | 2026-10-26 | 3 | `iterazione-07-gruppi` | Avvisi dal vivo su canali privati (ADR-0024); notifica di uscita senza il nome del gruppo |
-| 8 | in corso | 2026-10-27 | — | 0 | `iterazione-08-tracker-privacy` | — |
+| 8 | completata con attese esterne | 2026-10-27 | 2026-10-30 | 3 | `iterazione-08-tracker-privacy` | Backup cifrato e diritti privacy (ADR-0025); mancano lo staging (segreti di R2, Brevo, Sentry e backup), la beta con utenti reali e la verifica con VoiceOver e TalkBack |
 | 9 | da iniziare | — | — | 0 | — | — |
 | 10 | da iniziare | — | — | 0 | — | — |
 | 11 | da iniziare | — | — | 0 | — | — |
@@ -941,4 +941,63 @@ Superfici di contatto: invito (solo amici confermati compatibili con tutti, `puo
   esportazione ed eliminazione dell'account; axe senza violazioni sulle schermate della
   fase); restano fuori i criteri che richiedono dati e utenti reali (locali, eventi, golden
   set, beta, verifica manuale con VoiceOver e TalkBack).
+
+**Cicli di revisione**
+
+- Ciclo 1 (Supabase locale e pgTAP): la migrazione del diario usava l'enum
+  `categoria_spesa`, documentato ma mai creato → creato nella migrazione con il commento di
+  R-40. Il salvataggio con `insert … on conflict do update` faceva scattare il trigger
+  `before insert` anche su una voce esistente, che rifiutava un evento ritirato dopo
+  l'annotazione → prima la modifica, poi l'inserimento; un identificativo di un'altra persona
+  dà `42501` come prima (R-69).
+- Ciclo 2 (test unitari ed e2e scritti in questo ciclo): le scritture del diario avevano il
+  `networkMode` predefinito di TanStack e senza rete restavano in pausa, quindi la coda
+  offline non partiva mai → `networkMode: 'always'`. L'app aperta senza rete restava su
+  «Carico il tuo account», e il ripristino della cache da IndexedDB mostrava la pagina e poi
+  la smontava, perdendo ciò che si era scritto (7 test preesistenti rotti) → il guardiano
+  aspetta il ripristino e non blocca una lettura in pausa per la rete. Dopo il ripristino la
+  cache non si rileggeva (un evento annullato restava pubblicato) → invalidazione
+  all'apertura. Dopo l'eliminazione la sessione si chiudeva prima della navigazione e si
+  tornava al Benvenuto senza conferma → la pulizia del dispositivo la fa la schermata di
+  uscita. Il totale delle spese non aveva il punto delle migliaia a quattro cifre; i link
+  nel testo di dettaglio ed eliminazione usavano una classe inesistente e axe li segnalava;
+  l'helper `attendiAnimazioni` poteva misurare prima dell'ingresso della pagina; il test del
+  calendario confondeva «1 novembre» con l'11 e il 21.
+- Ciclo 3 (`safety-review`): il blocco cancella l'amicizia ma non le persone indicate nel
+  diario; `mio_diario` le nasconde, l'esportazione ne elencava ancora lo username (R-17) →
+  filtro con `private.c_e_blocco` e test in `036`. Il test delle notifiche del diario
+  contava quelle dell'ultimo minuto e dopo il reset trovava quella del seed → conta solo le
+  notifiche all'amico indicato create nella transazione.
+
+**Esito dei test**
+
+- pgTAP dopo `supabase db reset`: 1059/1059 (`036_diario` 75, `037_diritti_privacy` 50;
+  `018` e `026` aggiornati per i tre eventi passati del seed).
+- Unitari: 108/108 (`ricorda.test.ts`: coda offline, diario mostrato, importi). E2e
+  simulati: 350/350 (`ricorda.spec.ts`, `privacy.spec.ts`; quello offline del diario e
+  quello della mappa su mobile vanno rilanciati da soli sotto carico). E2e di integrazione
+  dopo il reset: 12/12, compreso `integrazione/privacy.spec.ts` (diario, esportazione con il
+  limite orario, eliminazione con password sbagliata e giusta, nuovo accesso rifiutato) con
+  l'Edge Function servita da `supabase functions serve`.
+- Backup: `backup_database.sh` con `SOLO_FILE` e `ripristina_backup.sh` provati in un
+  container su un database nuovo con lo stesso schema: file cifrato con `age`, 43 tabelle,
+  stessi conteggi dopo il ripristino (account, identità, fattori, profili, consensi,
+  eventi, locali, amicizie, gruppi, file).
+- Worker: ruff, format e mypy puliti; pytest 215 passati, 4 saltati (integrazione con il
+  database). Documentazione: `verifica_documentazione.py` e `verifica_migrazioni.py` senza
+  problemi.
+
+**Criteri di completamento**
+
+| Criterio | Esito | Evidenza |
+|---|---|---|
+| pgTAP per ogni policy delle tabelle nuove con tutte le età del seed | SÌ | `036_diario` (14–21 anni, `moderatore`, `moderatore_senza_mfa`), `037_diritti_privacy` |
+| R-40: niente alcolici per i minorenni | SÌ | trigger `verifica_categoria_spesa` e `categorie_spesa_disponibili` (`036`), `ricorda.spec.ts`, `integrazione/privacy.spec.ts` |
+| E2e di voce del tracker | SÌ | `ricorda.spec.ts` (anche offline), `integrazione/privacy.spec.ts` |
+| E2e di esportazione ed eliminazione dell'account | SÌ | `privacy.spec.ts`, `integrazione/privacy.spec.ts` |
+| Axe senza violazioni sulle schermate della fase | SÌ | `ricorda.spec.ts`, `privacy.spec.ts` (due temi, foglio di conferma), `navigazione.spec.ts` |
+| Conservazione completa di SAFETY_PRIVACY.md §10 | SÌ, salvo gli account inattivi | `applica_conservazione` (`037`); gli account senza accessi da 24 mesi passano all'iterazione 12 (ROADMAP.md §5) |
+| Backup cifrato e ripristino provato | SÌ in locale | prova in «Esito dei test»; il workflow `backup.yml` gira quando ci sono i segreti dello staging |
+| `safety-review` | SÌ | rapporto nella PR |
+| Beta, dati reali, VoiceOver e TalkBack | attesa esterna | richiedono lo staging e utenti reali |
 

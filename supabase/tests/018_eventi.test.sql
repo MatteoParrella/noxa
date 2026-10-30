@@ -1,6 +1,7 @@
 -- eventi, eventi_generi, eventi_fonti (DATA_MODEL.md §5.3). Regole: R-20, R-21, R-22, R-23.
 -- Eventi del seed: e002, e011, e012 14+; e004, e006 (annullato), e009 16+; e001, e005 18+;
 -- e003 18+ non dichiarata; e008 18+ con riferimenti all'alcol; e007 21+; e010 in revisione.
+-- Serate passate per il diario: e101 16+, e102 18+ con riferimenti all'alcol, e103 21+.
 begin;
 select plan(51);
 
@@ -26,31 +27,33 @@ select tests.autentica_come('minore_15');
 select is(tests.eventi_visibili(), tests.attesi('002', '011', '012'),
           'R-20: chi ha 15 anni non vede gli eventi 16+');
 select tests.autentica_come('minore_16');
-select is(tests.eventi_visibili(), tests.attesi('002', '004', '006', '009', '011', '012'),
+select is(tests.eventi_visibili(), tests.attesi('002', '004', '006', '009', '011', '012', '101'),
           'R-20: chi ha 16 anni vede 14+ e 16+, anche annullati');
 select tests.autentica_come('minore_17');
-select is(tests.eventi_visibili(), tests.attesi('002', '004', '006', '009', '011', '012'),
+select is(tests.eventi_visibili(), tests.attesi('002', '004', '006', '009', '011', '012', '101'),
           'R-20, R-21, R-23: chi ha 17 anni non vede i 18+, quelli senza età né quelli con alcol');
 select tests.autentica_come('adulto_18');
 select is(tests.eventi_visibili(),
-          tests.attesi('001', '002', '003', '004', '005', '006', '008', '009', '011', '012'),
+          tests.attesi('001', '002', '003', '004', '005', '006', '008', '009', '011', '012', '101', '102'),
           'R-20, R-23: chi ha 18 anni vede i 18+ e gli eventi con riferimenti all''alcol');
 select tests.autentica_come('adulto_20');
 select is(tests.eventi_visibili(),
-          tests.attesi('001', '002', '003', '004', '005', '006', '008', '009', '011', '012'),
+          tests.attesi('001', '002', '003', '004', '005', '006', '008', '009', '011', '012', '101', '102'),
           'R-20: chi ha 20 anni non vede gli eventi 21+');
 select tests.autentica_come('adulto_21');
 select is(tests.eventi_visibili(),
-          tests.attesi('001', '002', '003', '004', '005', '006', '007', '008', '009', '011', '012'),
+          tests.attesi('001', '002', '003', '004', '005', '006', '007', '008', '009', '011', '012', '101',
+                       '102', '103'),
           'R-20: chi ha 21 anni vede anche i 21+, mai gli eventi in revisione');
 select tests.autentica_come('moderatore_senza_mfa');
 select is(tests.eventi_visibili(),
-          tests.attesi('001', '002', '003', '004', '005', '006', '007', '008', '009', '011', '012'),
+          tests.attesi('001', '002', '003', '004', '005', '006', '007', '008', '009', '011', '012', '101',
+                       '102', '103'),
           'R-06: senza due fattori un moderatore vede solo il catalogo pubblicato');
 select tests.autentica_come('moderatore');
 select is(tests.eventi_visibili(),
           tests.attesi('001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011',
-                       '012'),
+                       '012', '101', '102', '103'),
           'Un moderatore con due fattori vede anche gli eventi in revisione');
 
 -- private.evento_visibile_a applica la stessa regola della policy, per ogni utente del seed.

@@ -278,8 +278,11 @@ select throws_ok(
 select throws_ok(
   $$ insert into public.tracker_amici (serata_tracker_id, amico_id) values (tests.voce('15'), tests.id('adulto_21')) $$,
   '42501', null, 'R-10: un adulto sconosciuto non si indica');
+-- Notifiche all'amico indicato create in questa transazione (now() è l'ora del suo inizio).
+select tests.esci();
 select is(
-  (select count(*)::int from public.notifiche where creata_il > now() - interval '1 minute'), 0,
+  (select count(*)::int from public.notifiche
+   where utente_id = tests.id('minore_16') and creata_il = now()), 0,
   'Indicare un amico non crea notifiche');
 
 select tests.autentica_come('minore_16');
