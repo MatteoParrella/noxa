@@ -59,20 +59,32 @@ export async function impostaTema(pagina: Page, tema: TemaProva) {
   }, tema);
 }
 
-/** Aspetta la fine delle animazioni di ingresso (ADR-0019), così axe misura lo stato finale. */
+/**
+ * Aspetta la fine delle animazioni di ingresso (ADR-0019), così axe misura lo stato finale.
+ * La condizione deve reggere due volte a distanza: un ingresso può partire subito dopo il
+ * primo controllo (per esempio quello della pagina, quando arrivano i dati).
+ */
 export async function attendiAnimazioni(pagina: Page) {
-  await pagina.waitForFunction(() =>
-    document.getAnimations().every((animazione) => animazione.playState !== 'running'),
-  );
+  const ferme = () =>
+    pagina.waitForFunction(() =>
+      document.getAnimations().every((animazione) => animazione.playState !== 'running'),
+    );
+  await ferme();
+  await pagina.waitForTimeout(150);
+  await ferme();
 }
 
-/** Nessuna violazione WCAG 2.2 AA (DESIGN.md §4). */
-export async function verificaAccessibilita(pagina: Page) {
+/**
+ * Nessuna violazione WCAG 2.2 AA (DESIGN.md §4). Con `ambito` si controlla solo quella parte,
+ * per esempio un dialogo modale: il resto della pagina è inerte e oscurato dal suo sfondo.
+ */
+export async function verificaAccessibilita(pagina: Page, ambito?: string) {
   await attendiAnimazioni(pagina);
-  const risultato = await new AxeBuilder({ page: pagina })
+  let axe = new AxeBuilder({ page: pagina })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-    .exclude('.maplibregl-canvas')
-    .analyze();
+    .exclude('.maplibregl-canvas');
+  if (ambito) axe = axe.include(ambito);
+  const risultato = await axe.analyze();
   expect(risultato.violations).toEqual([]);
 }
 
@@ -158,7 +170,14 @@ export type Endpoint =
   | 'serate_crea'
   | 'serate_aggiorna'
   | 'partecipazioni_serata_aggiorna'
-  | 'partecipazioni_serata_salva';
+  | 'partecipazioni_serata_salva'
+  | 'mio_diario'
+  | 'salva_serata_diario'
+  | 'cerca_per_diario'
+  | 'categorie_spesa_disponibili'
+  | 'serate_tracker_elimina'
+  | 'esporta_miei_dati'
+  | 'elimina_account';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
@@ -597,6 +616,60 @@ export function serataDiGruppoDiProva(possoGuidare: boolean) {
   };
 }
 
+export const ID_VOCE = '00000000-0000-4000-8000-00000000a301';
+
+/** Serate del diario come le restituisce `mio_diario()` (F-30). */
+export function diarioDiProva() {
+  const binario = LOCALI_DI_PROVA.binario;
+  return [
+    {
+      id: ID_VOCE,
+      data_serata: serataDiProva(-3),
+      evento: {
+        id: '00000000-0000-4000-8000-00000000e101',
+        titolo: 'Indie al Binario',
+        inizio: alle(serataDiProva(-3), '22:00'),
+        stato: 'pubblicato',
+      },
+      locale: { id: binario.id, nome: binario.nome, comune: binario.comune },
+      nome_locale_libero: null,
+      voto: 4,
+      note: 'Il secondo gruppo era il migliore.',
+      spese: [
+        { categoria: 'ingresso', importo_centesimi: 1200 },
+        { categoria: 'trasporto', importo_centesimi: 450 },
+      ],
+      dj: ['I Fili Scoperti'],
+      amici: [PERSONE.marco, PERSONE.sara].map(
+        ({ id, username, nome_visualizzato, avatar_path }) => ({
+          id,
+          username,
+          nome_visualizzato,
+          avatar_path,
+        }),
+      ),
+      amici_altri: 0,
+      creato_il: '2026-10-20T08:00:00Z',
+      aggiornato_il: '2026-10-20T08:00:00Z',
+    },
+    {
+      id: '00000000-0000-4000-8000-00000000a302',
+      data_serata: serataDiProva(-40),
+      evento: null,
+      locale: null,
+      nome_locale_libero: 'Festa da Luca',
+      voto: null,
+      note: null,
+      spese: [],
+      dj: [],
+      amici: [],
+      amici_altri: 0,
+      creato_il: '2026-09-20T08:00:00Z',
+      aggiornato_il: '2026-09-20T08:00:00Z',
+    },
+  ];
+}
+
 export class SupabaseSimulato {
   readonly richieste: Array<{ endpoint: Endpoint; corpo: unknown; url: string }> = [];
   private readonly risposte = new Map<Endpoint, Risposta>();
@@ -606,6 +679,8 @@ export class SupabaseSimulato {
   partecipazione: { stato: string; visibile: boolean } | null = null;
   /** Chi guarda la serata di gruppo può guidare (maggiorenne, deciso dal database). */
   possoGuidare = false;
+  /** Serate restituite da `mio_diario` (vuoto per default). */
+  diario: unknown[] = [];
   /** Profili visibili per `profili_leggi` (la RLS reale decide chi si vede). */
   profiliVisibili: PersonaProva[] = Object.values(PERSONE);
 
@@ -808,6 +883,36 @@ export class SupabaseSimulato {
         return { stato: 200, corpo: [] };
       case 'partecipazioni_serata_salva':
         return { stato: 201 };
+      case 'mio_diario':
+        return { stato: 200, corpo: this.diario };
+      case 'salva_serata_diario':
+        return { stato: 200, corpo: ID_VOCE };
+      case 'cerca_per_diario':
+        return { stato: 200, corpo: [] };
+      case 'categorie_spesa_disponibili':
+        // R-40: il database toglie gli alcolici ai minorenni, l'app mostra ciò che riceve.
+        return {
+          stato: 200,
+          corpo: [
+            'ingresso',
+            'prevendita',
+            'trasporto',
+            'cibo',
+            'bevande_analcoliche',
+            ...(this.account?.minorenne === false ? ['alcolici'] : []),
+            'guardaroba',
+            'altro',
+          ],
+        };
+      case 'serate_tracker_elimina':
+        return { stato: 204 };
+      case 'esporta_miei_dati':
+        return {
+          stato: 200,
+          corpo: { formato: 'noxa-esportazione-1', profilo: { username: 'giulia.rota' } },
+        };
+      case 'elimina_account':
+        return { stato: 200, corpo: { esito: 'eliminato' } };
       default:
         return { stato: 200, corpo: {} };
     }
@@ -883,6 +988,7 @@ export class SupabaseSimulato {
         PATCH: 'partecipazioni_serata_aggiorna',
         POST: 'partecipazioni_serata_salva',
       },
+      '/rest/v1/serate_tracker': { DELETE: 'serate_tracker_elimina' },
       '/rest/v1/partecipazioni_evento': {
         POST: 'partecipazioni_crea',
         PATCH: 'partecipazioni_aggiorna',
@@ -911,10 +1017,16 @@ export class SupabaseSimulato {
       'invita_nel_gruppo',
       'eventi_adatti_al_gruppo',
       'dettaglio_serata',
+      'mio_diario',
+      'salva_serata_diario',
+      'cerca_per_diario',
+      'categorie_spesa_disponibili',
+      'esporta_miei_dati',
     ];
     if (rpc && rpcSimulate.includes(rpc)) return rpc as Endpoint;
     if (percorso.startsWith('/storage/v1/object/sign/') && metodo === 'POST')
       return 'firma_immagini';
+    if (percorso === '/functions/v1/elimina-account' && metodo === 'POST') return 'elimina_account';
     if (percorso === '/auth/v1/signup') return 'signup';
     if (percorso === '/auth/v1/resend') return 'resend';
     if (percorso === '/auth/v1/verify') return 'verify';

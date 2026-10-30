@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDownToLine, Check, Trash2, TriangleAlert, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Avviso } from '@/components/ui/Avviso';
 import { CampoPassword } from '@/components/ui/CampoPassword';
 import { CodiceSeiCifre } from '@/components/ui/CodiceSeiCifre';
@@ -17,7 +17,13 @@ import { useIo } from '@/features/amici/dati';
 import { useOnline } from '@/lib/connessione';
 import { ErroreLimite, ErroreRete, ErroreValidazione } from '@/lib/errori';
 import { messaggi } from '@/lib/messaggi/it';
-import { eliminaAccount, fattoreDueFattori, pulisciDispositivo } from './api';
+import {
+  daPulire,
+  eliminaAccount,
+  fattoreDueFattori,
+  pulisciDispositivo,
+  segnaDaPulire,
+} from './api';
 
 const testi = messaggi.privacy.elimina;
 
@@ -85,7 +91,7 @@ export function EliminaAccount() {
         <Icona icona={ArrowDownToLine} />
         <span>
           {testi.primaScarica}
-          <Link className="link" href="/profilo/privacy/scarica/">
+          <Link className="link-in-testo" href="/profilo/privacy/scarica/">
             {testi.primaScaricaLink}
           </Link>
           .
@@ -111,7 +117,6 @@ export function EliminaAccount() {
 function Conferma({ onAnnulla }: { onAnnulla: () => void }) {
   const io = useIo();
   const router = useRouter();
-  const client = useQueryClient();
   const online = useOnline();
   const fattore = useQuery({
     queryKey: ['account', 'fattore', io ?? ''],
@@ -131,15 +136,14 @@ function Conferma({ onAnnulla }: { onAnnulla: () => void }) {
         password,
         ...(conDueFattori && fattore.data ? { codice, fattoreId: fattore.data } : {}),
       }),
-    onSuccess: async (esito) => {
+    onSuccess: (esito) => {
       setPasswordErrata(esito === 'password_errata');
       if (esito === 'serve_codice') setServeCodice(true);
       if (esito !== 'eliminato' || !io) return;
-      // Prima si lascia l'area protetta, poi si pulisce il dispositivo: la schermata di uscita
-      // non dipende dalla sessione, che sul server non esiste più.
+      // La pulizia del dispositivo la fa la schermata di uscita, fuori dall'area protetta:
+      // chiudere qui la sessione farebbe tornare al Benvenuto prima della conferma.
+      segnaDaPulire(io);
       router.replace('/account-eliminato/');
-      await pulisciDispositivo(io);
-      client.clear();
     },
   });
 
@@ -230,6 +234,12 @@ function Conferma({ onAnnulla }: { onAnnulla: () => void }) {
 /** Uscita dopo l'eliminazione (design/F-42-privacy §3): annunciata, con il ritorno all'inizio. */
 export function AccountEliminato() {
   const fatto = testi.fatto;
+  const client = useQueryClient();
+  useEffect(() => {
+    const io = daPulire();
+    if (!io) return;
+    void pulisciDispositivo(io).then(() => client.clear());
+  }, [client]);
   return (
     <Schermata
       illustrazione={

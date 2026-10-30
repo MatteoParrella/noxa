@@ -115,7 +115,7 @@ function Dettaglio({ voce }: { voce: VoceMostrata }) {
             {voce.evento && (
               <>
                 {luogo ? ' · ' : ''}
-                <Link className="link" href={`/evento/?id=${voce.evento.id}`}>
+                <Link className="link-in-testo" href={`/evento/?id=${voce.evento.id}`}>
                   {testi.dettaglio.vediEvento}
                 </Link>
               </>

@@ -110,6 +110,8 @@ export function useSalvaSerata() {
   const io = useIo();
   const client = useQueryClient();
   return useMutation({
+    // La rete la gestisce la funzione: senza, la scrittura va nella coda del dispositivo.
+    networkMode: 'always',
     mutationFn: async ({
       dati,
       anteprima,
@@ -149,6 +151,8 @@ export function useEliminaSerata() {
   const io = useIo();
   const client = useQueryClient();
   return useMutation({
+    // La rete la gestisce la funzione: senza, la scrittura va nella coda del dispositivo.
+    networkMode: 'always',
     mutationFn: async (voce: VoceMostrata): Promise<EsitoScrittura> => {
       if (!io) throw new ErroreRete('sessione');
       const soloLocale =

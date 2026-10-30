@@ -83,6 +83,29 @@ export async function eliminaAccount(dati: {
   throw new ErroreSconosciuto('elimina-account', data);
 }
 
+const CHIAVE_DA_PULIRE = 'noxa-account-eliminato';
+
+/** Ricorda, per la schermata di uscita, quale account va tolto dal dispositivo. */
+export function segnaDaPulire(io: string): void {
+  try {
+    window.sessionStorage.setItem(CHIAVE_DA_PULIRE, io);
+  } catch (errore) {
+    registraErrore('account da pulire', errore);
+  }
+}
+
+/** L'account appena eliminato, una volta sola: chi riapre la pagina non tocca niente. */
+export function daPulire(): string | null {
+  try {
+    const io = window.sessionStorage.getItem(CHIAVE_DA_PULIRE);
+    window.sessionStorage.removeItem(CHIAVE_DA_PULIRE);
+    return io;
+  } catch (errore) {
+    registraErrore('account da pulire', errore);
+    return null;
+  }
+}
+
 /**
  * Dopo l'eliminazione: niente resta sul dispositivo. La sessione si chiude solo qui, perché
  * sul server non esiste più.

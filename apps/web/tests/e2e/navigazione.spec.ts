@@ -1,11 +1,12 @@
 import { expect, impostaTema, TEMI, test, verificaAccessibilita } from './supporto';
 
+// Ricorda si apre sul diario (design/F-30-tracker): il titolo è quello della schermata.
 const AREE = [
-  { percorso: '/scopri/', nome: 'Scopri' },
-  { percorso: '/organizza/', nome: 'Organizza' },
-  { percorso: '/vivi/', nome: 'Vivi' },
-  { percorso: '/ricorda/', nome: 'Ricorda' },
-  { percorso: '/profilo/', nome: 'Profilo' },
+  { percorso: '/scopri/', nome: 'Scopri', titolo: 'Scopri' },
+  { percorso: '/organizza/', nome: 'Organizza', titolo: 'Organizza' },
+  { percorso: '/vivi/', nome: 'Vivi', titolo: 'Vivi' },
+  { percorso: '/ricorda/', nome: 'Ricorda', titolo: 'Il mio diario' },
+  { percorso: '/profilo/', nome: 'Profilo', titolo: 'Profilo' },
 ] as const;
 
 test('la home apre Scopri', async ({ page }) => {
@@ -26,7 +27,7 @@ for (const tema of TEMI) {
         await expect(page.locator('html')).toHaveAttribute('lang', 'it');
         if (tema === 'chiaro')
           await expect(page.locator('html')).toHaveAttribute('data-tema', 'chiaro');
-        await expect(page.getByRole('heading', { level: 1, name: area.nome })).toBeVisible();
+        await expect(page.getByRole('heading', { level: 1, name: area.titolo })).toBeVisible();
         const navigazione = page.getByRole('navigation', { name: 'Principale' });
         await expect(navigazione.getByRole('link', { name: area.nome })).toHaveAttribute(
           'aria-current',
@@ -49,7 +50,7 @@ test('la barra porta da un’area all’altra e il link “Vai al contenuto” �
     .getByRole('link', { name: 'Ricorda' })
     .click();
   await expect(page).toHaveURL(/\/ricorda\/$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Ricorda' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Il mio diario' })).toBeVisible();
 });
 
 test('il tema chiaro scelto nel profilo resta dopo il ricaricamento', async ({ page }) => {

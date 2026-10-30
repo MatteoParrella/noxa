@@ -38,11 +38,11 @@ export function dataMedia(iso: string): string {
   return `${giorno.charAt(0).toUpperCase()}${giorno.slice(1)} ${due(data.giorno)}.${due(data.mese)}`;
 }
 
-/** "€ 15,00" */
+/** "€ 15,00", "€ 1.000,00": il punto delle migliaia sempre, anche a quattro cifre. */
 export function euro(centesimi: number): string {
   const euro = Math.floor(centesimi / 100);
   const resto = centesimi % 100;
-  return `€ ${euro.toLocaleString('it-IT')},${due(resto)}`;
+  return `€ ${String(euro).replace(/\B(?=(\d{3})+(?!\d))/g, '.')},${due(resto)}`;
 }
 
 /** "15,00" per il campo dell'importo. */

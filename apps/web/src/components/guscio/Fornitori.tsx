@@ -35,6 +35,8 @@ export function Fornitori({ children }: { children: ReactNode }) {
         buster: process.env.NEXT_PUBLIC_VERSIONE_APP ?? '',
         dehydrateOptions: { shouldDehydrateQuery: daSalvare },
       }}
+      // All'apertura si vede subito la copia salvata, poi si rilegge tutto dal database.
+      onSuccess={() => void client.invalidateQueries()}
     >
       <FornitoreToast>{children}</FornitoreToast>
     </PersistQueryClientProvider>
