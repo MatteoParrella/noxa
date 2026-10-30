@@ -42,6 +42,8 @@ class Impostazioni(BaseSettings):
     claude_modello_flyer: str = "claude-opus-5-5"
     flyer_lato_max_px: int = Field(default=1568, ge=256, le=4096)
     flyer_budget_giornaliero_eur: float = Field(default=10.0, ge=0)
+    # Sentry, regione UE (ADR-0014): vuoto in locale, dove gli errori restano nei log.
+    sentry_dsn_worker: SecretStr = SecretStr("")
 
     def url_database(self) -> str:
         """URL del database validato come DSN Postgres."""

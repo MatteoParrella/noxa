@@ -12,7 +12,7 @@ loadEnvConfig(
   true,
 );
 
-// Export statico servito da Vercel e incluso nelle app Capacitor (ADR-0001).
+// Export statico servito da Cloudflare Pages e incluso nelle app Capacitor (ADR-0001, ADR-0021).
 // Le pagine *.dev.tsx (catalogo dei componenti) esistono solo in sviluppo (DESIGN.md §3) e
 // nella build dei test e2e (NOXA_CATALOGO=1), che verificano il catalogo con axe.
 const sviluppo = process.env.NODE_ENV === 'development' || process.env.NOXA_CATALOGO === '1';
@@ -23,6 +23,12 @@ const configurazione: NextConfig = {
   images: { unoptimized: true },
   reactStrictMode: true,
   poweredByHeader: false,
+  // Versione della build: invalida la cache salvata sul dispositivo a ogni rilascio
+  // (lib/cacheLocale.ts) ed etichetta gli errori inviati a Sentry.
+  env: {
+    NEXT_PUBLIC_VERSIONE_APP:
+      process.env.CF_PAGES_COMMIT_SHA ?? process.env.GITHUB_SHA ?? 'sviluppo',
+  },
   pageExtensions: sviluppo ? ['dev.tsx', 'tsx', 'ts'] : ['tsx', 'ts'],
 };
 

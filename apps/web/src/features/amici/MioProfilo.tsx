@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Ban, ChevronRight, Flag, Pencil, ShieldCheck, Users } from 'lucide-react';
+import { ChevronRight, Flag, LockKeyhole, Pencil, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Contatore } from '@/components/ui/Badge';
@@ -73,16 +73,19 @@ export function MioProfilo() {
               <Icona icona={ChevronRight} dimensione="s" />
             </span>
           </Link>
-          <Link className="voce-profilo" href="/profilo/bloccati/">
-            <Icona icona={Ban} />
-            {testi.bloccati}
+          <Link className="voce-profilo" href="/profilo/segnalazioni/">
+            <Icona icona={Flag} />
+            {testi.segnalazioni}
             <span className="valore">
               <Icona icona={ChevronRight} dimensione="s" />
             </span>
           </Link>
-          <Link className="voce-profilo" href="/profilo/segnalazioni/">
-            <Icona icona={Flag} />
-            {testi.segnalazioni}
+          <Link className="voce-profilo" href="/profilo/privacy/">
+            <Icona icona={LockKeyhole} />
+            <span className="flex flex-col">
+              {messaggi.privacy.voce.titolo}
+              <span className="t-didascalia">{messaggi.privacy.voce.testo}</span>
+            </span>
             <span className="valore">
               <Icona icona={ChevronRight} dimensione="s" />
             </span>

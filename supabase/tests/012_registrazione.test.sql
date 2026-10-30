@@ -9,7 +9,7 @@ select jsonb_build_object(
   'username', 'prova.registraz',
   'nome_visualizzato', 'Giulia',
   'data_nascita', ((now() at time zone 'Europe/Rome')::date - interval '16 years')::date,
-  'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-10')
+  'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-11')
 ) as dati;
 
 -- ---------------------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ select is(private.verifica_dati_registrazione(
 select is(private.verifica_dati_registrazione((select dati - 'consensi' from dati_validi)),
           'NX006', 'R-63: senza consensi la registrazione è rifiutata');
 select is(private.verifica_dati_registrazione(
-            (select dati || '{"consensi": {"termini": "2025-01", "privacy": "2026-10"}}' from dati_validi)),
+            (select dati || '{"consensi": {"termini": "2025-01", "privacy": "2026-11"}}' from dati_validi)),
           'NX006', 'R-63: il consenso a una versione non in vigore è rifiutato');
 
 -- ---------------------------------------------------------------------------------------------
@@ -131,7 +131,7 @@ select is(
 select results_eq(
   $$ select tipo::text, versione from public.consensi
      where utente_id = '00000000-0000-4000-8000-0000000000b1' order by tipo::text $$,
-  $$ values ('privacy', '2026-10'), ('termini', '2026-10') $$,
+  $$ values ('privacy', '2026-11'), ('termini', '2026-10') $$,
   'R-63: il trigger registra i consensi con la versione accettata'
 );
 select is(

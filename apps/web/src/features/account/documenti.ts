@@ -5,7 +5,13 @@
  */
 export const VERSIONI_DOCUMENTI = {
   termini: '2026-10',
-  privacy: '2026-10',
+  privacy: '2026-11',
+} as const;
+
+/** Data di entrata in vigore delle versioni sopra, mostrata nell'informativa in breve. */
+export const IN_VIGORE_DAL = {
+  termini: '16.10.2026',
+  privacy: '27.10.2026',
 } as const;
 
 export const PERCORSI = {

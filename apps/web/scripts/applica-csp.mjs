@@ -1,8 +1,8 @@
 // Content Security Policy dell'app (ARCHITECTURE.md §9). Gira dopo `next build`, prima del
 // service worker: per ogni pagina dell'export statico calcola l'hash SHA-256 degli script
 // inline (tema e dati di Next) e inserisce un <meta http-equiv="Content-Security-Policy">.
-// Il meta vale sia sul web (Vercel) sia nelle app Capacitor, dove gli header HTTP non
-// esistono; vercel.json aggiunge le direttive che un meta non può esprimere (frame-ancestors).
+// Il meta vale sia sul web (Cloudflare Pages) sia nelle app Capacitor, dove gli header HTTP non
+// esistono; public/_headers aggiunge le direttive che un meta non può esprimere (frame-ancestors).
 import { createHash } from 'node:crypto';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -27,6 +27,8 @@ function origine(valore) {
 const supabase = origine(process.env.NEXT_PUBLIC_SUPABASE_URL);
 const mappa = origine(process.env.NEXT_PUBLIC_MAPPA_PMTILES_URL);
 const supabaseRealtime = supabase?.replace(/^http/, 'ws') ?? null;
+// Sentry (regione UE, ADR-0014): l'unica altra origine, solo se il DSN è configurato.
+const sentry = origine(process.env.NEXT_PUBLIC_SENTRY_DSN);
 
 const esterne = (...origini) => [...new Set(origini.filter(Boolean))].join(' ');
 
@@ -38,7 +40,7 @@ function politica(hash) {
     'style-src': "'self' 'unsafe-inline'",
     'img-src': esterne("'self' data: blob:", supabase),
     'font-src': "'self' data:",
-    'connect-src': esterne("'self'", supabase, supabaseRealtime, mappa),
+    'connect-src': esterne("'self'", supabase, supabaseRealtime, mappa, sentry),
     'frame-src': TURNSTILE,
     'worker-src': "'self' blob:",
     'manifest-src': "'self'",

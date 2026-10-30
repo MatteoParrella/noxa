@@ -53,6 +53,9 @@ export const CODICI_DATABASE = {
   NX043: 'evento_non_adatto',
   NX044: 'modifica_membri_non_prevista',
   NX045: 'troppi_gruppi_oggi',
+  NX046: 'data_futura',
+  NX047: 'esportazione_recente',
+  NX048: 'troppi_tentativi_eliminazione',
 } as const;
 
 export type CodiceDatabase = (typeof CODICI_DATABASE)[keyof typeof CODICI_DATABASE];

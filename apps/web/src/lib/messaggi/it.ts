@@ -1,5 +1,7 @@
 import { gruppi } from './gruppi';
 import { moderazione } from './moderazione';
+import { privacy } from './privacy';
+import { ricorda } from './ricorda';
 
 /**
  * Testi dell'app in italiano (DESIGN.md §6: "tu", frasi brevi, niente pressione). I testi
@@ -886,4 +888,6 @@ export const messaggi = {
 
   gruppi,
   moderazione,
+  ricorda,
+  privacy,
 } as const;

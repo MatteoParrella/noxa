@@ -739,6 +739,104 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"serate_tracker": {
+                  Row: {
+                    "aggiornato_il": string,"creato_il": string,"data_serata": string,"evento_id": string | null,"id": string,"locale_id": string | null,"nome_locale_libero": string | null,"note": string | null,"utente_id": string,"voto": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aggiornato_il"?: string,"creato_il"?: string,"data_serata": string,"evento_id"?: string | null,"id"?: string,"locale_id"?: string | null,"nome_locale_libero"?: string | null,"note"?: string | null,"utente_id"?: string,"voto"?: number | null
+                  }
+                  Update: {
+                    "aggiornato_il"?: string,"creato_il"?: string,"data_serata"?: string,"evento_id"?: string | null,"id"?: string,"locale_id"?: string | null,"nome_locale_libero"?: string | null,"note"?: string | null,"utente_id"?: string,"voto"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "serate_tracker_evento_id_fkey"
+      columns: ["evento_id"]
+isOneToOne: false
+      referencedRelation: "eventi"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "serate_tracker_locale_id_fkey"
+      columns: ["locale_id"]
+isOneToOne: false
+      referencedRelation: "locali"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "serate_tracker_utente_id_fkey"
+      columns: ["utente_id"]
+isOneToOne: false
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"tracker_amici": {
+                  Row: {
+                    "amico_id": string,"serata_tracker_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amico_id": string,"serata_tracker_id": string
+                  }
+                  Update: {
+                    "amico_id"?: string,"serata_tracker_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tracker_amici_amico_id_fkey"
+      columns: ["amico_id"]
+isOneToOne: false
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tracker_amici_serata_tracker_id_fkey"
+      columns: ["serata_tracker_id"]
+isOneToOne: false
+      referencedRelation: "serate_tracker"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"tracker_dj": {
+                  Row: {
+                    "nome_dj": string,"serata_tracker_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "nome_dj": string,"serata_tracker_id": string
+                  }
+                  Update: {
+                    "nome_dj"?: string,"serata_tracker_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tracker_dj_serata_tracker_id_fkey"
+      columns: ["serata_tracker_id"]
+isOneToOne: false
+      referencedRelation: "serate_tracker"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"tracker_spese": {
+                  Row: {
+                    "categoria": Database["public"]['Enums']["categoria_spesa"],"id": string,"importo_centesimi": number,"serata_tracker_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "categoria": Database["public"]['Enums']["categoria_spesa"],"id"?: string,"importo_centesimi": number,"serata_tracker_id": string
+                  }
+                  Update: {
+                    "categoria"?: Database["public"]['Enums']["categoria_spesa"],"id"?: string,"importo_centesimi"?: number,"serata_tracker_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tracker_spese_serata_tracker_id_fkey"
+      columns: ["serata_tracker_id"]
+isOneToOne: false
+      referencedRelation: "serate_tracker"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -771,9 +869,17 @@ isOneToOne: false
               "comune": string,"doppione_id": string,"doppione_nome": string,"google_place_id": string,"id": string,"indirizzo": string,"lat": number,"lon": number,"nome": string,"origine": string,"osm_id": string,"provincia": string,"sito_web": string
             }[]
                            },
+"categorie_spesa_disponibili":
+{ Args: Record<PropertyKey, never>; Returns: Database["public"]['Enums']["categoria_spesa"][]
+                           },
 "cerca_eventi":
 { Args: { "al"?: string,"dal"?: string,"eta_minima_max"?: number,"generi"?: (string)[],"lat"?: number,"lon"?: number,"raggio_km"?: number,"solo_amici"?: boolean }; Returns: {
               "amici": Json,"amici_interessati": number,"amici_partecipano": number,"copertina_attribuzione": string,"copertina_path": string,"copertina_tipo": string,"data_serata": string,"distanza_m": number,"eta_minima": number,"eta_minima_dichiarata": boolean,"fine": string,"generi_evento": (string)[],"id": string,"inizio": string,"locale_comune": string,"locale_id": string,"locale_lat": number,"locale_lon": number,"locale_nome": string,"mia_partecipazione": Database["public"]['Enums']["stato_partecipazione_evento"],"prezzo_min_centesimi": number,"stato": Database["public"]['Enums']["stato_evento"],"titolo": string
+            }[]
+                           },
+"cerca_per_diario":
+{ Args: { "testo": string }; Returns: {
+              "comune": string,"data_serata": string,"id": string,"inizio": string,"locale_id": string,"locale_nome": string,"tipo": string,"titolo": string
             }[]
                            },
 "cerca_utenti":
@@ -850,6 +956,9 @@ isOneToOne: false
               "altri": number,"creata_da": Json,"data_serata": string,"evento": Json,"gruppo_id": string,"gruppo_nome": string,"id": string,"luogo_ritrovo": string,"note": string,"ora_ritrovo": string,"partecipanti": Json,"passata": boolean,"posso_gestire": boolean,"posso_guidare": boolean,"stato": Database["public"]['Enums']["stato_serata"],"titolo": string,"url_lista": string,"url_prevendita": string
             }[]
                            },
+"elimina_mio_account":
+{ Args: { "password": string }; Returns: Json
+                           },
 "esamina_reclamo":
 { Args: { "reclamo": string }; Returns: undefined
                            },
@@ -861,6 +970,9 @@ isOneToOne: false
                            },
 "esegui_fonte_ora":
 { Args: { "fonte": string }; Returns: number
+                           },
+"esporta_miei_dati":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "eventi_adatti_al_gruppo":
 { Args: { "gruppo": string,"testo"?: string }; Returns: {
@@ -913,6 +1025,9 @@ isOneToOne: false
 "mio_account":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"mio_diario":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "possibili_annullamenti":
 { Args: Record<PropertyKey, never>; Returns: {
               "data_serata": string,"evento_id": string,"fonte_url": string,"ha_partecipanti": boolean,"inizio": string,"locale_comune": string,"locale_nome": string,"titolo": string,"ultima_conferma_il": string
@@ -945,12 +1060,15 @@ isOneToOne: false
 "salva_foto_locale":
 { Args: { "attribuzione"?: string,"fonte": Database["public"]['Enums']["fonte_immagine_locale"],"locale": string,"percorso": string,"riferimento"?: string,"senza_alcol": boolean,"senza_persone": boolean }; Returns: string
                            },
+"salva_serata_diario":
+{ Args: { "serata": Json }; Returns: string
+                           },
 "usa_codice_invito":
 { Args: { "codice": string }; Returns: string
                            }
           }
           Enums: {
-            "azione_moderazione": "nessuna_violazione"|"rimuovi_contenuto"|"modifica_evento"|"approva_flyer"|"rifiuta_flyer"|"sospendi_account"|"riattiva_account"|"correggi_data_nascita"|"escalation_autorita"|"accesso_segnalazione"|"crea_locale"|"modifica_locale"|"approva_immagine_locale"|"rimuovi_immagine_locale"|"crea_fonte"|"modifica_fonte"|"esegui_fonte"|"unisci_duplicato"|"separa_duplicato"|"pubblica_evento"|"annulla_evento"|"rifiuta_evento"|"correggi_eta_alcol"|"conferma_in_programma"|"verifica_candidato_locale"|"unisci_candidato_locale"|"scarta_candidato_locale"|"unisci_flyer"|"prendi_in_carico"|"occulta_contenuto"|"ripristina_contenuto"|"conferma_decisione"|"cambia_decisione","canale_amicizia": "ricerca"|"codice_invito","fonte_immagine_locale": "autorizzazione_locale"|"noxa"|"licenza_libera","mezzo_trasporto": "auto_guido"|"passaggio"|"mezzi_pubblici"|"taxi_ncc"|"a_piedi"|"altro","motivo_segnalazione": "contenuto_inappropriato"|"molestie"|"adescamento_o_rischio_minore"|"spam"|"evento_falso"|"eta_errata"|"alcol_a_minori"|"altro"|"dati_errati","risposta_serata": "si"|"forse"|"no","ruolo_gruppo": "admin"|"membro","ruolo_utente": "moderatore"|"amministratore","stato_account": "attivo"|"sospeso","stato_amicizia": "in_attesa"|"accettata","stato_biglietto": "nessuno"|"prevendita"|"lista"|"alla_cassa","stato_caricamento": "caricato"|"in_analisi"|"in_revisione"|"approvato"|"unito"|"rifiutato"|"errore","stato_conformita": "da_verificare"|"consentita"|"vietata","stato_evento": "in_revisione"|"pubblicato"|"rifiutato"|"annullato","stato_grezzo": "nuovo"|"normalizzato"|"unito"|"in_revisione_dedup"|"scartato"|"errore","stato_job": "in_coda"|"in_esecuzione"|"completato"|"fallito","stato_membro": "invitato"|"attivo","stato_partecipazione_evento": "interessato"|"partecipo","stato_reclamo": "inviato"|"in_esame"|"deciso","stato_segnalazione": "aperta"|"in_lavorazione"|"chiusa","stato_serata": "proposta"|"confermata"|"annullata","tipo_consenso": "termini"|"privacy","tipo_fonte": "sito_locale"|"instagram"|"resident_advisor"|"xceed"|"dice","tipo_job": "esegui_fonte"|"analizza_flyer"|"deduplica_grezzo"|"copia_immagine_flyer"|"pulizia_flyer","tipo_oggetto_segnalabile": "profilo"|"evento"|"caricamento_flyer"|"gruppo"|"serata_gruppo"|"immagine_locale"|"locale"|"fonte"|"candidato_locale"|"foto_profilo"
+            "azione_moderazione": "nessuna_violazione"|"rimuovi_contenuto"|"modifica_evento"|"approva_flyer"|"rifiuta_flyer"|"sospendi_account"|"riattiva_account"|"correggi_data_nascita"|"escalation_autorita"|"accesso_segnalazione"|"crea_locale"|"modifica_locale"|"approva_immagine_locale"|"rimuovi_immagine_locale"|"crea_fonte"|"modifica_fonte"|"esegui_fonte"|"unisci_duplicato"|"separa_duplicato"|"pubblica_evento"|"annulla_evento"|"rifiuta_evento"|"correggi_eta_alcol"|"conferma_in_programma"|"verifica_candidato_locale"|"unisci_candidato_locale"|"scarta_candidato_locale"|"unisci_flyer"|"prendi_in_carico"|"occulta_contenuto"|"ripristina_contenuto"|"conferma_decisione"|"cambia_decisione","canale_amicizia": "ricerca"|"codice_invito","categoria_spesa": "ingresso"|"prevendita"|"trasporto"|"cibo"|"bevande_analcoliche"|"alcolici"|"guardaroba"|"altro","fonte_immagine_locale": "autorizzazione_locale"|"noxa"|"licenza_libera","mezzo_trasporto": "auto_guido"|"passaggio"|"mezzi_pubblici"|"taxi_ncc"|"a_piedi"|"altro","motivo_segnalazione": "contenuto_inappropriato"|"molestie"|"adescamento_o_rischio_minore"|"spam"|"evento_falso"|"eta_errata"|"alcol_a_minori"|"altro"|"dati_errati","risposta_serata": "si"|"forse"|"no","ruolo_gruppo": "admin"|"membro","ruolo_utente": "moderatore"|"amministratore","stato_account": "attivo"|"sospeso","stato_amicizia": "in_attesa"|"accettata","stato_biglietto": "nessuno"|"prevendita"|"lista"|"alla_cassa","stato_caricamento": "caricato"|"in_analisi"|"in_revisione"|"approvato"|"unito"|"rifiutato"|"errore","stato_conformita": "da_verificare"|"consentita"|"vietata","stato_evento": "in_revisione"|"pubblicato"|"rifiutato"|"annullato","stato_grezzo": "nuovo"|"normalizzato"|"unito"|"in_revisione_dedup"|"scartato"|"errore","stato_job": "in_coda"|"in_esecuzione"|"completato"|"fallito","stato_membro": "invitato"|"attivo","stato_partecipazione_evento": "interessato"|"partecipo","stato_reclamo": "inviato"|"in_esame"|"deciso","stato_segnalazione": "aperta"|"in_lavorazione"|"chiusa","stato_serata": "proposta"|"confermata"|"annullata","tipo_consenso": "termini"|"privacy","tipo_fonte": "sito_locale"|"instagram"|"resident_advisor"|"xceed"|"dice","tipo_job": "esegui_fonte"|"analizza_flyer"|"deduplica_grezzo"|"copia_immagine_flyer"|"pulizia_flyer","tipo_oggetto_segnalabile": "profilo"|"evento"|"caricamento_flyer"|"gruppo"|"serata_gruppo"|"immagine_locale"|"locale"|"fonte"|"candidato_locale"|"foto_profilo"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1070,7 +1188,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "azione_moderazione": ["nessuna_violazione", "rimuovi_contenuto", "modifica_evento", "approva_flyer", "rifiuta_flyer", "sospendi_account", "riattiva_account", "correggi_data_nascita", "escalation_autorita", "accesso_segnalazione", "crea_locale", "modifica_locale", "approva_immagine_locale", "rimuovi_immagine_locale", "crea_fonte", "modifica_fonte", "esegui_fonte", "unisci_duplicato", "separa_duplicato", "pubblica_evento", "annulla_evento", "rifiuta_evento", "correggi_eta_alcol", "conferma_in_programma", "verifica_candidato_locale", "unisci_candidato_locale", "scarta_candidato_locale", "unisci_flyer", "prendi_in_carico", "occulta_contenuto", "ripristina_contenuto", "conferma_decisione", "cambia_decisione"],"canale_amicizia": ["ricerca", "codice_invito"],"fonte_immagine_locale": ["autorizzazione_locale", "noxa", "licenza_libera"],"mezzo_trasporto": ["auto_guido", "passaggio", "mezzi_pubblici", "taxi_ncc", "a_piedi", "altro"],"motivo_segnalazione": ["contenuto_inappropriato", "molestie", "adescamento_o_rischio_minore", "spam", "evento_falso", "eta_errata", "alcol_a_minori", "altro", "dati_errati"],"risposta_serata": ["si", "forse", "no"],"ruolo_gruppo": ["admin", "membro"],"ruolo_utente": ["moderatore", "amministratore"],"stato_account": ["attivo", "sospeso"],"stato_amicizia": ["in_attesa", "accettata"],"stato_biglietto": ["nessuno", "prevendita", "lista", "alla_cassa"],"stato_caricamento": ["caricato", "in_analisi", "in_revisione", "approvato", "unito", "rifiutato", "errore"],"stato_conformita": ["da_verificare", "consentita", "vietata"],"stato_evento": ["in_revisione", "pubblicato", "rifiutato", "annullato"],"stato_grezzo": ["nuovo", "normalizzato", "unito", "in_revisione_dedup", "scartato", "errore"],"stato_job": ["in_coda", "in_esecuzione", "completato", "fallito"],"stato_membro": ["invitato", "attivo"],"stato_partecipazione_evento": ["interessato", "partecipo"],"stato_reclamo": ["inviato", "in_esame", "deciso"],"stato_segnalazione": ["aperta", "in_lavorazione", "chiusa"],"stato_serata": ["proposta", "confermata", "annullata"],"tipo_consenso": ["termini", "privacy"],"tipo_fonte": ["sito_locale", "instagram", "resident_advisor", "xceed", "dice"],"tipo_job": ["esegui_fonte", "analizza_flyer", "deduplica_grezzo", "copia_immagine_flyer", "pulizia_flyer"],"tipo_oggetto_segnalabile": ["profilo", "evento", "caricamento_flyer", "gruppo", "serata_gruppo", "immagine_locale", "locale", "fonte", "candidato_locale", "foto_profilo"]
+            "azione_moderazione": ["nessuna_violazione", "rimuovi_contenuto", "modifica_evento", "approva_flyer", "rifiuta_flyer", "sospendi_account", "riattiva_account", "correggi_data_nascita", "escalation_autorita", "accesso_segnalazione", "crea_locale", "modifica_locale", "approva_immagine_locale", "rimuovi_immagine_locale", "crea_fonte", "modifica_fonte", "esegui_fonte", "unisci_duplicato", "separa_duplicato", "pubblica_evento", "annulla_evento", "rifiuta_evento", "correggi_eta_alcol", "conferma_in_programma", "verifica_candidato_locale", "unisci_candidato_locale", "scarta_candidato_locale", "unisci_flyer", "prendi_in_carico", "occulta_contenuto", "ripristina_contenuto", "conferma_decisione", "cambia_decisione"],"canale_amicizia": ["ricerca", "codice_invito"],"categoria_spesa": ["ingresso", "prevendita", "trasporto", "cibo", "bevande_analcoliche", "alcolici", "guardaroba", "altro"],"fonte_immagine_locale": ["autorizzazione_locale", "noxa", "licenza_libera"],"mezzo_trasporto": ["auto_guido", "passaggio", "mezzi_pubblici", "taxi_ncc", "a_piedi", "altro"],"motivo_segnalazione": ["contenuto_inappropriato", "molestie", "adescamento_o_rischio_minore", "spam", "evento_falso", "eta_errata", "alcol_a_minori", "altro", "dati_errati"],"risposta_serata": ["si", "forse", "no"],"ruolo_gruppo": ["admin", "membro"],"ruolo_utente": ["moderatore", "amministratore"],"stato_account": ["attivo", "sospeso"],"stato_amicizia": ["in_attesa", "accettata"],"stato_biglietto": ["nessuno", "prevendita", "lista", "alla_cassa"],"stato_caricamento": ["caricato", "in_analisi", "in_revisione", "approvato", "unito", "rifiutato", "errore"],"stato_conformita": ["da_verificare", "consentita", "vietata"],"stato_evento": ["in_revisione", "pubblicato", "rifiutato", "annullato"],"stato_grezzo": ["nuovo", "normalizzato", "unito", "in_revisione_dedup", "scartato", "errore"],"stato_job": ["in_coda", "in_esecuzione", "completato", "fallito"],"stato_membro": ["invitato", "attivo"],"stato_partecipazione_evento": ["interessato", "partecipo"],"stato_reclamo": ["inviato", "in_esame", "deciso"],"stato_segnalazione": ["aperta", "in_lavorazione", "chiusa"],"stato_serata": ["proposta", "confermata", "annullata"],"tipo_consenso": ["termini", "privacy"],"tipo_fonte": ["sito_locale", "instagram", "resident_advisor", "xceed", "dice"],"tipo_job": ["esegui_fonte", "analizza_flyer", "deduplica_grezzo", "copia_immagine_flyer", "pulizia_flyer"],"tipo_oggetto_segnalabile": ["profilo", "evento", "caricamento_flyer", "gruppo", "serata_gruppo", "immagine_locale", "locale", "fonte", "candidato_locale", "foto_profilo"]
           }
         }
 } as const

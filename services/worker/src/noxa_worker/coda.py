@@ -176,6 +176,25 @@ class EsecutoreCoda:
                 except TimeoutError:
                     pass
 
+    async def esegui_fino_a_esaurimento(self, scadenza: float) -> int:
+        """Esegue job finché la coda è vuota o finché `time.monotonic()` supera `scadenza`.
+
+        Modalità a esaurimento (ADR-0021): il job in corso alla scadenza arriva comunque alla
+        fine, entro `timeout_job`. Un errore dell'archivio ferma l'esecutore: riproverà la
+        prossima esecuzione pianificata. Restituisce il numero di job eseguiti.
+        """
+        eseguiti = 0
+        while time.monotonic() < scadenza:
+            try:
+                eseguito = await self.esegui_uno()
+            except Exception:
+                log.exception("errore_coda")
+                break
+            if not eseguito:
+                break
+            eseguiti += 1
+        return eseguiti
+
     async def _registra_errore_temporaneo(
         self,
         job: Job,

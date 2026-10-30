@@ -17,6 +17,7 @@ dependencies = [
     "uvicorn==0.54.0",
     "anthropic==1.17.0",
     "pillow==13.0.0",
+    "sentry-sdk==2.72.0",
 ]
 
 [dependency-groups]

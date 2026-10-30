@@ -329,7 +329,7 @@ begin
             'extra_' || n || '@example.com', '', now(), '{"provider": "email"}'::jsonb,
             jsonb_build_object('username', 'extra_' || n, 'nome_visualizzato', 'Extra ' || n,
                                'data_nascita', ((now() at time zone 'Europe/Rome')::date - interval '25 years')::date,
-                               'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-10')),
+                               'consensi', jsonb_build_object('termini', '2026-10', 'privacy', '2026-11')),
             now(), now());
     insert into public.amicizie (richiedente_id, destinatario_id, canale, stato, accettata_il)
     values (utente, tests.id('adulto_20'), 'codice_invito', 'accettata', now());
