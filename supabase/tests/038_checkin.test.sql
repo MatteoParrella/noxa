@@ -4,7 +4,7 @@
 -- dopo_disattivazione_checkin.
 -- Amici del seed: 15-16, 20-21, 18-17 (codice invito); richiesta in attesa 14 → 15.
 begin;
-select plan(65);
+select plan(66);
 
 -- Si parte senza check-in, anche dopo una corsa dei test e2e di integrazione (tutto torna
 -- com'era con il rollback finale).
@@ -122,6 +122,9 @@ select tests.autentica_come('moderatore');
 select is((select count(*)::int from public.checkin), 0, 'R-69: il moderatore non vede i check-in');
 select is((select count(*)::int from public.checkin_destinatari), 0,
           'R-69: il moderatore non vede i destinatari');
+select tests.autentica_come('moderatore_senza_mfa');
+select is((select count(*)::int from public.checkin), 0,
+          'R-69: nemmeno il moderatore senza due fattori vede i check-in');
 
 select tests.autentica_come('adulto_18');
 select lives_ok($$ select public.fai_checkin(tests.loc('001'), tests.ev9('18'), array[tests.id('minore_17')]) $$,

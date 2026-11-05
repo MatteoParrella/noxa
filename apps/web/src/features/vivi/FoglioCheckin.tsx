@@ -278,11 +278,39 @@ function PassoDove({
   const eventi = suggerimenti.data?.eventi ?? [];
   const serate = (suggerimenti.data?.serate ?? []).filter((s) => s.locale_id && s.locale);
   const daRicerca = scelta !== null && scelta.chiave === null;
+  // Un solo radio nella sequenza del tasto Tab: quello scelto, altrimenti il primo.
+  const chiavi = [
+    ...eventi.map((evento) => `evento:${evento.evento_id}`),
+    ...serate.map((serata) => `serata:${serata.serata_id}`),
+  ];
+  const conFocus = chiavi.includes(scelta?.chiave ?? '') ? scelta?.chiave : chiavi[0];
+  const tabIndice = (chiave: string) => (chiave === conFocus ? 0 : -1);
 
   return (
     <>
       {eventi.length + serate.length > 0 && (
-        <div role="radiogroup" aria-labelledby="ck-per-stasera">
+        <div
+          role="radiogroup"
+          aria-labelledby="ck-per-stasera"
+          onKeyDown={(evento) => {
+            // Pattern ARIA del gruppo di radio: le frecce spostano e scelgono.
+            const passo =
+              evento.key === 'ArrowDown' || evento.key === 'ArrowRight'
+                ? 1
+                : evento.key === 'ArrowUp' || evento.key === 'ArrowLeft'
+                  ? -1
+                  : 0;
+            if (!passo) return;
+            evento.preventDefault();
+            const radio = Array.from(
+              evento.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]'),
+            );
+            const attuale = radio.indexOf(document.activeElement as HTMLButtonElement);
+            const prossimo = radio[(attuale + passo + radio.length) % radio.length];
+            prossimo?.focus();
+            prossimo?.click();
+          }}
+        >
           <h4 className="etichetta m-0" id="ck-per-stasera">
             {testi.dove.perStasera}
           </h4>
@@ -294,6 +322,7 @@ function PassoDove({
                 type="button"
                 role="radio"
                 aria-checked={scelta?.chiave === chiave}
+                tabIndex={tabIndice(chiave)}
                 className="ck-sugg"
                 onClick={() =>
                   onScegli({
@@ -329,6 +358,7 @@ function PassoDove({
                 type="button"
                 role="radio"
                 aria-checked={scelta?.chiave === chiave}
+                tabIndex={tabIndice(chiave)}
                 className="ck-sugg"
                 onClick={() =>
                   onScegli({

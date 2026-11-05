@@ -260,3 +260,17 @@ test('notifica di un check-in: attivo con il locale, poi «Check-in terminato»'
   await expect(page.getByRole('link', { name: 'Vedi locale' })).toBeVisible();
   await expect(page.getByText('Check-in terminato', { exact: true })).toBeVisible();
 });
+
+test('i suggerimenti di stasera si scelgono anche con le frecce', async ({ page, supabase }) => {
+  supabase.checkinAbilitato = true;
+  await page.goto('/vivi/');
+  await page.getByRole('button', { name: 'Fai check-in' }).click();
+  const foglio = page.getByRole('dialog', { name: 'Fai check-in' });
+  const evento = foglio.getByRole('radio', { name: /Vinili al Binario/ });
+  const serata = foglio.getByRole('radio', { name: /Serata di gruppo/ });
+  await evento.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(serata).toBeFocused();
+  await expect(serata).toHaveAttribute('aria-checked', 'true');
+  await expect(evento).toHaveAttribute('tabindex', '-1');
+});

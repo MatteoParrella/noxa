@@ -31,13 +31,15 @@ self.addEventListener('notificationclick', (evento) => {
   const id = evento.notification.data && evento.notification.data.notifica;
   const percorso = id ? `/notifiche/?apri=${encodeURIComponent(id)}` : '/notifiche/';
   evento.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((finestre) => {
-      for (const finestra of finestre) {
-        if ('focus' in finestra && 'navigate' in finestra) {
-          return finestra.navigate(percorso).then((aperta) => (aperta || finestra).focus());
-        }
-      }
-      return self.clients.openWindow(percorso);
+    self.clients.matchAll({ type: 'window' }).then((finestre) => {
+      const finestra = finestre.find((f) => 'navigate' in f);
+      // navigate funziona solo sulle finestre controllate da questo service worker: se non
+      // riesce, si apre una finestra nuova.
+      if (!finestra) return self.clients.openWindow(percorso);
+      return finestra
+        .navigate(percorso)
+        .then((aperta) => (aperta || finestra).focus())
+        .catch(() => self.clients.openWindow(percorso));
     }),
   );
 });
