@@ -19,6 +19,9 @@ permissions:
 jobs:
   mappa:
     name: Mappa (${{ inputs.ambiente || 'staging' }})
+    # Finché la variabile del repository SERVIZI_ATTIVI non vale 'true' (nessun Supabase o R2 online,
+    # quindi nessun segreto) l'esecuzione programmata viene saltato invece di fallire.
+    if: github.event_name == 'workflow_dispatch' || vars.SERVIZI_ATTIVI == 'true'
     runs-on: ubuntu-24.04
     environment: ${{ inputs.ambiente || 'staging' }}
     timeout-minutes: 30
