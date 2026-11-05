@@ -94,7 +94,7 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 | F-40 | Moderazione | P0 | 1 | Area riservata con autenticazione a due fattori: coda dei flyer, coda dei duplicati, coda delle segnalazioni ordinate per priorità con il tempo rimanente e l'avviso delle urgenti (R-53); dettaglio con apertura registrata e immagini sfocate fino a «Mostra» (R-69); azioni motivate e registrate con l'anteprima del messaggio alle persone interessate; reclami (DSA art. 20); escalation alle autorità in due passaggi (R-55); occultamento automatico delle immagini segnalate per rischio a un minorenne (ADR-0023); gestione dei locali e delle fonti con verifica di conformità. |
 | F-41 | Diritti privacy | P0 | 1 | Esportazione JSON ed eliminazione dell'account self-service (R-64); informativa a livelli (R-63). |
 | F-42 | Impostazioni di privacy | P0 | 1 | Visibilità predefinita delle partecipazioni, check-in (attivabile dalla Fase 2), notifiche, elenco dei bloccati. |
-| F-43 | App installabile | P0 | 1–2 | Fase 1: PWA installabile con dati offline; build interne iOS (TestFlight) e Android (test interno) quando ci sono gli account degli store (D-13). Fase 2: pubblicazione su App Store e Google Play. |
+| F-43 | App installabile | P0 | 1–2 | Fase 1: PWA installabile con dati offline. Dall'iterazione 10 app Android provata sui telefoni del team con l'APK di debug; Fase 2: pubblicazione su Google Play per ultima, a funzionalità complete (ADR-0027). App Store solo se D-13 si chiude per Apple. |
 | F-44 | Raccolta eventi automatica | P0 | 1 | Almeno 2 adattatori per siti dei locali (dati strutturati e HTML) e l'adattatore Instagram Business Discovery, più i flyer; deduplicazione; conformità ADR-0008. |
 | F-45 | Accessibilità | P0 | 1 | WCAG 2.2 livello AA su tutte le schermate; verifiche automatiche (axe) e manuali (VoiceOver, TalkBack) prima di ogni rilascio. |
 | F-46 | Nuove aree geografiche | P2 | 3 | Aggiunta di province tramite migrazione su `locali.provincia` e nuovo bootstrap dei locali. |
@@ -150,7 +150,7 @@ fase della roadmap. La matrice va aggiornata insieme alla funzionalità (skill `
 | F-17 | Supabase Auth | `profili_privati` | R-01, R-02 | 3 |
 | F-20 | App · RPC `fai_checkin`, `suggerimenti_checkin` · Realtime Broadcast `vivi:<utente>` | `checkin`, `checkin_destinatari`, `profili_privati`, `notifiche` | R-17, R-30, R-43 | 2 |
 | F-21 | App nativa (geolocalizzazione in background) · Realtime Broadcast · `pg_cron` · Edge Function `invia-push` | `ritorni_sicuri`, `ritorni_destinatari`, `posizioni_ritorno`, `notifiche` | R-31, R-32 | 2 |
-| F-22 | Edge Function `invia-push` · Web Push (FCM/APNs con D-13) · `pg_net` · RPC `registra_dispositivo_push` | `dispositivi_push`, `notifiche`, `profili_privati` | R-43, R-66 | 2 |
+| F-22 | Edge Function `invia-push` · Web Push (FCM con Android, ADR-0027; APNs con D-13) · `pg_net` · RPC `registra_dispositivo_push` | `dispositivi_push`, `notifiche`, `profili_privati` | R-43, R-66 | 2 |
 | F-30 | App (offline) | `serate_tracker`, `tracker_spese`, `tracker_dj`, `tracker_amici` | R-40 | 1 |
 | F-31 | App · viste SQL | come F-30 | R-40 | 2 |
 | F-32 | `pg_cron` · funzione SQL `private.assegna_badge()` | `badge`, `badge_utente` | R-41 | 2 |

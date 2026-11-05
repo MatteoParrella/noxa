@@ -35,3 +35,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0024](0024-realtime-avvisi-privati.md) | Aggiornamenti dal vivo con avvisi senza dati su canali privati | Accettato |
 | [0025](0025-backup-cifrato-e-diritti-privacy.md) | Backup cifrato in proprio e diritti privacy nel database | Accettato |
 | [0026](0026-notifiche-web-push.md) | Notifiche sul telefono con il Web Push, testi di sistema e webhook dal database | Accettato |
+| [0027](0027-distribuzione-android-e-posizione-in-background.md) | Distribuzione su Google Play per ultima e posizione in background open source | Accettato |

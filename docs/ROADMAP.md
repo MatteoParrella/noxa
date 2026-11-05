@@ -58,7 +58,7 @@ l'ipotesi di lavoro `noxa.app`.
 ## Fase 1 — Beta chiusa Milano e Brianza
 
 **Funzionalità**: F-01, F-02, F-03, F-04, F-05, F-06, F-10, F-11, F-12, F-13, F-14, F-15,
-F-16, F-30, F-40, F-41, F-42, F-43 (PWA + build interne iOS e Android), F-44, F-45.
+F-16, F-30, F-40, F-41, F-42, F-43 (PWA; app Android con APK di debug, ADR-0027), F-44, F-45.
 
 **Fonti degli eventi** (2–3 fonti più i flyer, come da perimetro):
 
@@ -93,13 +93,15 @@ F-16, F-30, F-40, F-41, F-42, F-43 (PWA + build interne iOS e Android), F-44, F-
 ## Fase 2 — Lancio pubblico (MVP completo)
 
 **Funzionalità**: F-20, F-21, F-22, F-31, F-32, F-33, F-43 (pubblicazione negli store), più
-il consolidamento di tutte le funzionalità della Fase 1.
+il consolidamento di tutte le funzionalità della Fase 1. La pubblicazione su Google Play è
+l'ultimo passo, a funzionalità complete; App Store solo se D-13 si chiude per Apple
+(ADR-0027).
 
 **Contenuto aggiuntivo**
 
-- Plugin di geolocalizzazione in background scelto (D-04) e testato su dispositivi reali iOS
-  e Android, con l'app in background e con lo schermo bloccato.
-- Notifiche push per Android, iOS e web.
+- Plugin `@capacitor-community/background-geolocation` (ADR-0027) testato su dispositivi
+  reali Android, con l'app in background e con lo schermo bloccato; iOS se D-13 si chiude.
+- Notifiche push per Android (FCM) e web; APNs con iOS.
 - DPIA definitiva, informativa e termini definitivi, nomina del DPO se richiesta (D-07).
 - Penetration test esterno su app, API Supabase ed Edge Functions.
 - Test di carico: 100.000 utenti sintetici, 5.000 eventi futuri, 500 ritorni sicuri
@@ -107,16 +109,16 @@ il consolidamento di tutte le funzionalità della Fase 1.
 
 **Criteri di completamento**
 
-1. Ritorno sicuro: su 20 prove reali per piattaforma (iOS e Android) con l'app in background
+1. Ritorno sicuro: su 20 prove reali per piattaforma nativa (Android; iOS se D-13 si chiude) con l'app in background
    per almeno 30 minuti, la posizione arriva ai destinatari con un intervallo massimo di 2
    minuti nel 95% del tempo; l'allerta parte entro 2 minuti dall'arrivo previsto superato nel
    100% delle prove.
 2. Test pgTAP di R-30, R-31 e R-41 superati; nessuna posizione più vecchia di 24 ore dalla
    fine della sessione presente nel database (query di verifica in CI su staging).
 3. Penetration test senza vulnerabilità di gravità alta o critica aperte.
-4. DPIA approvata; termini e informativa pubblicati; questionari di età degli store compilati
-   (D-06).
-5. App approvate su App Store e Google Play; PWA in produzione.
+4. DPIA approvata; termini e informativa pubblicati; questionario di età di Google Play
+   compilato (D-06).
+5. App approvata su Google Play (e su App Store se D-13 si chiude); PWA in produzione.
 6. Test di carico: `cerca_eventi` < 800 ms al 95° percentile; nessun errore Realtime sopra
    l'1%.
 7. Crash-free sessions ≥ 99,5% nell'ultima settimana di beta.
@@ -166,11 +168,11 @@ Ogni iterazione ha:
 | 5 | 1 | Raccolta automatica degli eventi | F-44, F-40 (locali e fonti) | Moderazione: locali e fonti |
 | 6 | 1 | Flyer e moderazione | F-06, F-40, F-10 (foto profilo) | Carica flyer, stato flyer, code di moderazione, foto profilo |
 | 7 | 1 | Gruppi e serate di gruppo | F-13, F-14, F-15, F-16 | Gruppi, dettaglio gruppo, serata di gruppo |
-| 8 | 1 | Tracker, privacy e beta | F-30, F-41, F-42, F-45, F-43 (build interne) | Tracker, impostazioni di privacy, esporta ed elimina account |
+| 8 | 1 | Tracker, privacy e beta | F-30, F-41, F-42, F-45, F-43 (PWA) | Tracker, impostazioni di privacy, esporta ed elimina account |
 | 9 | 2 | Notifiche e check-in | F-22, F-20 | Centro notifiche, permessi, check-in |
-| 10 | 2 | Ritorno sicuro | F-21 | Avvio, ritorno in corso, ritorno di un amico, allerta |
+| 10 | 2 | Ritorno sicuro | F-21, F-43 (app Android) | Avvio, ritorno in corso, ritorno di un amico, allerta |
 | 11 | 2 | Statistiche, badge e Wrapped | F-31, F-32, F-33 | Statistiche, bacheca badge, schede del Wrapped |
-| 12 | 2 | Preparazione al lancio | F-43 (store), consolidamento | Icona, schermate e testi per gli store |
+| 12 | 2 | Preparazione al lancio | F-43 (Google Play), consolidamento | Icona, schermate e testi per gli store |
 | 13 | 3 | Accesso con Apple e Google | F-17 | Accesso social e completamento del profilo |
 | 14 | 3 | Aggregatori e nuove aree | F-07, F-46 | — |
 
@@ -195,8 +197,8 @@ Ogni iterazione ha:
   `milano-brianza.pmtiles`, font e icone nel bucket `mappe` e stili personalizzati
   (ADR-0016); scheda evento con spazio per la foto del locale e velatura al posto del blocco
   colorato del design (ADR-0018); axe nei test e2e.
-- **Prerequisiti esterni**: account Apple Developer e Google Play Console per firmare le
-  build (le build locali funzionano anche senza).
+- **Prerequisiti esterni**: nessuno; le build locali non richiedono account (Google Play
+  solo nell'iterazione 12, ADR-0027).
 - **Criteri**: nessuna violazione axe nel catalogo e nella navigazione, in entrambi i temi;
   l'app gira su browser, emulatore Android e simulatore iOS; la mappa si apre senza
   richieste a domini esterni (verificato nel test e2e).
@@ -289,8 +291,8 @@ Ogni iterazione ha:
   workflow `worker.yml`, mappa su Cloudflare R2 (`prepara_mappa.sh` e `mappa.yml`), header di
   sicurezza in `_headers` di Cloudflare Pages al posto di `vercel.json`, SMTP Brevo, fornitori
   aggiornati nella pagina `/privacy` con una nuova versione dell'informativa; backup notturno
-  cifrato su R2 (D-14 chiusa con ADR-0025). La beta parte dalla sola PWA: le build interne
-  e i link delle email nell'app nativa passano all'iterazione 10 (D-13).
+  cifrato su R2 (D-14 chiusa con ADR-0025). La beta parte dalla sola PWA: l'app Android e
+  i link delle email nell'app nativa passano all'iterazione 10 (ADR-0027).
 - **Criteri**: criteri della **Fase 1** (§Fase 1) verificati per la parte tecnica; la beta
   con utenti reali si avvia alla chiusura di questa iterazione.
 
@@ -298,21 +300,24 @@ Ogni iterazione ha:
 - **Contenuto**: `dispositivi_push`, Edge Function `invia-push` (FCM, APNs, Web Push),
   permessi e preferenze; `checkin`, `checkin_destinatari`, trigger `verifica_checkin`.
 - **Prerequisiti esterni**: chiavi VAPID per il Web Push, gratuite e generate in locale; la
-  beta è solo PWA (D-13), quindi progetto Firebase e chiavi APNs servono solo se D-13 si
-  chiude con gli account degli store e arrivano con le build native dell'iterazione 10.
+  beta è solo PWA, quindi il progetto Firebase arriva con l'app Android dell'iterazione 10
+  (ADR-0027) e le chiavi APNs solo se D-13 si chiude per Apple.
 - **Design**: `design/F-22-notifiche/` e `design/F-20-checkin/`.
 - **Criteri**: test pgTAP di R-30; nessun testo di altri utenti nelle notifiche, né nomi né
   username nei testi sulla schermata di blocco (test).
 
 ### Iterazione 10 — Ritorno sicuro
-- **Contenuto**: plugin di posizione in background (D-04), `ritorni_sicuri`,
-  `ritorni_destinatari`, `posizioni_ritorno`, Broadcast privato, `verifica_ritorni_scaduti`,
-  area di arrivo salvata solo sul dispositivo, modalità solo in primo piano nella PWA. Se
-  D-13 si chiude con gli account degli store: build interne TestFlight e Google Play e link
-  delle email di conferma e di recupero aperti nell'app nativa con App Links e Universal
-  Links sul dominio di D-01 (spostati dall'iterazione 8).
-- **Criteri**: test pgTAP di R-31 e R-32; prove su dispositivi reali secondo il criterio 1
-  della Fase 2.
+- **Contenuto**: plugin `@capacitor-community/background-geolocation` (ADR-0027),
+  `ritorni_sicuri`, `ritorni_destinatari`, `posizioni_ritorno`, Broadcast privato,
+  `verifica_ritorni_scaduti`, area di arrivo salvata solo sul dispositivo, modalità solo in
+  primo piano nella PWA. App Android installata sui telefoni del team con l'APK di debug
+  (nessun account Google Play) e notifiche native con FCM in `invia-push`; link delle email
+  di conferma e di recupero aperti nell'app con gli App Links, se il dominio di D-01 c'è già
+  (altrimenti si aprono nel browser).
+- **Prerequisiti esterni**: progetto Firebase gratuito per FCM; un telefono Android per le
+  prove. Nessun account degli store (ADR-0027).
+- **Criteri**: test pgTAP di R-31 e R-32; prove su dispositivi Android reali secondo il
+  criterio 1 della Fase 2.
 
 ### Iterazione 11 — Statistiche, badge e Wrapped
 - **Contenuto**: vista `statistiche_personali`; catalogo dei badge e `assegna_badge`;
@@ -322,7 +327,10 @@ Ogni iterazione ha:
 
 ### Iterazione 12 — Preparazione al lancio
 - **Contenuto**: correzioni del penetration test, test di carico, DPIA e testi legali
-  definitivi, questionari degli store (D-06), pubblicazione su App Store e Google Play;
+  definitivi, come ultimo passo account Google Play Console (25 $ una tantum), test chiuso richiesto da
+  Google (12 tester per 14 giorni con un account personale), dichiarazione della posizione in
+  background, questionario d'età (D-06) e pubblicazione su Google Play (ADR-0027); App Store
+  solo se D-13 si chiude per Apple;
   eliminazione degli account senza accessi da 24 mesi, con l'avviso via email 30 giorni
   prima (SAFETY_PRIVACY.md §10): nessun account della beta può arrivarci prima.
 - **Prerequisiti esterni**: penetration test esterno, consulente legale.

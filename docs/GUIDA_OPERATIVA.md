@@ -148,5 +148,6 @@ DECISIONI_APERTE.md, aggiorna i documenti e, se serve, scrive un ADR.
 | Durante la Fase 0 | Avviare con un legale DPIA, termini e informativa (D-07); inviare la richiesta di App Review a Meta |
 | Prima dell'iterazione 5 | App Review Meta approvata; chiave Google Places facoltativa (senza, solo OpenStreetMap) |
 | Prima dell'iterazione 6 | Organizzazione della moderazione (D-10). Facoltativi finché non si apre la beta: chiave Claude API con limite di spesa e accordo sul trattamento dei dati con Anthropic (D-12); senza chiave i flyer si compilano a mano in moderazione (ADR-0021) |
-| Prima dell'iterazione 9 | Niente: le chiavi VAPID del Web Push le genera Claude in locale. Progetto Firebase e chiavi APNs solo se D-13 si chiude con gli store, prima dell'iterazione 10 |
-| Prima dell'iterazione 12 | Penetration test esterno; testi legali definitivi; questionari d'età degli store (D-06) |
+| Prima dell'iterazione 9 | Niente: le chiavi VAPID del Web Push le genera Claude in locale |
+| Prima dell'iterazione 10 | Progetto Firebase gratuito per le notifiche Android; un telefono Android con le opzioni sviluppatore per installare l'APK di debug. Nessun account degli store (ADR-0027) |
+| Prima dell'iterazione 12 | Penetration test esterno; testi legali definitivi. Come ultima cosa, ad app completa: account Google Play Console (25 $ una tantum), 12 tester per il test chiuso di 14 giorni e questionario d'età (D-06). Account Apple solo se si chiude D-13 |
