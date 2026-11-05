@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 8 su 15.
+Iterazioni completate: 9 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -29,7 +29,7 @@ Iterazioni completate: 8 su 15.
 | 6 | completata con attese esterne | 2026-10-21 | 2026-10-22 | 4 | `iterazione-06-flyer-moderazione` | Mancano la chiave Claude API con limite di spesa, la valutazione sul golden set dei flyer e il DPA di Anthropic (D-12) |
 | 7 | completata | 2026-10-23 | 2026-10-26 | 3 | `iterazione-07-gruppi` | Avvisi dal vivo su canali privati (ADR-0024); notifica di uscita senza il nome del gruppo |
 | 8 | completata con attese esterne | 2026-10-27 | 2026-10-30 | 3 | `iterazione-08-tracker-privacy` | Backup cifrato e diritti privacy (ADR-0025); mancano lo staging (segreti di R2, Brevo, Sentry e backup), la beta con utenti reali e la verifica con VoiceOver e TalkBack |
-| 9 | in corso | 2026-11-05 | — | 0 | `iterazione-09-notifiche-checkin` | — |
+| 9 | completata con attese esterne | 2026-11-05 | 2026-11-05 | 2 | `iterazione-09-notifiche-checkin` | Web Push con testi di sistema (ADR-0026); mancano chiavi VAPID, segreti e deploy di `invia-push` in staging e la prova su telefoni reali |
 | 10 | da iniziare | — | — | 0 | — | — |
 | 11 | da iniziare | — | — | 0 | — | — |
 | 12 | da iniziare | — | — | 0 | — | — |
@@ -1034,3 +1034,70 @@ Superfici di contatto: invito (solo amici confermati compatibili con tutti, `puo
 - Criteri dell'iterazione: test pgTAP di R-30; nessun testo di altri utenti nelle notifiche,
   né nomi né username nei testi sulla schermata di blocco (test).
 
+**Cicli di revisione**
+- Ciclo 1: trovato che il tocco su una notifica non apriva niente se la finestra non era
+  controllata dal service worker (`navigate` rifiutato) → corretto con il ripiego su
+  `openWindow`; il gruppo di radio "Per stasera" non si muoveva con le frecce (pattern ARIA)
+  → aggiunti frecce e tabindex a rotazione, con test e2e; mancava il caso
+  `moderatore_senza_mfa` nei pgTAP del check-in → aggiunto; D-07 non elencava i servizi push
+  dei browser → aggiornata; i test e2e di navigazione e movimento cercavano il vecchio titolo
+  "Vivi" → aggiornati a "Stasera"; il test "spegnere il check-in" era instabile perché il
+  Supabase simulato non ricordava il salvataggio → corretto il test; il pgTAP del check-in
+  dipendeva dai dati lasciati dai test di integrazione → ora parte da zero.
+- Ciclo 2: tutti i controlli superati.
+
+**Esito dei test**
+- pgTAP: 1160 test in 32 file; nuovi `038_checkin` (66) e `039_notifiche_push` (35) verdi.
+  In locale falliscono solo `024_candidati_locali` (test 18) e `026_moderazione_eventi`
+  (test 11), che dipendono dai dati del database locale (decisioni fatte a mano e date del
+  seed dall'ultimo reset del 30.10) e non toccano tabelle di questa iterazione; si risolvono
+  con `supabase db reset`, non eseguito senza il permesso dell'utente.
+- App: lint, typecheck e Prettier puliti; unitari 118/118 (nuovi: cifratura Web Push
+  verificata con una decifratura indipendente, firma VAPID, testi senza nomi né username).
+- e2e simulati: 386 passati al primo giro completo, poi i 6 da aggiornare (titolo "Stasera")
+  e i nuovi di Vivi e notifiche verdi (`vivi.spec.ts`, `notifiche-push.spec.ts`: 77 test sui
+  due progetti).
+- e2e di integrazione: `vivi`, `privacy`, `amici`, `gruppi` verdi; `scopri` fallisce in locale
+  per le date del seed (eventi creati al reset del 30.10).
+- Edge Function `invia-push` provata sul runtime Deno locale: rifiuta senza segreto, valida
+  l'input, legge la notifica.
+- Worker (non modificato): ruff, mypy e pytest 215 passati, 4 saltati.
+
+**Safety review — F-20 Check-in, F-22 Notifiche sul telefono, F-42**
+Esito: SUPERATA
+
+| Dato | Chi lo vede | Regole |
+|---|---|---|
+| `checkin` (locale, evento, orari) | Il titolare; i destinatari amici confermati finché è attivo; nessun moderatore | R-17, R-30, R-69 |
+| `checkin_destinatari` | Il titolare; ogni destinatario solo la propria riga | R-30 |
+| Notifica `checkin_amico` (`checkin_id`, `utente_id`) | Il destinatario; il locale si legge dal check-in con la RLS | R-30, F-22 |
+| `dispositivi_push` (endpoint, chiavi, etichetta generica, date) | Solo il titolare; la funzione `invia-push` con `service_role` | R-66 |
+| Testo sulla schermata di blocco | Chiunque guardi il telefono: solo testi di sistema per tipo | F-22, R-43 |
+
+Superfici di contatto: selettore dei destinatari (solo amici confermati da `amicizie`),
+suggerimenti con gli amici della serata di gruppo (filtrati da `sono_amici`), elenco "Amici in
+giro stasera" e notifica (solo destinatari amici, blocco nelle due direzioni). Nessuna nuova
+ricerca di persone.
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | Migrazioni `20261105090000`, `20261105090100`: RLS e policy per operazione; `fai_checkin` e `suggerimenti_checkin` invoker; definer solo in `private` o RPC documentate con `search_path = ''`; pgTAP `038` e `039` con tutte le età del seed e i due moderatori; nessuna `service_role` nell'app |
+| B. Contatti | SÌ | Destinatari solo `sono_amici` (policy e RPC; test "un adulto escluso non vede il check-in di un minorenne", "una richiesta in attesa non è un destinatario"); blocco e amicizia rimossa tolgono i destinatari (test R-17); nessun testo libero; notifiche senza testi di altri (`push.test.ts`, test pgTAP del contenuto di `dati`) |
+| C. Eventi e contenuti | SÌ | Evento solo se `evento_visibile_a` (test 16 anni e 18+); il destinatario minorenne vede il locale ma non l'evento 18+ (test); nessuna pressione: suggerimento delle notifiche una volta sola, "Attiva" e "Non ora" con lo stesso peso (e2e), testi senza richiami (test R-43) |
+| D. Posizione | SÌ | Spento di default (test pgTAP ed e2e); solo il locale, nessuna colonna di coordinate (test); nessuna richiesta della posizione del telefono (e2e con geolocalizzazione strumentata); 6 ore, cancellato 24 ore dalla fine (test di conservazione) |
+| E. Contenuti e moderazione | SÌ | Nessun contenuto caricato né testo libero; limiti: 10 check-in in 24 ore (`NX052`, test), 10 dispositivi (test); nessuna policy per i moderatori (test R-69) |
+| F. Privacy | SÌ | Nuovo dato `dispositivi_push.descrizione` generico e indispensabile; righe in SAFETY_PRIVACY §10; esportazione con check-in e dispositivi senza endpoint (test); cancellazione a cascata con l'account; servizi push in R-66 e D-07; informativa `/privacy` aggiornata (testo della versione 2026-11 non ancora pubblicata) |
+| G. Documentazione | SÌ | ADR-0026; DATA_MODEL, ARCHITECTURE §5.3–5.4, SAFETY_PRIVACY (R-30 applicazione, R-66, §10), PRD F-20/F-22/F-42, DECISIONI_APERTE D-07; `verifica_documentazione.py` 0 problemi |
+
+**Attese esterne**
+- Chiavi VAPID di staging e produzione (`node scripts/genera_chiavi_vapid.mjs`, gratuite):
+  pubblica in `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`,
+  `VAPID_SUBJECT` e `NOXA_PUSH_SEGRETO` con `supabase secrets set`.
+- Vault del progetto: `invia_push_url` e `invia_push_segreto`; deploy di `invia-push` con
+  `--no-verify-jwt`.
+- Prova su telefoni reali (Android Chrome, iPhone con Noxa sulla schermata Home) e verifica con
+  VoiceOver e TalkBack di Vivi e del foglio delle notifiche.
+- FCM e APNs per le app native solo se D-13 si chiude con gli account degli store.
+
+**Commit**: 9d66ee6, f0056c7, 1587be8, 5208258, 5af5122, 1d48bce, fff3004, 86c9646, 07180fb e
+il commit finale sul branch `iterazione-09-notifiche-checkin`.
