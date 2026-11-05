@@ -132,7 +132,7 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `conta_membri(gruppo uuid)` | `integer` | Membri del gruppo, invitati compresi, solo se chi chiama è membro o invitato (null altrimenti): l'invito mostra quante persone ci sono senza mostrare le righe. |
 | `persona_json(p profili)` | `jsonb` | Identificativo, username, nome visualizzato e foto (null se nascosta, ADR-0023) per le RPC dei gruppi; non è `security definer`. |
 | `applica_invariante_gruppi(persone uuid[], motivo text)` | `integer` | Per ogni coppia di membri (invitati o attivi) di fasce diverse che non sono amici confermati toglie il maggiorenne, con `motivo` (`fasce`, `compleanno` se ha appena compiuto 18 anni); `persone` limita il controllo alle coppie che le contengono, null = tutti. Restituisce le rimozioni (R-15). |
-| `puo_ascoltare(argomento text)` | `boolean` | `security invoker`: `gruppi:<auth.uid()>` oppure `serata:<id>` di una serata che chi chiama vede (sottoquery soggetta alla RLS di `serate_gruppo`); falso per ogni altro argomento. Usata dalla policy di `realtime.messages` (§7). |
+| `puo_ascoltare(argomento text)` | `boolean` | `security invoker`: `gruppi:<auth.uid()>`, `vivi:<auth.uid()>` (iterazione 9) oppure `serata:<id>` di una serata che chi chiama vede (sottoquery soggetta alla RLS di `serate_gruppo`); falso per ogni altro argomento. Usata dalla policy di `realtime.messages` (§7). |
 | `garantisci_admin_gruppo(gruppo uuid)` | `void` | Un gruppo ha sempre un admin: se non ce n'è uno attivo diventa admin il membro attivo da più tempo; un gruppo senza membri attivi si elimina con inviti e serate. |
 | `evento_visibile_a(evento uuid, utente uuid)` | `boolean` | L'evento è `pubblicato` o `annullato` (un annullamento resta visibile per avvisare chi voleva andarci), `eta_di(utente) >= eta_minima` e (`not riferimenti_alcol` oppure `not e_minorenne(utente)`). Applica R-20 e R-23. La policy `SELECT` di `eventi` scrive la stessa regola con le funzioni valutate una volta per query; il test `018_eventi` verifica che coincidano per tutte le età. |
 | `evento_partecipabile(evento uuid)` | `boolean` | `evento_visibile_a(evento, auth.uid())` e l'evento è `pubblicato` (non ci si segna a un evento annullato o in revisione). F-05. |
@@ -166,6 +166,8 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `e_titolare_serata_tracker(serata uuid)` | `boolean` | `auth.uid()` è il titolare della serata del diario; usata dalle policy di `tracker_spese`, `tracker_dj` e `tracker_amici` (R-69). |
 | `e_titolare_checkin(checkin uuid)` | `boolean` | `auth.uid()` è l'autore del check-in. |
 | `e_destinatario_checkin(checkin uuid)` | `boolean` | `auth.uid()` è in `checkin_destinatari` del check-in. |
+| `avvisa_vivi(utente uuid)` | `void` | Avviso `cambio` senza dati sul canale privato `vivi:<utente>` (§7): un check-in ricevuto, terminato o da cui si è stati tolti. |
+| `esporta_dati_base()` | `jsonb` | L'esportazione dell'iterazione 8, spostata in `private`: `public.esporta_miei_dati()` le aggiunge check-in e dispositivi. Nessun permesso per `authenticated`. |
 | `e_titolare_ritorno(ritorno uuid)` | `boolean` | `auth.uid()` è il titolare del ritorno sicuro. |
 | `e_destinatario_ritorno(ritorno uuid)` | `boolean` | `auth.uid()` è in `ritorni_destinatari` del ritorno, il ritorno è `attivo` (oppure concluso da meno di 15 minuti, per mostrare l'esito) e `sono_amici(auth.uid(), titolare)`. |
 
@@ -185,7 +187,10 @@ Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `prepara_serata_gruppo`, `imposta_aggiornata_il`, `notifica_serata_gruppo`,
 `rimuovi_notifiche_serata`, `avvisa_cambio_serata`, `avvisa_cambio_membri`, `verifica_categoria_spesa`,
 `prepara_serata_tracker`, `registra_account_conservato`,
-`limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `calcola_data_serata`,
+`limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `proteggi_checkin`,
+`dopo_fine_checkin`, `verifica_destinatario_checkin`, `notifica_checkin`,
+`dopo_rimozione_destinatario`, `rimuovi_destinatari_checkin`, `dopo_disattivazione_checkin`,
+`sincronizza_notifiche_push`, `invia_push`, `calcola_data_serata`,
 `imposta_aggiornato_il`, `imposta_nome_normalizzato`, `prepara_fonte`,
 `registra_modifica_moderatore`, `notifica_amicizia`, `rimuovi_notifiche_amicizia`,
 `verifica_codice_invito`, `accoda_analisi_flyer`, `proteggi_caricamento_flyer`,
@@ -232,12 +237,12 @@ Dati pubblici minimi dell'utente. Non contiene informazioni sull'età (R-05).
 | `data_nascita` | `date` | not null; età ≥ 14 alla creazione |
 | `checkin_abilitato` | `boolean` | default `false` (R-30) |
 | `partecipazioni_visibili` | `boolean` | default `true` (R-67) |
-| `notifiche_push_abilitate` | `boolean` | default `false` |
+| `notifiche_push_abilitate` | `boolean` | default `false`; vera se esiste almeno un dispositivo in `dispositivi_push`, scritta solo dal trigger `private.sincronizza_notifiche_push` (ADR-0026) |
 | `onboarding_completato_il` | `timestamptz` | nullable; impostata alla fine dell'onboarding di sicurezza (F-10) |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
 - **S**: `utente_id = auth.uid()`.
-- **U**: `utente_id = auth.uid()`; `GRANT UPDATE (checkin_abilitato, partecipazioni_visibili, notifiche_push_abilitate, onboarding_completato_il)`. Il trigger `private.blocca_modifica_data_nascita` rifiuta qualsiasi modifica di `data_nascita` che non arrivi dalla RPC `public.correggi_data_nascita` (riservata agli amministratori e registrata in `azioni_moderazione`, che arriva con quella tabella): la RPC imposta per la propria transazione `noxa.correzione_data_nascita = 'consentita'`; ogni altra modifica fallisce con `NX007` (R-02).
+- **U**: `utente_id = auth.uid()`; `GRANT UPDATE (checkin_abilitato, partecipazioni_visibili, onboarding_completato_il)` (`notifiche_push_abilitate` dall'iterazione 9 la scrive solo il database). Spegnere `checkin_abilitato` termina il check-in attivo (trigger `private.dopo_disattivazione_checkin`, R-30). Il trigger `private.blocca_modifica_data_nascita` rifiuta qualsiasi modifica di `data_nascita` che non arrivi dalla RPC `public.correggi_data_nascita` (riservata agli amministratori e registrata in `azioni_moderazione`, che arriva con quella tabella): la RPC imposta per la propria transazione `noxa.correzione_data_nascita = 'consentita'`; ogni altra modifica fallisce con `NX007` (R-02).
 - **I/D**: nessuna (creazione da trigger, eliminazione a cascata).
 - Registrazione (ARCHITECTURE.md §4.1). `private.verifica_dati_registrazione(metadati)` controlla `username`, `nome_visualizzato`, `data_nascita` (età ≥ 14 a Roma, R-01) e `consensi` (versioni in vigore, R-63) e restituisce il primo codice d'errore (`NX001` età, `NX002` username non valido, `NX003` username in uso, `NX004` nome, `NX005` data, `NX006` consensi) o null. La usano:
   - l'hook di Supabase Auth `private.prima_della_creazione_utente(evento jsonb)` ("before user created", eseguito da `supabase_auth_admin`), che rifiuta la richiesta con `http_code 400` e il codice come messaggio;
@@ -283,10 +288,15 @@ Unico su (`utente_id`, `tipo`, `versione`).
 | `id` | `uuid` | PK |
 | `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade` |
 | `piattaforma` | `piattaforma` | |
-| `token` | `text` | unico |
-| `creato_il`, `ultimo_uso_il` | `timestamptz` | |
+| `token` | `text` | unico; per `web` l'endpoint dell'iscrizione, solo verso i servizi push dei browser (`fcm.googleapis.com`, `updates.push.services.mozilla.com`, `web.push.apple.com`, `*.notify.windows.com`) |
+| `chiave_p256dh`, `chiave_auth` | `text` | chiavi della cifratura del browser (base64url), obbligatorie per `web` |
+| `descrizione` | `text` | al massimo 60 caratteri; etichetta generica scritta dall'app ("Android · Chrome", "Telefono · Noxa dalla Home"), senza modello né versione |
+| `creato_il`, `ultimo_uso_il` | `timestamptz` | `ultimo_uso_il` rinnovato a ogni apertura dell'app sul dispositivo |
 
-- **S/I/U/D**: `utente_id = auth.uid()`.
+- **S/D**: `utente_id = auth.uid()`.
+- **I/U**: nessuna diretta. RPC `public.registra_dispositivo_push(piattaforma, token, chiave_p256dh, chiave_auth, descrizione)` (`security definer`): registra o rinnova il dispositivo di chi chiama; se l'endpoint era di un altro account (stesso browser, altra persona) la sua riga si toglie; al massimo 10 dispositivi per persona, oltre si toglie il meno usato.
+- Trigger `private.sincronizza_notifiche_push` (`after insert or delete`): aggiorna `profili_privati.notifiche_push_abilitate`.
+- All'uscita dall'account l'app toglie il dispositivo; conservazione: 90 giorni dall'ultimo uso (§8, ADR-0026).
 
 #### `notifiche`
 *Funzionalità: F-11, F-13, F-14, F-21, F-22, F-32, F-33, F-40.*
@@ -303,7 +313,7 @@ Unico su (`utente_id`, `tipo`, `versione`).
 
 - **S**: `utente_id = auth.uid()`.
 - **U**: `utente_id = auth.uid()`; `GRANT UPDATE (letta_il)`.
-- **I**: nessuna per `authenticated`; le righe sono create solo da `private.crea_notifica`, chiamata dai trigger e dalle RPC. Dall'iterazione 6: `richiesta_amicizia` e `amicizia_accettata` (trigger `private.notifica_amicizia`, che `private.rimuovi_notifiche_amicizia` toglie se la richiesta viene rifiutata o annullata), `esito_moderazione` (`private.notifica_esito`). Dopo un blocco spariscono le notifiche che riguardano l'altra persona (R-17). Dall'iterazione 9 un webhook del database sull'`INSERT` chiama l'Edge Function `invia-push`.
+- **I**: nessuna per `authenticated`; le righe sono create solo da `private.crea_notifica`, chiamata dai trigger e dalle RPC. Dall'iterazione 6: `richiesta_amicizia` e `amicizia_accettata` (trigger `private.notifica_amicizia`, che `private.rimuovi_notifiche_amicizia` toglie se la richiesta viene rifiutata o annullata), `esito_moderazione` (`private.notifica_esito`). Dopo un blocco spariscono le notifiche che riguardano l'altra persona (R-17). Dall'iterazione 9: `checkin_amico` (trigger `private.notifica_checkin`, con i soli `checkin_id` e `utente_id`; tolta se il destinatario viene tolto) e il webhook `private.invia_push` (`after insert`), che per chi ha almeno un dispositivo chiama l'Edge Function `invia-push` con `pg_net`, il solo `notifica_id` e il segreto `x-noxa-segreto`; indirizzo e segreto stanno nel Vault (`invia_push_url`, `invia_push_segreto`) e senza di essi non parte nessuna richiesta (ADR-0026).
 - Realtime: tabella nella pubblicazione `supabase_realtime` (§7).
 - Conservazione: 90 giorni.
 
@@ -791,17 +801,19 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 | Colonna | Tipo | Vincoli |
 |---|---|---|
 | `id` | `uuid` | PK |
-| `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade` |
-| `locale_id` | `uuid` | FK → `locali(id)` (nessuna coordinata, R-30) |
-| `evento_id` | `uuid` | nullable |
-| `creato_il` | `timestamptz` | |
-| `scade_il` | `timestamptz` | `creato_il + interval '6 hours'` |
-| `terminato_il` | `timestamptz` | nullable |
+| `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade`; default `auth.uid()` |
+| `locale_id` | `uuid` | FK → `locali(id)` `on delete cascade` (nessuna coordinata, R-30) |
+| `evento_id` | `uuid` | nullable, FK → `eventi(id)` `on delete set null`; evento dello stesso locale |
+| `creato_il` | `timestamptz` | scritta dal database |
+| `scade_il` | `timestamptz` | `creato_il + interval '6 hours'` (vincolo) |
+| `terminato_il` | `timestamptz` | nullable; "Sono andato via" |
 
-- **S**: `utente_id = auth.uid()` oppure (`scade_il > now()` e `terminato_il is null` e `private.e_destinatario_checkin(id)` e `private.sono_amici(auth.uid(), utente_id)`).
-- **I**: `utente_id = auth.uid()` e (`evento_id is null` oppure `private.evento_visibile_a(evento_id, auth.uid())`); il trigger `private.verifica_checkin` controlla `profili_privati.checkin_abilitato = true` (R-30) e crea le notifiche `checkin_amico` per i destinatari.
-- **U**: `utente_id = auth.uid()`; `GRANT UPDATE (terminato_il)`.
+- **S**: `utente_id = auth.uid()` oppure (`scade_il > now()` e `terminato_il is null` e `private.e_destinatario_checkin(id)` e `private.sono_amici(auth.uid(), utente_id)` e `private.account_attivo(auth.uid())`). I moderatori non hanno policy (R-69).
+- **I**: `utente_id = auth.uid()` e `private.account_attivo(auth.uid())` e (`evento_id is null` oppure `private.evento_visibile_a(evento_id, auth.uid())`); `GRANT INSERT (locale_id, evento_id)`. Il trigger `private.verifica_checkin` (`before insert`) controlla `profili_privati.checkin_abilitato = true` (`NX049`, R-30), **un solo check-in attivo alla volta** (`NX050`), al massimo 10 check-in in 24 ore (`NX052`), locale attivo ed evento dello stesso locale (`NX053`), e scrive `creato_il` e `scade_il`.
+- **U**: `utente_id = auth.uid()`; `GRANT UPDATE (terminato_il)`. Il trigger `private.proteggi_checkin` registra la fine una volta sola con l'ora del database; `private.dopo_fine_checkin` avvisa i destinatari.
 - **D**: `utente_id = auth.uid()`.
+- RPC `public.fai_checkin(locale, evento, destinatari uuid[])` (`security invoker`): crea il check-in con i destinatari in un'unica transazione; chi non è un amico confermato viene escluso e restituito in `esclusi`; senza nessun amico valido `NX051`. RPC `public.suggerimenti_checkin()` (`security invoker`): eventi a cui partecipi nella serata in corso e serate di gruppo della serata in corso a cui non hai risposto "no", con il locale e gli amici confermati del gruppo da proporre.
+- Conservazione: 24 ore dalla fine (scadenza o "Sono andato via"), §8.
 
 #### `checkin_destinatari`
 *Funzionalità: F-20.*
@@ -812,8 +824,9 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 | `amico_id` | `uuid` | FK → `profili(id)` `on delete cascade`; PK composta |
 
 - **S**: `private.e_titolare_checkin(checkin_id)` oppure `amico_id = auth.uid()`.
-- **I**: `private.e_titolare_checkin(checkin_id)` e `private.sono_amici(auth.uid(), amico_id)`.
-- **D**: `private.e_titolare_checkin(checkin_id)`.
+- **I**: `private.e_titolare_checkin(checkin_id)` e `private.sono_amici(auth.uid(), amico_id)`. Il trigger `private.verifica_destinatario_checkin` accetta solo un check-in attivo e un destinatario diverso dal titolare (`NX054`); `private.notifica_checkin` crea la notifica `checkin_amico` e l'avviso su `vivi:<amico>`.
+- **D**: `private.e_titolare_checkin(checkin_id)`. Il trigger `private.dopo_rimozione_destinatario` toglie la notifica del destinatario e, se era l'ultimo, termina il check-in.
+- R-17: un blocco (`after insert on blocchi`) o un'amicizia rimossa (`after delete on amicizie`) tolgono la persona dai check-in dell'altra nelle due direzioni (`private.rimuovi_destinatari_checkin`).
 
 #### `ritorni_sicuri`
 *Funzionalità: F-21.*
@@ -1034,8 +1047,11 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `salva_serata_diario(serata jsonb)` | invoker | utenti | Crea o modifica una serata con spese (al massimo 8), DJ (20) e amici (30) in un'unica transazione; l'`id` arriva dal dispositivo; un `id` di un'altra persona dà `42501` (F-30, R-40, R-69) |
 | `cerca_per_diario(testo text)` | invoker | utenti | Campo «Dove»: eventi pubblicati visibili dell'ultimo anno fino a oggi e locali attivi, almeno 2 caratteri, 10 risultati per tipo |
 | `categorie_spesa_disponibili()` | definer | utenti | Categorie di spesa per chi chiama, senza `alcolici` per i minorenni: l'app non decide da sé (R-40) |
-| `esporta_miei_dati()` | definer | utenti | Tutti i propri dati in un JSON (`formato` `noxa-esportazione-1`); delle altre persone solo username e nome di chi ha un legame con te; nessuna segnalazione ricevuta (R-50, R-69). Una richiesta all'ora (`private.esportazioni_dati`), `NX047` con l'ora della prossima (R-64, ADR-0025) |
+| `esporta_miei_dati()` | definer | utenti | Tutti i propri dati in un JSON, dall'iterazione 9 con check-in e dispositivi (senza endpoint né chiavi) (`formato` `noxa-esportazione-1`); delle altre persone solo username e nome di chi ha un legame con te; nessuna segnalazione ricevuta (R-50, R-69). Una richiesta all'ora (`private.esportazioni_dati`), `NX047` con l'ora della prossima (R-64, ADR-0025) |
 | `elimina_mio_account(password text)` | definer | utenti | Verifica la password (5 tentativi sbagliati all'ora in `private.tentativi_eliminazione`, poi `NX048`) e i due fattori se attivi (`serve_codice` senza `aal2`); conserva l'identità in `private.account_conservati` solo se c'è un'escalation (R-55); elimina `auth.users` e restituisce i file della foto profilo che l'Edge Function `elimina-account` cancella (R-64, ADR-0025) |
+| `fai_checkin(locale uuid, evento uuid, destinatari uuid[])` | invoker | utenti | Check-in con i destinatari in un'unica transazione; restituisce `id`, `scade_il`, `destinatari` ed `esclusi` (non più amici confermati); `NX049`…`NX053` (F-20, R-30) |
+| `suggerimenti_checkin()` | invoker | utenti | Eventi a cui partecipi e serate di gruppo della serata in corso, con gli amici confermati da proporre (F-20) |
+| `registra_dispositivo_push(piattaforma, token, chiave_p256dh, chiave_auth, descrizione)` | definer | utenti | Registra o rinnova il dispositivo push di chi chiama; un endpoint appartiene a un solo account; al massimo 10 dispositivi (F-22, ADR-0026) |
 | `rigenera_mio_riepilogo()` | definer | utenti | Rigenera il proprio riepilogo annuale (F-33) |
 | `coda_flyer()` | definer | moderatori | Caricamenti in revisione o non leggibili con estrazione, percorso dell'immagine, evento in revisione e possibile corrispondenza con un evento pubblicato, senza `utente_id` né dati del profilo di chi ha caricato (il percorso contiene solo l'uuid pseudonimo usato per la cartella) (F-40, R-69) |
 | `decidi_flyer(caricamento, esito, dati, motivazione, evento_esistente)` | definer | moderatori | Approvazione con le due conferme e la scelta esplicita sull'alcol (R-23), unione a un evento pubblicato o rifiuto motivato (R-51); sotto i 18 anni serve la motivazione (R-22); se l'immagine è adatta accoda `copia_immagine_flyer` |
@@ -1079,6 +1095,7 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 |---|---|---|
 | `serata:<id>` | Broadcast privato, avviso `cambio` senza dati da `private.avvisa_cambio_serata` | policy su `realtime.messages` con `private.puo_ascoltare(topic)`: la serata si vede (RLS di `serate_gruppo`: membri attivi, evento visibile, R-24) |
 | `gruppi:<utente_id>` | Broadcast privato, avviso `cambio` senza dati da `private.avvisa_cambio_membri` (invito, ingresso, uscita, ruolo) | stessa policy: solo il titolare (`utente_id = auth.uid()`) |
+| `vivi:<utente_id>` | Broadcast privato, avviso `cambio` senza dati da `private.avvisa_vivi` (check-in ricevuto, terminato, destinatario tolto) | stessa policy: solo il titolare; l'app ricarica i check-in con la RLS e li ricontrolla ogni minuto per la scadenza (iterazione 9) |
 | Modifiche a `notifiche` dell'utente | Postgres Changes | RLS di `notifiche` |
 | `ritorno:<id>` | Broadcast privato | policy su `realtime.messages`: titolare o `private.e_destinatario_ritorno(id)` |
 
@@ -1095,7 +1112,7 @@ RLS (iterazione 7).
 | Codici invito scaduti | ogni ora, al minuto 23 | `private.elimina_codici_invito_scaduti()`: elimina i codici scaduti da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Account non confermati | ogni ora, al minuto 17 | `private.elimina_account_non_confermati()`: elimina gli account senza email confermata creati da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Ritorni scaduti | ogni minuto | `private.verifica_ritorni_scaduti()` |
-| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); dall'iterazione 8 `azioni_moderazione` e `segnalazioni` chiuse dopo 12 mesi (salvo prove e decisioni con un reclamo conservato), il riferimento alla foto dei locali disattivati da 7 giorni, `private.tentativi_eliminazione` e `private.esportazioni_dati` dopo 24 ore. Gli account inattivi da 24 mesi sono nell'iterazione 12 (ROADMAP.md §5) |
+| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); dall'iterazione 8 `azioni_moderazione` e `segnalazioni` chiuse dopo 12 mesi (salvo prove e decisioni con un reclamo conservato), il riferimento alla foto dei locali disattivati da 7 giorni, `private.tentativi_eliminazione` e `private.esportazioni_dati` dopo 24 ore; dall'iterazione 9 `checkin` (con i destinatari) 24 ore dopo la fine e `dispositivi_push` dopo 90 giorni senza uso. Gli account inattivi da 24 mesi sono nell'iterazione 12 (ROADMAP.md §5) |
 | Invariante dei gruppi | ogni giorno alle 04:00 | `private.verifica_invariante_gruppi()` |
 | Accodamento job del worker | ogni 5 minuti | `private.accoda_fonti_da_eseguire()`: inserisce `esegui_fonte` per le fonti attive scadute; dopo un errore l'intervallo raddoppia (fino a 8 volte la frequenza), che è il backoff delle fonti |
 | Metriche | ogni giorno alle 02:00 | `refresh materialized view private.metriche_settimanali` |

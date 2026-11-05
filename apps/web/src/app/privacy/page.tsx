@@ -85,14 +85,22 @@ export default function PaginaPrivacy() {
           Anthropic: legge l’immagine dei flyer caricati per estrarre i dati dell’evento, senza
           ricevere chi li ha caricati.
         </li>
-        <li>Google e Apple: consegnano le notifiche push, se le accendi.</li>
+        <li>
+          I servizi push dei browser (Google, Mozilla, Apple, Microsoft): consegnano le notifiche
+          sul telefono, se le accendi. Ricevono un testo cifrato che non possono leggere, senza
+          nomi né testi di altre persone.
+        </li>
         <li>Sentry (Unione europea): errori tecnici, senza email, posizioni o testi.</li>
       </ul>
 
       <h2>6. Quanto li teniamo</h2>
       <ul>
         <li>Account e dati collegati: finché hai l’account.</li>
-        <li>Posizione del ritorno sicuro e check-in: 24 ore.</li>
+        <li>Posizione del ritorno sicuro e check-in: 24 ore dalla fine.</li>
+        <li>
+          Dispositivi con le notifiche sul telefono: finché le tieni accese, al massimo 90 giorni
+          senza aprire l’app.
+        </li>
         <li>Account non confermato con il link dell’email: 24 ore.</li>
         <li>Account senza accessi per 24 mesi: ti avvisiamo, poi lo cancelliamo dopo 30 giorni.</li>
         <li>

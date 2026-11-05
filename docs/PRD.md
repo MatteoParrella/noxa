@@ -74,9 +74,9 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 
 | ID | Funzionalità | Priorità | Fase | Criteri di accettazione |
 |---|---|---|---|---|
-| F-20 | Check-in "sono qui" | P0 | 2 | Disattivato di default; si attiva nelle impostazioni; indica solo il locale; destinatari scelti tra gli amici confermati (proposti di default: i membri della serata di gruppo che sono anche amici confermati); scade dopo 6 ore; si termina in un tocco (R-30). |
+| F-20 | Check-in "sono qui" | P0 | 2 | Disattivato di default; si attiva nelle impostazioni; indica solo il locale; destinatari scelti tra gli amici confermati (proposti di default: i membri della serata di gruppo che sono anche amici confermati); scade dopo 6 ore; si termina in un tocco (R-30). Un solo check-in attivo alla volta (per cambiare locale si termina e se ne fa uno nuovo); il locale si sceglie dai suggerimenti di stasera o per nome, mai con la posizione del telefono; chi lo riceve vede nome, avatar, locale e da quando, in Vivi e in una notifica; si possono togliere destinatari (togliere l'ultimo lo termina). |
 | F-21 | Ritorno sicuro | P0 | 2 | Avvio esplicito con arrivo previsto e da 1 a 5 amici confermati; posizione condivisa anche con l'app in background (app native, ADR-0006); indicatore permanente; "sono arrivato" in un tocco oppure arrivo automatico in un'area salvata solo sul dispositivo; allerta push ai destinatari se l'arrivo previsto passa senza conferma; fine automatica (R-31, R-32). Nella PWA la funzione è disponibile solo in primo piano e lo dichiara chiaramente. |
-| F-22 | Notifiche push | P0 | 2 | iOS e Android tramite FCM/APNs, Web Push per la PWA; consenso esplicito; nessun testo scritto da altri utenti nelle notifiche (solo testi di sistema). Nella Fase 1 le notifiche sono solo nell'app: campanella con il numero delle non lette, elenco aggiornato in tempo reale (Realtime), esiti di moderazione con la motivazione. |
+| F-22 | Notifiche push | P0 | 2 | iOS e Android tramite FCM/APNs, Web Push per la PWA; consenso esplicito; nessun testo scritto da altri utenti nelle notifiche (solo testi di sistema). Sulla schermata di blocco né nomi né username; il permesso del sistema si chiede solo dopo "Attiva" nel foglio di Noxa, con "Non ora" dello stesso peso; su iPhone si spiega come aggiungere Noxa alla schermata Home; i dispositivi si vedono e si tolgono in Privacy e dati. Nella beta solo PWA (D-13) c'è il Web Push (ADR-0026). Nella Fase 1 le notifiche sono solo nell'app: campanella con il numero delle non lette, elenco aggiornato in tempo reale (Realtime), esiti di moderazione con la motivazione. |
 
 ### 4.4 Ricorda
 
@@ -148,16 +148,16 @@ fase della roadmap. La matrice va aggiornata insieme alla funzionalità (skill `
 | F-15 | App | `serate_gruppo`, `partecipazioni_serata` | — | 1 |
 | F-16 | App | `partecipazioni_serata` | — | 1 |
 | F-17 | Supabase Auth | `profili_privati` | R-01, R-02 | 3 |
-| F-20 | App · Realtime | `checkin`, `checkin_destinatari`, `profili_privati` | R-30 | 2 |
+| F-20 | App · RPC `fai_checkin`, `suggerimenti_checkin` · Realtime Broadcast `vivi:<utente>` | `checkin`, `checkin_destinatari`, `profili_privati`, `notifiche` | R-17, R-30, R-43 | 2 |
 | F-21 | App nativa (geolocalizzazione in background) · Realtime Broadcast · `pg_cron` · Edge Function `invia-push` | `ritorni_sicuri`, `ritorni_destinatari`, `posizioni_ritorno`, `notifiche` | R-31, R-32 | 2 |
-| F-22 | Edge Function `invia-push` · FCM/APNs/Web Push | `dispositivi_push`, `notifiche` | R-66 | 2 |
+| F-22 | Edge Function `invia-push` · Web Push (FCM/APNs con D-13) · `pg_net` · RPC `registra_dispositivo_push` | `dispositivi_push`, `notifiche`, `profili_privati` | R-43, R-66 | 2 |
 | F-30 | App (offline) | `serate_tracker`, `tracker_spese`, `tracker_dj`, `tracker_amici` | R-40 | 1 |
 | F-31 | App · viste SQL | come F-30 | R-40 | 2 |
 | F-32 | `pg_cron` · funzione SQL `private.assegna_badge()` | `badge`, `badge_utente` | R-41 | 2 |
 | F-33 | `pg_cron` · funzione SQL `private.genera_riepiloghi()` · App | `riepiloghi_annuali` | R-42 | 2 |
 | F-40 | App (area di moderazione) · RPC di moderazione | `segnalazioni`, `azioni_moderazione`, `contenuti_occultati`, `reclami`, `caricamenti_flyer`, `eventi_grezzi`, `locali`, `fonti`, `esecuzioni_fonte`, `candidati_locali` | R-06, R-51, R-53, R-55, R-69 | 1 |
 | F-41 | RPC `esporta_miei_dati`, `elimina_mio_account`; Edge Function `elimina-account` | tutte le tabelle personali | R-64 | 1 |
-| F-42 | App | `profili_privati`, `blocchi` | R-30, R-67 | 1 |
+| F-42 | App | `profili_privati`, `blocchi`, `dispositivi_push` | R-30, R-67 | 1 |
 | F-43 | App (Next.js export statico + Capacitor) · service worker | — | — | 1–2 |
 | F-44 | `pg_cron` · Worker (coda, adattatori, normalizzazione, dedup) | `fonti`, `esecuzioni_fonte`, `eventi_grezzi`, `eventi`, `eventi_fonti`, `coda_job`, `candidati_locali` | R-21, R-22, ADR-0008 | 1 |
 | F-45 | App · CI (axe) | — | — | 1 |

@@ -97,7 +97,7 @@ flowchart LR
 | Auth | Email e password (almeno 10 caratteri) con verifica, CAPTCHA (Cloudflare Turnstile, ADR-0020), protezione dalle password compromesse, MFA TOTP obbligatoria per i moderatori (R-06); hook "before user created" per il controllo dell'età (§4.1); modelli delle email in italiano. |
 | Storage | Bucket `avatar`, `flyer-caricati`, `flyer-pubblicati`, `immagini-locali` (foto dei locali, ADR-0018), `mappe` (DATA_MODEL.md §6). |
 | Realtime | Postgres Changes per le notifiche; Broadcast privato per gli avvisi di gruppi e serate e per le posizioni del ritorno sicuro. |
-| Edge Functions (Deno) | `invia-push` (FCM HTTP v1 per Android e iOS, Web Push VAPID), `elimina-account` (ADR-0025: chiama `elimina_mio_account` con il JWT dell'utente e usa `service_role` solo per cancellare i file della foto profilo). L'esportazione dei dati è la RPC `esporta_miei_dati`. |
+| Edge Functions (Deno) | `invia-push` (ADR-0026: Web Push VAPID con contenuto cifrato e testi di sistema, chiamata dal webhook `private.invia_push` con `pg_net` e un segreto condiviso; FCM HTTP v1 per Android e iOS quando D-13 si chiude), `elimina-account` (ADR-0025: chiama `elimina_mio_account` con il JWT dell'utente e usa `service_role` solo per cancellare i file della foto profilo). L'esportazione dei dati è la RPC `esporta_miei_dati`. |
 | `pg_cron` | Job di DATA_MODEL.md §8, compresi il calcolo dei badge e dei riepiloghi annuali con funzioni SQL. |
 
 ### 3.3 Worker (`services/worker`)
@@ -321,20 +321,53 @@ l'immagine come prova e non notifica l'account coinvolto.
 - Postgres Changes solo su tabelle con RLS, con filtri per l'identificativo dell'oggetto, e
   solo se la chiave primaria non rivela relazioni tra persone: la RLS non vale per gli
   eventi `DELETE`, che arrivano a ogni sessione con la chiave (oggi solo `notifiche`).
-- Gruppi e serate usano avvisi senza dati su canali Broadcast privati (`serata:<id>`,
-  `gruppi:<utente_id>`) autorizzati dalla policy di `realtime.messages`; l'app ricarica con
+- Gruppi, serate e check-in usano avvisi senza dati su canali Broadcast privati
+  (`serata:<id>`, `gruppi:<utente_id>`, `vivi:<utente_id>`) autorizzati dalla policy di `realtime.messages`; l'app ricarica con
   le RPC (DATA_MODEL.md §7).
 - Le posizioni del ritorno sicuro usano Broadcast privato perché sono ad alta frequenza e non
   devono passare dalla replica delle modifiche.
 
 ### 5.4 Notifiche
 
-Le notifiche sono righe in `notifiche` create da trigger e funzioni. Un webhook del database
-sull'`INSERT` invoca `invia-push`, che legge `dispositivi_push` e invia il messaggio con un
-testo di sistema localizzato, senza testi scritti da altri utenti, poi imposta
-`inviata_push_il`. Nella Fase 1 le notifiche sono mostrate solo nell'app: la campanella delle
-aree si iscrive alle `INSERT` su `notifiche` dell'utente (Postgres Changes, filtrate dalla
-RLS) e aggiorna il numero delle non lette; l'elenco `/notifiche/` le segna come lette.
+Le notifiche sono righe in `notifiche` create da trigger e funzioni. Nell'app la campanella
+delle aree si iscrive alle `INSERT` su `notifiche` dell'utente (Postgres Changes, filtrate
+dalla RLS) e aggiorna il numero delle non lette; l'elenco `/notifiche/` le segna come lette.
+
+Dall'iterazione 9 le notifiche arrivano anche sul telefono con il Web Push della PWA
+(ADR-0026):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Utente
+    participant A as App (PWA)
+    participant SW as Service worker
+    participant DB as Postgres
+    participant EF as Edge Function invia-push
+    participant P as Servizio push del browser
+    U->>A: "Attiva" nel foglio di Noxa
+    A->>A: permesso del sistema, iscrizione con la chiave VAPID pubblica
+    A->>DB: registra_dispositivo_push (endpoint, chiavi, etichetta generica)
+    Note over DB: trigger, RPC o job creano una riga in notifiche
+    DB->>EF: pg_net: notifica_id + segreto (indirizzo e segreto nel Vault)
+    EF->>DB: rilegge notifica e dispositivi (service_role)
+    EF->>P: contenuto cifrato aes128gcm + JWT VAPID
+    P-->>SW: push
+    SW-->>U: testo di sistema, senza nomi né username
+    U->>SW: tocco
+    SW->>A: /notifiche/?apri=<id>: schermata giusta o "Non è più disponibile"
+```
+
+- Il testo dipende solo dal tipo e, per la moderazione, dall'esito
+  (`supabase/functions/_shared/testi_push.ts`): mai nomi, username, nomi dei gruppi, locali o
+  testi di altre persone sulla schermata di blocco.
+- Il permesso del sistema si chiede solo dopo il tocco su "Attiva"; su iPhone il Web Push
+  funziona solo con Noxa aggiunta alla schermata Home, e l'app mostra i due passi.
+- I dispositivi scaduti (404, 410 dal servizio push) si tolgono all'invio; all'uscita
+  dall'account l'app toglie il proprio; quelli non usati da 90 giorni li cancella
+  `applica_conservazione`.
+- In sviluppo il service worker di Workbox non c'è: l'app registra solo `public/sw-push.js`,
+  che in produzione Workbox importa con `importScripts`.
 
 ### 5.5 Offline
 
@@ -430,9 +463,9 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | F-15 Prevendite e liste | App (link esterni) | §4.3 |
 | F-16 Trasporto | App, trigger `verifica_trasporto` | §4.3 |
 | F-17 Accesso con Apple e Google | Supabase Auth (provider OAuth) | §3.2 |
-| F-20 Check-in | App, Realtime | §5.3 |
+| F-20 Check-in | App, RPC `fai_checkin` e `suggerimenti_checkin`, avvisi su `vivi:<utente>` | §5.3 |
 | F-21 Ritorno sicuro | App nativa (posizione in background), Realtime Broadcast, `pg_cron`, `invia-push` | §4.4, ADR-0006 |
-| F-22 Notifiche push | Nella Fase 1 campanella e `/notifiche/` con Realtime; dalla Fase 2 Edge Function `invia-push`, FCM/APNs, Web Push | §5.4 |
+| F-22 Notifiche push | Nella Fase 1 campanella e `/notifiche/` con Realtime; dall'iterazione 9 Web Push con l'Edge Function `invia-push` (FCM/APNs con le app native, D-13) | §5.4, ADR-0026 |
 | F-30 Tracker | App (offline con coda di scritture) | §5.5 |
 | F-31 Statistiche | Vista `statistiche_personali` | §3.2 |
 | F-32 Badge | Funzione SQL `private.assegna_badge()` con `pg_cron` | §3.2 |
