@@ -38,6 +38,9 @@ ADR-0016.
   la stessa immagine Docker del worker in **modalità a esaurimento**: preleva i job pronti da
   `coda_job` finché la coda è vuota o finché non passa la durata massima (10 minuti), poi
   termina. In locale `docker compose` continua a usare gli esecutori nel lifespan di FastAPI.
+- `worker.yml`, `backup.yml` e le esecuzioni programmate di `mappa.yml` girano solo se la
+  variabile del repository `SERVIZI_ATTIVI` vale `true`, da impostare insieme ai segreti
+  quando si crea lo staging: prima i job vengono saltati invece di fallire.
 - `pg_cron` resta l'**unico scheduler**: decide quali job entrano in coda e quando. GitHub
   Actions sveglia soltanto l'esecutore, che non pianifica nulla (ADR-0003). Un job aspetta
   al massimo circa 15 minuti più i ritardi di GitHub: accettabile per la raccolta (frequenze

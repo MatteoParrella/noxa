@@ -18,7 +18,9 @@ concurrency:
 jobs:
   backup:
     name: Backup cifrato
-    if: github.ref == 'refs/heads/main'
+    # Finché la variabile del repository SERVIZI_ATTIVI non vale 'true' (nessun Supabase o R2 online,
+    # quindi nessun segreto) il job viene saltato invece di fallire.
+    if: github.ref == 'refs/heads/main' && vars.SERVIZI_ATTIVI == 'true'
     runs-on: ubuntu-24.04
     environment: produzione
     timeout-minutes: 30

@@ -1,0 +1,108 @@
+/* =========================================================
+   NOXA — layer "check-in" (F-20, area Vivi). Usa flyer, gruppi, serata, privacy.
+   ========================================================= */
+.ck-mono { font-family: var(--tipo-famiglia-mono); font-variant-numeric: tabular-nums; }
+
+/* check-in spento: solo la spiegazione */
+.ck-spento { display: flex; flex-direction: column; gap: 14px; padding: 18px; border: 1px solid var(--colore-linea-forte); border-radius: var(--raggio-3); }
+.ck-spento h2 { margin: 0; font-size: 1.625rem; line-height: 1.05; font-weight: 700; font-stretch: 72%; }
+.ck-spento p { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--colore-testo-secondario); }
+.ck-tre { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; border-top: 1px solid var(--colore-linea); }
+.ck-tre li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--colore-linea); font-size: 0.875rem; line-height: 1.4; }
+.ck-tre li b { display: block; font-size: 0.9375rem; }
+.ck-tre li span { color: var(--colore-testo-secondario); }
+.ck-tre li .ico { width: 18px; height: 18px; margin-top: 1px; color: var(--colore-testo-secondario); }
+
+/* azione "Fai check-in" quando non ce n'è uno attivo */
+.ck-vuoto { display: flex; flex-direction: column; gap: 10px; padding: 16px; border: 1px dashed var(--colore-linea-forte); border-radius: var(--raggio-3); }
+.ck-vuoto p { margin: 0; font-size: 0.875rem; line-height: 1.45; color: var(--colore-testo-secondario); }
+.ck-motivo { display: flex; gap: 8px; align-items: flex-start; font-size: 0.8125rem; line-height: 1.4; color: var(--colore-testo-secondario); }
+.ck-motivo .ico { width: 14px; height: 14px; margin-top: 2px; flex: none; }
+
+/* il tuo check-in attivo: un timbro sul biglietto */
+.ck-timbro { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 16px 16px 14px 22px; border: 1px solid var(--colore-linea-forte); border-radius: var(--raggio-3); background: var(--colore-superficie-1); overflow: hidden; }
+.ck-timbro::before { content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px; border-left: 2px dashed var(--colore-linea-forte); }
+.ck-timbro-testa { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.ck-bollo { flex: none; display: inline-flex; flex-direction: column; align-items: center; gap: 0; padding: 4px 8px; border: 1.5px solid var(--colore-testo-primario); border-radius: var(--raggio-2); transform: rotate(-4deg); font-family: var(--tipo-famiglia-mono); font-size: 0.6875rem; line-height: 1.25; letter-spacing: .08em; text-transform: uppercase; }
+.ck-bollo b { font-size: 0.8125rem; font-weight: 500; }
+.ck-luogo { margin: 0; font-size: 1.875rem; line-height: 1; font-weight: 700; font-stretch: 72%; }
+.ck-evento { font-size: 0.875rem; color: var(--colore-testo-secondario); }
+.ck-orari { display: flex; flex-wrap: wrap; gap: 4px 12px; font-family: var(--tipo-famiglia-mono); font-size: 0.8125rem; letter-spacing: .04em; text-transform: uppercase; }
+.ck-orari span { white-space: nowrap; }
+.ck-orari .fino { color: var(--colore-testo-primario); font-weight: 500; }
+.ck-chi { display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 0.875rem; padding-top: 10px; border-top: 1px dashed var(--colore-linea-forte); }
+.ck-azioni { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ck-azioni .btn { padding-left: 10px; padding-right: 10px; white-space: nowrap; }
+
+/* amici in giro stasera */
+.ck-amico { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; column-gap: 12px; align-items: center; width: 100%; min-height: 68px; padding: 10px 0; border: 0; border-bottom: 1px solid var(--colore-linea); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ck-amico:hover { background: var(--colore-superficie-1); }
+.ck-amico .avatar { border: 0; }
+.ck-amico-corpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ck-amico-corpo .riga1 { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.ck-amico-corpo .dove { font-size: 0.9375rem; line-height: 1.3; }
+.ck-amico-corpo .dove b { font-weight: 700; }
+.ck-dalle { font-family: var(--tipo-famiglia-mono); font-size: 0.75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--colore-testo-secondario); white-space: nowrap; }
+.ck-amico .fine { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; color: var(--colore-testo-secondario); }
+
+/* spazio riservato al ritorno sicuro (iterazione 10): vuoto */
+.ck-riservato { height: 56px; margin: 18px 0 4px; border-radius: var(--raggio-3); border: 1px dashed var(--colore-linea); }
+
+/* foglio Fai check-in: tre passi in un solo foglio */
+.ck-passo { border-top: 1px solid var(--colore-linea); }
+.ck-passo-testa { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 10px; align-items: center; min-height: 52px; }
+.ck-passo-testa .n { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--colore-linea-forte); font-family: var(--tipo-famiglia-mono); font-size: 0.8125rem; }
+.ck-passo.is-ora .ck-passo-testa .n { background: var(--colore-testo-primario); border-color: var(--colore-testo-primario); color: var(--colore-sfondo); }
+.ck-passo.is-fatto .ck-passo-testa .n { border-color: var(--colore-testo-primario); }
+.ck-passo-testa b { font-size: 1rem; font-weight: 700; }
+.ck-passo-testa small { display: block; font-size: 0.8125rem; color: var(--colore-testo-secondario); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ck-passo-testa .cambia { min-height: 44px; padding: 0 8px; border: 0; background: transparent; color: var(--colore-testo-primario); font: inherit; font-size: 0.875rem; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.ck-passo-corpo { display: flex; flex-direction: column; gap: 10px; padding: 2px 0 14px; }
+.ck-passo.is-dopo .ck-passo-testa { color: var(--colore-testo-secondario); }
+
+/* suggerimento di locale */
+.ck-sugg { display: grid; grid-template-columns: 56px minmax(0, 1fr) 24px; column-gap: 12px; align-items: center; width: 100%; min-height: 72px; padding: 8px 0; border: 0; border-bottom: 1px solid var(--colore-linea); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ck-sugg[aria-checked="true"] { background: var(--colore-superficie-1); box-shadow: inset 3px 0 0 var(--colore-accento); padding-left: 10px; }
+.ck-sugg .miniatura { width: 56px; height: 56px; border-radius: var(--raggio-2); overflow: hidden; position: relative; }
+.ck-sugg .pin-box { width: 56px; height: 56px; border-radius: var(--raggio-2); display: flex; align-items: center; justify-content: center; background: var(--colore-superficie-2); border: 1px solid var(--colore-linea); }
+.ck-sugg b { display: block; font-size: 0.9375rem; line-height: 1.3; }
+.ck-sugg small { display: block; font-size: 0.8125rem; color: var(--colore-testo-secondario); }
+.ck-perche { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 0.75rem; color: var(--colore-testo-primario); }
+.ck-perche .ico { width: 12px; height: 12px; }
+
+/* scheda compatta del locale scelto */
+.ck-locale { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; column-gap: 12px; align-items: center; padding: 8px 8px 8px 10px; border: 1px solid var(--colore-linea-forte); border-radius: var(--raggio-3); background: var(--colore-superficie-1); }
+.ck-locale .pin-box { width: 44px; height: 44px; border-radius: var(--raggio-2); display: flex; align-items: center; justify-content: center; background: var(--colore-superficie-3); }
+.ck-locale b { display: block; font-size: 0.9375rem; }
+.ck-locale small { display: block; font-size: 0.8125rem; color: var(--colore-testo-secondario); }
+
+/* amici proposti dalla serata */
+.ck-proposti { display: flex; align-items: center; gap: 8px; padding: 6px 0 2px; font-size: 0.8125rem; font-weight: 600; }
+.ck-proposti .ico { width: 14px; height: 14px; color: var(--colore-testo-secondario); }
+.ck-altri { padding: 14px 0 2px; font-size: 0.6875rem; letter-spacing: .14em; text-transform: uppercase; color: var(--colore-testo-secondario); }
+
+/* riepilogo */
+.ck-riepilogo { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: var(--raggio-3); background: var(--colore-superficie-2); font-size: 0.9375rem; line-height: 1.45; }
+.ck-riepilogo b { font-weight: 700; }
+
+/* chi vede il mio check-in */
+.ck-dest { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; column-gap: 12px; align-items: center; min-height: 64px; padding: 10px 0; border-bottom: 1px solid var(--colore-linea); }
+.ck-dest .avatar { border: 0; }
+.ck-dest.is-conferma { grid-template-columns: minmax(0, 1fr); row-gap: 8px; padding: 12px; margin: 4px 0; border: 1px solid var(--colore-linea-forte); border-radius: var(--raggio-2); background: var(--colore-superficie-1); }
+.ck-dest-conferma { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 0.9375rem; }
+.ck-dest-conferma .az { display: flex; gap: 8px; }
+.ck-nota-fine { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; padding: 14px 0; font-size: 0.875rem; line-height: 1.45; color: var(--colore-testo-secondario); }
+.ck-nota-fine .ico { width: 16px; height: 16px; margin-top: 2px; }
+
+/* notifica: check-in di un amico */
+.nt-ck { font-family: var(--tipo-famiglia-mono); font-size: 0.75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--colore-testo-secondario); }
+.nt-voce.is-finita .nt-titolo { color: var(--colore-testo-secondario); }
+
+@container fl (min-width: 900px) {
+  .ck-attivo-griglia { display: grid; grid-template-columns: minmax(0, 1fr); }
+}
+@container fl (max-width: 370px) {
+  .ck-luogo { font-size: 1.625rem; }
+  .ck-azioni { grid-template-columns: minmax(0, 1fr); }
+  .ck-orari { font-size: 0.75rem; }
+}
