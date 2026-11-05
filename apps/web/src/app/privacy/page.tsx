@@ -87,8 +87,8 @@ export default function PaginaPrivacy() {
         </li>
         <li>
           I servizi push dei browser (Google, Mozilla, Apple, Microsoft): consegnano le notifiche
-          sul telefono, se le accendi. Ricevono un testo cifrato che non possono leggere, senza
-          nomi né testi di altre persone.
+          sul telefono, se le accendi. Ricevono un testo cifrato che non possono leggere, senza nomi
+          né testi di altre persone.
         </li>
         <li>Sentry (Unione europea): errori tecnici, senza email, posizioni o testi.</li>
       </ul>
