@@ -29,7 +29,7 @@ Iterazioni completate: 8 su 15.
 | 6 | completata con attese esterne | 2026-10-21 | 2026-10-22 | 4 | `iterazione-06-flyer-moderazione` | Mancano la chiave Claude API con limite di spesa, la valutazione sul golden set dei flyer e il DPA di Anthropic (D-12) |
 | 7 | completata | 2026-10-23 | 2026-10-26 | 3 | `iterazione-07-gruppi` | Avvisi dal vivo su canali privati (ADR-0024); notifica di uscita senza il nome del gruppo |
 | 8 | completata con attese esterne | 2026-10-27 | 2026-10-30 | 3 | `iterazione-08-tracker-privacy` | Backup cifrato e diritti privacy (ADR-0025); mancano lo staging (segreti di R2, Brevo, Sentry e backup), la beta con utenti reali e la verifica con VoiceOver e TalkBack |
-| 9 | da iniziare | — | — | 0 | — | — |
+| 9 | in corso | 2026-11-05 | — | 0 | `iterazione-09-notifiche-checkin` | — |
 | 10 | da iniziare | — | — | 0 | — | — |
 | 11 | da iniziare | — | — | 0 | — | — |
 | 12 | da iniziare | — | — | 0 | — | — |
@@ -1000,4 +1000,37 @@ Superfici di contatto: invito (solo amici confermati compatibili con tutti, `puo
 | Backup cifrato e ripristino provato | SÌ in locale | prova in «Esito dei test»; il workflow `backup.yml` gira quando ci sono i segreti dello staging |
 | `safety-review` | SÌ | rapporto nella PR |
 | Beta, dati reali, VoiceOver e TalkBack | attesa esterna | richiedono lo staging e utenti reali |
+
+### Iterazione 9 — Notifiche e check-in
+
+**Piano**
+- Funzionalità: F-20 (check-in "sono qui": spento di default, solo il locale, destinatari
+  scelti ogni volta tra gli amici confermati, proposti quelli della serata di gruppo di
+  stasera, 6 ore, terminabile in un tocco), F-22 (notifiche sul telefono con il Web Push
+  della PWA: consenso esplicito dopo il foglio di Noxa, testi di sistema senza nomi né
+  username, dispositivi elencati e removibili), F-42 (interruttori del check-in e delle
+  notifiche in Privacy e dati). Regole: R-17, R-30, R-43, R-65, R-66, R-69. Design:
+  `design/F-20-checkin/`, `design/F-22-notifiche/`.
+- Decisioni prese all'avvio: la beta è solo PWA (D-13 aperta), quindi solo Web Push con
+  chiavi VAPID; FCM e APNs arrivano con le build native. Proposte dei brief fissate in
+  DATA_MODEL: un solo check-in attivo alla volta; testi sulla schermata di blocco senza nomi
+  né username.
+- Database: `checkin`, `checkin_destinatari` con RLS, RPC `fai_checkin` e
+  `suggerimenti_checkin`, trigger `verifica_checkin` (R-30, un check-in attivo, limite
+  giornaliero), notifiche `checkin_amico`, fine del check-in quando si spegne l'impostazione o
+  se ne va l'ultimo destinatario, blocchi e amicizie rimosse (R-17), avvisi Broadcast su
+  `vivi:<utente>`; `dispositivi_push` con RLS e RPC di registrazione; webhook con `pg_net`
+  sulle `INSERT` di `notifiche`; conservazione di check-in e dispositivi; esportazione dei
+  dati aggiornata.
+- Backend: Edge Function `invia-push` (Web Push con cifratura aes128gcm e VAPID scritti con
+  WebCrypto, testi di sistema per tipo, dispositivi scaduti rimossi).
+- App: area Vivi (check-in spento, acceso, attivo, amici in giro, stati), foglio "Fai
+  check-in" in tre passi, "Chi lo vede", righe nuove in Privacy e dati (check-in, notifiche,
+  dispositivi), foglio del permesso con gli esiti (negato, iPhone senza installazione, browser
+  non compatibile), service worker con `push` e `notificationclick`, notifica `checkin_amico`
+  e riga discreta in fondo all'elenco delle notifiche.
+- Passi: migrazioni e pgTAP → tipi → Edge Function e moduli condivisi con test → API e
+  schermate → test unitari ed e2e → documenti e ADR → cicli di revisione e `safety-review`.
+- Criteri dell'iterazione: test pgTAP di R-30; nessun testo di altri utenti nelle notifiche,
+  né nomi né username nei testi sulla schermata di blocco (test).
 
