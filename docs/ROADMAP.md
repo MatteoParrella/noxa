@@ -297,8 +297,12 @@ Ogni iterazione ha:
 ### Iterazione 9 — Notifiche e check-in
 - **Contenuto**: `dispositivi_push`, Edge Function `invia-push` (FCM, APNs, Web Push),
   permessi e preferenze; `checkin`, `checkin_destinatari`, trigger `verifica_checkin`.
-- **Prerequisiti esterni**: progetto Firebase, chiavi APNs, chiavi VAPID.
-- **Criteri**: test pgTAP di R-30; nessun testo di altri utenti nelle notifiche (test).
+- **Prerequisiti esterni**: chiavi VAPID per il Web Push, gratuite e generate in locale; la
+  beta è solo PWA (D-13), quindi progetto Firebase e chiavi APNs servono solo se D-13 si
+  chiude con gli account degli store e arrivano con le build native dell'iterazione 10.
+- **Design**: `design/F-22-notifiche/` e `design/F-20-checkin/`.
+- **Criteri**: test pgTAP di R-30; nessun testo di altri utenti nelle notifiche, né nomi né
+  username nei testi sulla schermata di blocco (test).
 
 ### Iterazione 10 — Ritorno sicuro
 - **Contenuto**: plugin di posizione in background (D-04), `ritorni_sicuri`,
