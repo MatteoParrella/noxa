@@ -234,6 +234,9 @@ test('spegnere il check-in con uno attivo: prima il foglio, poi termina', async 
   await expect(
     foglio.getByText('Quello attivo a Club Binario 7 termina subito', { exact: false }),
   ).toBeVisible();
+  // Il database salva la scelta e termina il check-in: la rilettura lo restituisce.
+  supabase.checkinAbilitato = false;
+  supabase.mioCheckin = null;
   await foglio.getByRole('button', { name: 'Spegni' }).click();
   await expect(interruttore).toHaveAttribute('aria-checked', 'false');
   expect(supabase.chiamate('profili_privati').at(-1)?.corpo).toEqual({ checkin_abilitato: false });

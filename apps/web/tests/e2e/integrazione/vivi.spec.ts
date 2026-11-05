@@ -62,7 +62,7 @@ test('R-30: il check-in arriva solo all’amico scelto e sparisce quando finisce
   await amico.goto('/vivi/');
   await expect(amico.getByText('Nessun amico ha condiviso dove si trova.')).toBeVisible();
   await amico.goto('/notifiche/');
-  await expect(amico.getByText('Check-in terminato', { exact: true })).toBeVisible();
+  await expect(amico.getByText('Check-in terminato', { exact: true }).first()).toBeVisible();
 
   // Pulizia: le impostazioni tornano quelle del seed (R-30, spento).
   await impostaCheckin(io, false);
