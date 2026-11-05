@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { IntestazioneArea } from '@/components/guscio/IntestazioneArea';
 import { ElencoNotifiche } from '@/features/notifiche/ElencoNotifiche';
 import { messaggi } from '@/lib/messaggi/it';
@@ -12,7 +13,9 @@ export default function PaginaNotifiche() {
     <>
       <IntestazioneArea titolo={testi.titolo} />
       <div className="pagina flex flex-col gap-4 pt-4 pb-8">
-        <ElencoNotifiche />
+        <Suspense>
+          <ElencoNotifiche />
+        </Suspense>
       </div>
     </>
   );

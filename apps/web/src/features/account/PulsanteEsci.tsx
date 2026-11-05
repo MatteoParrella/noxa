@@ -7,6 +7,7 @@ import { Avviso } from '@/components/ui/Avviso';
 import { Icona } from '@/components/ui/Icona';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { useIo } from '@/features/amici/dati';
+import { scollegaDispositivoAllUscita } from '@/features/notifiche/push';
 import { svuotaCoda } from '@/features/ricorda/coda';
 import { cancellaCacheLocale } from '@/lib/cacheLocale';
 import { messaggi } from '@/lib/messaggi/it';
@@ -15,8 +16,9 @@ import { esci } from './api';
 import { PERCORSI } from './documenti';
 
 /**
- * Uscita dall'account su questo dispositivo: cancella la sessione, i dati in memoria, quelli
- * salvati per l'offline e la coda del diario (ARCHITECTURE.md §5.5).
+ * Uscita dall'account su questo dispositivo: toglie il dispositivo delle notifiche, cancella la
+ * sessione, i dati in memoria, quelli salvati per l'offline e la coda del diario
+ * (ARCHITECTURE.md §5.5).
  */
 export function PulsanteEsci() {
   const router = useRouter();
@@ -24,6 +26,8 @@ export function PulsanteEsci() {
   const io = useIo();
   const uscita = useMutation({
     mutationFn: async () => {
+      // Prima di chiudere la sessione: qui non devono più arrivare le sue notifiche (F-22).
+      await scollegaDispositivoAllUscita();
       await esci();
       try {
         await Promise.all([cancellaCacheLocale(), io ? svuotaCoda(io) : Promise.resolve()]);

@@ -18,6 +18,8 @@ const { count, size, warnings } = await generateSW({
   clientsClaim: true,
   skipWaiting: true,
   sourcemap: false,
+  // Gestori del Web Push (F-22, ADR-0026), condivisi con lo sviluppo.
+  importScripts: ['sw-push.js'],
   runtimeCaching: [
     {
       urlPattern: ({ url }) => url.pathname.includes('/mappe/assets/'),

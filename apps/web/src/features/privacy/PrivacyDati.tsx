@@ -20,6 +20,8 @@ import { Pulsante } from '@/components/ui/Pulsante';
 import { Caricamento, ErroreConAzione } from '@/components/ui/Stati';
 import { useToast } from '@/components/ui/Toast';
 import { useBloccati, useIo } from '@/features/amici/dati';
+import { SezioneNotifiche } from '@/features/notifiche/SezioneNotifiche';
+import { ImpostazioneCheckin } from '@/features/vivi/ImpostazioneCheckin';
 import { CHIAVI as CHIAVI_EVENTI, useVisibilitaPredefinita } from '@/features/scopri/dati';
 import { useOnline } from '@/lib/connessione';
 import { messaggi } from '@/lib/messaggi/it';
@@ -55,6 +57,7 @@ export function PrivacyDati() {
             {testi.chiVedeCosa}
           </h2>
           <Partecipazioni io={io} attivo={visibili.data} online={online} />
+          <ImpostazioneCheckin io={io} online={online} />
           <RigaNavigazione
             href="/profilo/bloccati/"
             icona={Ban}
@@ -68,6 +71,14 @@ export function PrivacyDati() {
         </section>
       </Entra>
       <Entra indice={2}>
+        <section className="pv-sezione" aria-labelledby="pv-notifiche">
+          <h2 className="etichetta" id="pv-notifiche">
+            {messaggi.push.impostazioni.sezione}
+          </h2>
+          <SezioneNotifiche online={online} />
+        </section>
+      </Entra>
+      <Entra indice={3}>
         <section className="pv-sezione" aria-labelledby="pv-dati">
           <h2 className="etichetta" id="pv-dati">
             {testi.tuoiDati}
@@ -86,7 +97,7 @@ export function PrivacyDati() {
           />
         </section>
       </Entra>
-      <Entra indice={3}>
+      <Entra indice={4}>
         <section className="pv-sezione account" aria-labelledby="pv-account">
           <h2 className="etichetta" id="pv-account">
             {testi.account}

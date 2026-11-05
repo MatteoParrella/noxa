@@ -3,7 +3,7 @@
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useIo } from '@/features/amici/dati';
-import { supabase } from '@/lib/supabase';
+import { ascoltaAvvisi } from '@/lib/avvisi';
 import {
   amiciInvitabili,
   anteprimaInvito,
@@ -83,27 +83,6 @@ export function useEventiAdatti(gruppo: string | null, testo: string) {
     enabled: io !== null && gruppo !== null,
     placeholderData: keepPreviousData,
   });
-}
-
-/**
- * Avvisi senza dati su un canale Broadcast privato (DATA_MODEL.md §7): la policy di
- * `realtime.messages` decide chi ascolta; chi riceve un avviso ricarica con le RPC, soggette
- * alla RLS. Restituisce la funzione che chiude il canale.
- */
-function ascoltaAvvisi(argomento: string, onAvviso: () => void): () => void {
-  const client = supabase();
-  const canale = client
-    .channel(argomento, { config: { private: true } })
-    .on('broadcast', { event: 'cambio' }, onAvviso);
-  let chiuso = false;
-  // Il token deve arrivare a Realtime prima dell'ingresso in un canale privato.
-  void client.realtime.setAuth().then(() => {
-    if (!chiuso) canale.subscribe();
-  });
-  return () => {
-    chiuso = true;
-    void client.removeChannel(canale);
-  };
 }
 
 /**

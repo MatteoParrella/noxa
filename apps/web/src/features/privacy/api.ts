@@ -1,4 +1,5 @@
 import { FunctionsFetchError, FunctionsHttpError } from '@supabase/supabase-js';
+import { iscrizioneCorrente } from '@/features/notifiche/push';
 import { svuotaCoda } from '@/features/ricorda/coda';
 import { cancellaCacheLocale } from '@/lib/cacheLocale';
 import { ErroreLimite, ErroreRete, ErroreSconosciuto, converti } from '@/lib/errori';
@@ -112,7 +113,12 @@ export function daPulire(): string | null {
  */
 export async function pulisciDispositivo(io: string): Promise<void> {
   try {
-    await Promise.all([cancellaCacheLocale(), svuotaCoda(io)]);
+    // Il dispositivo push è già sparito con l'account: resta da annullare l'iscrizione.
+    await Promise.all([
+      cancellaCacheLocale(),
+      svuotaCoda(io),
+      iscrizioneCorrente().then((iscrizione) => iscrizione?.unsubscribe()),
+    ]);
   } catch (errore) {
     registraErrore('pulizia del dispositivo', errore);
   }

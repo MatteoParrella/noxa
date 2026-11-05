@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { BarraNavigazione } from '@/components/guscio/BarraNavigazione';
 import { StatoConnessione } from '@/components/guscio/StatoConnessione';
 import { ProtezioneAccount } from '@/features/account/ProtezioneAccount';
+import { RinnovaDispositivo } from '@/features/notifiche/RinnovaDispositivo';
 import { SincronizzaDiario } from '@/features/ricorda/SincronizzaDiario';
 
 export default function LayoutAree({ children }: Readonly<{ children: ReactNode }>) {
@@ -15,6 +16,7 @@ export default function LayoutAree({ children }: Readonly<{ children: ReactNode 
         <ProtezioneAccount>
           {children}
           <SincronizzaDiario />
+          <RinnovaDispositivo />
         </ProtezioneAccount>
       </main>
       <BarraNavigazione />
