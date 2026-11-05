@@ -1,21 +1,25 @@
-import { ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import { IntestazioneArea } from '@/components/guscio/IntestazioneArea';
 import { Rivela } from '@/components/ui/Movimento';
-import { ElencoVuoto } from '@/components/ui/Stati';
 import { Campanella } from '@/features/notifiche/Campanella';
+import { AreaVivi, OraStasera } from '@/features/vivi/AreaVivi';
+import { messaggi } from '@/lib/messaggi/it';
 
 export const metadata: Metadata = { title: 'Vivi · Noxa' };
+
+const testi = messaggi.vivi;
 
 export default function PaginaVivi() {
   return (
     <>
-      <IntestazioneArea sottotitolo="Durante la serata" titolo="Vivi" azioni={<Campanella />} />
-      <Rivela className="pagina pt-4" indice={2}>
-        <ElencoVuoto icona={ShieldCheck} titolo="Check-in e ritorno sicuro">
-          Qui potrai dire agli amici che hai scelto dove sei e farti seguire finché arrivi a casa.
-          Sono sempre spenti finché non li attivi tu, e la posizione si cancella dopo 24 ore.
-        </ElencoVuoto>
+      <IntestazioneArea
+        sottotitolo={`${testi.titolo} · ${testi.sottotitolo}`}
+        titolo={testi.stasera}
+        dopoTitolo={<OraStasera />}
+        azioni={<Campanella />}
+      />
+      <Rivela className="pagina pb-8" indice={2}>
+        <AreaVivi />
       </Rivela>
     </>
   );

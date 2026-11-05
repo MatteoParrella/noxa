@@ -1,7 +1,9 @@
 import { gruppi } from './gruppi';
 import { moderazione } from './moderazione';
 import { privacy } from './privacy';
+import { push } from './push';
 import { ricorda } from './ricorda';
+import { vivi } from './vivi';
 
 /**
  * Testi dell'app in italiano (DESIGN.md §6: "tu", frasi brevi, niente pressione). I testi
@@ -840,7 +842,7 @@ export const messaggi = {
       invito_gruppo: 'Hai un invito in un gruppo.',
       nuova_serata: 'Nel tuo gruppo c’è una nuova serata.',
       aggiornamento_serata: 'Una serata del tuo gruppo è cambiata.',
-      checkin_amico: 'Un amico ha fatto il check-in a un evento.',
+      checkin_amico: 'Un amico ha fatto check-in.',
       ritorno_avviato: 'Un amico ha avviato il ritorno sicuro.',
       ritorno_allerta: 'Allerta: un amico non è ancora rientrato.',
       ritorno_arrivato: 'Un amico è rientrato sano e salvo.',
@@ -890,4 +892,6 @@ export const messaggi = {
   moderazione,
   ricorda,
   privacy,
+  vivi,
+  push,
 } as const;

@@ -177,7 +177,18 @@ export type Endpoint =
   | 'categorie_spesa_disponibili'
   | 'serate_tracker_elimina'
   | 'esporta_miei_dati'
-  | 'elimina_account';
+  | 'elimina_account'
+  | 'checkin_leggi'
+  | 'checkin_aggiorna'
+  | 'checkin_destinatari_elimina'
+  | 'fai_checkin'
+  | 'suggerimenti_checkin'
+  | 'locali_leggi'
+  | 'dispositivi_push_leggi'
+  | 'dispositivi_push_elimina'
+  | 'registra_dispositivo_push'
+  | 'notifiche_leggi'
+  | 'notifiche_aggiorna';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
@@ -670,6 +681,69 @@ export function diarioDiProva() {
   ];
 }
 
+export const ID_CHECKIN = '00000000-0000-4000-8000-00000000e801';
+export const ID_CHECKIN_AMICO = '00000000-0000-4000-8000-00000000e802';
+const ID_EVENTO_STASERA = '00000000-0000-4000-8000-00000000e803';
+
+/** Suggerimenti di "Fai check-in": un evento a cui partecipi e la serata di gruppo di stasera. */
+export const SUGGERIMENTI_DI_PROVA = {
+  eventi: [
+    {
+      evento_id: ID_EVENTO_STASERA,
+      titolo: 'Vinili al Binario',
+      inizio: new Date(Date.now() - 3600_000).toISOString(),
+      fine: null,
+      locale_id: LOCALI_DI_PROVA.binario.id,
+      locale: LOCALI_DI_PROVA.binario.nome,
+      comune: 'Monza',
+    },
+  ],
+  serate: [
+    {
+      serata_id: ID_SERATA,
+      titolo: 'Sabato al Binario 7',
+      evento_id: ID_EVENTO_STASERA,
+      evento: 'Vinili al Binario',
+      locale_id: LOCALI_DI_PROVA.binario.id,
+      locale: LOCALI_DI_PROVA.binario.nome,
+      comune: 'Monza',
+      amici: [PERSONE.marco.id],
+    },
+  ],
+};
+
+const locale = {
+  id: LOCALI_DI_PROVA.binario.id,
+  nome: LOCALI_DI_PROVA.binario.nome,
+  comune: 'Monza',
+};
+
+/** Il proprio check-in attivo con i destinatari, come lo restituisce PostgREST. */
+export function mioCheckinDiProva(destinatari: PersonaProva[] = [PERSONE.marco, PERSONE.davide]) {
+  const creato = new Date(Date.now() - 30 * 60_000);
+  return {
+    id: ID_CHECKIN,
+    creato_il: creato.toISOString(),
+    scade_il: new Date(creato.getTime() + 6 * 3600_000).toISOString(),
+    locale,
+    evento: { id: ID_EVENTO_STASERA, titolo: 'Vinili al Binario' },
+    destinatari: destinatari.map((amico) => ({ amico })),
+  };
+}
+
+/** Check-in di un amico ricevuto (la RLS reale lo restituisce solo ai destinatari). */
+export function checkinAmicoDiProva() {
+  const creato = new Date(Date.now() - 20 * 60_000);
+  return {
+    id: ID_CHECKIN_AMICO,
+    creato_il: creato.toISOString(),
+    scade_il: new Date(creato.getTime() + 6 * 3600_000).toISOString(),
+    locale,
+    evento: { id: ID_EVENTO_STASERA, titolo: 'Vinili al Binario' },
+    utente: PERSONE.marco,
+  };
+}
+
 export class SupabaseSimulato {
   readonly richieste: Array<{ endpoint: Endpoint; corpo: unknown; url: string }> = [];
   private readonly risposte = new Map<Endpoint, Risposta>();
@@ -683,6 +757,16 @@ export class SupabaseSimulato {
   diario: unknown[] = [];
   /** Profili visibili per `profili_leggi` (la RLS reale decide chi si vede). */
   profiliVisibili: PersonaProva[] = Object.values(PERSONE);
+  /** Impostazione del check-in in Privacy e dati (R-30: spenta di default). */
+  checkinAbilitato = false;
+  /** Il proprio check-in attivo, come lo restituisce PostgREST, o null. */
+  mioCheckin: unknown = null;
+  /** Check-in attivi ricevuti dagli amici (la RLS reale decide quali). */
+  checkinAmici: unknown[] = [];
+  /** Righe di `dispositivi_push` dell'utente. */
+  dispositivi: unknown[] = [];
+  /** Notifiche dell'utente, dalla più recente. */
+  notifiche: unknown[] = [];
 
   constructor(account: AccountSimulato | null) {
     this.account = account;
@@ -696,7 +780,7 @@ export class SupabaseSimulato {
     return this.richieste.filter((richiesta) => richiesta.endpoint === endpoint);
   }
 
-  private predefinita(endpoint: Endpoint): Risposta {
+  private predefinita(endpoint: Endpoint, corpo: unknown = null): Risposta {
     switch (endpoint) {
       case 'signup':
         return { stato: 200, corpo: { ...utente(), email_confirmed_at: null } };
@@ -818,7 +902,10 @@ export class SupabaseSimulato {
       case 'generi_musicali':
         return { stato: 200, corpo: GENERI_DI_PROVA };
       case 'profili_privati_leggi':
-        return { stato: 200, corpo: { partecipazioni_visibili: true } };
+        return {
+          stato: 200,
+          corpo: { partecipazioni_visibili: true, checkin_abilitato: this.checkinAbilitato },
+        };
       case 'partecipazioni_crea':
         return { stato: 201 };
       case 'partecipazioni_aggiorna':
@@ -913,6 +1000,41 @@ export class SupabaseSimulato {
         };
       case 'elimina_account':
         return { stato: 200, corpo: { esito: 'eliminato' } };
+      case 'checkin_aggiorna':
+      case 'checkin_destinatari_elimina':
+      case 'dispositivi_push_elimina':
+      case 'notifiche_aggiorna':
+        return { stato: 204 };
+      case 'fai_checkin':
+        return {
+          stato: 200,
+          corpo: {
+            id: ID_CHECKIN,
+            scade_il: new Date(Date.now() + 6 * 3600_000).toISOString(),
+            destinatari: (corpo as { destinatari?: string[] } | null)?.destinatari ?? [],
+            esclusi: [],
+          },
+        };
+      case 'suggerimenti_checkin':
+        return { stato: 200, corpo: SUGGERIMENTI_DI_PROVA };
+      case 'locali_leggi':
+        return {
+          stato: 200,
+          corpo: [
+            {
+              id: LOCALI_DI_PROVA.ventuno.id,
+              nome: 'Sala Ventuno',
+              comune: 'Desio',
+              indirizzo: 'Via Ventuno 21',
+            },
+          ],
+        };
+      case 'dispositivi_push_leggi':
+        return { stato: 200, corpo: this.dispositivi };
+      case 'registra_dispositivo_push':
+        return { stato: 200, corpo: '00000000-0000-4000-8000-00000000e901' };
+      case 'notifiche_leggi':
+        return { stato: 200, corpo: this.notifiche };
       default:
         return { stato: 200, corpo: {} };
     }
@@ -938,6 +1060,18 @@ export class SupabaseSimulato {
       this.amicizie as Array<{ richiedente_id: string; destinatario_id: string }>
     ).filter((riga) => !id || riga.richiedente_id === id || riga.destinatario_id === id);
     return { stato: 200, corpo: righe };
+  }
+
+  /** GET su checkin: il proprio (`utente_id=eq.`), quelli degli amici (`neq.`) o uno per id. */
+  private checkin(richiesta: Request): Risposta {
+    const parametri = new URL(richiesta.url()).searchParams;
+    const utente = parametri.get('utente_id') ?? '';
+    const id = (parametri.get('id') ?? '').replace(/^eq\./, '');
+    if (utente.startsWith('eq.'))
+      return { stato: 200, corpo: this.mioCheckin ? [this.mioCheckin] : [] };
+    if (utente.startsWith('neq.')) return { stato: 200, corpo: this.checkinAmici };
+    const trovato = (this.checkinAmici as Array<{ id: string }>).filter((c) => c.id === id);
+    return { stato: 200, corpo: trovato };
   }
 
   /** GET su profili con `id=eq.…`: un oggetto se visibile, come `maybeSingle()` lo chiede. */
@@ -989,6 +1123,14 @@ export class SupabaseSimulato {
         POST: 'partecipazioni_serata_salva',
       },
       '/rest/v1/serate_tracker': { DELETE: 'serate_tracker_elimina' },
+      '/rest/v1/checkin': { GET: 'checkin_leggi', PATCH: 'checkin_aggiorna' },
+      '/rest/v1/checkin_destinatari': { DELETE: 'checkin_destinatari_elimina' },
+      '/rest/v1/locali': { GET: 'locali_leggi' },
+      '/rest/v1/dispositivi_push': {
+        GET: 'dispositivi_push_leggi',
+        DELETE: 'dispositivi_push_elimina',
+      },
+      '/rest/v1/notifiche': { GET: 'notifiche_leggi', PATCH: 'notifiche_aggiorna' },
       '/rest/v1/partecipazioni_evento': {
         POST: 'partecipazioni_crea',
         PATCH: 'partecipazioni_aggiorna',
@@ -1022,6 +1164,9 @@ export class SupabaseSimulato {
       'cerca_per_diario',
       'categorie_spesa_disponibili',
       'esporta_miei_dati',
+      'fai_checkin',
+      'suggerimenti_checkin',
+      'registra_dispositivo_push',
     ];
     if (rpc && rpcSimulate.includes(rpc)) return rpc as Endpoint;
     if (percorso.startsWith('/storage/v1/object/sign/') && metodo === 'POST')
@@ -1075,7 +1220,9 @@ export class SupabaseSimulato {
           ? this.profilo(richiesta)
           : endpoint === 'amicizie_leggi'
             ? this.amicizieFiltrate(richiesta)
-            : this.predefinita(endpoint));
+            : endpoint === 'checkin_leggi'
+              ? this.checkin(richiesta)
+              : this.predefinita(endpoint, corpo));
       if (risposta === 'rete') {
         await route.abort('internetdisconnected');
         return;

@@ -34,6 +34,9 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_URL: 'http://supabase.noxa.test',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'chiave-anon-di-prova',
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
+      // Chiave pubblica VAPID di prova (la privata non esiste): le iscrizioni sono simulate.
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY:
+        'BA0BM103vf3plr-lPSBdRtez0OO-D-slDi1K1yHKBMkcs_Vd0CO7rTbfpXNUUCgVEaunVb8DMkMxL42vEpKso3o',
     },
     url: `http://127.0.0.1:${porta}`,
     reuseExistingServer: false,

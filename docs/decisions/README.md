@@ -34,3 +34,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0023](0023-occultamento-automatico.md) | Occultamento automatico delle immagini segnalate per rischio a un minorenne | Accettato |
 | [0024](0024-realtime-avvisi-privati.md) | Aggiornamenti dal vivo con avvisi senza dati su canali privati | Accettato |
 | [0025](0025-backup-cifrato-e-diritti-privacy.md) | Backup cifrato in proprio e diritti privacy nel database | Accettato |
+| [0026](0026-notifiche-web-push.md) | Notifiche sul telefono con il Web Push, testi di sistema e webhook dal database | Accettato |

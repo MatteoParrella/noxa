@@ -37,7 +37,7 @@ test.describe('movimento espressivo (ADR-0019)', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/vivi/');
     const parola = page
-      .getByRole('heading', { level: 1, name: 'Vivi' })
+      .getByRole('heading', { level: 1, name: 'Stasera' })
       .locator('.parola > span')
       .first();
     await expect(parola).toHaveCSS('transform', 'none');

@@ -327,6 +327,90 @@ export type Database = {
           },
         ];
       };
+      checkin: {
+        Row: {
+          creato_il: string;
+          evento_id: string | null;
+          id: string;
+          locale_id: string;
+          scade_il: string;
+          terminato_il: string | null;
+          utente_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          creato_il?: string;
+          evento_id?: string | null;
+          id?: string;
+          locale_id: string;
+          scade_il?: string;
+          terminato_il?: string | null;
+          utente_id?: string;
+        };
+        Update: {
+          creato_il?: string;
+          evento_id?: string | null;
+          id?: string;
+          locale_id?: string;
+          scade_il?: string;
+          terminato_il?: string | null;
+          utente_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'checkin_evento_id_fkey';
+            columns: ['evento_id'];
+            isOneToOne: false;
+            referencedRelation: 'eventi';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'checkin_locale_id_fkey';
+            columns: ['locale_id'];
+            isOneToOne: false;
+            referencedRelation: 'locali';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'checkin_utente_id_fkey';
+            columns: ['utente_id'];
+            isOneToOne: false;
+            referencedRelation: 'profili';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      checkin_destinatari: {
+        Row: {
+          amico_id: string;
+          checkin_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amico_id: string;
+          checkin_id: string;
+        };
+        Update: {
+          amico_id?: string;
+          checkin_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'checkin_destinatari_amico_id_fkey';
+            columns: ['amico_id'];
+            isOneToOne: false;
+            referencedRelation: 'profili';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'checkin_destinatari_checkin_id_fkey';
+            columns: ['checkin_id'];
+            isOneToOne: false;
+            referencedRelation: 'checkin';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       coda_job: {
         Row: {
           bloccato_fino: string | null;
@@ -481,6 +565,51 @@ export type Database = {
             columns: ['segnalazione_id'];
             isOneToOne: false;
             referencedRelation: 'segnalazioni';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      dispositivi_push: {
+        Row: {
+          chiave_auth: string | null;
+          chiave_p256dh: string | null;
+          creato_il: string;
+          descrizione: string | null;
+          id: string;
+          piattaforma: Database['public']['Enums']['piattaforma'];
+          token: string;
+          ultimo_uso_il: string;
+          utente_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          chiave_auth?: string | null;
+          chiave_p256dh?: string | null;
+          creato_il?: string;
+          descrizione?: string | null;
+          id?: string;
+          piattaforma: Database['public']['Enums']['piattaforma'];
+          token: string;
+          ultimo_uso_il?: string;
+          utente_id: string;
+        };
+        Update: {
+          chiave_auth?: string | null;
+          chiave_p256dh?: string | null;
+          creato_il?: string;
+          descrizione?: string | null;
+          id?: string;
+          piattaforma?: Database['public']['Enums']['piattaforma'];
+          token?: string;
+          ultimo_uso_il?: string;
+          utente_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'dispositivi_push_utente_id_fkey';
+            columns: ['utente_id'];
+            isOneToOne: false;
+            referencedRelation: 'profili';
             referencedColumns: ['id'];
           },
         ];
@@ -2072,6 +2201,10 @@ export type Database = {
           titolo: string;
         }[];
       };
+      fai_checkin: {
+        Args: { destinatari: string[]; evento: string; locale: string };
+        Returns: Json;
+      };
       flyer_disponibili: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -2230,6 +2363,16 @@ export type Database = {
           tipo_oggetto: Database['public']['Enums']['tipo_oggetto_segnalabile'];
         }[];
       };
+      registra_dispositivo_push: {
+        Args: {
+          chiave_auth: string;
+          chiave_p256dh: string;
+          descrizione: string;
+          piattaforma: Database['public']['Enums']['piattaforma'];
+          token: string;
+        };
+        Returns: string;
+      };
       registro_moderazione: {
         Args: { oggetto: string; tipo: Database['public']['Enums']['tipo_oggetto_segnalabile'] };
         Returns: {
@@ -2253,6 +2396,7 @@ export type Database = {
         Returns: string;
       };
       salva_serata_diario: { Args: { serata: Json }; Returns: string };
+      suggerimenti_checkin: { Args: Record<PropertyKey, never>; Returns: Json };
       usa_codice_invito: { Args: { codice: string }; Returns: string };
     };
     Enums: {
@@ -2313,6 +2457,7 @@ export type Database = {
         | 'alcol_a_minori'
         | 'altro'
         | 'dati_errati';
+      piattaforma: 'ios' | 'android' | 'web';
       risposta_serata: 'si' | 'forse' | 'no';
       ruolo_gruppo: 'admin' | 'membro';
       ruolo_utente: 'moderatore' | 'amministratore';
@@ -2530,6 +2675,7 @@ export const Constants = {
         'altro',
         'dati_errati',
       ],
+      piattaforma: ['ios', 'android', 'web'],
       risposta_serata: ['si', 'forse', 'no'],
       ruolo_gruppo: ['admin', 'membro'],
       ruolo_utente: ['moderatore', 'amministratore'],

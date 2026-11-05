@@ -40,3 +40,8 @@ export function chiaveTurnstile(): string | undefined {
 export function urlPubblicoApp(): string {
   return (process.env.NEXT_PUBLIC_URL_APP || window.location.origin).replace(/\/$/, '');
 }
+
+/** Chiave pubblica VAPID del Web Push (ADR-0026), o undefined se non configurata. */
+export function chiaveVapidPubblica(): string | undefined {
+  return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || undefined;
+}

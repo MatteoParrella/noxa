@@ -14,7 +14,7 @@ const SchemaProfilo = z.object({
 });
 
 // Una foto nascosta in attesa della revisione (D-15) non si mostra.
-const SchemaPersona = SchemaProfilo.extend({
+export const SchemaPersona = SchemaProfilo.extend({
   avatar_path: z.string().nullable(),
   avatar_nascosto: z.boolean(),
 }).transform(({ avatar_nascosto, avatar_path, ...persona }) => ({
@@ -47,7 +47,7 @@ export type ElencoAmici = {
   inviate: Relazione[];
 };
 
-const PROFILO = 'id, username, nome_visualizzato, avatar_path, avatar_nascosto';
+export const PROFILO = 'id, username, nome_visualizzato, avatar_path, avatar_nascosto';
 
 export async function leggiAmici(io: string): Promise<ElencoAmici> {
   const { data, error } = await supabase()
