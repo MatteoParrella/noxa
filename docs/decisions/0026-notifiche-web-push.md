@@ -57,5 +57,6 @@ locale lì rivelerebbe con chi e dove esce un minorenne.
 - In staging e produzione servono: chiavi VAPID, `NOXA_PUSH_SEGRETO` e `VAPID_SUBJECT` nei
   segreti delle funzioni, i due segreti nel Vault e il deploy di `invia-push` senza verifica
   del JWT.
-- Le app native (D-13) aggiungeranno FCM e APNs alla stessa funzione, con gli stessi testi.
+- L'app Android aggiunge FCM alla stessa funzione, con gli stessi testi (ADR-0027); APNs
+  arriva con l'app iOS, se D-13 si chiude per Apple.
 - Documenti aggiornati: DATA_MODEL.md, ARCHITECTURE.md §5.4, SAFETY_PRIVACY.md, PRD.md (F-22).

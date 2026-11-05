@@ -8,7 +8,8 @@ Il ritorno sicuro deve funzionare anche con il telefono in tasca e lo schermo bl
 l'allerta deve partire anche se il telefono è scarico o spento.
 
 ## Decisione
-- Posizione in background tramite plugin Capacitor (scelta definitiva D-04), solo durante una
+- Posizione in background tramite plugin Capacitor
+  `@capacitor-community/background-geolocation` (ADR-0027), solo durante una
   sessione avviata esplicitamente, con notifica di sistema permanente (R-31).
 - Posizioni trasmesse su un canale Realtime Broadcast privato e salvate al massimo ogni 30
   secondi in `posizioni_ritorno`.

@@ -85,7 +85,7 @@ flowchart LR
 | Dati | `@supabase/supabase-js` con tipi generati (`src/lib/database.types.ts`); TanStack Query per cache, retry e stato offline; validazione dei dati in ingresso e uscita con Zod. |
 | Stile | Tailwind con design token generati da Claude Design (ADR-0011, [DESIGN.md](DESIGN.md)). |
 | Mappe | MapLibre GL JS con la basemap Protomaps (stili `dark` e `light` personalizzati con i design token) in un file PMTiles servito, insieme a font e icone, dal bucket `mappe` in locale e da Cloudflare R2 in staging e produzione: nessuna richiesta a servizi di mappe esterni (ADR-0016, ADR-0021). |
-| Nativo | Capacitor: geolocalizzazione in background (D-04), notifiche push, fotocamera, condivisione, preferenze sicure per l'area di arrivo (R-32). |
+| Nativo | Capacitor: geolocalizzazione in background (`@capacitor-community/background-geolocation`, ADR-0027), notifiche push, fotocamera, condivisione, preferenze sicure per l'area di arrivo (R-32). |
 | PWA | Manifest e service worker (Workbox): cache dell'app shell e dei dati in sola lettura (PRD §5 Offline). |
 | Organizzazione | `src/features/<area>/` (scopri, organizza, vivi, ricorda, account, moderazione) con componenti, hook, query e test della funzionalità; `src/components/ui` per i componenti del design system. |
 
@@ -97,7 +97,7 @@ flowchart LR
 | Auth | Email e password (almeno 10 caratteri) con verifica, CAPTCHA (Cloudflare Turnstile, ADR-0020), protezione dalle password compromesse, MFA TOTP obbligatoria per i moderatori (R-06); hook "before user created" per il controllo dell'età (§4.1); modelli delle email in italiano. |
 | Storage | Bucket `avatar`, `flyer-caricati`, `flyer-pubblicati`, `immagini-locali` (foto dei locali, ADR-0018), `mappe` (DATA_MODEL.md §6). |
 | Realtime | Postgres Changes per le notifiche; Broadcast privato per gli avvisi di gruppi e serate e per le posizioni del ritorno sicuro. |
-| Edge Functions (Deno) | `invia-push` (ADR-0026: Web Push VAPID con contenuto cifrato e testi di sistema, chiamata dal webhook `private.invia_push` con `pg_net` e un segreto condiviso; FCM HTTP v1 per Android e iOS quando D-13 si chiude), `elimina-account` (ADR-0025: chiama `elimina_mio_account` con il JWT dell'utente e usa `service_role` solo per cancellare i file della foto profilo). L'esportazione dei dati è la RPC `esporta_miei_dati`. |
+| Edge Functions (Deno) | `invia-push` (ADR-0026: Web Push VAPID con contenuto cifrato e testi di sistema, chiamata dal webhook `private.invia_push` con `pg_net` e un segreto condiviso; FCM HTTP v1 per l'app Android (ADR-0027) e APNs per iOS se D-13 si chiude), `elimina-account` (ADR-0025: chiama `elimina_mio_account` con il JWT dell'utente e usa `service_role` solo per cancellare i file della foto profilo). L'esportazione dei dati è la RPC `esporta_miei_dati`. |
 | `pg_cron` | Job di DATA_MODEL.md §8, compresi il calcolo dei badge e dei riepiloghi annuali con funzioni SQL. |
 
 ### 3.3 Worker (`services/worker`)
@@ -388,7 +388,7 @@ flowchart LR
     CI -->|next build export| CFP[Cloudflare Pages<br/>PWA statica]
     CI -->|pmtiles + assets| R2[Cloudflare R2<br/>mappa]
     CRONGH[GitHub Actions<br/>ogni 15 minuti] -->|worker a esaurimento| SBP
-    CI -->|cap sync + fastlane| STORE[TestFlight /<br/>Google Play interno]
+    CI -->|cap sync + fastlane<br/>dall'iterazione 12| STORE[Google Play<br/>ADR-0027]
     SBS[(Supabase staging)] -.stesse migrazioni.-> SBP
 ```
 
@@ -465,7 +465,7 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | F-17 Accesso con Apple e Google | Supabase Auth (provider OAuth) | §3.2 |
 | F-20 Check-in | App, RPC `fai_checkin` e `suggerimenti_checkin`, avvisi su `vivi:<utente>` | §5.3 |
 | F-21 Ritorno sicuro | App nativa (posizione in background), Realtime Broadcast, `pg_cron`, `invia-push` | §4.4, ADR-0006 |
-| F-22 Notifiche push | Nella Fase 1 campanella e `/notifiche/` con Realtime; dall'iterazione 9 Web Push con l'Edge Function `invia-push` (FCM/APNs con le app native, D-13) | §5.4, ADR-0026 |
+| F-22 Notifiche push | Nella Fase 1 campanella e `/notifiche/` con Realtime; dall'iterazione 9 Web Push con l'Edge Function `invia-push` (FCM con l'app Android, ADR-0027; APNs con iOS, D-13) | §5.4, ADR-0026 |
 | F-30 Tracker | App (offline con coda di scritture) | §5.5 |
 | F-31 Statistiche | Vista `statistiche_personali` | §3.2 |
 | F-32 Badge | Funzione SQL `private.assegna_badge()` con `pg_cron` | §3.2 |

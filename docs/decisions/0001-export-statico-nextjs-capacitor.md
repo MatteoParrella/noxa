@@ -29,6 +29,6 @@ locali: non può eseguire il rendering lato server di Next.js.
 ## Conseguenze
 - La SEO delle pagine evento è limitata (non serve: l'accesso richiede un account, R-07).
 - Tutta l'autorizzazione è per forza nel database: è un vantaggio per la sicurezza.
-- Servono plugin Capacitor per geolocalizzazione in background (D-04), notifiche push,
+- Servono plugin Capacitor per geolocalizzazione in background (ADR-0027), notifiche push,
   fotocamera e condivisione.
 - Le release native passano dalla revisione degli store.
