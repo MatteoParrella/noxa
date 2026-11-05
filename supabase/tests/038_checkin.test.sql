@@ -6,6 +6,12 @@
 begin;
 select plan(65);
 
+-- Si parte senza check-in, anche dopo una corsa dei test e2e di integrazione (tutto torna
+-- com'era con il rollback finale).
+delete from public.checkin;
+delete from public.notifiche where tipo = 'checkin_amico';
+update public.profili_privati set checkin_abilitato = false;
+
 -- Eventi e locali di prova, indipendenti dalla data del seed.
 insert into public.eventi (id, locale_id, titolo, inizio, fine, eta_minima, eta_minima_dichiarata,
                            riferimenti_alcol, stato)
