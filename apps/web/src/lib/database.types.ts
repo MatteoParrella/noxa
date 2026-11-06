@@ -1355,6 +1355,39 @@ export type Database = {
           },
         ];
       };
+      posizioni_ritorno: {
+        Row: {
+          id: number;
+          posizione: unknown;
+          precisione_m: number;
+          registrata_il: string;
+          ritorno_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: never;
+          posizione: unknown;
+          precisione_m: number;
+          registrata_il?: string;
+          ritorno_id: string;
+        };
+        Update: {
+          id?: never;
+          posizione?: unknown;
+          precisione_m?: number;
+          registrata_il?: string;
+          ritorno_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'posizioni_ritorno_ritorno_id_fkey';
+            columns: ['ritorno_id'];
+            isOneToOne: false;
+            referencedRelation: 'ritorni_sicuri';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       profili: {
         Row: {
           aggiornato_il: string;
@@ -1496,6 +1529,79 @@ export type Database = {
           },
           {
             foreignKeyName: 'reclami_utente_id_fkey';
+            columns: ['utente_id'];
+            isOneToOne: false;
+            referencedRelation: 'profili';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      ritorni_destinatari: {
+        Row: {
+          amico_id: string;
+          ritorno_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amico_id: string;
+          ritorno_id: string;
+        };
+        Update: {
+          amico_id?: string;
+          ritorno_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ritorni_destinatari_amico_id_fkey';
+            columns: ['amico_id'];
+            isOneToOne: false;
+            referencedRelation: 'profili';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ritorni_destinatari_ritorno_id_fkey';
+            columns: ['ritorno_id'];
+            isOneToOne: false;
+            referencedRelation: 'ritorni_sicuri';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      ritorni_sicuri: {
+        Row: {
+          allerta_inviata_il: string | null;
+          arrivo_previsto: string;
+          avviato_il: string;
+          concluso_il: string | null;
+          id: string;
+          stato: Database['public']['Enums']['stato_ritorno'];
+          ultima_posizione_il: string | null;
+          utente_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          allerta_inviata_il?: string | null;
+          arrivo_previsto: string;
+          avviato_il?: string;
+          concluso_il?: string | null;
+          id?: string;
+          stato?: Database['public']['Enums']['stato_ritorno'];
+          ultima_posizione_il?: string | null;
+          utente_id?: string;
+        };
+        Update: {
+          allerta_inviata_il?: string | null;
+          arrivo_previsto?: string;
+          avviato_il?: string;
+          concluso_il?: string | null;
+          id?: string;
+          stato?: Database['public']['Enums']['stato_ritorno'];
+          ultima_posizione_il?: string | null;
+          utente_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ritorni_sicuri_utente_id_fkey';
             columns: ['utente_id'];
             isOneToOne: false;
             referencedRelation: 'profili';
@@ -1858,6 +1964,7 @@ export type Database = {
           stato: string;
         }[];
       };
+      avvia_ritorno: { Args: { arrivo_previsto: string; destinatari: string[] }; Returns: Json };
       avviso_richiesta: { Args: { amicizia: string }; Returns: boolean };
       cambia_stato_evento: {
         Args: {
@@ -2212,6 +2319,10 @@ export type Database = {
           rimasti: number;
         }[];
       };
+      invia_posizione_ritorno: {
+        Args: { latitudine: number; longitudine: number; precisione_m: number; ritorno: string };
+        Returns: undefined;
+      };
       invita_nel_gruppo: { Args: { gruppo: string; invitati: string[] }; Returns: number };
       locale_moderazione: {
         Args: { locale: string };
@@ -2329,6 +2440,7 @@ export type Database = {
       };
       prendi_in_carico_segnalazione: { Args: { segnalazione: string }; Returns: undefined };
       presenta_reclamo: { Args: { azione: string; testo: string }; Returns: string };
+      proroga_ritorno: { Args: { minuti: number; ritorno: string }; Returns: string };
       prossime_serate: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -2383,6 +2495,7 @@ export type Database = {
         }[];
       };
       rimuovi_foto_locale: { Args: { locale: string; motivazione: string }; Returns: string };
+      ritorni_vivi: { Args: Record<PropertyKey, never>; Returns: Json };
       salva_foto_locale: {
         Args: {
           attribuzione?: string;
@@ -2397,6 +2510,7 @@ export type Database = {
       };
       salva_serata_diario: { Args: { serata: Json }; Returns: string };
       suggerimenti_checkin: { Args: Record<PropertyKey, never>; Returns: Json };
+      suggerimenti_ritorno: { Args: Record<PropertyKey, never>; Returns: Json };
       usa_codice_invito: { Args: { codice: string }; Returns: string };
     };
     Enums: {
@@ -2474,6 +2588,7 @@ export type Database = {
       stato_membro: 'invitato' | 'attivo';
       stato_partecipazione_evento: 'interessato' | 'partecipo';
       stato_reclamo: 'inviato' | 'in_esame' | 'deciso';
+      stato_ritorno: 'attivo' | 'arrivato' | 'annullato' | 'scaduto';
       stato_segnalazione: 'aperta' | 'in_lavorazione' | 'chiusa';
       stato_serata: 'proposta' | 'confermata' | 'annullata';
       tipo_consenso: 'termini' | 'privacy';
@@ -2698,6 +2813,7 @@ export const Constants = {
       stato_membro: ['invitato', 'attivo'],
       stato_partecipazione_evento: ['interessato', 'partecipo'],
       stato_reclamo: ['inviato', 'in_esame', 'deciso'],
+      stato_ritorno: ['attivo', 'arrivato', 'annullato', 'scaduto'],
       stato_segnalazione: ['aperta', 'in_lavorazione', 'chiusa'],
       stato_serata: ['proposta', 'confermata', 'annullata'],
       tipo_consenso: ['termini', 'privacy'],

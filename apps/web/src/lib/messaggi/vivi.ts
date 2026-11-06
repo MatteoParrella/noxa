@@ -4,6 +4,9 @@
  */
 
 const amici = (n: number) => (n === 1 ? '1 amico' : `${n} amici`);
+/** "lo vede 1 amico", "lo vedono 2 amici". */
+const loVede = (n: number) => (n === 1 ? 'lo vede 1 amico' : `lo vedono ${n} amici`);
+const LoVede = (n: number) => (n === 1 ? 'Lo vede 1 amico' : `Lo vedono ${n} amici`);
 
 /** "Giulia R.", "Giulia R. e Marco B.", "Giulia R., Marco B. e Sara C." */
 export function elencoNomi(nomi: readonly string[]): string {
@@ -22,7 +25,6 @@ export const vivi = {
   },
   offline: 'Sei offline: il check-in non parte senza rete.',
   aggiornato: (ora: string) => `Agg. ${ora}`,
-  ritornoRiservato: 'Il ritorno sicuro arriverà qui.',
   spento: {
     etichetta: 'Check-in «sono qui»',
     titolo: 'Dì ad alcuni amici in quale locale sei',
@@ -43,7 +45,7 @@ export const vivi = {
     bollo: ['Sono', 'qui'],
     dalle: (ora: string) => `Dalle ${ora}`,
     finoAlle: (ora: string) => `Fino alle ${ora}`,
-    loVedono: (n: number) => `Lo vedono ${amici(n)}`,
+    loVedono: LoVede,
     andatoVia: 'Sono andato via',
     chiLoVede: 'Chi lo vede',
     terminato: 'Check-in terminato. Nessuno lo vede più.',
@@ -97,7 +99,7 @@ export const vivi = {
       nota: 'Dopo 6 ore sparisce per tutti. Puoi terminarlo prima con «Sono andato via».',
       invia: 'Fai check-in',
     },
-    fatto: (n: number) => `Check-in fatto: lo vedono ${amici(n)}.`,
+    fatto: (n: number) => `Check-in fatto: ${loVede(n)}.`,
     esclusi: {
       titolo: (nomi: string) => `Abbiamo tolto ${nomi}`,
       testo: 'Non è più tra i tuoi amici, quindi non vede il check-in.',

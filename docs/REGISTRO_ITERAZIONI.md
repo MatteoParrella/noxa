@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 9 su 15.
+Iterazioni completate: 10 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -30,7 +30,7 @@ Iterazioni completate: 9 su 15.
 | 7 | completata | 2026-10-23 | 2026-10-26 | 3 | `iterazione-07-gruppi` | Avvisi dal vivo su canali privati (ADR-0024); notifica di uscita senza il nome del gruppo |
 | 8 | completata con attese esterne | 2026-10-27 | 2026-10-30 | 3 | `iterazione-08-tracker-privacy` | Backup cifrato e diritti privacy (ADR-0025); mancano lo staging (segreti di R2, Brevo, Sentry e backup), la beta con utenti reali e la verifica con VoiceOver e TalkBack |
 | 9 | completata con attese esterne | 2026-11-05 | 2026-11-05 | 2 | `iterazione-09-notifiche-checkin` | Web Push con testi di sistema (ADR-0026); mancano chiavi VAPID, segreti e deploy di `invia-push` in staging e la prova su telefoni reali |
-| 10 | da iniziare | — | — | 0 | — | — |
+| 10 | completata con attese esterne | 2026-11-06 | 2026-11-06 | 2 | `iterazione-10-ritorno-sicuro` | Servizio in primo piano, posizioni lette con la RLS, aree solo sul telefono (ADR-0028); mancano il progetto Firebase, l'APK sul telefono e le 20 prove reali del criterio 1 della Fase 2 |
 | 11 | da iniziare | — | — | 0 | — | — |
 | 12 | da iniziare | — | — | 0 | — | — |
 | 13 | da iniziare | — | — | 0 | — | — |
@@ -1101,3 +1101,116 @@ ricerca di persone.
 
 **Commit**: 9d66ee6, f0056c7, 1587be8, 5208258, 5af5122, 1d48bce, fff3004, 86c9646, 07180fb e
 il commit finale sul branch `iterazione-09-notifiche-checkin`.
+
+### Iterazione 10 — Ritorno sicuro
+
+**Piano**
+- Funzionalità: F-21 (ritorno sicuro: avvio esplicito, arrivo previsto tra 10 minuti e 4 ore,
+  da 1 a 5 amici confermati con quelli della serata e chi torna con te proposti, indicatore
+  permanente, "Sono arrivato" in un tocco, proroga, annullamento, area di arrivo solo sul
+  telefono, allerta dal server, fine automatica), F-43 (app Android: plugin
+  `@capacitor-community/background-geolocation`, notifiche native con FCM), F-22 (testi delle
+  tre notifiche del ritorno). Regole: R-17, R-31, R-32, R-34, R-43, R-55, R-64, R-66, R-69.
+  Design: `design/F-21-ritorno-sicuro/`.
+- Decisioni prese all'avvio (proposte del brief fissate in DATA_MODEL): proroga di 15 o 30
+  minuti entro le 4 ore, area di arrivo di 150 m (con 100 e 300 m), esito visibile 15 minuti.
+  Decisioni tecniche in ADR-0028: servizio Android in primo piano senza "Consenti sempre",
+  coordinate mai su Realtime, al massimo 10 ritorni in 24 ore, posizione condivisa solo dal
+  telefono che ha avviato il ritorno.
+- Database: `stato_ritorno`, `ritorni_sicuri`, `ritorni_destinatari`, `posizioni_ritorno` con
+  RLS; trigger di avvio, transizioni, limite di 5 destinatari, frequenza delle posizioni,
+  notifiche `ritorno_avviato`/`ritorno_arrivato`, R-17; RPC `avvia_ritorno`,
+  `proroga_ritorno`, `invia_posizione_ritorno`, `ritorni_vivi`, `suggerimenti_ritorno`; job
+  `verifica_ritorni_scaduti` ogni minuto; canale `ritorno:<id>`; conservazione ed esportazione.
+- Backend: FCM HTTP v1 in `invia-push` (JWT RS256 con WebCrypto, segreto
+  `FCM_ACCOUNT_SERVIZIO`), testi di sistema del brief §7.
+- App: spazio del ritorno in Vivi, foglio di avvio in quattro passi con spiegazione e stati dei
+  permessi, barra permanente (in cima e nella barra laterale), dettaglio con mappa e cerchio di
+  precisione, proroga, "Chi lo vede", ritorno di un amico (in viaggio, non aggiornato, in
+  ritardo, arrivato, terminato, non più disponibile), aree di arrivo in Privacy e dati,
+  notifiche del ritorno nell'elenco, registrazione FCM nell'app Android, configurazione
+  Capacitor (bridge legacy, canale "Ritorno sicuro").
+- Passi: migrazione e pgTAP → tipi → FCM e testi → API, motore e schermate → test unitari, e2e
+  e integrazione → documenti e ADR → cicli di revisione e `safety-review`.
+- Criteri dell'iterazione: test pgTAP di R-31 e R-32; prove su dispositivi Android reali
+  secondo il criterio 1 della Fase 2 (attesa esterna).
+
+**Cicli di revisione**
+- Ciclo 1: trovato che con un solo amico i testi dicevano "lo vedono 1 amico" (anche nel
+  check-in) → corretto il singolare; il filtro di 10 m del plugin faceva risultare "non
+  aggiornata" la posizione di chi aspetta fermo → tolto (l'invio resta di una posizione ogni
+  30 s); il listener del tocco sulle notifiche native si registrava due volte → una sola
+  volta; `window.location.assign` per aprire una notifica nativa → evento gestito con il
+  router; mancava `moderatore_senza_mfa` nei pgTAP del ritorno → aggiunto; la barra laterale
+  non ripeteva la nota della PWA → aggiunta; `BarraNavigazione` richiedeva un QueryClient nei
+  test → il ritorno arriva come contenuto passato dal layout; D-07 non elencava Firebase →
+  aggiunto; quattro file non formattati → Prettier.
+- Ciclo 2: tutti i controlli superati.
+- Dopo la chiusura, su richiesta del product owner: il pallino della scelta dell'area di
+  arrivo non si riempiva (lo stile c'era solo per il check-in) → corretto con un test e2e;
+  "Tieni Noxa aperta" non è realistico su iPhone → nota sul ritorno "a tempo" (posizione al
+  blocco dello schermo, allerta comunque dal server) mostrata solo nel browser del telefono,
+  mai nell'app installata né da computer, con un test e2e su iPhone (ADR-0006, ADR-0028).
+
+**Esito dei test**
+- pgTAP: 1256 test in 33 file; nuovo `040_ritorno_sicuro` (96) verde. In locale falliscono
+  `018_eventi` (1-9), `024_candidati_locali` (18), `026_moderazione_eventi` (9, 11) e
+  `029_avatar_occultamenti` (23-24, 35), che dipendono dai dati del database locale (eventi e
+  account aggiunti a mano, età degli account del seed dall'ultimo reset del 30.10) e non
+  toccano tabelle di questa iterazione; si risolvono con `supabase db reset`, non eseguito
+  senza il permesso dell'utente. `021_prestazioni_cerca_eventi` è sensibile al carico.
+- App: lint, typecheck e Prettier puliti; unitari 136/136 (nuovi: orari dell'avvio, aree solo
+  nello storage senza richieste di rete, stato visto da chi riceve, codici NX055…NX061, testi
+  senza parole di controllo, firma JWT e messaggio FCM).
+- e2e simulati: 418/418 nella corsa completa del ciclo 1 (nuovo `ritorno.spec.ts`: 22 test
+  sui due progetti, axe nei due temi compreso). Nella corsa completa del ciclo 2 nove test di
+  moderazione, mappa, Scopri, Ricorda e notifiche sono andati in timeout per il carico della
+  macchina; rilanciati per file sono tutti verdi (84 + 48 + 76).
+- e2e di integrazione: nuovo `ritorno` verde; `vivi`, `privacy`, `amici` verdi.
+- Build statica e `cap sync android` riusciti (2 plugin: posizione e notifiche); APK non
+  compilabile in WSL (manca l'SDK Android).
+- Worker (non modificato): ruff, mypy e pytest 215 passati, 4 saltati.
+
+**Safety review — F-21 Ritorno sicuro, F-43 app Android, F-22**
+Esito: SUPERATA
+
+| Dato | Chi lo vede | Regole |
+|---|---|---|
+| `ritorni_sicuri` (stato, orari, allerta, fine) | Il titolare; i destinatari amici confermati finché è attivo e 15 minuti dopo; nessun moderatore | R-17, R-31, R-69 |
+| `ritorni_destinatari` | Il titolare; ogni destinatario solo la propria riga | R-31 |
+| `posizioni_ritorno` (punto, precisione, ora) | Il titolare; i destinatari solo l'ultima e solo a ritorno attivo; mai su Realtime | R-31, R-34, ADR-0028 |
+| Notifiche `ritorno_avviato`, `ritorno_allerta`, `ritorno_arrivato` (`ritorno_id`, `utente_id`) | Il destinatario; i dati si leggono dal ritorno con la RLS | R-31, F-22 |
+| Aree di arrivo e tratta | Solo il telefono (`localStorage`) | R-32 |
+| Token FCM in `dispositivi_push` | Solo il titolare; `invia-push` con `service_role`; Google FCM | R-66 |
+
+Superfici di contatto: selettore dei destinatari (solo amici confermati da `amicizie`, al
+massimo 5), suggerimenti dalla serata di stasera e "Torna con te" (filtrati da `sono_amici` e
+dalla RLS di serate e partecipazioni), "Ritorni degli amici" e notifiche (solo destinatari
+amici, blocco e amicizia rimossa tolgono subito nelle due direzioni). Nessuna ricerca di
+persone, nessun messaggio, nessun pulsante per chiamare o scrivere.
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | Migrazione `20261106090000`: RLS e policy per operazione sulle tre tabelle; RPC `invoker`; definer solo in `private` con `search_path = ''`; pgTAP `040` con 14, 15, 16, 17, 18, 20, 21, `moderatore` e `moderatore_senza_mfa`; nessuna `service_role` nell'app |
+| B. Contatti | SÌ | Destinatari solo `sono_amici` (test "un adulto non amico viene escluso", "una richiesta in attesa non è un destinatario"); R-17 (test blocco e amicizia rimossa, nelle due direzioni); notifiche con soli identificativi (test); testi di sistema senza nomi (`push.test.ts`) |
+| C. Eventi e contenuti | SÌ | Nessun evento mostrato; nessun conto alla rovescia né richiamo; testi senza "traccia/segui/localizza/monitora" (`ritorno.test.ts`); allerta con icona ed etichetta, senza nuovi rossi |
+| D. Posizione | SÌ | Avvio solo esplicito, nessun interruttore "sempre attivo" e nessuna richiesta della posizione prima di "Avvia" (e2e); 1-5 amici, 4 ore al massimo, fine automatica (pgTAP); cancellazione 24 ore dopo la fine (pgTAP); nessuna colonna per indirizzo o area (pgTAP); aree mai inviate (e2e); coordinate tolte da Sentry (`pulisciEvento`), mai in Realtime né nelle notifiche |
+| E. Contenuti e moderazione | SÌ | Nessun contenuto caricato né testo libero (il nome dell'area resta sul telefono); limiti: 10 ritorni in 24 ore, 5 destinatari, una posizione ogni 30 s (pgTAP); nessuna policy per i moderatori (test R-69) |
+| F. Privacy | SÌ | Dati indispensabili; righe in SAFETY_PRIVACY §10 e job di conservazione; esportazione con ritorni e posizioni (pgTAP); cancellazione a cascata con l'account; Firebase in R-66, D-07 e informativa; posizione spenta finché non si avvia un ritorno |
+| G. Documentazione | SÌ | ADR-0028; DATA_MODEL §5.5, §7, §8; ARCHITECTURE §4.4, §5.3; SAFETY_PRIVACY R-31, R-32, R-66, §10; PRD F-21; README; `verifica_documentazione.py` 0 problemi. Nessuna regola cambiata |
+
+**Attese esterne**
+- Progetto Firebase gratuito: `google-services.json` in `apps/web/android/app/` (fuori dal
+  repository), build con `NEXT_PUBLIC_FCM_ATTIVO=true`, segreto `FCM_ACCOUNT_SERVIZIO` della
+  funzione `invia-push` (`supabase secrets set`).
+- APK di debug da Android Studio installato su un telefono Android, con l'app puntata a un
+  Supabase raggiungibile dal telefono (staging o l'indirizzo del PC).
+- Criterio 1 della Fase 2: 20 prove reali con l'app in background per almeno 30 minuti
+  (intervallo massimo di 2 minuti nel 95% del tempo; allerta entro 2 minuti nel 100% delle
+  prove); verifica con TalkBack.
+- App Links per i link delle email: richiedono il dominio di D-01 (finché manca si aprono nel
+  browser).
+
+**Commit**: 1dc3ad2, 7f4649b, 31b19e3, b7fe4d7, 3eba5d9, fe98338 e il commit finale sul branch
+`iterazione-10-ritorno-sicuro`.
+

@@ -12,6 +12,11 @@ import {
 } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import {
+  corpoMessaggio,
+  firmaJwt,
+  leggiAccountServizio,
+} from '../../../../supabase/functions/_shared/fcm';
+import {
   TUTTI_I_TESTI,
   durataPush,
   testoPush,
@@ -215,5 +220,65 @@ describe('Testi sulla schermata di blocco (F-22)', () => {
     expect(durataPush('richiesta_amicizia')).toBe(24 * 3600);
     expect(urgenzaPush('ritorno_allerta')).toBe('high');
     expect(urgenzaPush('checkin_amico')).toBe('normal');
+  });
+});
+
+describe('FCM per l’app Android (ADR-0027)', () => {
+  const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const pem = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+  const account = {
+    client_email: 'noxa@noxa-prova.iam.gserviceaccount.com',
+    private_key: pem,
+    project_id: 'noxa-prova',
+  };
+
+  it('legge l’account di servizio solo se completo', () => {
+    expect(leggiAccountServizio(JSON.stringify(account))).toEqual(account);
+    expect(leggiAccountServizio(undefined)).toBeNull();
+    expect(leggiAccountServizio('non è json')).toBeNull();
+    expect(leggiAccountServizio(JSON.stringify({ ...account, project_id: '../altro' }))).toBeNull();
+  });
+
+  it('firma il JWT RS256 con l’ambito di FCM e una scadenza di un’ora', async () => {
+    const jwt = await firmaJwt(account, 1_800_000_000);
+    const [intestazione, richieste, firma] = jwt.split('.') as [string, string, string];
+    expect(JSON.parse(Buffer.from(intestazione, 'base64url').toString())).toEqual({
+      alg: 'RS256',
+      typ: 'JWT',
+    });
+    expect(JSON.parse(Buffer.from(richieste, 'base64url').toString())).toEqual({
+      iss: account.client_email,
+      scope: 'https://www.googleapis.com/auth/firebase.messaging',
+      aud: 'https://oauth2.googleapis.com/token',
+      iat: 1_800_000_000,
+      exp: 1_800_003_600,
+    });
+    expect(
+      verify(
+        'sha256',
+        Buffer.from(`${intestazione}.${richieste}`),
+        publicKey,
+        Buffer.from(firma, 'base64url'),
+      ),
+    ).toBe(true);
+  });
+
+  it('il messaggio contiene solo il testo di sistema e gli identificativi', () => {
+    const testo = testoPush('ritorno_allerta', { utente_id: 'x' });
+    expect(testo).not.toBeNull();
+    const corpo = corpoMessaggio(
+      'token-del-telefono',
+      testo!,
+      { notifica: '00000000-0000-4000-8000-000000000001', tipo: 'ritorno_allerta' },
+      { ttlSecondi: 21600, urgenza: urgenzaPush('ritorno_allerta') },
+    );
+    expect(corpo).toEqual({
+      message: {
+        token: 'token-del-telefono',
+        notification: { title: testo!.titolo, body: testo!.testo },
+        data: { notifica: '00000000-0000-4000-8000-000000000001', tipo: 'ritorno_allerta' },
+        android: { priority: 'HIGH', ttl: '21600s', notification: { channel_id: 'ritorno' } },
+      },
+    });
   });
 });

@@ -3,6 +3,7 @@ import { moderazione } from './moderazione';
 import { privacy } from './privacy';
 import { push } from './push';
 import { ricorda } from './ricorda';
+import { ritorno } from './ritorno';
 import { vivi } from './vivi';
 
 /**
@@ -892,5 +893,6 @@ export const messaggi = {
   ricorda,
   privacy,
   vivi,
+  ritorno,
   push,
 } as const;

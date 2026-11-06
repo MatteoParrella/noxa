@@ -17,6 +17,7 @@ import { messaggi } from '@/lib/messaggi/it';
 import { registraErrore } from '@/lib/registro';
 import { terminaCheckin, type CheckinAmico, type MioCheckin } from './api';
 import { CHIAVI, useAvvisiVivi, useCheckinAbilitato, useCheckinAmici, useMioCheckin } from './dati';
+import { SezioneRitorno } from '@/features/ritorno/SezioneRitorno';
 import { FoglioCheckin } from './FoglioCheckin';
 
 const testi = messaggi.vivi;
@@ -47,7 +48,7 @@ export function OraStasera() {
 
 /**
  * Area Vivi (design/F-20-checkin §1): check-in spento con la spiegazione, oppure il proprio
- * check-in (da fare o attivo), poi gli amici in giro stasera e lo spazio del ritorno sicuro.
+ * check-in (da fare o attivo), poi gli amici in giro stasera e il ritorno sicuro (F-21).
  */
 export function AreaVivi() {
   const io = useIo();
@@ -121,7 +122,9 @@ export function AreaVivi() {
       <Entra indice={2}>
         <AmiciInGiro elenco={amici.data} aggiornatoIl={amici.dataUpdatedAt} online={online} />
       </Entra>
-      <div className="ck-riservato" aria-hidden="true" />
+      <Entra indice={3}>
+        <SezioneRitorno online={online} />
+      </Entra>
       <FoglioCheckin aperto={foglio} onChiudi={() => setFoglio(false)} />
     </div>
   );

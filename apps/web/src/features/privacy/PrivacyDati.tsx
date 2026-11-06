@@ -21,6 +21,7 @@ import { Caricamento, ErroreConAzione } from '@/components/ui/Stati';
 import { useToast } from '@/components/ui/Toast';
 import { useBloccati, useIo } from '@/features/amici/dati';
 import { SezioneNotifiche } from '@/features/notifiche/SezioneNotifiche';
+import { AreeArrivo } from '@/features/ritorno/AreeArrivo';
 import { ImpostazioneCheckin } from '@/features/vivi/ImpostazioneCheckin';
 import { CHIAVI as CHIAVI_EVENTI, useVisibilitaPredefinita } from '@/features/scopri/dati';
 import { useOnline } from '@/lib/connessione';
@@ -76,6 +77,14 @@ export function PrivacyDati() {
             {messaggi.push.impostazioni.sezione}
           </h2>
           <SezioneNotifiche online={online} />
+        </section>
+      </Entra>
+      <Entra indice={3}>
+        <section className="pv-sezione" aria-labelledby="pv-ritorno">
+          <h2 className="etichetta" id="pv-ritorno">
+            {messaggi.ritorno.aree.etichetta}
+          </h2>
+          <AreeArrivo />
         </section>
       </Entra>
       <Entra indice={3}>

@@ -167,9 +167,12 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `e_titolare_checkin(checkin uuid)` | `boolean` | `auth.uid()` è l'autore del check-in. |
 | `e_destinatario_checkin(checkin uuid)` | `boolean` | `auth.uid()` è in `checkin_destinatari` del check-in. |
 | `avvisa_vivi(utente uuid)` | `void` | Avviso `cambio` senza dati sul canale privato `vivi:<utente>` (§7): un check-in ricevuto, terminato o da cui si è stati tolti. |
-| `esporta_dati_base()` | `jsonb` | L'esportazione dell'iterazione 8, spostata in `private`: `public.esporta_miei_dati()` le aggiunge check-in e dispositivi. Nessun permesso per `authenticated`. |
+| `esporta_dati_base()` | `jsonb` | L'esportazione dell'iterazione 8, spostata in `private`: `public.esporta_miei_dati()` le aggiunge check-in, ritorni sicuri e dispositivi. Nessun permesso per `authenticated`. |
 | `e_titolare_ritorno(ritorno uuid)` | `boolean` | `auth.uid()` è il titolare del ritorno sicuro. |
 | `e_destinatario_ritorno(ritorno uuid)` | `boolean` | `auth.uid()` è in `ritorni_destinatari` del ritorno, il ritorno è `attivo` (oppure concluso da meno di 15 minuti, per mostrare l'esito) e `sono_amici(auth.uid(), titolare)`. |
+| `ritorno_attivo(ritorno uuid)` | `boolean` | Il ritorno è `attivo`: le posizioni si mostrano ai destinatari solo in questo caso. |
+| `avvisa_ritorno(ritorno uuid)` | `void` | Avviso `cambio` senza dati sul canale privato `ritorno:<id>` (§7): posizione nuova, proroga, fine. |
+| `avvisa_persone_ritorno(ritorno uuid)` | `void` | `avvisa_ritorno` più l'avviso su `vivi:<utente>` del titolare e dei destinatari. |
 
 Le policy di due tabelle che si riferiscono l'una all'altra (`checkin` ↔ `checkin_destinatari`,
 `ritorni_sicuri` ↔ `ritorni_destinatari`, `gruppi` ↔ `membri_gruppo`) usano **sempre** queste
@@ -190,7 +193,10 @@ Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `limita_caricamenti_flyer`, `proteggi_eta_evento`, `verifica_checkin`, `proteggi_checkin`,
 `dopo_fine_checkin`, `verifica_destinatario_checkin`, `notifica_checkin`,
 `dopo_rimozione_destinatario`, `rimuovi_destinatari_checkin`, `dopo_disattivazione_checkin`,
-`sincronizza_notifiche_push`, `invia_push`, `calcola_data_serata`,
+`sincronizza_notifiche_push`, `invia_push`, `verifica_ritorno`, `proteggi_ritorno`,
+`dopo_cambio_ritorno`, `verifica_destinatario_ritorno`, `notifica_ritorno`,
+`dopo_rimozione_destinatario_ritorno`, `rimuovi_destinatari_ritorno`,
+`verifica_posizione_ritorno`, `dopo_posizione_ritorno`, `calcola_data_serata`,
 `imposta_aggiornato_il`, `imposta_nome_normalizzato`, `prepara_fonte`,
 `registra_modifica_moderatore`, `notifica_amicizia`, `rimuovi_notifiche_amicizia`,
 `verifica_codice_invito`, `accoda_analisi_flyer`, `proteggi_caricamento_flyer`,
@@ -288,9 +294,9 @@ Unico su (`utente_id`, `tipo`, `versione`).
 | `id` | `uuid` | PK |
 | `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade` |
 | `piattaforma` | `piattaforma` | |
-| `token` | `text` | unico; per `web` l'endpoint dell'iscrizione, solo verso i servizi push dei browser (`fcm.googleapis.com`, `updates.push.services.mozilla.com`, `web.push.apple.com`, `*.notify.windows.com`) |
+| `token` | `text` | unico, al massimo 1000 caratteri; per `web` l'endpoint dell'iscrizione, solo verso i servizi push dei browser (`fcm.googleapis.com`, `updates.push.services.mozilla.com`, `web.push.apple.com`, `*.notify.windows.com`); per `android` il token FCM dell'app (iterazione 10, ADR-0027) |
 | `chiave_p256dh`, `chiave_auth` | `text` | chiavi della cifratura del browser (base64url), obbligatorie per `web` |
-| `descrizione` | `text` | al massimo 60 caratteri; etichetta generica scritta dall'app ("Android · Chrome", "Telefono · Noxa dalla Home"), senza modello né versione |
+| `descrizione` | `text` | al massimo 60 caratteri; etichetta generica scritta dall'app ("Android · Chrome", "Telefono · Noxa dalla Home", "Android · app Noxa"), senza modello né versione |
 | `creato_il`, `ultimo_uso_il` | `timestamptz` | `ultimo_uso_il` rinnovato a ogni apertura dell'app sul dispositivo |
 
 - **S/D**: `utente_id = auth.uid()`.
@@ -834,21 +840,24 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 | Colonna | Tipo | Vincoli |
 |---|---|---|
 | `id` | `uuid` | PK |
-| `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade` |
+| `utente_id` | `uuid` | FK → `profili(id)` `on delete cascade`; default `auth.uid()` |
 | `stato` | `stato_ritorno` | default `attivo` |
-| `avviato_il` | `timestamptz` | |
-| `arrivo_previsto` | `timestamptz` | tra 10 minuti e 4 ore dopo `avviato_il`; prorogabile |
-| `allerta_inviata_il` | `timestamptz` | nullable |
-| `concluso_il` | `timestamptz` | nullable |
-| `ultima_posizione_il` | `timestamptz` | nullable |
+| `avviato_il` | `timestamptz` | scritta dal database |
+| `arrivo_previsto` | `timestamptz` | tra 10 minuti e 4 ore dopo `avviato_il` (vincolo); prorogabile di 15 o 30 minuti entro le 4 ore |
+| `allerta_inviata_il` | `timestamptz` | nullable; torna null con una proroga |
+| `concluso_il` | `timestamptz` | nullable; non null se e solo se `stato <> 'attivo'` (vincolo) |
+| `ultima_posizione_il` | `timestamptz` | nullable; scritta dal trigger delle posizioni |
 
-Indice unico parziale: al massimo un ritorno `attivo` per utente.
+Indice unico parziale: al massimo un ritorno `attivo` per utente. Nessuna colonna per
+l'indirizzo, la destinazione o l'area di arrivo (R-32, ADR-0028).
 
-- **S**: `utente_id = auth.uid()` oppure `private.e_destinatario_ritorno(id)`.
-- **I**: `utente_id = auth.uid()` e `stato = 'attivo'`.
-- **U**: `utente_id = auth.uid()`; `GRANT UPDATE (stato, arrivo_previsto, concluso_il)`; transizioni consentite: `attivo → arrivato | annullato`, proroga di `arrivo_previsto` solo se `attivo`.
+- **S**: `utente_id = auth.uid()` oppure (`private.e_destinatario_ritorno(id)` e `private.account_attivo(auth.uid())`). I moderatori non hanno policy (R-69).
+- **I**: `utente_id = auth.uid()`, `stato = 'attivo'` e `private.account_attivo(auth.uid())`; `GRANT INSERT (arrivo_previsto)`. Il trigger `private.verifica_ritorno` (`before insert`) serializza gli avvii con il lock su `profili_privati`, controlla un solo ritorno attivo (`NX055`), al massimo 10 ritorni in 24 ore (`NX061`), l'arrivo previsto tra 10 minuti e 4 ore (`NX058`) e scrive `avviato_il`.
+- **U**: `utente_id = auth.uid()`; `GRANT UPDATE (stato, arrivo_previsto)`. Il trigger `private.proteggi_ritorno` ammette solo `attivo → arrivato | annullato` dal telefono (`scaduto` solo dal job), un ritorno concluso non cambia più (`NX059`), la proroga solo in avanti, nel futuro ed entro 4 ore dall'avvio (`NX058`; dopo un'allerta la azzera), e scrive `concluso_il`. `private.dopo_cambio_ritorno` crea le notifiche `ritorno_arrivato` per "Sono arrivato" e avvisa titolare e destinatari.
 - **D**: nessuna (pulizia con il job di conservazione).
-- `private.verifica_ritorni_scaduti()` (ogni minuto, `pg_cron`): se `now() > arrivo_previsto` e `allerta_inviata_il is null`, imposta `allerta_inviata_il` e crea notifiche `ritorno_allerta` per i destinatari con l'ultima posizione nota; se `now() > arrivo_previsto + 2 ore`, imposta `stato = 'scaduto'` (R-31).
+- RPC `public.avvia_ritorno(arrivo_previsto, destinatari uuid[])` (`security invoker`): crea il ritorno con i destinatari in un'unica transazione; chi non è un amico confermato è escluso e restituito in `esclusi`; senza amici validi `NX056`, con più di 5 `NX057`. RPC `public.proroga_ritorno(ritorno, minuti)` (`security invoker`, 15 o 30): dall'arrivo previsto o da adesso, se è già passato. RPC `public.ritorni_vivi()` (`security invoker`): il proprio ritorno attivo con i destinatari e i ritorni ricevuti (attivi o conclusi da meno di 15 minuti) con il profilo e l'ultima posizione, che la RLS mostra solo a ritorno attivo. RPC `public.suggerimenti_ritorno()` (`security invoker`): il locale del check-in attivo e le serate di gruppo della serata in corso con gli amici confermati del gruppo e chi torna con te (stesso passaggio al ritorno, F-16).
+- `private.verifica_ritorni_scaduti()` (ogni minuto, `pg_cron`): se `now() > arrivo_previsto` e `allerta_inviata_il is null`, imposta `allerta_inviata_il` e crea notifiche `ritorno_allerta` (solo identificativi) per i destinatari ancora amici; se `now() > arrivo_previsto + 2 ore`, imposta `stato = 'scaduto'` (R-31).
+- Conservazione: il ritorno, con destinatari e posizioni, si cancella 24 ore dopo `concluso_il` (§8).
 
 #### `ritorni_destinatari`
 *Funzionalità: F-21.*
@@ -859,8 +868,9 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `amico_id` | `uuid` | FK → `profili(id)` `on delete cascade`; PK composta |
 
 - **S**: `private.e_titolare_ritorno(ritorno_id)` oppure `amico_id = auth.uid()`.
-- **I**: `private.e_titolare_ritorno(ritorno_id)`, ritorno `attivo`, `private.sono_amici(auth.uid(), amico_id)`, al massimo 5 righe per ritorno (trigger) (R-31).
-- **D**: `private.e_titolare_ritorno(ritorno_id)`.
+- **I**: `private.e_titolare_ritorno(ritorno_id)` e `private.sono_amici(auth.uid(), amico_id)`. Il trigger `private.verifica_destinatario_ritorno` accetta solo un ritorno attivo e un destinatario diverso dal titolare (`NX059`) e al massimo 5 righe per ritorno (`NX057`, R-31); `private.notifica_ritorno` crea la notifica `ritorno_avviato` e l'avviso su `vivi:<amico>`.
+- **D**: `private.e_titolare_ritorno(ritorno_id)`. Il trigger `private.dopo_rimozione_destinatario_ritorno` toglie le notifiche del ritorno al destinatario e, se era l'ultimo, annulla il ritorno.
+- R-17: un blocco (`after insert on blocchi`) o un'amicizia rimossa (`after delete on amicizie`) tolgono la persona dai ritorni dell'altra nelle due direzioni (`private.rimuovi_destinatari_ritorno`).
 
 #### `posizioni_ritorno`
 *Funzionalità: F-21.*
@@ -870,14 +880,14 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `id` | `bigint` | PK, identity |
 | `ritorno_id` | `uuid` | FK → `ritorni_sicuri(id)` `on delete cascade` |
 | `posizione` | `geography(Point, 4326)` | |
-| `precisione_m` | `real` | |
-| `registrata_il` | `timestamptz` | |
+| `precisione_m` | `real` | tra 0 (escluso) e 10.000 |
+| `registrata_il` | `timestamptz` | scritta dal database |
 
-- **S**: `private.e_titolare_ritorno(ritorno_id)` oppure `private.e_destinatario_ritorno(ritorno_id)`.
-- **I**: `private.e_titolare_ritorno(ritorno_id)`, ritorno `attivo`; al massimo una posizione ogni 30 secondi (trigger).
+- **S**: `private.e_titolare_ritorno(ritorno_id)` oppure (`private.e_destinatario_ritorno(ritorno_id)` e `private.ritorno_attivo(ritorno_id)` e `private.account_attivo(auth.uid())`): con l'esito la posizione non si vede più.
+- **I**: `private.e_titolare_ritorno(ritorno_id)` e `private.ritorno_attivo(ritorno_id)`; `GRANT INSERT (ritorno_id, posizione, precisione_m)`. Il trigger `private.verifica_posizione_ritorno` ammette al massimo una posizione ogni 30 secondi (`NX060`), scrive `registrata_il` e `ultima_posizione_il`; `private.dopo_posizione_ritorno` invia l'avviso senza dati su `ritorno:<id>`. L'app usa la RPC `public.invia_posizione_ritorno(ritorno, latitudine, longitudine, precisione_m)` (`security invoker`).
 - **U/D**: nessuna.
-- Le posizioni in tempo reale viaggiano anche su un canale Realtime Broadcast privato `ritorno:<id>`, autorizzato con policy su `realtime.messages` (ARCHITECTURE.md §5.4); la tabella conserva le posizioni per l'allerta e per chi apre l'app in un secondo momento.
-- Conservazione: 24 ore dalla fine (R-31).
+- Nessuna coordinata passa da Realtime: chi guarda riceve l'avviso sul canale privato `ritorno:<id>` e rilegge l'ultima posizione con `ritorni_vivi` (§7, ADR-0028). La tabella non è mai letta come percorso: le RPC restituiscono solo l'ultima posizione.
+- Conservazione: con il ritorno, 24 ore dopo la fine (R-31).
 
 ### 5.6 Ricorda: tracker, badge, riepilogo
 
@@ -1047,11 +1057,16 @@ Indice unico parziale: al massimo un ritorno `attivo` per utente.
 | `salva_serata_diario(serata jsonb)` | invoker | utenti | Crea o modifica una serata con spese (al massimo 8), DJ (20) e amici (30) in un'unica transazione; l'`id` arriva dal dispositivo; un `id` di un'altra persona dà `42501` (F-30, R-40, R-69) |
 | `cerca_per_diario(testo text)` | invoker | utenti | Campo «Dove»: eventi pubblicati visibili dell'ultimo anno fino a oggi e locali attivi, almeno 2 caratteri, 10 risultati per tipo |
 | `categorie_spesa_disponibili()` | definer | utenti | Categorie di spesa per chi chiama, senza `alcolici` per i minorenni: l'app non decide da sé (R-40) |
-| `esporta_miei_dati()` | definer | utenti | Tutti i propri dati in un JSON, dall'iterazione 9 con check-in e dispositivi (senza endpoint né chiavi) (`formato` `noxa-esportazione-1`); delle altre persone solo username e nome di chi ha un legame con te; nessuna segnalazione ricevuta (R-50, R-69). Una richiesta all'ora (`private.esportazioni_dati`), `NX047` con l'ora della prossima (R-64, ADR-0025) |
+| `esporta_miei_dati()` | definer | utenti | Tutti i propri dati in un JSON, dall'iterazione 9 con check-in e dispositivi (senza endpoint né chiavi), dall'iterazione 10 con i ritorni sicuri e le loro posizioni (`formato` `noxa-esportazione-1`); delle altre persone solo username e nome di chi ha un legame con te; nessuna segnalazione ricevuta (R-50, R-69). Una richiesta all'ora (`private.esportazioni_dati`), `NX047` con l'ora della prossima (R-64, ADR-0025) |
 | `elimina_mio_account(password text)` | definer | utenti | Verifica la password (5 tentativi sbagliati all'ora in `private.tentativi_eliminazione`, poi `NX048`) e i due fattori se attivi (`serve_codice` senza `aal2`); conserva l'identità in `private.account_conservati` solo se c'è un'escalation (R-55); elimina `auth.users` e restituisce i file della foto profilo che l'Edge Function `elimina-account` cancella (R-64, ADR-0025) |
 | `fai_checkin(locale uuid, evento uuid, destinatari uuid[])` | invoker | utenti | Check-in con i destinatari in un'unica transazione; restituisce `id`, `scade_il`, `destinatari` ed `esclusi` (non più amici confermati); `NX049`…`NX053` (F-20, R-30) |
 | `suggerimenti_checkin()` | invoker | utenti | Eventi a cui partecipi e serate di gruppo della serata in corso, con gli amici confermati da proporre (F-20) |
-| `registra_dispositivo_push(piattaforma, token, chiave_p256dh, chiave_auth, descrizione)` | definer | utenti | Registra o rinnova il dispositivo push di chi chiama; un endpoint appartiene a un solo account; al massimo 10 dispositivi (F-22, ADR-0026) |
+| `registra_dispositivo_push(piattaforma, token, chiave_p256dh, chiave_auth, descrizione)` | definer | utenti | Registra o rinnova il dispositivo push di chi chiama (Web Push o, dall'iterazione 10, il token FCM dell'app Android senza chiavi); un endpoint appartiene a un solo account; al massimo 10 dispositivi (F-22, ADR-0026, ADR-0027) |
+| `avvia_ritorno(arrivo_previsto timestamptz, destinatari uuid[])` | invoker | utenti attivi | Ritorno sicuro con i destinatari in un'unica transazione; restituisce `id`, `avviato_il`, `arrivo_previsto`, `destinatari` ed `esclusi`; `NX055`…`NX058`, `NX061` (F-21, R-31) |
+| `proroga_ritorno(ritorno uuid, minuti integer)` | invoker | titolare | Proroga di 15 o 30 minuti entro 4 ore dall'avvio; restituisce il nuovo arrivo previsto; `NX058`, `NX059` |
+| `invia_posizione_ritorno(ritorno, latitudine, longitudine, precisione_m)` | invoker | titolare | Una posizione del ritorno attivo, al massimo una ogni 30 secondi (`NX060`); avvisa `ritorno:<id>` (ADR-0028) |
+| `ritorni_vivi()` | invoker | utenti | Proprio ritorno attivo con i destinatari e ritorni ricevuti (attivi o conclusi da meno di 15 minuti) con il profilo e l'ultima posizione solo se attivi (R-17, R-31) |
+| `suggerimenti_ritorno()` | invoker | utenti | Locale del check-in attivo e serate di stasera con gli amici del gruppo e chi torna con te (F-16, F-21) |
 | `rigenera_mio_riepilogo()` | definer | utenti | Rigenera il proprio riepilogo annuale (F-33) |
 | `coda_flyer()` | definer | moderatori | Caricamenti in revisione o non leggibili con estrazione, percorso dell'immagine, evento in revisione e possibile corrispondenza con un evento pubblicato, senza `utente_id` né dati del profilo di chi ha caricato (il percorso contiene solo l'uuid pseudonimo usato per la cartella) (F-40, R-69) |
 | `decidi_flyer(caricamento, esito, dati, motivazione, evento_esistente)` | definer | moderatori | Approvazione con le due conferme e la scelta esplicita sull'alcol (R-23), unione a un evento pubblicato o rifiuto motivato (R-51); sotto i 18 anni serve la motivazione (R-22); se l'immagine è adatta accoda `copia_immagine_flyer` |
@@ -1097,7 +1112,7 @@ hanno `set search_path = ''` e test pgTAP con chiamanti non autorizzati.
 | `gruppi:<utente_id>` | Broadcast privato, avviso `cambio` senza dati da `private.avvisa_cambio_membri` (invito, ingresso, uscita, ruolo) | stessa policy: solo il titolare (`utente_id = auth.uid()`) |
 | `vivi:<utente_id>` | Broadcast privato, avviso `cambio` senza dati da `private.avvisa_vivi` (check-in ricevuto, terminato, destinatario tolto) | stessa policy: solo il titolare; l'app ricarica i check-in con la RLS e li ricontrolla ogni minuto per la scadenza (iterazione 9) |
 | Modifiche a `notifiche` dell'utente | Postgres Changes | RLS di `notifiche` |
-| `ritorno:<id>` | Broadcast privato | policy su `realtime.messages`: titolare o `private.e_destinatario_ritorno(id)` |
+| `ritorno:<id>` | Broadcast privato, avviso `cambio` senza dati da `private.avvisa_ritorno` (posizione nuova, proroga, fine, destinatario tolto) | stessa policy: `private.puo_ascoltare` controlla che il ritorno si veda (RLS di `ritorni_sicuri`: titolare o destinatario amico); chi riceve rilegge con `ritorni_vivi` (ADR-0028) |
 
 Postgres Changes non applica la RLS agli eventi `DELETE` e li invia con la chiave primaria a
 ogni sessione in ascolto: si usa solo per tabelle la cui chiave non rivela relazioni tra
@@ -1111,8 +1126,8 @@ RLS (iterazione 7).
 |---|---|---|
 | Codici invito scaduti | ogni ora, al minuto 23 | `private.elimina_codici_invito_scaduti()`: elimina i codici scaduti da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Account non confermati | ogni ora, al minuto 17 | `private.elimina_account_non_confermati()`: elimina gli account senza email confermata creati da più di 24 ore (SAFETY_PRIVACY.md §10) |
-| Ritorni scaduti | ogni minuto | `private.verifica_ritorni_scaduti()` |
-| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); dall'iterazione 8 `azioni_moderazione` e `segnalazioni` chiuse dopo 12 mesi (salvo prove e decisioni con un reclamo conservato), il riferimento alla foto dei locali disattivati da 7 giorni, `private.tentativi_eliminazione` e `private.esportazioni_dati` dopo 24 ore; dall'iterazione 9 `checkin` (con i destinatari) 24 ore dopo la fine e `dispositivi_push` dopo 90 giorni senza uso. Gli account inattivi da 24 mesi sono nell'iterazione 12 (ROADMAP.md §5) |
+| Ritorni scaduti | ogni minuto | `private.verifica_ritorni_scaduti()`: allerta all'arrivo previsto superato, fine automatica 2 ore dopo (R-31, iterazione 10) |
+| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); dall'iterazione 8 `azioni_moderazione` e `segnalazioni` chiuse dopo 12 mesi (salvo prove e decisioni con un reclamo conservato), il riferimento alla foto dei locali disattivati da 7 giorni, `private.tentativi_eliminazione` e `private.esportazioni_dati` dopo 24 ore; dall'iterazione 9 `checkin` (con i destinatari) 24 ore dopo la fine e `dispositivi_push` dopo 90 giorni senza uso; dall'iterazione 10 `ritorni_sicuri` (con destinatari e posizioni) 24 ore dopo la fine. Gli account inattivi da 24 mesi sono nell'iterazione 12 (ROADMAP.md §5) |
 | Invariante dei gruppi | ogni giorno alle 04:00 | `private.verifica_invariante_gruppi()` |
 | Accodamento job del worker | ogni 5 minuti | `private.accoda_fonti_da_eseguire()`: inserisce `esegui_fonte` per le fonti attive scadute; dopo un errore l'intervallo raddoppia (fino a 8 volte la frequenza), che è il backoff delle fonti |
 | Metriche | ogni giorno alle 02:00 | `refresh materialized view private.metriche_settimanali` |

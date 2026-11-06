@@ -115,6 +115,13 @@ pnpm --filter web exec cap sync         # copia l'export nei progetti iOS e Andr
 pnpm --filter web exec cap open android # oppure ios (solo macOS)
 ```
 
+Prova del ritorno sicuro su un telefono Android (ADR-0027, ADR-0028): in Android Studio
+**Run** installa l'APK di debug sul telefono collegato con il debug USB. L'app deve puntare a un
+Supabase raggiungibile dal telefono (`NEXT_PUBLIC_SUPABASE_URL` con l'indirizzo del PC o lo
+staging, non `127.0.0.1`). Le notifiche native richiedono `apps/web/android/app/google-services.json`
+del progetto Firebase (fuori dal repository), `NEXT_PUBLIC_FCM_ATTIVO=true` nella build e il
+segreto `FCM_ACCOUNT_SERVIZIO` della funzione `invia-push`.
+
 ## Mappe
 
 In locale: `scripts/prepara_mappa.sh` scarica l'area e la carica nel bucket `mappe` di

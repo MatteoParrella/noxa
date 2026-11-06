@@ -19,6 +19,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { BadgeRitorno } from '@/features/ritorno/Componenti';
+import { trovaRicevuto, useRitorni } from '@/features/ritorno/dati';
+import { statoAmico, useAdesso } from '@/features/ritorno/formato';
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Avatar } from '@/components/ui/Avatar';
@@ -39,6 +42,7 @@ import { invitoNascosto, nascondiInvito, useDispositivi, useStatoPush } from './
 
 const testi = messaggi.notifiche;
 const testiVivi = messaggi.vivi.notifica;
+const testiRitorno = messaggi.ritorno.notifica;
 
 const ICONE: Record<TipoNotifica, LucideIcon> = {
   richiesta_amicizia: UserPlus,
@@ -167,6 +171,13 @@ export function ElencoNotifiche() {
                     </li>
                   );
                 }
+                if (n.tipo.startsWith('ritorno_')) {
+                  return (
+                    <li key={n.id}>
+                      <VoceRitorno notifica={n} />
+                    </li>
+                  );
+                }
                 const IcoComponente = ICONE[n.tipo];
                 const href = linkNotifica(n.tipo, n.dati);
                 const { titolo, motivazione } = testoNotifica(n.tipo, n.dati);
@@ -279,6 +290,63 @@ function VoceCheckin({ notifica }: { notifica: Notifica }) {
 }
 
 /**
+ * Notifiche del ritorno sicuro (design/F-21-ritorno-sicuro §7): avatar, nome e stato finché il
+ * ritorno si vede (attivo o esito da meno di 15 minuti); poi il testo di sistema, senza
+ * posizione. I dati si leggono dal ritorno con la RLS (R-17, R-31), mai dalla notifica.
+ */
+function VoceRitorno({ notifica }: { notifica: Notifica }) {
+  const id = typeof notifica.dati.ritorno_id === 'string' ? notifica.dati.ritorno_id : null;
+  const ritorni = useRitorni();
+  const ritorno = trovaRicevuto(ritorni.data?.ricevuti, id);
+  const nonLetta = notifica.letta_il === null;
+  const tipo = notifica.tipo as 'ritorno_avviato' | 'ritorno_allerta' | 'ritorno_arrivato';
+  const adesso = useAdesso();
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-3">
+      {ritorno ? (
+        <Avatar
+          nome={ritorno.persona.nome_visualizzato}
+          foto={ritorno.persona.avatar_path}
+          decorativo
+        />
+      ) : (
+        <span
+          className={`cornice-icona mt-0.5 shrink-0 ${nonLetta ? 'bg-accento-tenue' : ''}`}
+          aria-hidden="true"
+        >
+          <Icona icona={ICONE[tipo]} dimensione="s" className={nonLetta ? 'c-accento' : 'c-2'} />
+        </span>
+      )}
+      <div className="flex flex-col gap-1 min-w-0">
+        {ritorno ? (
+          <>
+            <p className={`m-0 t-corpo-piccolo ${nonLetta ? 'font-medium' : ''}`}>
+              {testiRitorno.titolo[tipo](ritorno.persona.nome_visualizzato)}{' '}
+              <span className="c-2 ck-mono t-didascalia">@{ritorno.persona.username}</span>
+            </p>
+            <BadgeRitorno stato={statoAmico(ritorno, adesso)} />
+            <Link
+              className="btn btn-secondario btn-s self-start mt-1"
+              href={`/vivi/ritorno-amico/?id=${ritorno.id}`}
+            >
+              {testiRitorno.vedi}
+            </Link>
+          </>
+        ) : (
+          <>
+            <p className="m-0 t-corpo-piccolo c-2">{testi.tipi[tipo]}</p>
+            {!ritorni.isPending && <p className="m-0 t-didascalia c-2">{testiRitorno.finito}</p>}
+          </>
+        )}
+        <time dateTime={notifica.creata_il} className="t-didascalia c-3">
+          {orarioNotifica(notifica.creata_il)}
+        </time>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Tocco su una notifica del telefono (`/notifiche/?apri=<id>`): porta alla schermata giusta,
  * oppure resta qui con "Non è più disponibile" se nel frattempo l'oggetto non c'è più
  * (amicizia annullata, check-in terminato, persona bloccata).
@@ -306,9 +374,11 @@ function AperturaDaPush({ notifiche }: { notifiche: Notifica[] }) {
     }
   }, [apri, notifica, checkin.data, router]);
 
+  // Un ritorno sicuro non più visibile rimanda qui (design/F-21-ritorno-sicuro §5).
   const nonDisponibile =
-    apri !== null &&
-    (!notifica || (notifica.tipo === 'checkin_amico' && !checkin.isPending && !checkin.data));
+    parametri.get('non-disponibile') === 'ritorno' ||
+    (apri !== null &&
+      (!notifica || (notifica.tipo === 'checkin_amico' && !checkin.isPending && !checkin.data)));
   if (!nonDisponibile) return null;
   return (
     <div className="mb-4" aria-live="polite">

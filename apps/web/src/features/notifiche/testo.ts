@@ -42,11 +42,14 @@ export function testoNotifica(tipo: TipoNotifica, dati: Record<string, unknown>)
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-/** Pagina a cui porta una notifica: la serata o il gruppo quando la notifica li riguarda. */
+/** Pagina a cui porta una notifica: la serata, il gruppo o il ritorno quando la notifica li riguarda. */
 export function linkNotifica(tipo: TipoNotifica, dati: Record<string, unknown>): string {
   const serata = testo(dati.serata_id);
   if ((tipo === 'nuova_serata' || tipo === 'aggiornamento_serata') && uuid.test(serata))
     return `/serata/?id=${serata}`;
+  const ritorno = testo(dati.ritorno_id);
+  if (tipo.startsWith('ritorno_') && uuid.test(ritorno))
+    return `/vivi/ritorno-amico/?id=${ritorno}`;
   return LINK[tipo];
 }
 

@@ -9,7 +9,9 @@ const configurazione: CapacitorConfig = {
   webDir: 'out',
   backgroundColor: '#0E1116',
   ios: { contentInset: 'never' },
-  android: { allowMixedContent: false },
+  // Bridge legacy: senza, Android ferma la posizione del ritorno sicuro dopo 5 minuti in
+  // background (@capacitor-community/background-geolocation, ADR-0028).
+  android: { allowMixedContent: false, useLegacyBridge: true },
 };
 
 export default configurazione;

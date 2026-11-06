@@ -188,7 +188,14 @@ export type Endpoint =
   | 'dispositivi_push_elimina'
   | 'registra_dispositivo_push'
   | 'notifiche_leggi'
-  | 'notifiche_aggiorna';
+  | 'notifiche_aggiorna'
+  | 'ritorni_vivi'
+  | 'suggerimenti_ritorno'
+  | 'avvia_ritorno'
+  | 'proroga_ritorno'
+  | 'invia_posizione_ritorno'
+  | 'ritorni_aggiorna'
+  | 'ritorni_destinatari_elimina';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
@@ -744,6 +751,59 @@ export function checkinAmicoDiProva() {
   };
 }
 
+export const ID_RITORNO = '00000000-0000-4000-8000-0000000000a1';
+export const ID_RITORNO_AMICO = '00000000-0000-4000-8000-0000000000a2';
+
+/** Posizione di prova a Monza, senza vie leggibili negli screenshot. */
+export const POSIZIONE_DI_PROVA = { latitude: 45.5845, longitude: 9.2744, accuracy: 35 };
+
+/** Il proprio ritorno attivo, come lo restituisce `ritorni_vivi`. */
+export function mioRitornoDiProva(
+  destinatari: PersonaProva[] = [PERSONE.marco, PERSONE.sara],
+  { arrivoTraMinuti = 50, posizioneMinutiFa = 1 } = {},
+) {
+  return {
+    id: ID_RITORNO,
+    stato: 'attivo',
+    avviato_il: new Date(Date.now() - 10 * 60_000).toISOString(),
+    arrivo_previsto: new Date(Date.now() + arrivoTraMinuti * 60_000).toISOString(),
+    allerta_inviata_il: null,
+    concluso_il: null,
+    posizione: {
+      lat: POSIZIONE_DI_PROVA.latitude,
+      lon: POSIZIONE_DI_PROVA.longitude,
+      precisione_m: 40,
+      registrata_il: new Date(Date.now() - posizioneMinutiFa * 60_000).toISOString(),
+    },
+    destinatari,
+  };
+}
+
+/** Ritorno ricevuto da un amico (la RLS reale lo restituisce solo ai destinatari). */
+export function ritornoAmicoDiProva(
+  stato: 'in_viaggio' | 'in_ritardo' | 'arrivato' | 'annullato' = 'in_viaggio',
+) {
+  const ritardo = stato === 'in_ritardo';
+  const concluso = stato === 'arrivato' || stato === 'annullato';
+  return {
+    id: ID_RITORNO_AMICO,
+    stato: concluso ? stato : 'attivo',
+    avviato_il: new Date(Date.now() - 60 * 60_000).toISOString(),
+    arrivo_previsto: new Date(Date.now() + (ritardo ? -5 : 25) * 60_000).toISOString(),
+    allerta_inviata_il: ritardo ? new Date(Date.now() - 4 * 60_000).toISOString() : null,
+    concluso_il: concluso ? new Date(Date.now() - 3 * 60_000).toISOString() : null,
+    posizione: concluso
+      ? null
+      : {
+          lat: 45.5801,
+          lon: 9.2702,
+          precisione_m: 30,
+          registrata_il: new Date(Date.now() - 60_000).toISOString(),
+        },
+    utente: PERSONE.sara,
+  };
+}
+
 export class SupabaseSimulato {
   readonly richieste: Array<{ endpoint: Endpoint; corpo: unknown; url: string }> = [];
   private readonly risposte = new Map<Endpoint, Risposta>();
@@ -767,6 +827,10 @@ export class SupabaseSimulato {
   dispositivi: unknown[] = [];
   /** Notifiche dell'utente, dalla più recente. */
   notifiche: unknown[] = [];
+  /** Il proprio ritorno sicuro attivo (`ritorni_vivi.mio`), o null. */
+  mioRitorno: unknown = null;
+  /** Ritorni ricevuti dagli amici (`ritorni_vivi.ricevuti`). */
+  ritorniAmici: unknown[] = [];
 
   constructor(account: AccountSimulato | null) {
     this.account = account;
@@ -1017,6 +1081,51 @@ export class SupabaseSimulato {
         };
       case 'suggerimenti_checkin':
         return { stato: 200, corpo: SUGGERIMENTI_DI_PROVA };
+      case 'ritorni_vivi':
+        return { stato: 200, corpo: { mio: this.mioRitorno, ricevuti: this.ritorniAmici } };
+      case 'suggerimenti_ritorno':
+        return {
+          stato: 200,
+          corpo: {
+            partenza: LOCALI_DI_PROVA.binario.nome,
+            serate: [
+              {
+                serata_id: ID_SERATA,
+                titolo: 'Sabato al Binario 7',
+                locale: LOCALI_DI_PROVA.binario.nome,
+                amici: [PERSONE.marco.id, PERSONE.sara.id],
+                torna_con_te: [PERSONE.marco.id],
+              },
+            ],
+          },
+        };
+      case 'avvia_ritorno': {
+        const dati = corpo as { arrivo_previsto?: string; destinatari?: string[] } | null;
+        const destinatari = dati?.destinatari ?? [];
+        // Dopo l'avvio `ritorni_vivi` restituisce il ritorno, come il database.
+        this.mioRitorno = {
+          ...mioRitornoDiProva(Object.values(PERSONE).filter((p) => destinatari.includes(p.id))),
+          arrivo_previsto: dati?.arrivo_previsto,
+        };
+        return {
+          stato: 200,
+          corpo: {
+            id: ID_RITORNO,
+            avviato_il: new Date().toISOString(),
+            arrivo_previsto: dati?.arrivo_previsto,
+            destinatari,
+            esclusi: [],
+          },
+        };
+      }
+      case 'proroga_ritorno':
+        return { stato: 200, corpo: new Date(Date.now() + 65 * 60_000).toISOString() };
+      case 'invia_posizione_ritorno':
+      case 'ritorni_destinatari_elimina':
+        return { stato: 204 };
+      case 'ritorni_aggiorna':
+        this.mioRitorno = null;
+        return { stato: 204 };
       case 'locali_leggi':
         return {
           stato: 200,
@@ -1131,6 +1240,8 @@ export class SupabaseSimulato {
         DELETE: 'dispositivi_push_elimina',
       },
       '/rest/v1/notifiche': { GET: 'notifiche_leggi', PATCH: 'notifiche_aggiorna' },
+      '/rest/v1/ritorni_sicuri': { PATCH: 'ritorni_aggiorna' },
+      '/rest/v1/ritorni_destinatari': { DELETE: 'ritorni_destinatari_elimina' },
       '/rest/v1/partecipazioni_evento': {
         POST: 'partecipazioni_crea',
         PATCH: 'partecipazioni_aggiorna',
@@ -1167,6 +1278,11 @@ export class SupabaseSimulato {
       'fai_checkin',
       'suggerimenti_checkin',
       'registra_dispositivo_push',
+      'ritorni_vivi',
+      'suggerimenti_ritorno',
+      'avvia_ritorno',
+      'proroga_ritorno',
+      'invia_posizione_ritorno',
     ];
     if (rpc && rpcSimulate.includes(rpc)) return rpc as Endpoint;
     if (percorso.startsWith('/storage/v1/object/sign/') && metodo === 'POST')
