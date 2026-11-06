@@ -8,14 +8,15 @@ import { messaggi } from '@/lib/messaggi/it';
 import { useConcludi } from './Componenti';
 import { avviatoQui, useRitorni } from './dati';
 import { oraDi } from './formato';
-import { modoPosizione } from './posizione';
+import { serveNotaSchermo } from './posizione';
 
 const testi = messaggi.ritorno;
 
 /**
  * Indicatore permanente del ritorno attivo (R-31, design §4): una barra in cima a tutte le aree
- * con "Sono arrivato"; da desktop sta nella barra laterale (`variante="laterale"`). Nella PWA
- * ricorda che serve Noxa aperta. Con lo schermo bloccato su Android c'è la notifica fissa.
+ * con "Sono arrivato"; da desktop sta nella barra laterale (`variante="laterale"`). Nel browser
+ * del telefono ricorda che a schermo bloccato gli amici vedono dove eri; nell'app Android c'è
+ * la notifica fissa e la nota non compare.
  */
 export function BarraRitorno({ variante = 'cima' }: { variante?: 'cima' | 'laterale' }) {
   const ritorni = useRitorni();
@@ -25,7 +26,7 @@ export function BarraRitorno({ variante = 'cima' }: { variante?: 'cima' | 'later
   const percorso = usePathname();
   if (!mio) return null;
   const dettaglio = testi.barra.dettaglio(oraDi(mio.arrivoPrevisto), mio.destinatari.length);
-  const pwa = modoPosizione() !== 'nativo' && avviatoQui(mio);
+  const pwa = serveNotaSchermo() && avviatoQui(mio);
   const sonoArrivato = (
     <Pulsante
       variante="secondario"

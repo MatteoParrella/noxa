@@ -256,8 +256,9 @@ sequenceDiagram
 Nell'app Android il plugin `@capacitor-community/background-geolocation` avvia un servizio in
 primo piano di tipo `location` con la notifica fissa "Ritorno sicuro attivo" (R-31); basta il
 permesso "Mentre usi l'app". Nella PWA `watchPosition` si ferma quando Noxa non è in primo
-piano: la barra "Ritorno attivo" e il foglio di avvio lo dicono, e l'allerta parte comunque dal
-server. La posizione si condivide solo dal telefono che ha avviato il ritorno.
+piano: il ritorno funziona a tempo (ultima posizione al blocco dello schermo, aggiornata quando
+si riapre Noxa) e l'allerta parte comunque dal server; la barra e il foglio di avvio lo dicono
+solo nel browser del telefono, mai nell'app installata né da computer (ADR-0006). La posizione si condivide solo dal telefono che ha avviato il ritorno.
 
 ### 4.5 Raccolta eventi e flyer
 

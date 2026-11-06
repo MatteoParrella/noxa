@@ -19,6 +19,29 @@ export function modoPosizione(): ModoPosizione {
     : 'primo_piano';
 }
 
+export type Dispositivo = 'app' | 'iphone' | 'android_browser' | 'computer';
+
+/**
+ * Dove gira Noxa, per la nota sulla posizione a schermo bloccato: nell'app Android la
+ * posizione arriva sempre e la nota non serve; nel browser del telefono (iPhone o Android) si
+ * ferma quando lo blocchi; da computer non si torna a casa, quindi nessuna nota.
+ */
+export function dispositivo(): Dispositivo {
+  if (modoPosizione() === 'nativo') return 'app';
+  if (typeof navigator === 'undefined') return 'computer';
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1))
+    return 'iphone';
+  if (/Android/.test(ua)) return 'android_browser';
+  return 'computer';
+}
+
+/** Mostrare la nota "la posizione si ferma quando blocchi il telefono". */
+export function serveNotaSchermo(): boolean {
+  const qui = dispositivo();
+  return qui === 'iphone' || qui === 'android_browser';
+}
+
 export type ErrorePosizione = 'negata' | 'spenta' | 'tempo_scaduto' | 'non_supportata';
 
 export class ErroreDiPosizione extends Error {

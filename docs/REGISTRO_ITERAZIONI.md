@@ -1146,6 +1146,11 @@ il commit finale sul branch `iterazione-09-notifiche-checkin`.
   test → il ritorno arriva come contenuto passato dal layout; D-07 non elencava Firebase →
   aggiunto; quattro file non formattati → Prettier.
 - Ciclo 2: tutti i controlli superati.
+- Dopo la chiusura, su richiesta del product owner: il pallino della scelta dell'area di
+  arrivo non si riempiva (lo stile c'era solo per il check-in) → corretto con un test e2e;
+  "Tieni Noxa aperta" non è realistico su iPhone → nota sul ritorno "a tempo" (posizione al
+  blocco dello schermo, allerta comunque dal server) mostrata solo nel browser del telefono,
+  mai nell'app installata né da computer, con un test e2e su iPhone (ADR-0006, ADR-0028).
 
 **Esito dei test**
 - pgTAP: 1256 test in 33 file; nuovo `040_ritorno_sicuro` (96) verde. In locale falliscono

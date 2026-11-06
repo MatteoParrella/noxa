@@ -60,7 +60,7 @@ export const ritorno = {
   barra: {
     titolo: 'Ritorno attivo',
     dettaglio: (ora: string, n: number) => `Arrivo ${ora} · ${amici(n)}`,
-    pwa: 'Tieni Noxa aperta: con lo schermo bloccato gli amici vedono l’ultima posizione.',
+    pwa: 'Con lo schermo bloccato gli amici vedono dove eri; se non arrivi in tempo li avvisiamo comunque.',
   },
   notificaFissa: {
     titolo: 'Ritorno sicuro attivo',
@@ -81,8 +81,7 @@ export const ritorno = {
     mappa: 'Mappa con la tua ultima posizione e il cerchio di precisione',
     vecchia: {
       titolo: (ora: string) => `Gli amici vedono una posizione delle ${ora}`,
-      testo:
-        'Da più di 5 minuti il telefono non la aggiorna. Tieni Noxa aperta o controlla la rete.',
+      testo: 'Da più di 5 minuti il telefono non la aggiorna. Riapri Noxa o controlla la rete.',
     },
     offline: {
       titolo: 'Le posizioni ripartono con la rete',
@@ -181,8 +180,9 @@ export const ritorno = {
         `Se alle ${ora} non hai confermato, li avvisiamo, anche se il telefono è spento o senza rete.`,
       cancella: 'Le posizioni si cancellano 24 ore dopo.',
       pwa: {
-        titolo: 'Su questo telefono funziona solo con Noxa aperta.',
-        testo: 'Con lo schermo bloccato gli amici vedono l’ultima posizione.',
+        titolo: 'Su questo telefono la posizione si ferma quando lo blocchi.',
+        testo:
+          'Gli amici vedono dove eri in quel momento; se non arrivi in tempo li avvisiamo comunque.',
       },
       avvia: 'Avvia',
     },

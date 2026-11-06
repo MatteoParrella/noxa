@@ -35,6 +35,7 @@ notifica fissa. Implementandolo sono emersi vincoli tecnici che cambiano alcuni 
   L'arrivo nell'area conclude il ritorno dopo un minuto in cui si può toccare "Non ero arrivato".
 - **Un telefono per ritorno**: la posizione si condivide solo dal dispositivo che ha avviato il
   ritorno; dagli altri si può concludere o prorogare.
+- **Nota del browser del telefono**: nel browser del telefono (PWA su iPhone e Android) la posizione si ferma quando lo schermo si blocca: il ritorno funziona "a tempo" (gli amici vedono dove eri al blocco, si aggiorna quando riapri Noxa e l'allerta parte comunque dal server) e lo si dice in una nota visibile, senza chiedere di tenere Noxa aperta. La nota non compare nell'app Android installata né da computer.
 - **Limiti anti-abuso**: al massimo 10 ritorni in 24 ore per persona (ognuno avvisa gli amici).
 - **Notifica fissa senza pulsante**: il plugin non permette azioni nella notifica; il tocco apre
   Noxa, dove "Sono arrivato" è nella barra permanente.

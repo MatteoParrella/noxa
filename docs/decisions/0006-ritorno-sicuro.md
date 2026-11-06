@@ -17,7 +17,7 @@ l'allerta deve partire anche se il telefono è scarico o spento.
   `private.verifica_ritorni_scaduti()`, che crea le notifiche inviate da `invia-push`.
 - Nessun indirizzo di casa sul server; l'arrivo automatico usa un'area salvata solo sul
   dispositivo (R-32).
-- Nella PWA la funzione è disponibile solo in primo piano e lo dice chiaramente.
+- Nel browser del telefono (PWA su iPhone e Android) la posizione si ferma quando lo schermo si blocca: il ritorno funziona "a tempo" (gli amici vedono dove eri al blocco, si aggiorna quando riapri Noxa e l'allerta parte comunque dal server) e lo si dice in una nota visibile, senza chiedere di tenere Noxa aperta. La nota non compare nell'app Android installata né da computer. (precisato il 2026-11-06 con il product owner).
 
 ## Alternative considerate
 - **Solo PWA con timer**: senza posizione in background il valore per la sicurezza sarebbe

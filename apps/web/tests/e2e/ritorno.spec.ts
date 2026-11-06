@@ -142,7 +142,10 @@ test('avviare il ritorno: arrivo previsto, chi torna con te, riepilogo, spiegazi
     foglio.getByText('Marco e Sara vedono dove sei fino a quando arrivi.'),
   ).toBeVisible();
   await expect(foglio.getByText(/non hai confermato, li avvisiamo/)).toBeVisible();
-  await expect(foglio.getByText(/funziona solo con Noxa aperta/)).toBeVisible();
+  // Nota della posizione a schermo bloccato: nel browser del telefono sì, da computer no.
+  const notaFoglio = foglio.getByText(/la posizione si ferma quando lo blocchi/);
+  if (test.info().project.name === 'mobile-chromium') await expect(notaFoglio).toBeVisible();
+  else await expect(notaFoglio).toHaveCount(0);
   await foglio.getByRole('button', { name: 'Avvia', exact: true }).click();
 
   // Il permesso è già concesso: niente spiegazione, il ritorno parte.
@@ -169,7 +172,10 @@ test('avviare il ritorno: arrivo previsto, chi torna con te, riepilogo, spiegazi
   await page.goto('/scopri/');
   const barra = page.getByRole('status').filter({ hasText: 'Ritorno attivo', visible: true });
   await expect(barra).toBeVisible();
-  await expect(page.getByText(/Tieni Noxa aperta/).filter({ visible: true })).toBeVisible();
+  const notaBarra = page.getByText(/Con lo schermo bloccato gli amici vedono dove eri/);
+  if (test.info().project.name === 'mobile-chromium')
+    await expect(notaBarra.filter({ visible: true })).toBeVisible();
+  else await expect(notaBarra).toHaveCount(0);
 });
 
 test('posizione negata: il ritorno non parte e si spiega come riattivarla', async ({
@@ -299,4 +305,23 @@ test('R-32: le aree di arrivo restano solo su questo telefono', async ({
   expect(JSON.stringify(nuove)).not.toMatch(/Da Sara|45\.5845/);
   const salvate = await page.evaluate(() => window.localStorage.getItem('noxa-aree-arrivo'));
   expect(salvate).toContain('Da Sara');
+});
+
+test.describe('su iPhone', () => {
+  test.use({
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+  });
+
+  test('la nota dice cosa succede a schermo bloccato, senza chiedere di tenere Noxa aperta', async ({
+    page,
+  }) => {
+    await page.goto('/vivi/');
+    await page.getByRole('button', { name: 'Avvia il ritorno sicuro' }).click();
+    const foglio = page.getByRole('dialog', { name: 'Avvia il ritorno sicuro' });
+    for (let i = 0; i < 3; i++) await foglio.getByRole('button', { name: 'Continua' }).click();
+    await expect(foglio.getByText(/la posizione si ferma quando lo blocchi/)).toBeVisible();
+    await expect(foglio.getByText(/li avvisiamo comunque/)).toBeVisible();
+    await expect(page.getByText(/Noxa aperta/)).toHaveCount(0);
+  });
 });

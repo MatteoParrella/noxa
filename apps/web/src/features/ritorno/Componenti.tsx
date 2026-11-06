@@ -24,7 +24,7 @@ import {
   type StatoAmico,
 } from './formato';
 import { aggiornaMotore, ANTICIPO_PROMEMORIA, azzeraMotore, useMotore } from './motore';
-import { modoPosizione } from './posizione';
+import { serveNotaSchermo } from './posizione';
 
 const testi = messaggi.ritorno;
 
@@ -300,9 +300,12 @@ export function RigaRitornoAmico({ ritorno }: { ritorno: RitornoAmico }) {
   );
 }
 
-/** Nota della PWA, ben visibile e non nascosta (ADR-0006, ADR-0027). */
+/**
+ * Nota del browser del telefono, ben visibile e non nascosta (ADR-0006): mai nell'app
+ * installata, dove la posizione arriva anche a schermo bloccato, e mai da computer.
+ */
 export function NotaPwa() {
-  if (modoPosizione() === 'nativo') return null;
+  if (!serveNotaSchermo()) return null;
   return (
     <p className="rt-pwa m-0">
       <Icona icona={Clock} dimensione="s" className="ico" />
