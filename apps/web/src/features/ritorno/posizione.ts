@@ -76,7 +76,9 @@ export async function ascoltaPosizione({
         backgroundMessage: notifica.testo,
         requestPermissions: true,
         stale: false,
-        distanceFilter: 10,
+        // Nessun filtro di distanza: chi aspetta fermo deve risultare aggiornato; l'invio
+        // resta limitato a una posizione ogni 30 secondi (R-31).
+        distanceFilter: 0,
       },
       (posizione, errore) => {
         if (errore) onErrore(daErroreNativo(errore.code));

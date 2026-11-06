@@ -99,8 +99,8 @@ export default function PaginaPrivacy() {
         </li>
         <li>
           Google Firebase Cloud Messaging: consegna le notifiche dell’app Android, se le accendi.
-          Riceve un codice del telefono e un testo di sistema, senza nomi, testi di altre persone
-          né posizioni.
+          Riceve un codice del telefono e un testo di sistema, senza nomi, testi di altre persone né
+          posizioni.
         </li>
         <li>Sentry (Unione europea): errori tecnici, senza email, posizioni o testi.</li>
       </ul>

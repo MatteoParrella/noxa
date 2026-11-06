@@ -4,7 +4,7 @@
 -- Regole: R-17, R-31, R-32, R-34, R-55, R-64, R-65, R-69.
 -- Amici del seed: 15-16, 20-21, 18-17 (codice invito); richiesta in attesa 14 → 15.
 begin;
-select plan(94);
+select plan(96);
 
 delete from public.ritorni_sicuri;
 delete from public.notifiche where tipo like 'ritorno\_%';
@@ -80,6 +80,11 @@ select tests.autentica_come('moderatore');
 select is((select count(*)::int from public.ritorni_sicuri), 0, 'R-69: il moderatore non vede i ritorni');
 select is((select count(*)::int from public.ritorni_destinatari), 0, 'R-69: il moderatore non vede i destinatari');
 select is((select count(*)::int from public.posizioni_ritorno), 0, 'R-69: il moderatore non vede le posizioni');
+select tests.autentica_come('moderatore_senza_mfa');
+select is((select count(*)::int from public.ritorni_sicuri), 0,
+          'R-69: nemmeno il moderatore senza due fattori vede i ritorni');
+select throws_ok($$ select public.avvia_ritorno(now() + interval '1 hour', array[tests.id('adulto_18')]) $$,
+                 'NX056', null, 'Moderatore senza due fattori: nessun destinatario senza amicizia');
 
 select tests.autentica_come('adulto_18');
 select lives_ok($$ select public.avvia_ritorno(now() + interval '30 minutes', array[tests.id('minore_17')]) $$,

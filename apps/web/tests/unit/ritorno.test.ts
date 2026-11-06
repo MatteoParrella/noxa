@@ -61,9 +61,9 @@ describe('aree di arrivo solo sul telefono (R-32)', () => {
     expect(aggiungiArea({ nome: 'Troppe', lat: 45.5, lon: 9.2, raggio: 100 })).toBe(false);
     window.localStorage.clear();
     expect(aggiungiArea({ nome: '   ', lat: 45.5, lon: 9.2, raggio: 100 })).toBe(false);
-    expect(
-      aggiungiArea({ nome: 'X', lat: 45.5, lon: 9.2, raggio: 999 as unknown as 100 }),
-    ).toBe(false);
+    expect(aggiungiArea({ nome: 'X', lat: 45.5, lon: 9.2, raggio: 999 as unknown as 100 })).toBe(
+      false,
+    );
   });
 
   it('dati rovinati nello storage si ignorano', () => {
@@ -75,7 +75,7 @@ describe('aree di arrivo solo sul telefono (R-32)', () => {
 
   it('l’arrivo considera raggio e precisione (al massimo 100 m di tolleranza)', () => {
     const area = { id: 'a', nome: 'Casa', lat: 45.58, lon: 9.27, raggio: 150 as const };
-    const vicino = { lat: 45.5810, lon: 9.27, precisione: 20 };
+    const vicino = { lat: 45.581, lon: 9.27, precisione: 20 };
     const lontano = { lat: 45.59, lon: 9.27, precisione: 20 };
     expect(distanzaMetri(area, vicino)).toBeGreaterThan(100);
     expect(areaRaggiunta(area, vicino)).toBe(true);
@@ -156,7 +156,9 @@ describe('notifiche e errori del ritorno', () => {
 
   it('nessuna parola di controllo né pressione sociale nei testi (brief, R-43)', () => {
     const testi = JSON.stringify(messaggi.ritorno, (_, valore: unknown) =>
-      typeof valore === 'function' ? String((valore as (...a: string[]) => string)('X', 'Y')) : valore,
+      typeof valore === 'function'
+        ? String((valore as (...a: string[]) => string)('X', 'Y'))
+        : valore,
     );
     expect(testi).not.toMatch(/tracci|\bsegu[io]|localizz|monitor|non hai avviato/i);
   });

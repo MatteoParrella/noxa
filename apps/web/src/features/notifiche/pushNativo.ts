@@ -66,6 +66,7 @@ async function ottieniToken(): Promise<string> {
       }),
     ]).then(() => PushNotifications.register());
   }).finally(() => {
+    // Tolti i listener della registrazione, resta (una volta sola) quello dei tocchi.
     void PushNotifications.removeAllListeners().then(ascoltaTocchi);
   });
 }

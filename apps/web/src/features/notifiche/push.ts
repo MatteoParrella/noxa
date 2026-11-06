@@ -6,7 +6,6 @@ import { messaggi } from '@/lib/messaggi/it';
 import { registraErrore } from '@/lib/registro';
 import { supabase } from '@/lib/supabase';
 import {
-  ascoltaTocchi,
   attivaNativo,
   disattivaNativo,
   fcmDisponibile,
@@ -40,8 +39,7 @@ function eInstallata(): boolean {
 
 export function statoPush(): StatoPush {
   if (typeof window === 'undefined') return 'non_compatibile';
-  if (Capacitor.isNativePlatform())
-    return fcmDisponibile() ? permessoNativo() : 'non_compatibile';
+  if (Capacitor.isNativePlatform()) return fcmDisponibile() ? permessoNativo() : 'non_compatibile';
   // Su iPhone il Web Push esiste solo nell'app aggiunta alla schermata Home.
   if (eIos() && !eInstallata()) return 'iphone_da_installare';
   if (
@@ -142,7 +140,6 @@ export async function attivaPush(): Promise<EsitoAttivazione> {
     const token = await attivaNativo();
     if (!token) return 'negato';
     await registraNativo(token);
-    await ascoltaTocchi();
     return 'attivate';
   }
   const stato = statoPush();
@@ -201,10 +198,7 @@ export async function rinnovaDispositivo(): Promise<void> {
   if (Capacitor.isNativePlatform()) {
     if (!fcmDisponibile()) return;
     const token = await tokenRinnovato();
-    if (token) {
-      await registraNativo(token);
-      await ascoltaTocchi();
-    }
+    if (token) await registraNativo(token);
     return;
   }
   if (statoPush() !== 'concesso') return;
