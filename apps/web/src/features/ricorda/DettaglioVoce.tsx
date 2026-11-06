@@ -1,10 +1,11 @@
 'use client';
 
-import { BookOpen, ChevronLeft, Pencil, Trash2 } from 'lucide-react';
+import { BookOpen, Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { z } from 'zod';
+import { LinkIndietro } from '@/components/guscio/Indietro';
 import { Avatar } from '@/components/ui/Avatar';
 import { Avviso } from '@/components/ui/Avviso';
 import { Foglio } from '@/components/ui/Foglio';
@@ -80,10 +81,11 @@ function Dettaglio({ voce }: { voce: VoceMostrata }) {
   return (
     <article className="flex flex-col">
       <div className="ri-testa-barra pb-3">
-        <Link className="btn btn-testo btn-s -ml-3" href="/ricorda/">
-          <Icona icona={ChevronLeft} dimensione="s" />
-          {testi.dettaglio.torna}
-        </Link>
+        <LinkIndietro
+          className="btn btn-testo btn-s -ml-3"
+          href="/ricorda/"
+          etichetta={testi.dettaglio.torna}
+        />
         <div>
           <EtichettaPrivato />
           <MenuAzioni

@@ -12,9 +12,10 @@ import {
   Ticket,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { z } from 'zod';
+import { useIndietro } from '@/components/guscio/Indietro';
 import { AmiciPartecipano } from '@/components/ui/AmiciPartecipano';
 import { Avviso } from '@/components/ui/Avviso';
 import { Badge, Genere } from '@/components/ui/Badge';
@@ -110,16 +111,16 @@ export function DettaglioEvento() {
 }
 
 function Indietro() {
-  const router = useRouter();
+  const indietro = useIndietro({ href: '/scopri/', etichetta: 'Scopri' });
   return (
-    <button
-      type="button"
+    <Link
       className="cop-btn cop-indietro"
       aria-label={testi.indietro}
-      onClick={() => (window.history.length > 1 ? router.back() : router.push('/scopri/'))}
+      href={indietro.href}
+      onClick={indietro.onClick}
     >
       <Icona icona={ChevronLeft} />
-    </button>
+    </Link>
   );
 }
 

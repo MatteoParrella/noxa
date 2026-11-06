@@ -3,6 +3,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useState, type ReactNode } from 'react';
+import { TracciaNavigazione } from '@/components/guscio/Indietro';
 import { FornitoreToast } from '@/components/ui/Toast';
 import { DURATA_CACHE_MS, daSalvare, persistenza } from '@/lib/cacheLocale';
 import { ErroreRete } from '@/lib/errori';
@@ -38,6 +39,7 @@ export function Fornitori({ children }: { children: ReactNode }) {
       // All'apertura si vede subito la copia salvata, poi si rilegge tutto dal database.
       onSuccess={() => void client.invalidateQueries()}
     >
+      <TracciaNavigazione />
       <FornitoreToast>{children}</FornitoreToast>
     </PersistQueryClientProvider>
   );

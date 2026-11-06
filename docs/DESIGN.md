@@ -108,6 +108,11 @@ flowchart LR
   di accesso (`src/features/account/`) condividono l'impaginazione `Schermata` (testa con
   "Indietro", titolo che sale parola per parola, piede fisso) e fanno entrare i blocchi
   all'apertura con `Entra`, non allo scorrimento: sono schermate brevi, già tutte in vista.
+- Il link "indietro" delle pagine interne (`LinkIndietro` e `useIndietro` in
+  `src/components/guscio/Indietro.tsx`) riporta alla pagina dell'app da cui si è arrivati,
+  come il gesto indietro del telefono, e ne mostra il nome; solo senza una pagina precedente
+  (indirizzo aperto da fuori, notifica) porta alla pagina madre. La pila degli indirizzi
+  visitati resta nel `sessionStorage` della scheda (`src/lib/navigazione.ts`), mai sul server.
 - Ogni schermata gestisce gli stati: caricamento, vuoto, errore (con un'azione per
   riprovare), offline, successo.
 

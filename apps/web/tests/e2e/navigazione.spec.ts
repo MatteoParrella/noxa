@@ -1,4 +1,4 @@
-import { expect, impostaTema, TEMI, test, verificaAccessibilita } from './supporto';
+import { expect, ID_GRUPPO, impostaTema, TEMI, test, verificaAccessibilita } from './supporto';
 
 // Ricorda si apre sul diario (design/F-30-tracker) e Vivi su «Stasera» (design/F-20-checkin):
 // il titolo è quello della schermata.
@@ -66,4 +66,27 @@ test('il tema chiaro scelto nel profilo resta dopo il ricaricamento', async ({ p
     'aria-checked',
     'true',
   );
+});
+
+test('«indietro» torna alla pagina da cui si è arrivati, altrimenti alla pagina madre', async ({
+  page,
+}) => {
+  // Da un gruppo a una persona: si torna al gruppo, non ad Amici.
+  await page.goto(`/gruppo/?id=${ID_GRUPPO}`);
+  await expect(page.getByRole('heading', { name: 'Calcetto del giovedì' })).toBeVisible();
+  await page.locator('a.mb-nome').first().click();
+  await expect(page).toHaveURL(/\/persona\/\?id=/);
+  const contenuto = page.getByRole('main');
+  const indietro = contenuto.getByRole('link', { name: 'Gruppo', exact: true });
+  await expect(indietro).toBeVisible();
+  await indietro.click();
+  await expect(page).toHaveURL(new RegExp(`/gruppo/\\?id=${ID_GRUPPO}`));
+  // Il gruppo si è aperto da un indirizzo diretto: il suo «indietro» porta a Organizza.
+  await contenuto.getByRole('link', { name: 'Organizza', exact: true }).click();
+  await expect(page).toHaveURL(/\/organizza\/$/);
+  // Una pagina aperta direttamente usa la pagina madre.
+  await page.evaluate(() => sessionStorage.clear());
+  await page.goto('/amici/cerca/');
+  await contenuto.getByRole('link', { name: 'Amici', exact: true }).click();
+  await expect(page).toHaveURL(/\/amici\/$/);
 });
