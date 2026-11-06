@@ -221,6 +221,27 @@
 .btn-testo.is-premuto {
   background: var(--colore-superficie-3);
 }
+/* Pulsante "indietro" di tutte le pagine interne: tondo, solo la freccia, lo stesso della
+   copertina del dettaglio evento (design/F-03-dettaglio-evento). */
+.btn-indietro {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--area-tocco);
+  height: var(--area-tocco);
+  border: 0;
+  border-radius: var(--raggio-tondo);
+  background: color-mix(in srgb, var(--colore-sfondo) 86%, transparent);
+  color: var(--colore-testo-primario);
+  box-shadow: 0 0 0 1px var(--colore-linea);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--movimento-veloce) var(--curva-standard);
+}
+.btn-indietro:hover {
+  background: var(--colore-superficie-2);
+}
 .btn-neutro {
   color: var(--colore-testo-primario);
 }

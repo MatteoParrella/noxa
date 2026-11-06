@@ -249,11 +249,7 @@ function Serata({ io, dati }: { io: string; dati: Dati }) {
   return (
     <article className="flex flex-col">
       <div className="flex items-center justify-between">
-        <LinkIndietro
-          className="btn btn-testo btn-s -ml-3"
-          href={percorsoGruppo(dati.gruppo_id)}
-          etichetta={dati.gruppo_nome}
-        />
+        <LinkIndietro href={percorsoGruppo(dati.gruppo_id)} etichetta={dati.gruppo_nome} />
         <MenuAzioni
           etichetta={testi.menu(titolo)}
           titolo={`${titolo} · ${dataBreve(dati.data_serata)}`}

@@ -681,7 +681,6 @@ export const messaggi = {
 
   evento: {
     caricamento: 'Carico l’evento',
-    indietro: 'Indietro',
     nonDisponibile: {
       titolo: 'Questo evento non c’è più o non è adatto alla tua età',
       testo: 'Trovi altri eventi in Scopri.',
