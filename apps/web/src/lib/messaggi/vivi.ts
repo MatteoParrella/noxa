@@ -22,7 +22,6 @@ export const vivi = {
   },
   offline: 'Sei offline: il check-in non parte senza rete.',
   aggiornato: (ora: string) => `Agg. ${ora}`,
-  ritornoRiservato: 'Il ritorno sicuro arriverà qui.',
   spento: {
     etichetta: 'Check-in «sono qui»',
     titolo: 'Dì ad alcuni amici in quale locale sei',

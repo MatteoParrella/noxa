@@ -115,6 +115,7 @@ export const push = {
   /** Etichette generiche dei dispositivi, scritte dall'app: niente modello né versione. */
   dispositivo: {
     home: 'Telefono · Noxa dalla Home',
+    app: 'Android · app Noxa',
     browser: (sistema: string, browser: string) => `${sistema} · ${browser}`,
     computer: (browser: string) => `Browser · ${browser} su computer`,
     generico: 'Browser',

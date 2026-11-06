@@ -45,3 +45,6 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 apps/web/public/vendor/
+
+# Configurazione Firebase dell'app Android (ADR-0027): resta fuori dal repository pubblico.
+apps/web/android/app/google-services.json

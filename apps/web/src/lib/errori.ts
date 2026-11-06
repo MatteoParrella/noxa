@@ -62,6 +62,13 @@ export const CODICI_DATABASE = {
   NX052: 'troppi_checkin_oggi',
   NX053: 'locale_non_disponibile',
   NX054: 'checkin_non_attivo',
+  NX055: 'ritorno_gia_attivo',
+  NX056: 'ritorno_senza_destinatari',
+  NX057: 'ritorno_troppi_destinatari',
+  NX058: 'arrivo_fuori_limiti',
+  NX059: 'ritorno_non_attivo',
+  NX060: 'posizione_troppo_frequente',
+  NX061: 'troppi_ritorni_oggi',
 } as const;
 
 export type CodiceDatabase = (typeof CODICI_DATABASE)[keyof typeof CODICI_DATABASE];

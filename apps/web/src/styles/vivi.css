@@ -288,14 +288,6 @@
   color: var(--colore-testo-secondario);
 }
 
-/* spazio riservato al ritorno sicuro (iterazione 10): vuoto */
-.ck-riservato {
-  height: 56px;
-  margin: 18px 0 4px;
-  border-radius: var(--raggio-3);
-  border: 1px dashed var(--colore-linea);
-}
-
 /* foglio Fai check-in: tre passi in un solo foglio */
 .ck-passo {
   border-top: 1px solid var(--colore-linea);

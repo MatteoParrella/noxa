@@ -5,11 +5,21 @@ import { converti } from '@/lib/errori';
 import { messaggi } from '@/lib/messaggi/it';
 import { registraErrore } from '@/lib/registro';
 import { supabase } from '@/lib/supabase';
+import {
+  ascoltaTocchi,
+  attivaNativo,
+  disattivaNativo,
+  fcmDisponibile,
+  permessoNativo,
+  tokenRinnovato,
+  tokenSalvato,
+} from './pushNativo';
 
 /**
  * Notifiche sul telefono con il Web Push della PWA (F-22, ADR-0026). Il permesso del sistema
  * si chiede solo dopo il tocco su "Attiva" nel foglio di Noxa; l'iscrizione del browser si
- * registra con la RPC `registra_dispositivo_push`. Le app native arrivano con D-13.
+ * registra con la RPC `registra_dispositivo_push`. Nell'app Android le notifiche passano da FCM
+ * (ADR-0027, `pushNativo.ts`) con gli stessi testi di sistema.
  */
 
 const testi = messaggi.push.dispositivo;
@@ -29,7 +39,9 @@ function eInstallata(): boolean {
 }
 
 export function statoPush(): StatoPush {
-  if (typeof window === 'undefined' || Capacitor.isNativePlatform()) return 'non_compatibile';
+  if (typeof window === 'undefined') return 'non_compatibile';
+  if (Capacitor.isNativePlatform())
+    return fcmDisponibile() ? permessoNativo() : 'non_compatibile';
   // Su iPhone il Web Push esiste solo nell'app aggiunta alla schermata Home.
   if (eIos() && !eInstallata()) return 'iphone_da_installare';
   if (
@@ -88,6 +100,7 @@ function chiaveApplicazione(): Uint8Array<ArrayBuffer> {
 
 /** Iscrizione Web Push già presente su questo dispositivo, o null. */
 export async function iscrizioneCorrente(): Promise<PushSubscription | null> {
+  if (Capacitor.isNativePlatform()) return null;
   if (statoPush() === 'non_compatibile' || statoPush() === 'iphone_da_installare') return null;
   const registrazione = await navigator.serviceWorker.getRegistration();
   return (await registrazione?.pushManager.getSubscription()) ?? null;
@@ -111,7 +124,27 @@ export type EsitoAttivazione = 'attivate' | 'negato' | 'non_compatibile' | 'ipho
  * Chiede il permesso (solo dopo il tocco su "Attiva"), iscrive il browser e registra il
  * dispositivo. Un errore della registrazione arriva come eccezione, per il "Riprova".
  */
+async function registraNativo(token: string): Promise<void> {
+  const { error } = await supabase().rpc('registra_dispositivo_push', {
+    piattaforma: 'android',
+    token,
+    // Le chiavi servono solo al Web Push: la RPC accetta null, il tipo generato non lo dice.
+    chiave_p256dh: null as unknown as string,
+    chiave_auth: null as unknown as string,
+    descrizione: testi.app,
+  });
+  if (error) throw converti(error);
+}
+
 export async function attivaPush(): Promise<EsitoAttivazione> {
+  if (Capacitor.isNativePlatform()) {
+    if (!fcmDisponibile()) return 'non_compatibile';
+    const token = await attivaNativo();
+    if (!token) return 'negato';
+    await registraNativo(token);
+    await ascoltaTocchi();
+    return 'attivate';
+  }
   const stato = statoPush();
   if (stato === 'non_compatibile' || stato === 'iphone_da_installare') return stato;
   if (stato === 'negato') return 'negato';
@@ -130,6 +163,14 @@ export async function attivaPush(): Promise<EsitoAttivazione> {
 
 /** Spegne le notifiche su questo dispositivo: toglie la riga e annulla l'iscrizione. */
 export async function disattivaPushQui(): Promise<void> {
+  if (Capacitor.isNativePlatform()) {
+    const token = tokenSalvato();
+    if (!token) return;
+    const { error } = await supabase().from('dispositivi_push').delete().eq('token', token);
+    if (error) throw converti(error);
+    await disattivaNativo();
+    return;
+  }
   const iscrizione = await iscrizioneCorrente();
   if (!iscrizione) return;
   const { error } = await supabase()
@@ -157,6 +198,15 @@ export async function scollegaDispositivoAllUscita(): Promise<void> {
  * dispositivi non usati da 90 giorni si tolgono da soli (SAFETY_PRIVACY.md §10).
  */
 export async function rinnovaDispositivo(): Promise<void> {
+  if (Capacitor.isNativePlatform()) {
+    if (!fcmDisponibile()) return;
+    const token = await tokenRinnovato();
+    if (token) {
+      await registraNativo(token);
+      await ascoltaTocchi();
+    }
+    return;
+  }
   if (statoPush() !== 'concesso') return;
   const iscrizione = await iscrizioneCorrente();
   if (iscrizione) await registra(iscrizione);
@@ -182,8 +232,9 @@ export async function leggiDispositivi(): Promise<Dispositivo[]> {
   if (error) throw converti(error);
   const righe = z.array(SchemaDispositivo).safeParse(data);
   if (!righe.success) throw converti(righe.error);
+  const questo = Capacitor.isNativePlatform() ? tokenSalvato() : (iscrizione?.endpoint ?? null);
   return righe.data
-    .map((riga) => ({ ...riga, questo: riga.token === iscrizione?.endpoint }))
+    .map((riga) => ({ ...riga, questo: riga.token === questo }))
     .sort((a, b) => Number(b.questo) - Number(a.questo));
 }
 
@@ -191,5 +242,6 @@ export async function leggiDispositivi(): Promise<Dispositivo[]> {
 export async function togliDispositivo(dispositivo: Dispositivo): Promise<void> {
   const { error } = await supabase().from('dispositivi_push').delete().eq('id', dispositivo.id);
   if (error) throw converti(error);
-  if (dispositivo.questo) await (await iscrizioneCorrente())?.unsubscribe();
+  if (dispositivo.questo && Capacitor.isNativePlatform()) await disattivaNativo();
+  else if (dispositivo.questo) await (await iscrizioneCorrente())?.unsubscribe();
 }

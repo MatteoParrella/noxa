@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { CSSProperties } from 'react';
 import { Icona } from '@/components/ui/Icona';
+import { BarraRitorno } from '@/features/ritorno/BarraRitorno';
 import { classi } from '@/lib/classi';
 
 type Voce = {
@@ -76,6 +77,7 @@ export function BarraNavigazione() {
           </Link>
         );
       })}
+      <BarraRitorno variante="laterale" />
     </nav>
   );
 }

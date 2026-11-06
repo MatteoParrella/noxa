@@ -657,7 +657,8 @@ as $$
                'destinatari', coalesce((
                  select jsonb_agg(jsonb_build_object(
                           'id', p.id, 'username', p.username,
-                          'nome_visualizzato', p.nome_visualizzato, 'avatar_path', p.avatar_path)
+                          'nome_visualizzato', p.nome_visualizzato, 'avatar_path', p.avatar_path,
+                          'avatar_nascosto', p.avatar_nascosto)
                         order by p.nome_visualizzato)
                  from public.ritorni_destinatari d
                  join public.profili p on p.id = d.amico_id
@@ -675,7 +676,8 @@ as $$
                  'registrata_il', r.registrata_il) end,
                'utente', jsonb_build_object(
                  'id', p.id, 'username', p.username,
-                 'nome_visualizzato', p.nome_visualizzato, 'avatar_path', p.avatar_path))
+                 'nome_visualizzato', p.nome_visualizzato, 'avatar_path', p.avatar_path,
+                          'avatar_nascosto', p.avatar_nascosto))
              order by r.arrivo_previsto)
       from righe r
       join public.profili p on p.id = r.utente_id
