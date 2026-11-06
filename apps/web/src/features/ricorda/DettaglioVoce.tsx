@@ -81,11 +81,7 @@ function Dettaglio({ voce }: { voce: VoceMostrata }) {
   return (
     <article className="flex flex-col">
       <div className="ri-testa-barra pb-3">
-        <LinkIndietro
-          className="btn btn-testo btn-s -ml-3"
-          href="/ricorda/"
-          etichetta={testi.dettaglio.torna}
-        />
+        <LinkIndietro href="/ricorda/" etichetta={testi.dettaglio.torna} />
         <div>
           <EtichettaPrivato />
           <MenuAzioni

@@ -5,7 +5,6 @@ import type { CSSProperties, ReactNode } from 'react';
 import { StatoConnessione } from '@/components/guscio/StatoConnessione';
 import { Icona } from '@/components/ui/Icona';
 import { TitoloRivelato } from '@/components/ui/Movimento';
-import { Pulsante } from '@/components/ui/Pulsante';
 import { classi } from '@/lib/classi';
 import { messaggi } from '@/lib/messaggi/it';
 
@@ -54,14 +53,14 @@ export function Schermata({
       {testoOffline ? <StatoConnessione testo={testoOffline} /> : <StatoConnessione />}
       <div className="schermo-testa">
         {onIndietro && (
-          <Pulsante
-            variante="neutro"
-            soloIcona
+          <button
+            type="button"
+            className="btn-indietro"
             aria-label={messaggi.comune.indietro}
             onClick={onIndietro}
           >
-            <Icona icona={ChevronLeft} dimensione="l" />
-          </Pulsante>
+            <Icona icona={ChevronLeft} />
+          </button>
         )}
         {testa}
       </div>

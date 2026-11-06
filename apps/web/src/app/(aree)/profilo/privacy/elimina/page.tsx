@@ -9,7 +9,7 @@ export default function Pagina() {
   return (
     <div className="pagina flex flex-col gap-2 pt-4">
       <LinkIndietro
-        className="btn btn-testo btn-s -ml-3 self-start"
+        className="self-start"
         href="/profilo/privacy/"
         etichetta={messaggi.privacy.elimina.sopratitolo}
       />

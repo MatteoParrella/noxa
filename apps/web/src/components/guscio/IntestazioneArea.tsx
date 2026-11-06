@@ -25,7 +25,7 @@ export function IntestazioneArea({ titolo, sottotitolo, azioni, dopoTitolo, indi
       <div className="flex flex-col gap-1">
         {indietro && (
           <LinkIndietro
-            className="btn btn-testo btn-s -ml-3 self-start"
+            className="self-start"
             href={indietro.href}
             etichetta={indietro.etichetta}
           />

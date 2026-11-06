@@ -77,16 +77,16 @@ test('«indietro» torna alla pagina da cui si è arrivati, altrimenti alla pagi
   await page.locator('a.mb-nome').first().click();
   await expect(page).toHaveURL(/\/persona\/\?id=/);
   const contenuto = page.getByRole('main');
-  const indietro = contenuto.getByRole('link', { name: 'Gruppo', exact: true });
+  const indietro = contenuto.getByRole('link', { name: 'Indietro: Gruppo' });
   await expect(indietro).toBeVisible();
   await indietro.click();
   await expect(page).toHaveURL(new RegExp(`/gruppo/\\?id=${ID_GRUPPO}`));
   // Il gruppo si è aperto da un indirizzo diretto: il suo «indietro» porta a Organizza.
-  await contenuto.getByRole('link', { name: 'Organizza', exact: true }).click();
+  await contenuto.getByRole('link', { name: 'Indietro: Organizza' }).click();
   await expect(page).toHaveURL(/\/organizza\/$/);
   // Una pagina aperta direttamente usa la pagina madre.
   await page.evaluate(() => sessionStorage.clear());
   await page.goto('/amici/cerca/');
-  await contenuto.getByRole('link', { name: 'Amici', exact: true }).click();
+  await contenuto.getByRole('link', { name: 'Indietro: Amici' }).click();
   await expect(page).toHaveURL(/\/amici\/$/);
 });

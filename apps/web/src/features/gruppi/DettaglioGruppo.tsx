@@ -170,11 +170,7 @@ function Gruppo({ io, dati }: { io: string; dati: Dati }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <LinkIndietro
-          className="btn btn-testo btn-s -ml-3"
-          href="/organizza/"
-          etichetta={messaggi.gruppi.organizza.titolo}
-        />
+        <LinkIndietro href="/organizza/" etichetta={messaggi.gruppi.organizza.titolo} />
         <MenuAzioni
           etichetta={testi.dettaglio.altreAzioni(dati.nome)}
           titolo={dati.nome}

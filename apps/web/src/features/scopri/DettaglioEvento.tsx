@@ -1,21 +1,12 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Ban,
-  ChevronLeft,
-  CircleAlert,
-  ExternalLink,
-  Flag,
-  Globe,
-  Share,
-  Ticket,
-} from 'lucide-react';
+import { Ban, CircleAlert, ExternalLink, Flag, Globe, Share, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { z } from 'zod';
-import { useIndietro } from '@/components/guscio/Indietro';
+import { LinkIndietro } from '@/components/guscio/Indietro';
 import { AmiciPartecipano } from '@/components/ui/AmiciPartecipano';
 import { Avviso } from '@/components/ui/Avviso';
 import { Badge, Genere } from '@/components/ui/Badge';
@@ -111,17 +102,7 @@ export function DettaglioEvento() {
 }
 
 function Indietro() {
-  const indietro = useIndietro({ href: '/scopri/', etichetta: 'Scopri' });
-  return (
-    <Link
-      className="cop-btn cop-indietro"
-      aria-label={testi.indietro}
-      href={indietro.href}
-      onClick={indietro.onClick}
-    >
-      <Icona icona={ChevronLeft} />
-    </Link>
-  );
+  return <LinkIndietro className="cop-indietro" href="/scopri/" etichetta="Scopri" />;
 }
 
 function Stato({

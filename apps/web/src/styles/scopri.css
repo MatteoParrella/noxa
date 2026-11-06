@@ -408,7 +408,8 @@
   gap: var(--spazio-4);
   padding-top: calc(var(--spazio-6) + env(safe-area-inset-top));
 }
-.dettaglio-stato .cop-btn {
+.dettaglio-stato .cop-btn,
+.dettaglio-stato .btn-indietro {
   margin-left: calc(-1 * var(--spazio-3));
   background: transparent;
   box-shadow: none;

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useSyncExternalStore, type MouseEvent } from 'react';
 import { Icona } from '@/components/ui/Icona';
+import { classi } from '@/lib/classi';
+import { messaggi } from '@/lib/messaggi/it';
 import {
   conBarra,
   nomePagina,
@@ -69,17 +71,23 @@ export function useIndietro(ripiego: { href: string; etichetta: string }) {
 type Props = {
   /** Pagina madre, usata quando non c'è una pagina precedente dell'app. */
   href: string;
+  /** Nome della pagina madre, letto dai lettori di schermo ("Indietro: Il mio diario"). */
   etichetta: string;
+  /** Classi in più, per esempio la posizione sulla copertina del dettaglio evento. */
   className?: string;
 };
 
-/** Link "indietro" delle pagine interne, con freccia ed etichetta della pagina di arrivo. */
-export function LinkIndietro({ href, etichetta, className = 'btn btn-testo btn-s -ml-3' }: Props) {
+/** Pulsante "indietro" delle pagine interne: tondo, con la sola freccia (`.btn-indietro`). */
+export function LinkIndietro({ href, etichetta, className }: Props) {
   const indietro = useIndietro({ href, etichetta });
   return (
-    <Link className={className} href={indietro.href} onClick={indietro.onClick}>
-      <Icona icona={ChevronLeft} dimensione="s" />
-      {indietro.etichetta}
+    <Link
+      className={classi('btn-indietro', className)}
+      href={indietro.href}
+      onClick={indietro.onClick}
+      aria-label={`${messaggi.comune.indietro}: ${indietro.etichetta}`}
+    >
+      <Icona icona={ChevronLeft} />
     </Link>
   );
 }
