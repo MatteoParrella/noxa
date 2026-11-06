@@ -10,9 +10,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Icona } from '@/components/ui/Icona';
-import { BarraRitorno } from '@/features/ritorno/BarraRitorno';
 import { classi } from '@/lib/classi';
 
 type Voce = {
@@ -46,7 +45,8 @@ function normalizza(percorso: string): string {
   return percorso.endsWith('/') ? percorso : `${percorso}/`;
 }
 
-export function BarraNavigazione() {
+/** `children`: contenuto in fondo alla barra laterale (il ritorno sicuro attivo, F-21). */
+export function BarraNavigazione({ children }: { children?: ReactNode }) {
   const percorso = normalizza(usePathname());
   const attiva = VOCI.findIndex(
     (voce) =>
@@ -77,7 +77,7 @@ export function BarraNavigazione() {
           </Link>
         );
       })}
-      <BarraRitorno variante="laterale" />
+      {children}
     </nav>
   );
 }

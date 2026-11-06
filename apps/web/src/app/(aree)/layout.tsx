@@ -23,7 +23,9 @@ export default function LayoutAree({ children }: Readonly<{ children: ReactNode 
           <RinnovaDispositivo />
         </ProtezioneAccount>
       </main>
-      <BarraNavigazione />
+      <BarraNavigazione>
+        <BarraRitorno variante="laterale" />
+      </BarraNavigazione>
     </div>
   );
 }

@@ -46,6 +46,7 @@ export function BarraRitorno({ variante = 'cima' }: { variante?: 'cima' | 'later
           <span>{dettaglio}</span>
         </Link>
         {sonoArrivato}
+        {pwa && <p className="rt-rail-pwa">{testi.barra.pwa}</p>}
       </div>
     );
   }

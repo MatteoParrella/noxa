@@ -66,8 +66,11 @@ const normalizza = (testo: string) =>
 export function prossimoOrario(valore: string, adesso: number): number | null {
   const parti = /^(\d{2}):(\d{2})$/.exec(valore);
   if (!parti) return null;
+  const ore = Number(parti[1]);
+  const minuti = Number(parti[2]);
+  if (ore > 23 || minuti > 59) return null;
   const data = new Date(adesso);
-  data.setHours(Number(parti[1]), Number(parti[2]), 0, 0);
+  data.setHours(ore, minuti, 0, 0);
   if (data.getTime() <= adesso) data.setDate(data.getDate() + 1);
   return data.getTime();
 }
