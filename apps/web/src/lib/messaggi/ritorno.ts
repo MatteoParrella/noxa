@@ -5,6 +5,9 @@
  */
 
 const amici = (n: number) => (n === 1 ? '1 amico' : `${n} amici`);
+/** "lo vede 1 amico", "lo vedono 2 amici". */
+const loVede = (n: number) => (n === 1 ? 'lo vede 1 amico' : `lo vedono ${n} amici`);
+const LoVede = (n: number) => (n === 1 ? 'Lo vede 1 amico' : `Lo vedono ${n} amici`);
 
 export const ritorno = {
   etichetta: 'Ritorno sicuro',
@@ -32,7 +35,7 @@ export const ritorno = {
       vecchia: (ora: string) => `Gli amici vedono una posizione delle ${ora}`,
       altroTelefono: 'Avviato su un altro telefono: la posizione arriva da lì.',
     },
-    loVedono: (n: number) => `Lo vedono ${amici(n)}`,
+    loVedono: LoVede,
     arrivato: 'Sono arrivato',
     proroga: 'Proroga',
     chiLoVede: 'Chi lo vede',
@@ -62,7 +65,7 @@ export const ritorno = {
   notificaFissa: {
     titolo: 'Ritorno sicuro attivo',
     testo: (ora: string, n: number) =>
-      `Arrivo previsto ${ora} · lo vedono ${amici(n)}. Tocca per «Sono arrivato».`,
+      `Arrivo previsto ${ora} · ${loVede(n)}. Tocca per «Sono arrivato».`,
   },
   dettaglio: {
     sopratitolo: 'Vivi',
@@ -183,7 +186,7 @@ export const ritorno = {
       },
       avvia: 'Avvia',
     },
-    fatto: (n: number) => `Ritorno avviato: lo vedono ${amici(n)}.`,
+    fatto: (n: number) => `Ritorno avviato: ${loVede(n)}.`,
     esclusi: {
       titolo: (nomi: string) => `Abbiamo tolto ${nomi}`,
       testo: 'Non è più tra i tuoi amici, quindi non vede il ritorno.',

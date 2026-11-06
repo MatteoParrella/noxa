@@ -96,7 +96,7 @@ test('fare check-in: evento di stasera, amici della serata, riepilogo con la fin
     foglio.getByText(/Club Binario 7 · lo vedono Marco fino alle \d{2}:\d{2}\./),
   ).toBeVisible();
   await foglio.getByRole('button', { name: 'Fai check-in' }).click();
-  await expect(page.getByText('Check-in fatto: lo vedono 1 amico.').first()).toBeVisible();
+  await expect(page.getByText('Check-in fatto: lo vede 1 amico.').first()).toBeVisible();
   const invio = supabase.chiamate('fai_checkin').at(-1);
   expect(invio?.corpo).toEqual({
     locale: LOCALI_DI_PROVA.binario.id,

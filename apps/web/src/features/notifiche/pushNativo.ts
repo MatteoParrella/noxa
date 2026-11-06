@@ -10,6 +10,8 @@ import { PushNotifications } from '@capacitor/push-notifications';
  */
 
 const CHIAVE_TOKEN = 'noxa-token-fcm';
+/** Evento con l'id della notifica toccata: lo ascolta `RinnovaDispositivo`, che naviga. */
+export const EVENTO_APRI_NOTIFICA = 'noxa:apri-notifica';
 
 export function fcmDisponibile(): boolean {
   return (
@@ -98,6 +100,6 @@ export async function ascoltaTocchi(): Promise<void> {
   await PushNotifications.addListener('pushNotificationActionPerformed', ({ notification }) => {
     const id = (notification.data as Record<string, unknown> | undefined)?.notifica;
     if (typeof id === 'string' && /^[0-9a-f-]{36}$/.test(id))
-      window.location.assign(`/notifiche/?apri=${id}`);
+      window.dispatchEvent(new CustomEvent(EVENTO_APRI_NOTIFICA, { detail: id }));
   });
 }
