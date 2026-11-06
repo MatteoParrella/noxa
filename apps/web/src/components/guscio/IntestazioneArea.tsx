@@ -1,7 +1,5 @@
-import { ChevronLeft } from 'lucide-react';
-import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
-import { Icona } from '@/components/ui/Icona';
+import { LinkIndietro } from '@/components/guscio/Indietro';
 import { TitoloRivelato } from '@/components/ui/Movimento';
 
 type Props = {
@@ -10,7 +8,10 @@ type Props = {
   azioni?: ReactNode;
   /** Dato accanto al titolo, per esempio la data in Scopri. */
   dopoTitolo?: ReactNode;
-  /** Pagina interna di un'area: link per tornare alla pagina che la contiene. */
+  /**
+   * Pagina interna di un'area: il link torna alla pagina precedente dell'app; `href` ed
+   * `etichetta` indicano la pagina madre, usata quando non c'è una pagina precedente.
+   */
   indietro?: { href: string; etichetta: string };
 };
 
@@ -23,10 +24,11 @@ export function IntestazioneArea({ titolo, sottotitolo, azioni, dopoTitolo, indi
     <header className="intestazione-area con-bagliore flex items-end justify-between gap-4">
       <div className="flex flex-col gap-1">
         {indietro && (
-          <Link className="btn btn-testo btn-s -ml-3 self-start" href={indietro.href}>
-            <Icona icona={ChevronLeft} dimensione="s" />
-            {indietro.etichetta}
-          </Link>
+          <LinkIndietro
+            className="btn btn-testo btn-s -ml-3 self-start"
+            href={indietro.href}
+            etichetta={indietro.etichetta}
+          />
         )}
         {sottotitolo && (
           <span className="etichetta a-fuoco" style={{ '--ritardo': '120ms' } as CSSProperties}>

@@ -5,7 +5,6 @@ import {
   CalendarX,
   Car,
   CheckCircle2,
-  ChevronLeft,
   Clock,
   ExternalLink,
   Flag,
@@ -22,6 +21,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
+import { LinkIndietro } from '@/components/guscio/Indietro';
 import { Avatar } from '@/components/ui/Avatar';
 import { Avviso } from '@/components/ui/Avviso';
 import { Badge } from '@/components/ui/Badge';
@@ -249,10 +249,11 @@ function Serata({ io, dati }: { io: string; dati: Dati }) {
   return (
     <article className="flex flex-col">
       <div className="flex items-center justify-between">
-        <Link className="btn btn-testo btn-s -ml-3" href={percorsoGruppo(dati.gruppo_id)}>
-          <Icona icona={ChevronLeft} dimensione="s" />
-          {dati.gruppo_nome}
-        </Link>
+        <LinkIndietro
+          className="btn btn-testo btn-s -ml-3"
+          href={percorsoGruppo(dati.gruppo_id)}
+          etichetta={dati.gruppo_nome}
+        />
         <MenuAzioni
           etichetta={testi.menu(titolo)}
           titolo={`${titolo} · ${dataBreve(dati.data_serata)}`}

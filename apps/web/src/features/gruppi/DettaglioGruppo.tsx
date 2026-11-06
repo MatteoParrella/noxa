@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Ban,
   ChevronDown,
-  ChevronLeft,
   CircleAlert,
   Flag,
   LogOut,
@@ -20,6 +19,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { z } from 'zod';
+import { LinkIndietro } from '@/components/guscio/Indietro';
 import { Avatar, GruppoAvatar } from '@/components/ui/Avatar';
 import { Avviso } from '@/components/ui/Avviso';
 import { Badge } from '@/components/ui/Badge';
@@ -170,10 +170,11 @@ function Gruppo({ io, dati }: { io: string; dati: Dati }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <Link className="btn btn-testo btn-s -ml-3" href="/organizza/">
-          <Icona icona={ChevronLeft} dimensione="s" />
-          {messaggi.gruppi.organizza.titolo}
-        </Link>
+        <LinkIndietro
+          className="btn btn-testo btn-s -ml-3"
+          href="/organizza/"
+          etichetta={messaggi.gruppi.organizza.titolo}
+        />
         <MenuAzioni
           etichetta={testi.dettaglio.altreAzioni(dati.nome)}
           titolo={dati.nome}
