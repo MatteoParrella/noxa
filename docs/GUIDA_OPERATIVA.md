@@ -81,7 +81,7 @@ quella corrente.
 | 7 | Gruppi, dettaglio gruppo e inviti, serata di gruppo (chi c'è, biglietti, trasporto) | `design/F-13-gruppi/`, `design/F-14-serata/` |
 | 8 | Tracker (elenco, nuova serata, dettaglio), impostazioni di privacy, esporta dati, elimina account | `design/F-30-tracker/`, `design/F-42-privacy/` |
 | 9 | Centro notifiche, richiesta dei permessi, check-in | `design/F-22-notifiche/`, `design/F-20-checkin/` |
-| 10 | Avvio del ritorno sicuro, ritorno in corso, ritorno di un amico, allerta | `design/F-21-ritorno-sicuro/` |
+| 10 | Avvio del ritorno sicuro, ritorno in corso, ritorno di un amico, allerta, aree di arrivo | `design/F-21-ritorno-sicuro/` |
 | 11 | Statistiche, bacheca dei badge, schede del Wrapped | `design/F-31-statistiche/`, `design/F-32-badge/`, `design/F-33-wrapped/` |
 | 12 | Icona dell'app, schermate e testi per App Store e Google Play | `design/store/` |
 | 13 | Accesso con Apple e Google, completamento del profilo | `design/F-17-accesso-social/` |
