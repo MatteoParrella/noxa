@@ -132,6 +132,9 @@ test('avviare il ritorno: arrivo previsto, chi torna con te, riepilogo, spiegazi
     'aria-checked',
     'true',
   );
+  // Il pallino della scelta si riempie: si vede che il tocco ha funzionato.
+  const pallino = foglio.getByRole('radio', { name: /Nessuna, confermo io/ }).locator('.ck-radio');
+  await expect(pallino).toHaveCSS('border-top-width', '6px');
   await foglio.getByRole('button', { name: 'Continua' }).click();
 
   // 4. Riepilogo in tre righe e la nota della PWA prima di "Avvia".

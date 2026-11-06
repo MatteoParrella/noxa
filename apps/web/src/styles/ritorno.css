@@ -431,6 +431,12 @@
   text-align: left;
   cursor: pointer;
 }
+.rt-area-opz[aria-checked='true'] .ck-radio {
+  border: 6px solid var(--colore-accento);
+}
+.rt-area-opz:hover {
+  background: var(--colore-superficie-1);
+}
 .rt-area-opz small {
   display: block;
   font-size: 0.8125rem;
