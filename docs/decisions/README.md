@@ -36,3 +36,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0025](0025-backup-cifrato-e-diritti-privacy.md) | Backup cifrato in proprio e diritti privacy nel database | Accettato |
 | [0026](0026-notifiche-web-push.md) | Notifiche sul telefono con il Web Push, testi di sistema e webhook dal database | Accettato |
 | [0027](0027-distribuzione-android-e-posizione-in-background.md) | Distribuzione su Google Play per ultima e posizione in background open source | Accettato |
+| [0028](0028-ritorno-sicuro-sessione-e-posizioni.md) | Ritorno sicuro: servizio in primo piano, posizioni lette con la RLS e dati solo sul telefono | Accettato |

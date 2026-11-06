@@ -96,8 +96,8 @@ flowchart LR
 | Postgres + PostGIS | Tutte le tabelle di [DATA_MODEL.md](DATA_MODEL.md) e le RPC elencate in DATA_MODEL.md §5.10 (ricerca eventi e utenti, codici invito, moderazione, metriche). |
 | Auth | Email e password (almeno 10 caratteri) con verifica, CAPTCHA (Cloudflare Turnstile, ADR-0020), protezione dalle password compromesse, MFA TOTP obbligatoria per i moderatori (R-06); hook "before user created" per il controllo dell'età (§4.1); modelli delle email in italiano. |
 | Storage | Bucket `avatar`, `flyer-caricati`, `flyer-pubblicati`, `immagini-locali` (foto dei locali, ADR-0018), `mappe` (DATA_MODEL.md §6). |
-| Realtime | Postgres Changes per le notifiche; Broadcast privato per gli avvisi di gruppi e serate e per le posizioni del ritorno sicuro. |
-| Edge Functions (Deno) | `invia-push` (ADR-0026: Web Push VAPID con contenuto cifrato e testi di sistema, chiamata dal webhook `private.invia_push` con `pg_net` e un segreto condiviso; FCM HTTP v1 per l'app Android (ADR-0027) e APNs per iOS se D-13 si chiude), `elimina-account` (ADR-0025: chiama `elimina_mio_account` con il JWT dell'utente e usa `service_role` solo per cancellare i file della foto profilo). L'esportazione dei dati è la RPC `esporta_miei_dati`. |
+| Realtime | Postgres Changes per le notifiche; Broadcast privato con avvisi senza dati per gruppi, serate, Vivi e ritorno sicuro (ADR-0024, ADR-0028). |
+| Edge Functions (Deno) | `invia-push` (ADR-0026: Web Push VAPID con contenuto cifrato e testi di sistema, chiamata dal webhook `private.invia_push` con `pg_net` e un segreto condiviso; FCM HTTP v1 per l'app Android con l'account di servizio nel segreto `FCM_ACCOUNT_SERVIZIO` (ADR-0027; senza il segreto i dispositivi Android si saltano) e APNs per iOS se D-13 si chiude), `elimina-account` (ADR-0025: chiama `elimina_mio_account` con il JWT dell'utente e usa `service_role` solo per cancellare i file della foto profilo). L'esportazione dei dati è la RPC `esporta_miei_dati`. |
 | `pg_cron` | Job di DATA_MODEL.md §8, compresi il calcolo dei badge e dei riepiloghi annuali con funzioni SQL. |
 
 ### 3.3 Worker (`services/worker`)
@@ -215,36 +215,49 @@ sequenceDiagram
 
 ### 4.4 Ritorno sicuro
 
+Dettagli e motivi in ADR-0006, ADR-0027 e ADR-0028. Le coordinate non passano da Realtime: il
+telefono le scrive con una RPC e chi guarda riceve solo un avviso senza dati, poi rilegge
+l'ultima posizione con la RLS. Area di arrivo e tratta restano sul telefono (R-32).
+
 ```mermaid
 sequenceDiagram
     autonumber
     actor U as Utente
-    participant N as App nativa
+    participant N as App (Android nativa o PWA)
     participant DB as Postgres
     participant RT as Realtime Broadcast
     participant C as pg_cron
     participant EF as Edge Function invia-push
     actor F as Amici destinatari
-    U->>N: avvia ritorno (arrivo previsto, amici)
-    N->>DB: insert ritorni_sicuri + ritorni_destinatari
+    U->>N: avvia ritorno (arrivo previsto, amici, area solo sul telefono)
+    N->>N: spiegazione, poi permesso della posizione
+    N->>DB: avvia_ritorno(arrivo_previsto, destinatari)
     DB->>EF: notifiche ritorno_avviato
-    EF-->>F: push "X sta tornando a casa"
-    loop ogni 30-60 s finché la sessione è attiva (anche in background)
-        N->>RT: broadcast posizione su ritorno:<id> (privato)
-        N->>DB: insert posizioni_ritorno (al massimo 1 ogni 30 s)
-        RT-->>F: posizione in tempo reale
+    EF-->>F: push "Un amico ha avviato il ritorno sicuro"
+    loop al massimo ogni 30 s finché la sessione è attiva (Android anche con lo schermo bloccato)
+        N->>DB: invia_posizione_ritorno (client HTTP nativo su Android)
+        DB-->>RT: avviso "cambio" senza dati su ritorno:<id> (privato)
+        RT-->>F: avviso
+        F->>DB: ritorni_vivi() (RLS: solo l'ultima posizione, solo a ritorno attivo)
     end
     alt l'utente conferma l'arrivo
-        U->>N: "sono arrivato" (oppure ingresso nell'area salvata sul dispositivo)
+        U->>N: "Sono arrivato" (oppure ingresso nell'area salvata sul telefono, dopo un minuto)
         N->>DB: update stato = arrivato
         DB->>EF: notifiche ritorno_arrivato
     else arrivo previsto superato
-        C->>DB: verifica_ritorni_scaduti()
-        DB->>EF: notifiche ritorno_allerta con ultima posizione
-        EF-->>F: push di allerta
+        C->>DB: verifica_ritorni_scaduti() ogni minuto
+        DB->>EF: notifiche ritorno_allerta (solo identificativi)
+        EF-->>F: push di allerta (urgenza alta)
+        C->>DB: 2 ore dopo l'arrivo previsto: stato = scaduto
     end
-    C->>DB: applica_conservazione(): posizioni eliminate dopo 24 h (R-31)
+    C->>DB: applica_conservazione(): ritorno e posizioni eliminati dopo 24 h (R-31)
 ```
+
+Nell'app Android il plugin `@capacitor-community/background-geolocation` avvia un servizio in
+primo piano di tipo `location` con la notifica fissa "Ritorno sicuro attivo" (R-31); basta il
+permesso "Mentre usi l'app". Nella PWA `watchPosition` si ferma quando Noxa non è in primo
+piano: la barra "Ritorno attivo" e il foglio di avvio lo dicono, e l'allerta parte comunque dal
+server. La posizione si condivide solo dal telefono che ha avviato il ritorno.
 
 ### 4.5 Raccolta eventi e flyer
 
@@ -324,8 +337,9 @@ l'immagine come prova e non notifica l'account coinvolto.
 - Gruppi, serate e check-in usano avvisi senza dati su canali Broadcast privati
   (`serata:<id>`, `gruppi:<utente_id>`, `vivi:<utente_id>`) autorizzati dalla policy di `realtime.messages`; l'app ricarica con
   le RPC (DATA_MODEL.md §7).
-- Le posizioni del ritorno sicuro usano Broadcast privato perché sono ad alta frequenza e non
-  devono passare dalla replica delle modifiche.
+- Il ritorno sicuro usa lo stesso schema: avvisi senza dati sul canale privato `ritorno:<id>`
+  a ogni posizione (al massimo ogni 30 secondi), proroga e fine; le coordinate non viaggiano mai
+  su Realtime e si rileggono con la RLS (ADR-0028).
 
 ### 5.4 Notifiche
 
@@ -464,7 +478,7 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | F-16 Trasporto | App, trigger `verifica_trasporto` | §4.3 |
 | F-17 Accesso con Apple e Google | Supabase Auth (provider OAuth) | §3.2 |
 | F-20 Check-in | App, RPC `fai_checkin` e `suggerimenti_checkin`, avvisi su `vivi:<utente>` | §5.3 |
-| F-21 Ritorno sicuro | App nativa (posizione in background), Realtime Broadcast, `pg_cron`, `invia-push` | §4.4, ADR-0006 |
+| F-21 Ritorno sicuro | App nativa (servizio in primo piano), Realtime Broadcast con avvisi senza dati, `pg_cron`, `invia-push` (Web Push e FCM) | §4.4, ADR-0006, ADR-0027, ADR-0028 |
 | F-22 Notifiche push | Nella Fase 1 campanella e `/notifiche/` con Realtime; dall'iterazione 9 Web Push con l'Edge Function `invia-push` (FCM con l'app Android, ADR-0027; APNs con iOS, D-13) | §5.4, ADR-0026 |
 | F-30 Tracker | App (offline con coda di scritture) | §5.5 |
 | F-31 Statistiche | Vista `statistiche_personali` | §3.2 |

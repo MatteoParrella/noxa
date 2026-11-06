@@ -66,7 +66,14 @@ export default function PaginaPrivacy() {
       <ul>
         <li>Gli altri utenti vedono solo username e nome, e solo se possono trovarti.</li>
         <li>La data di nascita e la tua età non le vede nessuno.</li>
-        <li>La posizione la vedono solo gli amici che scegli tu, e si cancella dopo 24 ore.</li>
+        <li>
+          La posizione del ritorno sicuro la vedono solo gli amici che scegli tu, mentre torni, e si
+          cancella 24 ore dopo la fine.
+        </li>
+        <li>
+          Le aree di arrivo del ritorno sicuro restano solo sul tuo telefono: non conosciamo il tuo
+          indirizzo.
+        </li>
         <li>
           I moderatori vedono solo i contenuti segnalati, e ogni loro accesso viene registrato.
         </li>
@@ -89,6 +96,11 @@ export default function PaginaPrivacy() {
           I servizi push dei browser (Google, Mozilla, Apple, Microsoft): consegnano le notifiche
           sul telefono, se le accendi. Ricevono un testo cifrato che non possono leggere, senza nomi
           né testi di altre persone.
+        </li>
+        <li>
+          Google Firebase Cloud Messaging: consegna le notifiche dell’app Android, se le accendi.
+          Riceve un codice del telefono e un testo di sistema, senza nomi, testi di altre persone
+          né posizioni.
         </li>
         <li>Sentry (Unione europea): errori tecnici, senza email, posizioni o testi.</li>
       </ul>
