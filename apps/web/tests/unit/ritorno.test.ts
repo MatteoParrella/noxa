@@ -18,7 +18,8 @@ import { distanzaMetri } from '@/features/ritorno/posizione';
 import { converti, ErroreValidazione } from '@/lib/errori';
 import { messaggi } from '@/lib/messaggi/it';
 
-const ORA = new Date('2026-11-07T23:40:00+01:00').getTime();
+// Ora locale del dispositivo (l'orario scelto nel foglio è locale): vale con ogni fuso orario.
+const ORA = new Date(2026, 10, 7, 23, 40).getTime();
 const MIN = 60_000;
 
 describe('arrivo previsto (R-31: da 10 minuti a 4 ore)', () => {
