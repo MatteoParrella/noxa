@@ -1,5 +1,5 @@
-// Edge Function `invia-push` (F-22, ARCHITECTURE.md §5.4, ADR-0026): invia una notifica ai
-// dispositivi della persona con il Web Push.
+// Edge Function `invia-push` (F-22, ARCHITECTURE.md §5.4, ADR-0026, ADR-0027): invia una notifica
+// ai dispositivi della persona, con il Web Push ai browser e con FCM all'app Android.
 //
 // La chiama solo il trigger `private.invia_push` con `pg_net`, con il segreto condiviso
 // nell'intestazione `x-noxa-segreto` (la verifica del JWT è spenta in config.toml). Il corpo
@@ -7,9 +7,12 @@
 // solo qui e solo per leggere la notifica e i dispositivi, togliere quelli scaduti e segnare
 // l'invio. Il testo è quello di sistema del tipo (`_shared/testi_push.ts`), mai nomi, username o
 // testi di altre persone; il contenuto è cifrato per il browser e il servizio push non lo legge.
+// FCM riceve lo stesso testo di sistema: senza il segreto `FCM_ACCOUNT_SERVIZIO` i dispositivi
+// Android si saltano (in locale e finché il progetto Firebase non esiste).
 //
 // I log contengono solo esiti e conteggi, mai identificativi o endpoint (R-62).
 import { createClient } from 'npm:@supabase/supabase-js@2.117.3';
+import { corpoMessaggio, inviaFcm, leggiAccountServizio, tokenAccesso } from '../_shared/fcm.ts';
 import { durataPush, testoPush, urgenzaPush } from '../_shared/testi_push.ts';
 import { preparaRichiesta, type ChiaviVapid } from '../_shared/webpush.ts';
 
@@ -87,9 +90,9 @@ Deno.serve(async (richiesta) => {
 
   const { data: dispositivi, error: erroreDispositivi } = await db
     .from('dispositivi_push')
-    .select('id, token, chiave_p256dh, chiave_auth')
+    .select('id, piattaforma, token, chiave_p256dh, chiave_auth')
     .eq('utente_id', notifica.utente_id)
-    .eq('piattaforma', 'web');
+    .in('piattaforma', ['web', 'android']);
   if (erroreDispositivi) {
     registra('errore_database', { codice: erroreDispositivi.code ?? 'sconosciuto' });
     return risposta(500, { errore: 'non_riuscita' });
@@ -100,8 +103,10 @@ Deno.serve(async (richiesta) => {
   const scaduti: string[] = [];
   let inviate = 0;
   let fallite = 0;
+  const web = (dispositivi ?? []).filter((d) => d.piattaforma === 'web');
+  const android = (dispositivi ?? []).filter((d) => d.piattaforma === 'android');
   await Promise.all(
-    (dispositivi ?? []).map(async (dispositivo) => {
+    web.map(async (dispositivo) => {
       if (!dispositivo.chiave_p256dh || !dispositivo.chiave_auth) return;
       try {
         const invio = await preparaRichiesta(
@@ -129,6 +134,40 @@ Deno.serve(async (richiesta) => {
       }
     }),
   );
+
+  if (android.length > 0) {
+    const account = leggiAccountServizio(Deno.env.get('FCM_ACCOUNT_SERVIZIO'));
+    if (!account) {
+      registra('fcm_non_configurato', { dispositivi: android.length });
+    } else {
+      try {
+        const accesso = await tokenAccesso(account);
+        await Promise.all(
+          android.map(async (dispositivo) => {
+            try {
+              const { esito, stato } = await inviaFcm(
+                account.project_id,
+                accesso,
+                corpoMessaggio(dispositivo.token, testo, { notifica: notifica.id, tipo: notifica.tipo }, opzioni),
+              );
+              if (esito === 'scaduto') scaduti.push(dispositivo.id);
+              else if (esito === 'inviata') inviate++;
+              else {
+                fallite++;
+                registra('fcm_errore', { stato });
+              }
+            } catch (errore) {
+              fallite++;
+              registra('invio_non_riuscito', { errore: errore instanceof Error ? errore.name : 'sconosciuto' });
+            }
+          }),
+        );
+      } catch (errore) {
+        fallite += android.length;
+        registra('fcm_token_non_riuscito', { errore: errore instanceof Error ? errore.message : 'sconosciuto' });
+      }
+    }
+  }
 
   if (scaduti.length > 0) await db.from('dispositivi_push').delete().in('id', scaduti);
   if (inviate > 0) {

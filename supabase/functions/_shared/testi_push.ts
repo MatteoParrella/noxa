@@ -25,15 +25,16 @@ const PER_TIPO: Record<string, TestoPush> = {
   },
   rimozione_gruppo: { titolo: 'Non fai più parte di un gruppo', testo: 'Apri Noxa per i dettagli.' },
   checkin_amico: { titolo: 'Un amico ha fatto check-in', testo: 'Apri Noxa per vedere dove.' },
+  // design/F-21-ritorno-sicuro §7: seri ma calmi, senza nomi; toccando si apre il ritorno.
   ritorno_avviato: {
-    titolo: 'Un amico sta tornando a casa',
-    testo: 'Apri Noxa per seguire il ritorno sicuro.',
+    titolo: 'Un amico ha avviato il ritorno sicuro',
+    testo: 'Apri Noxa per vedere quando arriva.',
   },
   ritorno_allerta: {
-    titolo: 'Un amico non è ancora arrivato',
-    testo: 'Apri Noxa per vedere il ritorno sicuro.',
+    titolo: 'Allerta: un amico non è ancora rientrato',
+    testo: 'Apri Noxa per l’ultima posizione e cosa puoi fare.',
   },
-  ritorno_arrivato: { titolo: 'Un amico è arrivato', testo: 'Il ritorno sicuro è concluso.' },
+  ritorno_arrivato: { titolo: 'Un amico è rientrato sano e salvo', testo: 'Il ritorno sicuro è concluso.' },
   badge_ottenuto: { titolo: 'Nuovo badge', testo: 'Apri Noxa per vederlo.' },
   riepilogo_pronto: { titolo: 'Il tuo riepilogo è pronto', testo: 'Apri Noxa per vederlo.' },
 };
