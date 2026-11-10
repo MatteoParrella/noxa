@@ -138,6 +138,10 @@
   height: 520px;
   border-radius: 50%;
   background: radial-gradient(closest-side, var(--bagliore-accento), transparent 100%);
+  /* Sfuma verso il bordo superiore della pagina (180 px dall'inizio): niente taglio netto
+     sotto la barra degli indirizzi (vedi .con-bagliore in movimento.css). */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 180px, #000 340px);
+  mask-image: linear-gradient(to bottom, transparent 180px, #000 340px);
   pointer-events: none;
   animation: bagliore var(--movimento-ingresso) var(--curva-espressiva) 150ms both;
 }
