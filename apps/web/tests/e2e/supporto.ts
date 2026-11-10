@@ -84,6 +84,9 @@ export async function verificaAccessibilita(pagina: Page, ambito?: string) {
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .exclude('.maplibregl-canvas');
   if (ambito) axe = axe.include(ambito);
+  // Su WebKit la pagina vuota che axe apre per finire l'analisi fa perdere a questa pagina le
+  // risposte simulate (page.route): la modalità legacy analizza senza aprire altre pagine.
+  if (pagina.context().browser()?.browserType().name() === 'webkit') axe = axe.setLegacyMode(true);
   const risultato = await axe.analyze();
   expect(risultato.violations).toEqual([]);
 }
@@ -1390,6 +1393,65 @@ type Opzioni = {
  * così i test delle aree non passano dal Benvenuto (R-07).
  */
 export const test = base.extend<Opzioni & { supabase: SupabaseSimulato }>({
+  /**
+   * WebKit di Playwright su Linux riporta sempre `navigator.onLine = false` e `setOffline` non
+   * genera gli eventi online/offline (Safari vero sì): nei test lo stato della rete segue
+   * `setOffline`, come negli altri browser.
+   */
+  context: async ({ context, browserName }, usa) => {
+    if (browserName === 'webkit') {
+      const impostaRete = (inRete: boolean) => {
+        const finestra = window as Window & { __noxaInRete?: boolean };
+        if (!('__noxaInRete' in finestra)) {
+          Object.defineProperty(Navigator.prototype, 'onLine', {
+            configurable: true,
+            get: () => finestra.__noxaInRete ?? true,
+          });
+        }
+        const cambiato = finestra.__noxaInRete !== inRete;
+        finestra.__noxaInRete = inRete;
+        if (cambiato && document.readyState !== 'loading') {
+          window.dispatchEvent(new Event(inRete ? 'online' : 'offline'));
+        }
+      };
+      await context.addInitScript(impostaRete, true);
+      const setOfflineOriginale = context.setOffline.bind(context);
+      context.setOffline = async (offline: boolean) => {
+        await setOfflineOriginale(offline);
+        // Le pagine aperte dopo, o ricaricate, partono dallo stato più recente.
+        await context.addInitScript(impostaRete, !offline);
+        for (const pagina of context.pages()) {
+          await pagina.evaluate(impostaRete, !offline).catch(() => undefined);
+        }
+      };
+    }
+    await usa(context);
+  },
+  /**
+   * Dopo ogni caricamento si aspetta che React abbia agganciato la pagina (`html[data-pronta]`,
+   * components/guscio/Fornitori.tsx): su WebKit arriva più tardi e un `fill` fatto prima andrebbe
+   * perso. Le pagine che non si agganciano (per esempio offline senza copia) non bloccano il test.
+   */
+  page: async ({ page }, usa) => {
+    const aspettaPronta = () =>
+      page
+        .locator('html[data-pronta]')
+        .waitFor({ state: 'attached', timeout: 10_000 })
+        .catch(() => undefined);
+    const gotoOriginale = page.goto.bind(page);
+    page.goto = async (...argomenti: Parameters<Page['goto']>) => {
+      const risposta = await gotoOriginale(...argomenti);
+      await aspettaPronta();
+      return risposta;
+    };
+    const reloadOriginale = page.reload.bind(page);
+    page.reload = async (...argomenti: Parameters<Page['reload']>) => {
+      const risposta = await reloadOriginale(...argomenti);
+      await aspettaPronta();
+      return risposta;
+    };
+    await usa(page);
+  },
   account: [ACCOUNT_DI_PROVA, { option: true }],
   supabase: [
     async ({ page, account }, usa) => {

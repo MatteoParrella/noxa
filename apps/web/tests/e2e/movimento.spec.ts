@@ -16,7 +16,10 @@ test.describe('movimento espressivo (ADR-0019)', () => {
     );
     expect(animazioni).toContain('sale');
     // Le parole del titolo restano nel carattere editoriale (nessuna classe globale le cambia).
-    await expect(titolo.locator('.parola').first()).toHaveCSS('font-family', /^"Archivo Variable"/);
+    await expect(titolo.locator('.parola').first()).toHaveCSS(
+      'font-family',
+      /^"?Archivo Variable"?,/,
+    );
 
     const contenuto = page.locator('.rivela').first();
     await expect(contenuto).toHaveClass(/is-visibile/);

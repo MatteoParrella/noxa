@@ -173,14 +173,22 @@ export function posizioneAttuale(): Promise<Coordinate> {
       rifiuta(new ErroreDiPosizione('non_supportata'));
       return;
     }
+    // Il `timeout` del browser parte solo dopo il permesso: se la richiesta resta aperta (su
+    // Firefox chiudendo il popup senza scegliere) dopo un minuto si considera scaduta.
+    const limite = window.setTimeout(() => rifiuta(new ErroreDiPosizione('tempo_scaduto')), 60_000);
     navigator.geolocation.getCurrentPosition(
-      (posizione) =>
+      (posizione) => {
+        window.clearTimeout(limite);
         risolvi({
           lat: posizione.coords.latitude,
           lon: posizione.coords.longitude,
           precisione: posizione.coords.accuracy,
-        }),
-      (errore) => rifiuta(new ErroreDiPosizione(daErroreBrowser(errore))),
+        });
+      },
+      (errore) => {
+        window.clearTimeout(limite);
+        rifiuta(new ErroreDiPosizione(daErroreBrowser(errore)));
+      },
       { enableHighAccuracy: true, maximumAge: 30_000, timeout: 20_000 },
     );
   });

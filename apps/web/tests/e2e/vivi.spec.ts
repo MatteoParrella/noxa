@@ -135,10 +135,10 @@ test('un locale si cerca per nome; servono un locale e almeno un amico', async (
   await foglio.getByRole('checkbox', { name: /Marco/ }).click();
   await foglio.getByRole('button', { name: 'Continua' }).click();
   await foglio.getByRole('button', { name: 'Fai check-in' }).click();
-  expect(supabase.chiamate('fai_checkin').at(-1)?.corpo).toMatchObject({
-    locale: LOCALI_DI_PROVA.ventuno.id,
-    evento: null,
-  });
+  // La chiamata parte dopo il clic: si aspetta che arrivi (su Firefox può tardare un attimo).
+  await expect
+    .poll(() => supabase.chiamate('fai_checkin').at(-1)?.corpo)
+    .toMatchObject({ locale: LOCALI_DI_PROVA.ventuno.id, evento: null });
 });
 
 test('check-in spento nel frattempo: lo dice e porta a Privacy e dati', async ({

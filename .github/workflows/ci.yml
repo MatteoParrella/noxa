@@ -90,11 +90,47 @@ jobs:
       - run: pnpm --filter web exec cap sync
       - run: pnpm --filter web exec playwright install --with-deps chromium
       # Build dedicata ai test (catalogo incluso, mappa simulata): playwright.config.ts.
-      - run: pnpm --filter web test:e2e
+      # Safari e Firefox girano in parallelo nel job `browser`.
+      - run: pnpm --filter web test:e2e --project=mobile-chromium --project=desktop-chromium
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: rapporto-playwright
+          path: apps/web/playwright-report/
+          retention-days: 7
+
+  browser:
+    # L'app deve funzionare su tutti i browser principali: gli stessi test e2e su Safari (WebKit,
+    # iPhone) e Firefox, in parallelo al job `web` che li esegue su Chrome.
+    name: App web su ${{ matrix.nome }}
+    needs: modifiche
+    if: needs.modifiche.outputs.web == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - nome: Safari
+            browser: webkit
+            progetto: mobile-webkit
+          - nome: Firefox
+            browser: firefox
+            progetto: desktop-firefox
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web exec playwright install --with-deps ${{ matrix.browser }}
+      - run: pnpm --filter web test:e2e --project=${{ matrix.progetto }}
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rapporto-playwright-${{ matrix.browser }}
           path: apps/web/playwright-report/
           retention-days: 7
 

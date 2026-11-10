@@ -1,8 +1,8 @@
 'use client';
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, useIsRestoring } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { TracciaNavigazione } from '@/components/guscio/Indietro';
 import { FornitoreToast } from '@/components/ui/Toast';
 import { DURATA_CACHE_MS, daSalvare, persistenza } from '@/lib/cacheLocale';
@@ -40,7 +40,21 @@ export function Fornitori({ children }: { children: ReactNode }) {
       onSuccess={() => void client.invalidateQueries()}
     >
       <TracciaNavigazione />
+      <SegnalaPronta />
       <FornitoreToast>{children}</FornitoreToast>
     </PersistQueryClientProvider>
   );
+}
+
+/**
+ * Segna `<html data-pronta>` quando React ha agganciato la pagina e ripristinato la cache: da
+ * quel momento i campi rispondono. I test e2e lo aspettano dopo ogni caricamento, perché su
+ * Safari l'aggancio arriva più tardi e un testo scritto prima andrebbe perso.
+ */
+function SegnalaPronta() {
+  const ripristino = useIsRestoring();
+  useEffect(() => {
+    if (!ripristino) document.documentElement.dataset.pronta = '';
+  }, [ripristino]);
+  return null;
 }
