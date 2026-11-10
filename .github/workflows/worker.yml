@@ -1,7 +1,8 @@
 # Worker in modalità a esaurimento (ADR-0021): ogni 15 minuti esegue i job pronti in coda_job e
 # termina. pg_cron resta l'unico scheduler: questo workflow sveglia solo l'esecutore.
-# I segreti stanno nell'environment `produzione`, limitato al branch main; i log sono pubblici
-# e il worker non vi scrive dati personali.
+# Gira per ogni ambiente di AMBIENTI_SERVIZI (JSON, predefinito ["staging"]); i segreti stanno
+# negli environment di GitHub, limitati al branch main. I log sono pubblici e il worker non vi
+# scrive dati personali.
 name: Worker
 
 on:
@@ -12,18 +13,22 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: worker
-  cancel-in-progress: false
-
 jobs:
   esaurisci:
-    name: Coda dei job
+    name: Coda dei job (${{ matrix.ambiente }})
     # Finché la variabile del repository SERVIZI_ATTIVI non vale 'true' (nessun Supabase o R2 online,
     # quindi nessun segreto) il job viene saltato invece di fallire.
     if: github.ref == 'refs/heads/main' && vars.SERVIZI_ATTIVI == 'true'
     runs-on: ubuntu-24.04
-    environment: produzione
+    strategy:
+      fail-fast: false
+      matrix:
+        ambiente: ${{ fromJSON(vars.AMBIENTI_SERVIZI || '["staging"]') }}
+    environment: ${{ matrix.ambiente }}
+    # Una sola esecuzione alla volta per ambiente: la successiva aspetta.
+    concurrency:
+      group: worker-${{ matrix.ambiente }}
+      cancel-in-progress: false
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
@@ -39,9 +44,10 @@ jobs:
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
           SENTRY_DSN_WORKER: ${{ secrets.SENTRY_DSN_WORKER }}
+          AMBIENTE: ${{ matrix.ambiente }}
         run: |
           docker run --rm \
-            -e AMBIENTE=produzione -e LOG_FORMATO=json \
+            -e AMBIENTE -e LOG_FORMATO=json \
             -e WORKER_DATABASE_URL -e SUPABASE_URL -e SUPABASE_SERVICE_ROLE_KEY \
             -e ANTHROPIC_API_KEY -e META_IG_USER_ID -e META_ACCESS_TOKEN \
             -e GOOGLE_PLACES_API_KEY -e SENTRY_DSN_WORKER \

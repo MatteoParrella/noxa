@@ -409,7 +409,12 @@ flowchart LR
 
 - Ambienti: `locale` (Supabase CLI + docker-compose), `staging`, `produzione`, ognuno con un
   progetto Supabase separato.
-- Le migrazioni si applicano prima a staging, poi a produzione, solo dalla CI.
+- Le migrazioni si applicano prima a staging, poi a produzione, solo dalla CI: il workflow
+  `pubblica.yml` parte dopo ogni CI verde su `main` e, per ogni ambiente della variabile
+  `AMBIENTI_SERVIZI`, esegue `supabase db push`, pubblica le Edge Functions e carica l'export
+  statico su Cloudflare Pages. Worker, backup e mappa girano sugli stessi ambienti; ognuno ha
+  un *environment* di GitHub limitato a `main` con i propri segreti. La configurazione
+  iniziale di un ambiente è `scripts/configura_ambiente.sh` (GUIDA_OPERATIVA.md §9).
 - I segreti stanno nel gestore dei segreti di ciascun fornitore; `.env.example` elenca i nomi.
 - Piano Supabase Free in staging e produzione finché non si apre la beta (ADR-0021).
 - Backup: il workflow `backup.yml` esporta ogni notte i dati con `pg_dump`, li cifra con

@@ -91,6 +91,7 @@ La CLI Supabase è una dipendenza di sviluppo del repository: si esegue con `pnp
 | Mappa nel bucket `mappe` | `scripts/prepara_mappa.sh` (richiede la CLI `pmtiles`; locale o con `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`) |
 | Icone PNG dall'SVG | `pnpm --filter web icone` |
 | Chiavi VAPID del Web Push | `node scripts/genera_chiavi_vapid.mjs` (pubblica nell'app e nella funzione, privata solo nei segreti) |
+| Configurare staging o produzione | `scripts/configura_ambiente.sh .env.staging` (file da `.env.ambiente.example`; GUIDA_OPERATIVA.md §9); `--moderatore <email>` assegna il ruolo |
 | Edge Functions in locale | `supabase functions serve --env-file <file>` (segreti di `invia-push`: `VAPID_*`, `NOXA_PUSH_SEGRETO`) |
 | Worker (dipendenze) | `cd services/worker && uv sync` |
 | Controlli worker | `uv run ruff check .` · `uv run ruff format --check .` · `uv run mypy src tests` · `uv run pytest` |
