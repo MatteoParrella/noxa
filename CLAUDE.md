@@ -36,7 +36,7 @@ badge e riepilogo annuale. È un prodotto destinato al lancio pubblico, non un p
   Deno, `pg_cron`). **La RLS è l'unico punto di autorizzazione** (ADR-0002).
 - **Worker**: Python 3.12, FastAPI, httpx, Playwright, rapidfuzz, Pydantic, structlog, SDK
   `anthropic`; Docker; coda su Postgres; `pg_cron` è l'unico scheduler (ADR-0003).
-- **Hosting a costo minimo** (ADR-0021): Supabase Free a Francoforte, Cloudflare Pages
+- **Hosting a costo minimo** (ADR-0021): Supabase Free nell'UE (staging in Irlanda, produzione a Francoforte), Cloudflare Pages
   (statico), mappa su Cloudflare R2, worker eseguito da GitHub Actions ogni 15 minuti, email
   con Brevo, Sentry UE. Ogni servizio a pagamento richiede la soglia scritta nell'ADR.
 - **Sviluppo**: Windows + WSL Ubuntu, repository nel filesystem Linux, docker-compose per il

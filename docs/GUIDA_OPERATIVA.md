@@ -159,7 +159,8 @@ sui siti dei fornitori le fai tu; i segreti non passano mai dalla chat: li scriv
 locale che lo script legge e copia su GitHub e Supabase.
 
 **1. Account e progetti (tu)**
-1. **Supabase**: nuovo progetto `noxa-staging`, regione *Central EU (Frankfurt)*, piano Free;
+1. **Supabase**: nuovo progetto `noxa-staging`, regione UE (lo staging è in *West EU (Ireland)*; per la produzione
+   scegli *Central EU (Frankfurt)*, più vicina a Milano), piano Free;
    annota la password del database. Crea un token personale in *Account → Access Tokens*.
 2. **Cloudflare**: account gratuito. Attiva R2 (chiede un metodo di pagamento anche per il
    piano gratuito; sotto i 10 GB non si paga). Crea un token API personalizzato con i permessi

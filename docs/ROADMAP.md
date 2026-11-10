@@ -20,7 +20,7 @@ completa solo se rispetta la definizione di completato del §6.
   mypy strict, pytest; `supabase/` inizializzata con la CLI.
 - CI su GitHub Actions: lint, typecheck, test unitari, `supabase test db`, build web, build
   Docker del worker, controllo delle dipendenze, `scripts/verifica_documentazione.py`.
-- Progetti Supabase `staging` e `produzione` nella regione di Francoforte, sul piano Free;
+- Progetti Supabase `staging` (Irlanda, `eu-west-1`) e `produzione` (Francoforte), sul piano Free;
   Cloudflare Pages, Cloudflare R2 e il workflow del worker su GitHub Actions (ADR-0021).
 - Migrazioni di base: estensioni, enum, schema `private` con le funzioni del DATA_MODEL.md
   §4, `profili`, `profili_privati`, `ruoli_utente`, `consensi`, trigger di registrazione,
