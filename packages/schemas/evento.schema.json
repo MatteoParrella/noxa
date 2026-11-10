@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://noxa.app/schemas/evento/v1.json",
+  "$id": "https://noxanight.it/schemas/evento/v1.json",
   "title": "EventoNormalizzato",
   "description": "Evento normalizzato prodotto dalla pipeline di raccolta (docs/EVENT_INGESTION.md §3.3). Contratto condiviso tra worker e app.",
   "type": "object",

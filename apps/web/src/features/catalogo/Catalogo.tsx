@@ -207,7 +207,7 @@ export function Catalogo({ tema }: { tema: Tema }) {
           />
         </ul>
         <CodiceQr
-          valore="https://noxa.app/amici/invito/?c=K7Q4M2XP9H"
+          valore="https://noxanight.it/amici/invito/?c=K7Q4M2XP9H"
           etichetta="Codice QR di esempio"
         />
         <p className="codice">K7Q4-M2XP-9H</p>

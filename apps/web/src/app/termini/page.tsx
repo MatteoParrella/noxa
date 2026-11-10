@@ -13,7 +13,7 @@ export default function PaginaTermini() {
     >
       <p>
         Questi termini sono l’accordo tra te e Noxa. Li abbiamo scritti in modo semplice: se
-        qualcosa non è chiaro, scrivici a <span className="mono">supporto@noxa.app</span>.
+        qualcosa non è chiaro, scrivici a <span className="mono">supporto@noxanight.it</span>.
       </p>
 
       <h2>1. Cos’è Noxa</h2>

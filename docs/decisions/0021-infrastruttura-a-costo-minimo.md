@@ -30,7 +30,7 @@ ADR-0016.
 | Email di Auth | **Brevo** (azienda UE) come SMTP di Supabase Auth, con SPF e DKIM sul dominio | 0 € fino a 300 email al giorno |
 | Errori | Sentry, piano Developer, regione UE (ADR-0014) | 0 € |
 | CAPTCHA | Cloudflare Turnstile (ADR-0020) | 0 € |
-| Dominio | Cloudflare Registrar, a prezzo di costo, comprato quando si crea lo staging (D-01) | circa 10–15 € l'anno |
+| Dominio | `noxanight.it` su OVH, perché Cloudflare Registrar non vende i `.it`; DNS su Cloudflare, gratuito (D-01, 2026-11-10) | pochi euro l'anno |
 
 **Worker su GitHub Actions.**
 - Il workflow `worker.yml` parte ogni 15 minuti (`schedule`) e a mano (`workflow_dispatch`),

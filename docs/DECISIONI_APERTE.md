@@ -10,7 +10,6 @@ sotto) e rimandano a questo file con l'ID `D-xx`. Quando una decisione viene pre
 
 | ID | Decisione | Scelta provvisoria | Chi decide | Entro |
 |---|---|---|---|---|
-| D-01 | Dominio del prodotto (il nome "Noxa" è deciso) | Dominio di lavoro `noxa.app`, usato in user agent dello scraper, email, app Meta e identificativo delle app native (`app.noxa` in `capacitor.config.ts`, non più modificabile dopo la prima pubblicazione negli store); disponibilità del dominio e del marchio "Noxa" da verificare | Product owner | Quando si crea lo staging (serve per App Review Meta, email, mappa su R2 e informativa online), su Cloudflare Registrar a prezzo di costo (ADR-0021); fino ad allora vale `noxa.app` come ipotesi di lavoro |
 | D-03 | Modello Claude per l'estrazione dei flyer in produzione | `claude-opus-5-5` (ADR-0007). Valutare `claude-sonnet-5-5` o `claude-haiku-5-5` sul golden set confrontando qualità e costo per flyer | Product owner su dati della skill `flyer-parser` | Metà Fase 1 |
 | D-05 | Accordi con Resident Advisor, Xceed, Dice e le biglietterie italiane (TicketSMS) | Nessuna integrazione finché non c'è un accordo scritto o un'API ufficiale (ADR-0008); fino ad allora i link alle biglietterie si salvano solo come link ai biglietti letti dai siti conformi dei locali | Product owner | Fase 3 |
 | D-06 | Classificazione d'età negli store | Da determinare con i questionari ufficiali di Apple e Google, considerando i riferimenti alla vita notturna | Product owner | Fase 2 |
@@ -27,7 +26,8 @@ sotto) e rimandano a questo file con l'ID `D-xx`. Quando una decisione viene pre
 
 | ID | Decisione | Esito | Data |
 |---|---|---|---|
-| D-01 (parte) | Nome del prodotto | **Noxa**. Resta aperto il dominio (D-01). | 2026-10-12 |
+| D-01 (parte) | Nome del prodotto | **Noxa**. | 2026-10-12 |
+| D-01 | Dominio del prodotto | **`noxanight.it`**, registrato su OVH (Cloudflare Registrar non vende i `.it`) con il DNS su Cloudflare, gratuito (ADR-0021). Usi: app (`staging.noxanight.it`, poi la produzione), mappa su R2, mittente delle email con Brevo, indirizzi `privacy@`, `supporto@`, `sicurezza@`, `bot@` (inoltro gratuito di Cloudflare), user agent `NoxaBot/1.0 (+https://noxanight.it/bot)` e identificativo delle app native `it.noxanight`. Il marchio "Noxa" resta da verificare con il legale (D-07) | 2026-11-10 |
 | D-02 | Contatti tra minorenni di età diverse | Un'unica fascia 14–17: un minorenne può cercare per username qualsiasi altro minorenne, con amicizia reciproca ([ADR-0017](decisions/0017-fascia-unica-minorenni.md)) | 2026-10-12 |
 | D-04 | Plugin Capacitor per la geolocalizzazione in background | `@capacitor-community/background-geolocation`, open source e gratuito ([ADR-0027](decisions/0027-distribuzione-android-e-posizione-in-background.md)) | 2026-11-05 |
 | D-09 | Fornitore delle tile della mappa | Protomaps auto-ospitato, gratuito ([ADR-0016](decisions/0016-mappe-protomaps-autospitate.md)) | 2026-10-12 |

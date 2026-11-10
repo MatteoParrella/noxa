@@ -25,7 +25,7 @@ class Impostazioni(BaseSettings):
     # Tempo massimo per la verifica del database di /pronto.
     timeout_database_s: float = Field(default=2.0, gt=0, le=30)
     # Identità e limiti dello scraper (EVENT_INGESTION.md §2.4): non si alzano oltre ADR-0008.
-    scraper_user_agent: str = Field(default="NoxaBot/1.0 (+https://noxa.app/bot)", min_length=8)
+    scraper_user_agent: str = Field(default="NoxaBot/1.0 (+https://noxanight.it/bot)", min_length=8)
     scraper_intervallo_minimo_s: float = Field(default=5.0, ge=5.0, le=60.0)
     scraper_pagine_massime: int = Field(default=50, ge=1, le=50)
     # Instagram Graph API, Business Discovery (EVENT_INGESTION.md §2.5). Vuoti finché l'App

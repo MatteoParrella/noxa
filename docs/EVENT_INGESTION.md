@@ -68,7 +68,7 @@ database). La procedura completa è nella skill `add-event-source`.
 
 | Regola | Valore |
 |---|---|
-| User agent | `NoxaBot/1.0 (+https://noxa.app/bot)`: la pagina spiega chi siamo e come chiedere la rimozione |
+| User agent | `NoxaBot/1.0 (+https://noxanight.it/bot)`: la pagina spiega chi siamo e come chiedere la rimozione |
 | robots.txt | Letto per ogni dominio e anche a ogni redirect (cache di 24 ore); un percorso vietato interrompe la fonte con `ErroreConformita` senza fare la richiesta. Come RFC 9309: 404 = nessuna regola, 401 e 403 = tutto vietato, errore del server = la fonte non si legge in questa esecuzione. `Crawl-delay` più lungo di 5 secondi viene rispettato. Le API ufficiali con chiave (Graph API, Places, Overpass) non leggono robots.txt ma hanno gli stessi limiti |
 | Frequenza | Al massimo 1 richiesta ogni 5 secondi per dominio; un solo job per dominio alla volta (`coda_job.chiave_concorrenza`) |
 | Volume | Al massimo 50 pagine per esecuzione; esecuzione ogni 6 ore o meno spesso |

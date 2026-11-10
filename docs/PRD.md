@@ -1,7 +1,7 @@
 # Product Requirements Document — Noxa
 
-> Il nome del prodotto è **Noxa**. Il dominio è la decisione aperta D-01
-> ([DECISIONI_APERTE.md](DECISIONI_APERTE.md)).
+> Il nome del prodotto è **Noxa**, il dominio è `noxanight.it` (D-01, chiusa in
+> [DECISIONI_APERTE.md](DECISIONI_APERTE.md)).
 
 ## 1. Visione
 

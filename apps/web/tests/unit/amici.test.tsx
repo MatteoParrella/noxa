@@ -13,14 +13,16 @@ describe('codice invito', () => {
   });
 
   it('si ricava dal link del QR o dal testo scritto a mano', () => {
-    expect(estraiCodice('https://noxa.app/amici/invito/?c=K7Q4M2XP9H')).toBe('K7Q4M2XP9H');
+    expect(estraiCodice('https://noxanight.it/amici/invito/?c=K7Q4M2XP9H')).toBe('K7Q4M2XP9H');
     expect(estraiCodice(' k7q4-m2xp-9h ')).toBe('K7Q4M2XP9H');
     expect(estraiCodice('troppo corto')).toBeNull();
     expect(estraiCodice('https://example.com/')).toBeNull();
   });
 
   it('il QR ha l’alternativa testuale e moduli disegnati', () => {
-    render(<CodiceQr valore="https://noxa.app/amici/invito/?c=K7Q4M2XP9H" etichetta="Codice QR" />);
+    render(
+      <CodiceQr valore="https://noxanight.it/amici/invito/?c=K7Q4M2XP9H" etichetta="Codice QR" />,
+    );
     const qr = screen.getByRole('img', { name: 'Codice QR' });
     expect(qr.querySelector('path')?.getAttribute('d')).toMatch(/^M\d+ \d+h1v1h-1z/);
   });

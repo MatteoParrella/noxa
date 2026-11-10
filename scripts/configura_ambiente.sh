@@ -165,7 +165,7 @@ passo "Segreti delle Edge Functions"
 {
   printf 'VAPID_PUBLIC_KEY=%s\n' "$VAPID_PUBLIC_KEY"
   printf 'VAPID_PRIVATE_KEY=%s\n' "$VAPID_PRIVATE_KEY"
-  printf 'VAPID_SUBJECT=%s\n' "mailto:${EMAIL_MITTENTE:-sicurezza@noxa.app}"
+  printf 'VAPID_SUBJECT=%s\n' "mailto:${EMAIL_MITTENTE:-sicurezza@noxanight.it}"
   printf 'NOXA_PUSH_SEGRETO=%s\n' "$NOXA_PUSH_SEGRETO"
 } >"$TEMP/segreti_funzioni"
 pnpm exec supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
