@@ -6,6 +6,9 @@ allowBuilds:
   supabase: true
   sharp: true
   unrs-resolver: true
+  # wrangler (solo `pages deploy`, ADR-0021) funziona senza i binari di esbuild e workerd.
+  esbuild: false
+  workerd: false
 
 # Versioni corrette di dipendenze indirette con vulnerabilità note.
 minimumReleaseAgeExclude:

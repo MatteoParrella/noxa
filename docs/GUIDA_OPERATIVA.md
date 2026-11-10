@@ -144,10 +144,58 @@ DECISIONI_APERTE.md, aggiorna i documenti e, se serve, scrive un ADR.
 |---|---|
 | Prima dell'iterazione 0 | Creare il repository GitHub e l'account Supabase |
 | Prima dell'iterazione 1 | Design system in Claude Design |
-| Quando si crea lo staging | Comprare il dominio su Cloudflare Registrar (D-01); account Cloudflare (Pages, R2) e Brevo, tutti gratuiti (ADR-0021); dopo i segreti, la variabile del repository `SERVIZI_ATTIVI=true` che accende worker, backup e mappa |
+| Quando si crea lo staging | Comprare il dominio su Cloudflare Registrar (D-01); account Supabase, Cloudflare (Pages, R2) e Brevo, tutti gratuiti (ADR-0021); poi la procedura del §9 |
 | Durante la Fase 0 | Avviare con un legale DPIA, termini e informativa (D-07); inviare la richiesta di App Review a Meta |
 | Prima dell'iterazione 5 | App Review Meta approvata; chiave Google Places facoltativa (senza, solo OpenStreetMap) |
 | Prima dell'iterazione 6 | Organizzazione della moderazione (D-10). Facoltativi finché non si apre la beta: chiave Claude API con limite di spesa e accordo sul trattamento dei dati con Anthropic (D-12); senza chiave i flyer si compilano a mano in moderazione (ADR-0021) |
 | Prima dell'iterazione 9 | Niente: le chiavi VAPID del Web Push le genera Claude in locale |
 | Prima dell'iterazione 10 | Progetto Firebase gratuito per le notifiche Android; un telefono Android con le opzioni sviluppatore per installare l'APK di debug. Nessun account degli store (ADR-0027) |
 | Prima dell'iterazione 12 | Penetration test esterno; testi legali definitivi. Come ultima cosa, ad app completa: account Google Play Console (25 $ una tantum), 12 tester per il test chiuso di 14 giorni e questionario d'età (D-06). Account Apple solo se si chiude D-13 |
+
+## 9. Creare un ambiente online (staging o produzione)
+
+Lo stesso procedimento vale per `staging` e, prima della beta, per `produzione`. Le parti
+sui siti dei fornitori le fai tu; i segreti non passano mai dalla chat: li scrivi in un file
+locale che lo script legge e copia su GitHub e Supabase.
+
+**1. Account e progetti (tu)**
+1. **Supabase**: nuovo progetto `noxa-staging`, regione UE (lo staging è in *West EU (Ireland)*; per la produzione
+   scegli *Central EU (Frankfurt)*, più vicina a Milano), piano Free;
+   annota la password del database. Crea un token personale in *Account → Access Tokens*.
+2. **Cloudflare**: account gratuito. Attiva R2 (chiede un metodo di pagamento anche per il
+   piano gratuito; sotto i 10 GB non si paga). Crea un token API personalizzato con i permessi
+   di account *Cloudflare Pages: Edit* e *Workers R2 Storage: Edit*, e un token R2 (*R2 →
+   Manage API tokens*) con *Object Read & Write*.
+3. **Turnstile**: nel widget esistente aggiungi l'hostname dell'app
+   (`<progetto>.pages.dev` e, quando c'è, il dominio).
+4. **Dominio e Brevo** (facoltativi per partire): senza dominio l'app sta su
+   `<progetto>.pages.dev`, la mappa su `r2.dev` e le email partono dal server di prova di
+   Supabase, che scrive solo ai membri del progetto. Il dominio (Cloudflare Registrar non vende
+   i `.it`) serve per Brevo, per l'informativa online e per l'App Review di Meta.
+
+**2. File dell'ambiente (tu)**: `cp .env.ambiente.example .env.staging`, poi compila i valori
+seguendo i commenti. Il file è escluso da git.
+
+**3. Configurazione (Claude o tu)**: `scripts/configura_ambiente.sh .env.staging`. Usa solo
+HTTPS (il SQL passa dall'API di gestione di Supabase, perché molte reti bloccano la porta
+5432). Pubblica le Edge Functions con i segreti del Web Push, imposta Auth (email in italiano,
+TOTP, Turnstile, SMTP), crea il progetto Pages e i bucket R2 nell'UE (mappa con CORS, backup)
+e l'environment di GitHub con segreti e variabili. Si può rieseguire.
+
+**4. Migrazioni e accensione**
+- `gh workflow run pubblica.yml -f ambiente=staging` applica le migrazioni da GitHub e
+  pubblica l'app; da lì in poi `pubblica.yml` parte da solo dopo ogni CI verde su `main`.
+- Di nuovo `scripts/configura_ambiente.sh .env.staging`: ora che le migrazioni ci sono imposta
+  la password di `noxa_worker`, i segreti del Vault e l'hook dell'età di Auth.
+- `gh workflow run mappa.yml -f ambiente=staging` carica la basemap su R2.
+- `gh variable set AMBIENTI_SERVIZI --body '["staging"]'` e
+  `gh variable set SERVIZI_ATTIVI --body true` accendono worker (ogni 15 minuti), backup
+  notturno e aggiornamento trimestrale della mappa. Con la produzione l'elenco diventa
+  `["staging","produzione"]`.
+
+**5. Primo moderatore**: registrati dall'app, poi
+`scripts/configura_ambiente.sh .env.staging --moderatore <email>`; al primo ingresso
+nell'area di moderazione si attivano i due fattori.
+
+**6. Locali e fonti**: bootstrap dei locali da OpenStreetMap e prime fonti con la skill
+`add-event-source`, solo dopo la verifica di conformità (ADR-0008).

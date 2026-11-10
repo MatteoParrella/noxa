@@ -11,18 +11,21 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: backup
-  cancel-in-progress: false
-
 jobs:
   backup:
-    name: Backup cifrato
+    name: Backup cifrato (${{ matrix.ambiente }})
     # Finché la variabile del repository SERVIZI_ATTIVI non vale 'true' (nessun Supabase o R2 online,
     # quindi nessun segreto) il job viene saltato invece di fallire.
     if: github.ref == 'refs/heads/main' && vars.SERVIZI_ATTIVI == 'true'
     runs-on: ubuntu-24.04
-    environment: produzione
+    strategy:
+      fail-fast: false
+      matrix:
+        ambiente: ${{ fromJSON(vars.AMBIENTI_SERVIZI || '["staging"]') }}
+    environment: ${{ matrix.ambiente }}
+    concurrency:
+      group: backup-${{ matrix.ambiente }}
+      cancel-in-progress: false
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7

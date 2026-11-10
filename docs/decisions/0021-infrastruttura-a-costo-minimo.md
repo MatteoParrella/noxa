@@ -23,7 +23,7 @@ ADR-0016.
 
 | Componente | Scelta | Costo |
 |---|---|---|
-| Database, Auth, Storage, Realtime, Edge Functions | Supabase, piano **Free**, regione Francoforte; due progetti, `staging` e `produzione` | 0 € |
+| Database, Auth, Storage, Realtime, Edge Functions | Supabase, piano **Free**, regione UE; due progetti, `staging` (Irlanda, `eu-west-1`, creato il 2026-11-10) e `produzione` (Francoforte) | 0 € |
 | Worker | **GitHub Actions** con esecuzione periodica (sotto) | 0 € (repository pubblico) |
 | PWA statica | **Cloudflare Pages** | 0 € |
 | Mappa (PMTiles, font, icone) | **Cloudflare R2** con giurisdizione UE, su un sottodominio `mappe.` del dominio di D-01 | 0 € fino a 10 GB, traffico in uscita gratuito |
