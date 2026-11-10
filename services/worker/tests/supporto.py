@@ -11,7 +11,7 @@ import httpx
 from noxa_worker.fonti.http import ClientHttpConforme, StatoCondiviso
 
 DATI = Path(__file__).parent / "dati"
-USER_AGENT = "NoxaBot/1.0 (+https://noxa.app/bot)"
+USER_AGENT = "NoxaBot/1.0 (+https://noxanight.it/bot)"
 
 
 def leggi_dato(percorso: str) -> str:

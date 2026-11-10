@@ -32,7 +32,7 @@ export const moderazione = {
     codice: 'Codice a 6 cifre',
     cifra: (n: number) => `Cifra ${n} di 6`,
     senzaTelefono: 'Non hai il telefono? Scrivi all’amministratore',
-    emailAmministratore: 'mailto:sicurezza@noxa.app',
+    emailAmministratore: 'mailto:sicurezza@noxanight.it',
     errato: 'Codice non valido. Correggi le ultime cifre o aspetta il prossimo codice dell’app.',
     scaduto: 'Il codice è scaduto: scrivi quello nuovo che vedi nell’app.',
     troppi: 'Troppi tentativi. Per sicurezza l’accesso è in pausa per qualche minuto.',

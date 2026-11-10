@@ -165,7 +165,7 @@ passo "Segreti delle Edge Functions"
 {
   printf 'VAPID_PUBLIC_KEY=%s\n' "$VAPID_PUBLIC_KEY"
   printf 'VAPID_PRIVATE_KEY=%s\n' "$VAPID_PRIVATE_KEY"
-  printf 'VAPID_SUBJECT=%s\n' "mailto:${EMAIL_MITTENTE:-sicurezza@noxa.app}"
+  printf 'VAPID_SUBJECT=%s\n' "mailto:${EMAIL_MITTENTE:-sicurezza@noxanight.it}"
   printf 'NOXA_PUSH_SEGRETO=%s\n' "$NOXA_PUSH_SEGRETO"
 } >"$TEMP/segreti_funzioni"
 pnpm exec supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
@@ -210,7 +210,7 @@ if [[ -n "${BREVO_SMTP_CHIAVE:-}" ]]; then
   jq --arg utente "$BREVO_SMTP_UTENTE" --arg chiave "$BREVO_SMTP_CHIAVE" \
     --arg mittente "$EMAIL_MITTENTE" '. + {smtp_host: "smtp-relay.brevo.com", smtp_port: "587",
     smtp_user: $utente, smtp_pass: $chiave, smtp_admin_email: $mittente,
-    smtp_sender_name: "Noxa"}' "$TEMP/auth.json" >"$TEMP/auth2.json" &&
+    smtp_sender_name: "Noxa", rate_limit_email_sent: 30}' "$TEMP/auth.json" >"$TEMP/auth2.json" &&
     mv "$TEMP/auth2.json" "$TEMP/auth.json"
   # I modelli delle email (link alla pagina /accesso/conferma/ dell'app) si possono cambiare
   # sul piano Free solo con un SMTP proprio.

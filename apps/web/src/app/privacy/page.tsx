@@ -16,13 +16,13 @@ export default function PaginaPrivacy() {
     >
       <p>
         Qui trovi quali dati raccogliamo, perché, chi li vede e per quanto tempo li teniamo. Per
-        qualsiasi domanda scrivici a <span className="mono">privacy@noxa.app</span>.
+        qualsiasi domanda scrivici a <span className="mono">privacy@noxanight.it</span>.
       </p>
 
       <h2>1. Chi tratta i tuoi dati</h2>
       <p>
         Il titolare del trattamento è Noxa, raggiungibile a{' '}
-        <span className="mono">privacy@noxa.app</span>.
+        <span className="mono">privacy@noxanight.it</span>.
       </p>
 
       <h2>2. Cosa raccogliamo</h2>
@@ -125,8 +125,8 @@ export default function PaginaPrivacy() {
       <p>
         Puoi vedere, scaricare, correggere e cancellare i tuoi dati, e opporti al loro uso. Dal
         profilo puoi scaricarli e cancellare l’account senza chiedere a nessuno; per il resto
-        scrivici a <span className="mono">privacy@noxa.app</span>. Puoi anche presentare reclamo al
-        Garante per la protezione dei dati personali.
+        scrivici a <span className="mono">privacy@noxanight.it</span>. Puoi anche presentare reclamo
+        al Garante per la protezione dei dati personali.
       </p>
 
       <h2>8. Se hai meno di 18 anni</h2>

@@ -1,4 +1,4 @@
-package app.noxa;
+package it.noxanight;
 
 import com.getcapacitor.BridgeActivity;
 

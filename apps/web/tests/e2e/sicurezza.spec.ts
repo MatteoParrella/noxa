@@ -147,7 +147,7 @@ test('dal profilo si esce dall’account', async ({ page, supabase }) => {
   await expect(page).toHaveURL(/\/benvenuto\/$/);
 });
 
-test.describe('termini e informativa', () => {
+test.describe('termini, informativa e pagina del bot', () => {
   test.use({ account: null });
 
   for (const tema of TEMI) {
@@ -162,6 +162,11 @@ test.describe('termini e informativa', () => {
       await expect(
         page.getByRole('heading', { level: 1, name: 'Informativa privacy' }),
       ).toBeVisible();
+      await verificaAccessibilita(page);
+      // Pagina dello user agent del worker (EVENT_INGESTION.md §2.4).
+      await page.goto('/bot/');
+      await expect(page.getByRole('heading', { level: 1, name: 'NoxaBot' })).toBeVisible();
+      await expect(page.getByText('bot@noxanight.it')).toBeVisible();
       await verificaAccessibilita(page);
     });
   }

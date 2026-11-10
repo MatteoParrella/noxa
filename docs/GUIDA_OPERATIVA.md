@@ -144,7 +144,7 @@ DECISIONI_APERTE.md, aggiorna i documenti e, se serve, scrive un ADR.
 |---|---|
 | Prima dell'iterazione 0 | Creare il repository GitHub e l'account Supabase |
 | Prima dell'iterazione 1 | Design system in Claude Design |
-| Quando si crea lo staging | Comprare il dominio su Cloudflare Registrar (D-01); account Supabase, Cloudflare (Pages, R2) e Brevo, tutti gratuiti (ADR-0021); poi la procedura del §9 |
+| Quando si crea lo staging | Il dominio `noxanight.it` è registrato su OVH con il DNS su Cloudflare (D-01); account Supabase, Cloudflare (Pages, R2) e Brevo, tutti gratuiti (ADR-0021); poi la procedura del §9 |
 | Durante la Fase 0 | Avviare con un legale DPIA, termini e informativa (D-07); inviare la richiesta di App Review a Meta |
 | Prima dell'iterazione 5 | App Review Meta approvata; chiave Google Places facoltativa (senza, solo OpenStreetMap) |
 | Prima dell'iterazione 6 | Organizzazione della moderazione (D-10). Facoltativi finché non si apre la beta: chiave Claude API con limite di spesa e accordo sul trattamento dei dati con Anthropic (D-12); senza chiave i flyer si compilano a mano in moderazione (ADR-0021) |

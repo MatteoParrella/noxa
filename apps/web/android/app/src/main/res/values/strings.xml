@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">Noxa</string>
     <string name="title_activity_main">Noxa</string>
-    <string name="package_name">app.noxa</string>
-    <string name="custom_url_scheme">app.noxa</string>
+    <string name="package_name">it.noxanight</string>
+    <string name="custom_url_scheme">it.noxanight</string>
     <!-- Canale della notifica fissa del ritorno sicuro (R-31, ADR-0028). -->
     <string name="capacitor_background_geolocation_notification_channel_name">Ritorno sicuro</string>
 </resources>

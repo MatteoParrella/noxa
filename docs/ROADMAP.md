@@ -52,8 +52,8 @@ completa solo se rispetta la definizione di completato del §6.
    configurazione di Tailwind e documentati in DESIGN.md.
 6. La richiesta di App Review Meta è stata inviata.
 
-La decisione sul dominio (D-01) è spostata ai criteri della Fase 2: fino ad allora si usa
-l'ipotesi di lavoro `noxa.app`.
+La decisione sul dominio (D-01) è stata chiusa il 2026-11-10 con la creazione dello staging:
+`noxanight.it`.
 
 ## Fase 1 — Beta chiusa Milano e Brianza
 
@@ -124,8 +124,8 @@ l'ultimo passo, a funzionalità complete; App Store solo se D-13 si chiude per A
 7. Crash-free sessions ≥ 99,5% nell'ultima settimana di beta.
 8. Wrapped (F-33) e badge (F-32), se presenti nel rilascio, verificati con `safety-review`
    (R-41, R-42); se in ritardo, il lancio procede senza (sono P1).
-9. La decisione D-01 (dominio) è chiusa prima della pubblicazione negli store e gli ADR e i
-   documenti che citano `noxa.app` sono aggiornati (DECISIONI_APERTE.md).
+9. Il dominio `noxanight.it` (D-01) serve l'app di produzione con HTTPS, le email partono da
+   un mittente del dominio e gli App Links di Android sono verificati.
 
 ## Fase 3 — Crescita
 
@@ -312,8 +312,7 @@ Ogni iterazione ha:
   `verifica_ritorni_scaduti`, area di arrivo salvata solo sul dispositivo, modalità solo in
   primo piano nella PWA. App Android installata sui telefoni del team con l'APK di debug
   (nessun account Google Play) e notifiche native con FCM in `invia-push`; link delle email
-  di conferma e di recupero aperti nell'app con gli App Links, se il dominio di D-01 c'è già
-  (altrimenti si aprono nel browser).
+  di conferma e di recupero aperti nell'app con gli App Links, con il dominio `noxanight.it` (D-01).
 - **Prerequisiti esterni**: progetto Firebase gratuito per FCM; un telefono Android per le
   prove. Nessun account degli store (ADR-0027).
 - **Criteri**: test pgTAP di R-31 e R-32; prove su dispositivi Android reali secondo il
