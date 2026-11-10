@@ -7,14 +7,18 @@
 #   scripts/configura_ambiente.sh .env.staging                       # configurazione completa
 #   scripts/configura_ambiente.sh .env.staging --moderatore <email>  # ruolo di moderatore
 #
-# Passi: migrazioni e Edge Functions su Supabase; password del ruolo noxa_worker; segreti del
-# Vault e delle funzioni per il Web Push (ADR-0026); impostazioni di Auth (hook dell'età,
-# email in italiano, TOTP, Turnstile, SMTP); progetto Cloudflare Pages e bucket R2 nell'UE
-# (mappa con CORS, backup); environment di GitHub con segreti e variabili per pubblica.yml,
-# worker.yml, backup.yml e mappa.yml.
+# Passi: Edge Functions e loro segreti; impostazioni di Auth (email in italiano, TOTP,
+# Turnstile, SMTP); progetto Cloudflare Pages e bucket R2 nell'UE (mappa con CORS, backup);
+# environment di GitHub con segreti e variabili per pubblica.yml, worker.yml, backup.yml e
+# mappa.yml. Quando le migrazioni sono applicate: password del ruolo noxa_worker, segreti del
+# Vault per il Web Push (ADR-0026) e hook dell'età di Auth.
+#
+# Lo script usa solo HTTPS (porta 443): il SQL passa dall'API di gestione di Supabase, perché
+# molte reti bloccano la porta 5432. Le migrazioni le applica pubblica.yml da GitHub; alla
+# prima configurazione quindi lo script va eseguito due volte, prima e dopo pubblica.yml.
 #
 # Nessun segreto viene stampato: i valori passano da file temporanei con permessi 600 o
-# dall'input standard. Richiede: curl, jq, openssl, docker (per psql), gh autenticato, pnpm.
+# dall'input standard. Richiede: curl, jq, openssl, gh autenticato, pnpm, node.
 set -euo pipefail
 
 RADICE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -26,7 +30,7 @@ MODERATORE=""
 if [[ "${1:-}" == "--moderatore" ]]; then MODERATORE="${2:?manca email del moderatore}"; fi
 
 [[ -f "$FILE" ]] || { echo "File $FILE non trovato" >&2; exit 1; }
-for comando in curl jq openssl docker gh pnpm node; do
+for comando in curl jq openssl gh pnpm node; do
   command -v "$comando" >/dev/null || { echo "Manca il comando $comando" >&2; exit 1; }
 done
 
@@ -81,29 +85,32 @@ url_db() { # url_db <ruolo> <password>
     "$1" "$SUPABASE_PROJECT_REF" "$(codifica "$2")" "$POOLER_HOST"
 }
 
-# Esegue SQL letto dall'input standard come utente postgres. I valori arrivano come variabili
-# d'ambiente (docker -e NOME senza valore le eredita), mai negli argomenti; nel SQL si leggono
-# con \getenv.
-psql_remoto() {
-  local ambiente=(-e PGPASSWORD)
-  for nome in "$@"; do ambiente+=(-e "$nome"); done
-  PGPASSWORD="$SUPABASE_DB_PASSWORD" docker run --rm -i "${ambiente[@]}" postgres:17-alpine \
-    psql "host=$POOLER_HOST port=5432 dbname=postgres user=postgres.$SUPABASE_PROJECT_REF sslmode=require" \
-    -v ON_ERROR_STOP=1 -q
+# Esegue il SQL letto dall'input standard con l'API di gestione (utente postgres) e stampa
+# il risultato in JSON. Il corpo della richiesta sta in un file temporaneo, mai negli argomenti.
+sql_remoto() {
+  jq -Rs '{query: .}' >"$TEMP/query.json"
+  api_supabase POST /database/query "$TEMP/query.json"
 }
+# Letterale SQL con gli apici raddoppiati.
+letterale() { printf "'%s'" "${1//\'/\'\'}"; }
+
+# Le migrazioni sono applicate se esistono il ruolo del worker e l'hook dell'età.
+MIGRAZIONI_APPLICATE="$(sql_remoto <<'SQL' | jq -r '.[0].pronte'
+select to_regrole('noxa_worker') is not null
+   and to_regprocedure('private.prima_della_creazione_utente(jsonb)') is not null as pronte;
+SQL
+)"
 
 if [[ -n "$MODERATORE" ]]; then
   passo "Ruolo di moderatore per l'account indicato"
-  export MODERATORE
-  psql_remoto MODERATORE <<'SQL'
-\getenv email MODERATORE
+  [[ "$MIGRAZIONI_APPLICATE" == "true" ]] || { echo "Migrazioni non applicate" >&2; exit 1; }
+  sql_remoto <<SQL | jq -r '.[0].esito'
 insert into public.ruoli_utente (utente_id, ruolo)
-select u.id, 'moderatore' from auth.users u where u.email = :'email'
+select u.id, 'moderatore' from auth.users u where u.email = $(letterale "$MODERATORE")
 on conflict do nothing;
-select case when exists (select 1 from auth.users where email = :'email')
+select case when exists (select 1 from auth.users where email = $(letterale "$MODERATORE"))
   then 'Fatto: al primo accesso all''area di moderazione serve attivare i due fattori.'
-  else 'Nessun account con questa email: registralo prima dall''app.' end as esito \gset
-\echo :esito
+  else 'Nessun account con questa email: registralo prima dall''app.' end as esito;
 SQL
   exit 0
 fi
@@ -126,41 +133,33 @@ if [[ -z "${VAPID_PRIVATE_KEY:-}" ]]; then
   done < <(node scripts/genera_chiavi_vapid.mjs)
 fi
 
-passo "Migrazioni ed Edge Functions su Supabase ($SUPABASE_PROJECT_REF)"
-pnpm exec supabase link --project-ref "$SUPABASE_PROJECT_REF" </dev/null
-pnpm exec supabase db push --yes </dev/null
-
-passo "Password del ruolo noxa_worker e segreti del Vault per il Web Push"
-export WORKER_DB_PASSWORD NOXA_PUSH_SEGRETO
-export URL_PUSH="https://$SUPABASE_PROJECT_REF.supabase.co/functions/v1/invia-push"
-psql_remoto WORKER_DB_PASSWORD NOXA_PUSH_SEGRETO URL_PUSH <<'SQL'
-\getenv password_worker WORKER_DB_PASSWORD
-\getenv url_push URL_PUSH
-\getenv segreto_push NOXA_PUSH_SEGRETO
-alter role noxa_worker with login password :'password_worker';
--- I blocchi do non vedono le variabili di psql: i valori passano da impostazioni di sessione,
--- senza stampare il risultato della select.
-\o /dev/null
-select set_config('noxa.url_push', :'url_push', false),
-       set_config('noxa.segreto_push', :'segreto_push', false);
-\o
-do $$
+if [[ "$MIGRAZIONI_APPLICATE" == "true" ]]; then
+  passo "Password del ruolo noxa_worker e segreti del Vault per il Web Push"
+  URL_PUSH="https://$SUPABASE_PROJECT_REF.supabase.co/functions/v1/invia-push"
+  sql_remoto >/dev/null <<SQL
+alter role noxa_worker with login password $(letterale "$WORKER_DB_PASSWORD");
+do \$\$
 declare
+  segreti constant jsonb := jsonb_build_object(
+    'invia_push_url', $(letterale "$URL_PUSH"),
+    'invia_push_segreto', $(letterale "$NOXA_PUSH_SEGRETO"));
   nome text;
-  valore text;
 begin
-  foreach nome in array array['invia_push_url', 'invia_push_segreto'] loop
-    valore := current_setting(case nome when 'invia_push_url' then 'noxa.url_push'
-                                        else 'noxa.segreto_push' end);
+  for nome in select jsonb_object_keys(segreti) loop
     if exists (select 1 from vault.secrets s where s.name = nome) then
-      perform vault.update_secret((select s.id from vault.secrets s where s.name = nome), valore);
+      perform vault.update_secret((select s.id from vault.secrets s where s.name = nome),
+                                  segreti ->> nome);
     else
-      perform vault.create_secret(valore, nome);
+      perform vault.create_secret(segreti ->> nome, nome);
     end if;
   end loop;
 end
-$$;
+\$\$;
 SQL
+  echo "Fatto."
+else
+  echo "Migrazioni non ancora applicate: ruolo del worker, Vault e hook dell'età al prossimo giro."
+fi
 
 passo "Segreti delle Edge Functions"
 {
@@ -177,8 +176,6 @@ passo "Impostazioni di Auth"
 # Stessi valori di supabase/config.toml, con l'indirizzo dell'app al posto di quello locale.
 jq -n \
   --arg sito "$URL_APP" \
-  --rawfile conferma supabase/templates/conferma.html \
-  --rawfile recupero supabase/templates/recupero.html \
   '{
     site_url: $sito,
     uri_allow_list: ($sito + "/**"),
@@ -193,14 +190,14 @@ jq -n \
     refresh_token_rotation_enabled: true,
     security_refresh_token_reuse_interval: 10,
     mfa_totp_enroll_enabled: true,
-    mfa_totp_verify_enabled: true,
-    hook_before_user_created_enabled: true,
-    hook_before_user_created_uri: "pg-functions://postgres/private/prima_della_creazione_utente",
-    mailer_subjects_confirmation: "Conferma la tua email per Noxa",
-    mailer_templates_confirmation_content: $conferma,
-    mailer_subjects_recovery: "Scegli una nuova password per Noxa",
-    mailer_templates_recovery_content: $recupero
+    mfa_totp_verify_enabled: true
   }' >"$TEMP/auth.json"
+# L'hook dell'età (R-01) si attiva solo se la funzione esiste già nel database.
+if [[ "$MIGRAZIONI_APPLICATE" == "true" ]]; then
+  jq '. + {hook_before_user_created_enabled: true,
+    hook_before_user_created_uri: "pg-functions://postgres/private/prima_della_creazione_utente"}' \
+    "$TEMP/auth.json" >"$TEMP/auth2.json" && mv "$TEMP/auth2.json" "$TEMP/auth.json"
+fi
 if [[ -n "${TURNSTILE_SECRET:-}" ]]; then
   jq --arg segreto "$TURNSTILE_SECRET" '. + {security_captcha_enabled: true,
     security_captcha_provider: "turnstile", security_captcha_secret: $segreto}' \
@@ -215,10 +212,21 @@ if [[ -n "${BREVO_SMTP_CHIAVE:-}" ]]; then
     smtp_user: $utente, smtp_pass: $chiave, smtp_admin_email: $mittente,
     smtp_sender_name: "Noxa"}' "$TEMP/auth.json" >"$TEMP/auth2.json" &&
     mv "$TEMP/auth2.json" "$TEMP/auth.json"
+  # I modelli delle email (link alla pagina /accesso/conferma/ dell'app) si possono cambiare
+  # sul piano Free solo con un SMTP proprio.
+  jq --rawfile conferma supabase/templates/conferma.html \
+    --rawfile recupero supabase/templates/recupero.html '. + {
+    mailer_subjects_confirmation: "Conferma la tua email per Noxa",
+    mailer_templates_confirmation_content: $conferma,
+    mailer_subjects_recovery: "Scegli una nuova password per Noxa",
+    mailer_templates_recovery_content: $recupero}' "$TEMP/auth.json" >"$TEMP/auth2.json" &&
+    mv "$TEMP/auth2.json" "$TEMP/auth.json"
 else
-  echo "Brevo non configurato: email dal server di prova di Supabase (solo membri del progetto)."
+  echo "Brevo non configurato: email dal server di prova di Supabase (solo membri del"
+  echo "progetto) e con i modelli predefiniti, che il piano Free non lascia cambiare senza SMTP."
 fi
-api_supabase PATCH /config/auth "$TEMP/auth.json" >/dev/null
+api_supabase PATCH /config/auth "$TEMP/auth.json" >"$TEMP/esito_auth" ||
+  { jq -r '.message // .' "$TEMP/esito_auth" >&2; exit 1; }
 echo "Auth aggiornato."
 
 passo "Chiavi pubbliche e di servizio del progetto"
@@ -231,10 +239,25 @@ jq -r '(map(select(.name == "service_role")) + map(select(.type == "secret")))
 
 passo "Cloudflare Pages e R2"
 wrangler() { pnpm exec wrangler "$@" </dev/null; }
-if ! wrangler pages project list --json 2>/dev/null |
-  jq -e --arg nome "$CLOUDFLARE_PAGES_PROGETTO" 'any(.[]; (.["Project Name"] // .name) == $nome)' >/dev/null; then
-  wrangler pages project create "$CLOUDFLARE_PAGES_PROGETTO" --production-branch main
+# Il progetto Pages si crea con l'API REST: le versioni recenti di wrangler provano a
+# trasformarlo in un Worker, cosa che in un monorepo fallisce.
+printf 'Authorization: Bearer %s\nContent-Type: application/json\n' "$CLOUDFLARE_API_TOKEN" \
+  >"$TEMP/intestazioni_cf"
+API_PAGES="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects"
+if ! curl --silent --show-error -H "@$TEMP/intestazioni_cf" "$API_PAGES/$CLOUDFLARE_PAGES_PROGETTO" |
+  jq -e '.success' >/dev/null; then
+  jq -n --arg nome "$CLOUDFLARE_PAGES_PROGETTO" '{name: $nome, production_branch: "main"}' \
+    >"$TEMP/pages.json"
+  curl --silent --show-error -H "@$TEMP/intestazioni_cf" -X POST "$API_PAGES" \
+    --data-binary "@$TEMP/pages.json" >"$TEMP/esito_pages"
+  jq -e '.success' "$TEMP/esito_pages" >/dev/null ||
+    { jq -r '[.errors[].message] | join("; ")' "$TEMP/esito_pages" >&2; exit 1; }
+  echo "Progetto Pages $CLOUDFLARE_PAGES_PROGETTO creato."
 fi
+SOTTODOMINIO="$(curl --silent -H "@$TEMP/intestazioni_cf" "$API_PAGES/$CLOUDFLARE_PAGES_PROGETTO" |
+  jq -r '.result.subdomain')"
+[[ "https://$SOTTODOMINIO" == "$URL_APP" ]] ||
+  echo "Attenzione: Pages risponde su https://$SOTTODOMINIO, diverso da URL_APP ($URL_APP)."
 BUCKET_MAPPE="$CLOUDFLARE_PAGES_PROGETTO-mappe"
 BUCKET_BACKUP="$CLOUDFLARE_PAGES_PROGETTO-backup"
 for bucket in "$BUCKET_MAPPE" "$BUCKET_BACKUP"; do
@@ -314,10 +337,11 @@ cat <<FINE
 
 Ambiente $AMBIENTE configurato.
 Prossimi passi (GUIDA_OPERATIVA.md §9):
-  1. mappa:       gh workflow run mappa.yml -f ambiente=$AMBIENTE
-  2. app:         gh workflow run pubblica.yml -f ambiente=$AMBIENTE
-  3. servizi:     gh variable set AMBIENTI_SERVIZI --body '["$AMBIENTE"]'
-                  gh variable set SERVIZI_ATTIVI --body true
-  4. moderatore:  registrati su $URL_APP, poi
-                  scripts/configura_ambiente.sh $FILE --moderatore <email>
+  1. migrazioni e app:  gh workflow run pubblica.yml -f ambiente=$AMBIENTE
+  2. di nuovo:          scripts/configura_ambiente.sh $FILE   (worker, Vault, hook dell'età)
+  3. mappa:             gh workflow run mappa.yml -f ambiente=$AMBIENTE
+  4. servizi:           gh variable set AMBIENTI_SERVIZI --body '["$AMBIENTE"]'
+                        gh variable set SERVIZI_ATTIVI --body true
+  5. moderatore:        registrati su $URL_APP, poi
+                        scripts/configura_ambiente.sh $FILE --moderatore <email>
 FINE

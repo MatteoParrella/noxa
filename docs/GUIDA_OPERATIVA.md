@@ -176,16 +176,18 @@ locale che lo script legge e copia su GitHub e Supabase.
 **2. File dell'ambiente (tu)**: `cp .env.ambiente.example .env.staging`, poi compila i valori
 seguendo i commenti. Il file è escluso da git.
 
-**3. Configurazione (Claude o tu)**: `scripts/configura_ambiente.sh .env.staging`. Lo script
-applica migrazioni ed Edge Functions, imposta la password di `noxa_worker`, il Vault e i
-segreti del Web Push, le impostazioni di Auth (hook dell'età, email in italiano, TOTP,
-Turnstile, SMTP), crea il progetto Pages e i bucket R2 nell'UE (mappa con CORS, backup) e
-l'environment di GitHub con segreti e variabili. Si può rieseguire.
+**3. Configurazione (Claude o tu)**: `scripts/configura_ambiente.sh .env.staging`. Usa solo
+HTTPS (il SQL passa dall'API di gestione di Supabase, perché molte reti bloccano la porta
+5432). Pubblica le Edge Functions con i segreti del Web Push, imposta Auth (email in italiano,
+TOTP, Turnstile, SMTP), crea il progetto Pages e i bucket R2 nell'UE (mappa con CORS, backup)
+e l'environment di GitHub con segreti e variabili. Si può rieseguire.
 
-**4. Accensione**
+**4. Migrazioni e accensione**
+- `gh workflow run pubblica.yml -f ambiente=staging` applica le migrazioni da GitHub e
+  pubblica l'app; da lì in poi `pubblica.yml` parte da solo dopo ogni CI verde su `main`.
+- Di nuovo `scripts/configura_ambiente.sh .env.staging`: ora che le migrazioni ci sono imposta
+  la password di `noxa_worker`, i segreti del Vault e l'hook dell'età di Auth.
 - `gh workflow run mappa.yml -f ambiente=staging` carica la basemap su R2.
-- `gh workflow run pubblica.yml -f ambiente=staging` pubblica l'app; da lì in poi
-  `pubblica.yml` parte da solo dopo ogni CI verde su `main`.
 - `gh variable set AMBIENTI_SERVIZI --body '["staging"]'` e
   `gh variable set SERVIZI_ATTIVI --body true` accendono worker (ogni 15 minuti), backup
   notturno e aggiornamento trimestrale della mappa. Con la produzione l'elenco diventa

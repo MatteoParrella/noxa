@@ -1,7 +1,7 @@
 # Pubblicazione su staging e produzione (ADR-0021, ARCHITECTURE.md §6). Parte dopo ogni CI
 # verde su main, oppure a mano scegliendo l'ambiente. Per ogni ambiente: migrazioni e Edge
 # Functions su Supabase, poi l'export statico dell'app su Cloudflare Pages.
-# Gira solo con SERVIZI_ATTIVI=true; gli ambienti sono quelli di AMBIENTI_SERVIZI (JSON, per
+# Dopo la CI gira solo con SERVIZI_ATTIVI=true; gli ambienti sono quelli di AMBIENTI_SERVIZI (JSON, per
 # esempio ["staging"]). Segreti e variabili stanno negli environment di GitHub, limitati a main;
 # nessun valore segreto entra nella build dell'app (solo NEXT_PUBLIC_*, CLAUDE.md).
 name: Pubblicazione
@@ -29,9 +29,11 @@ concurrency:
 jobs:
   ambienti:
     name: Ambienti
+    # A mano parte sempre (serve alla prima configurazione, con i servizi ancora spenti); dopo la
+    # CI solo con SERVIZI_ATTIVI=true.
     if: >-
-      vars.SERVIZI_ATTIVI == 'true' && (github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
+      github.event_name == 'workflow_dispatch' || (vars.SERVIZI_ATTIVI == 'true' &&
+      github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-24.04
     outputs:
       elenco: ${{ steps.elenco.outputs.elenco }}
