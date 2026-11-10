@@ -130,8 +130,10 @@ flowchart LR
 | Colore | Il colore non è mai l'unico modo per comunicare uno stato |
 | Moduli | Errori associati al campo, descritti nel testo, con suggerimento di correzione |
 
-Verifica: axe-core nei test Playwright di ogni schermata, più una prova manuale con VoiceOver
-(iOS) e TalkBack (Android) per i percorsi principali prima di ogni rilascio.
+Verifica: axe-core nei test Playwright di ogni schermata, eseguiti su Chrome, Safari su iPhone
+(WebKit) e Firefox, più una prova manuale con VoiceOver (iOS) e TalkBack (Android) per i
+percorsi principali prima di ogni rilascio. Su Safari va provata a mano anche la resa sotto le
+barre del browser, che i test non riproducono.
 
 ## 5. Tono e testi
 

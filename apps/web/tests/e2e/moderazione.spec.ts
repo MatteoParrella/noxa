@@ -57,9 +57,10 @@ test.describe('accesso con due fattori (R-06)', () => {
     await page.evaluate((codice) => {
       const dati = new DataTransfer();
       dati.setData('text', codice);
-      document.activeElement?.dispatchEvent(
-        new ClipboardEvent('paste', { clipboardData: dati, bubbles: true }),
-      );
+      // Firefox svuota gli appunti di un evento creato da script: si assegnano a mano.
+      const evento = new ClipboardEvent('paste', { bubbles: true, cancelable: true });
+      Object.defineProperty(evento, 'clipboardData', { value: dati });
+      document.activeElement?.dispatchEvent(evento);
     }, CODICE_GIUSTO);
     await expect(page.getByRole('heading', { name: /^Fonti/ })).toBeVisible();
   });

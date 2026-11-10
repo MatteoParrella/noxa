@@ -45,6 +45,13 @@ async function simulaPush(pagina: Page, esito: 'granted' | 'denied' | 'default' 
           },
         },
       };
+      // Su iPhone il Web Push esiste solo con Noxa sulla schermata Home: si simula l'app
+      // installata (Safari la segnala con navigator.standalone). Negli altri browser non conta.
+      Object.defineProperty(navigator, 'standalone', { configurable: true, value: true });
+      // Il WebKit di Playwright su Linux non ha PushManager (Safari sì, da iOS 16.4).
+      if (!('PushManager' in window)) {
+        Object.defineProperty(window, 'PushManager', { configurable: true, value: class {} });
+      }
       Object.defineProperty(navigator, 'serviceWorker', {
         configurable: true,
         value: {
@@ -120,7 +127,9 @@ test('attivate: permesso dopo «Attiva» e dispositivo registrato con un’etich
   >;
   expect(registrazione).toMatchObject({ piattaforma: 'web', token: ENDPOINT });
   // Solo sistema e browser, mai modello né versione (R-66).
-  expect(registrazione.descrizione).toMatch(/^(Android · Chrome|Browser · Chrome su computer)$/);
+  expect(registrazione.descrizione).toMatch(
+    /^(Android · Chrome|Browser · (Chrome|Firefox) su computer|Telefono · Noxa dalla Home)$/,
+  );
   await foglio.getByRole('button', { name: 'Fatto' }).click();
   await expect(page.getByRole('switch', { name: /Notifiche sul telefono/ })).toHaveAttribute(
     'aria-checked',

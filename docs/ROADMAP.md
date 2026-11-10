@@ -355,7 +355,8 @@ Una funzionalità è completa quando:
 3. le migrazioni hanno RLS e test pgTAP positivi e negativi (skill `db-migration`);
 4. il codice è tipizzato (TypeScript strict, mypy strict), con gestione degli errori e
    logging secondo ARCHITECTURE.md §5.2 e §8;
-5. esistono test unitari e, per i percorsi utente, test e2e; la CI è verde;
+5. esistono test unitari e, per i percorsi utente, test e2e che passano su Chrome (telefono e
+   computer), Safari su iPhone (WebKit) e Firefox; la CI è verde;
 6. l'interfaccia rispetta WCAG 2.2 AA e DESIGN.md (skill `implement-design`);
 7. la skill `safety-review` è stata superata e l'esito è riportato nella PR;
 8. la revisione del codice è stata approvata da almeno un'altra persona.

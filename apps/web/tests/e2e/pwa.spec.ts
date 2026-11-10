@@ -1,5 +1,8 @@
 import { expect, test } from './supporto';
 
+// Qui si prova proprio il service worker: attivo anche su WebKit (playwright.config.ts).
+test.use({ serviceWorkers: 'allow' });
+
 test('l’app è installabile: manifest, icone e service worker', async ({ page, request }) => {
   await page.goto('/scopri/');
   const href = await page.locator('link[rel="manifest"]').getAttribute('href');

@@ -127,7 +127,14 @@ test('senza rete la serata resta sul telefono e parte al ritorno della connessio
   page,
   context,
   supabase,
+  browserName,
 }) => {
+  // Serve il service worker, e su WebKit di Playwright con il service worker attivo le chiamate
+  // a Supabase non si possono simulare: la coda offline si prova su Chromium e Firefox.
+  test.skip(
+    browserName === 'webkit',
+    'Supabase simulato non compatibile con il service worker su WebKit',
+  );
   // L'installazione del service worker è lenta quando girano altri test in parallelo.
   test.slow();
   await page.goto('/ricorda/modifica/');

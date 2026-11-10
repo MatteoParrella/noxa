@@ -63,6 +63,11 @@
   border-radius: 50%;
   background: radial-gradient(closest-side, var(--bagliore-accento), transparent 100%);
   filter: blur(32px);
+  /* Sfuma verso l'alto fino al bordo della pagina (140 px dall'inizio del cerchio): senza la
+     sfumatura il bagliore si interrompe di netto sotto la barra di Safari e dei browser con
+     la barra degli indirizzi opaca. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 140px, #000 320px);
+  mask-image: linear-gradient(to bottom, transparent 140px, #000 320px);
   pointer-events: none;
   animation: bagliore var(--movimento-bagliore) var(--curva-espressiva) both;
 }

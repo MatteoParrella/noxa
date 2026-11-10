@@ -261,6 +261,18 @@ test('la posizione si chiede solo con un tocco e si arrotonda (R-33)', async ({
 });
 
 test('senza permesso di posizione si spiega e si propone il comune', async ({ page }) => {
+  // Il telefono nega il permesso. Si simula perché senza permesso concesso Chromium nega da
+  // solo, mentre Firefox lascia la richiesta aperta come un popup a cui nessuno risponde.
+  await page.addInitScript(() => {
+    navigator.geolocation.getCurrentPosition = (_riuscita, errore) =>
+      errore?.({
+        code: 1,
+        message: 'User denied Geolocation',
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3,
+      } as GeolocationPositionError);
+  });
   await page.goto('/scopri/');
   await page.getByRole('button', { name: 'Filtri' }).click();
   // Il telefono nega il permesso: la scelta torna a tutta l'area.
@@ -360,13 +372,20 @@ test('una scelta non salvata torna indietro e lo dice', async ({ page, supabase 
   );
 });
 
-test('dettaglio: fonte, biglietti, Apri in Mappe e link condiviso (F-03)', async ({
-  page,
-  context,
-}) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+test('dettaglio: fonte, biglietti, Apri in Mappe e link condiviso (F-03)', async ({ page }) => {
+  // Appunti simulati: i permessi clipboard-* di Playwright esistono solo su Chromium.
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'share', { value: undefined });
+    const finestra = window as unknown as { __copiato: string };
+    finestra.__copiato = '';
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: async (testo: string) => {
+          finestra.__copiato = testo;
+        },
+      },
+    });
   });
   await page.goto(EVENTO);
   const fonte = page.getByRole('link', { name: /Fonte: sito del locale/ });
@@ -386,7 +405,7 @@ test('dettaglio: fonte, biglietti, Apri in Mappe e link condiviso (F-03)', async
   await page.getByRole('button', { name: 'Altre azioni per Notte Ferrovia' }).click();
   await page.getByRole('menuitem', { name: 'Condividi il link' }).click();
   await expect(page.getByText('Link copiato')).toBeVisible();
-  const copiato = await page.evaluate(() => navigator.clipboard.readText());
+  const copiato = await page.evaluate(() => (window as unknown as { __copiato: string }).__copiato);
   expect(copiato).toMatch(/\/evento\/\?id=00000000-0000-4000-8000-00000000e001$/);
 });
 

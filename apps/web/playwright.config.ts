@@ -21,6 +21,11 @@ export default defineConfig({
   projects: [
     { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
     { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
+    // Safari su iPhone (WebKit) e Firefox: l'app deve funzionare su tutti i browser principali.
+    // Su WebKit le richieste di una pagina controllata dal service worker sfuggono a page.route
+    // (Supabase simulato): il service worker si attiva solo nei test che lo provano.
+    { name: 'mobile-webkit', use: { ...devices['iPhone 15'], serviceWorkers: 'block' } },
+    { name: 'desktop-firefox', use: { ...devices['Desktop Firefox'] } },
   ],
   webServer: {
     // Build dedicata ai test: include il catalogo dei componenti e punta la mappa a un bucket

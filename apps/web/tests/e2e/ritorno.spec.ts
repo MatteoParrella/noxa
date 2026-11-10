@@ -144,7 +144,7 @@ test('avviare il ritorno: arrivo previsto, chi torna con te, riepilogo, spiegazi
   await expect(foglio.getByText(/non hai confermato, li avvisiamo/)).toBeVisible();
   // Nota della posizione a schermo bloccato: nel browser del telefono sì, da computer no.
   const notaFoglio = foglio.getByText(/la posizione si ferma quando lo blocchi/);
-  if (test.info().project.name === 'mobile-chromium') await expect(notaFoglio).toBeVisible();
+  if (test.info().project.name.startsWith('mobile-')) await expect(notaFoglio).toBeVisible();
   else await expect(notaFoglio).toHaveCount(0);
   await foglio.getByRole('button', { name: 'Avvia', exact: true }).click();
 
@@ -173,7 +173,7 @@ test('avviare il ritorno: arrivo previsto, chi torna con te, riepilogo, spiegazi
   const barra = page.getByRole('status').filter({ hasText: 'Ritorno attivo', visible: true });
   await expect(barra).toBeVisible();
   const notaBarra = page.getByText(/Con lo schermo bloccato gli amici vedono dove eri/);
-  if (test.info().project.name === 'mobile-chromium')
+  if (test.info().project.name.startsWith('mobile-'))
     await expect(notaBarra.filter({ visible: true })).toBeVisible();
   else await expect(notaBarra).toHaveCount(0);
 });
