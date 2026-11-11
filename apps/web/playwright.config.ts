@@ -25,7 +25,17 @@ export default defineConfig({
     // Su WebKit le richieste di una pagina controllata dal service worker sfuggono a page.route
     // (Supabase simulato): il service worker si attiva solo nei test che lo provano.
     { name: 'mobile-webkit', use: { ...devices['iPhone 15'], serviceWorkers: 'block' } },
-    { name: 'desktop-firefox', use: { ...devices['Desktop Firefox'] } },
+    {
+      name: 'desktop-firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        // I runner di GitHub non hanno GPU: Firefox headless mette in blocklist il WebGL
+        // software (llvmpipe) e la mappa MapLibre va in errore. Lo si forza solo nei test.
+        launchOptions: {
+          firefoxUserPrefs: { 'webgl.force-enabled': true, 'webgl.disabled': false },
+        },
+      },
+    },
   ],
   webServer: {
     // Build dedicata ai test: include il catalogo dei componenti e punta la mappa a un bucket
