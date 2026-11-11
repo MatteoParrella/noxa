@@ -21,6 +21,7 @@ import structlog
 from pydantic import JsonValue, ValidationError
 
 from noxa_worker.coda import ErroreJobDefinitivo, Job
+from noxa_worker.copertine.servizio import ColoriCopertine
 from noxa_worker.dedup.fusione import EventoEsistente, fondi
 from noxa_worker.dedup.punteggio import EsitoDedup, EventoConfronto, decidi
 from noxa_worker.errori import ErroreRaccolta, ErroreValidazione
@@ -76,7 +77,9 @@ class GestoreRaccolta:
         crea_http: Callable[[int], ClientHttpConforme],
         *,
         adesso: Callable[[], datetime],
+        colori: ColoriCopertine | None = None,
     ) -> None:
+        self._colori = colori
         self._archivio = archivio
         self._adattatori = dict(adattatori)
         self._crea_http = crea_http
@@ -103,6 +106,7 @@ class GestoreRaccolta:
         inizio = time.monotonic()
         adattatore = self._adattatori.get(fonte.adattatore)
         http = self._crea_http(fonte.pagine_massime)
+        grezzi: list[EventoGrezzo] = []
         if adattatore is None:
             esito.codice_errore = "ADATTATORE_SCONOSCIUTO"
             esito.messaggio_errore = f"adattatore {fonte.adattatore!r} non registrato"
@@ -121,6 +125,7 @@ class GestoreRaccolta:
 
         if not prova and esito.codice_errore is None and esito.eventi_letti > 0:
             await self._archivio.aggiorna_assenze(fonte.id, esito.confermati)
+            await self._aggiorna_colori(fonte, grezzi, contesto)
         disattivata = await self._archivio.registra_esito(fonte.id, esito)
 
         dati_log = esito.come_json() | {"durata_ms": esito.durata_ms}
@@ -132,6 +137,20 @@ class GestoreRaccolta:
             contesto.error("fonte_disattivata", motivo="5 errori consecutivi")
         if esito.codice_errore is None and esito.eventi_letti == 0 and not prova:
             contesto.warning("fonte_senza_eventi")
+
+    async def _aggiorna_colori(
+        self, fonte: Fonte, grezzi: list[EventoGrezzo], contesto: structlog.BoundLogger
+    ) -> None:
+        """Colori delle copertine (ADR-0030): un errore qui non tocca l'esito della fonte."""
+        if self._colori is None:
+            return
+        try:
+            serate = await self._colori.aggiorna(fonte, grezzi)
+        except Exception as errore:  # noqa: BLE001 - i colori non devono fermare la raccolta
+            contesto.warning("colori_falliti", errore=type(errore).__name__)
+        else:
+            if serate:
+                contesto.info("colori_aggiornati", serate=serate)
 
     async def _elabora(
         self,

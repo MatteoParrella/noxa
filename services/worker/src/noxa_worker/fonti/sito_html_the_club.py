@@ -41,6 +41,7 @@ class AdattatoreSitoHtmlTheClub(AdattatoreSitoHtml):
         titolo=".event-title",
         data=".event-date",
         link=".imgbox a",
+        immagine=".imgbox img",
     )
 
     async def raccogli(self, fonte: Fonte, http: ClientHttpConforme) -> list[EventoGrezzo]:

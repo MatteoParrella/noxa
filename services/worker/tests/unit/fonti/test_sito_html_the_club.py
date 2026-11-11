@@ -52,6 +52,10 @@ async def test_tutte_le_schede_con_titolo_pulito_e_link() -> None:
         "SUPERBE",
     ]
     assert grezzi[0].url == f"{BASE}/event/one-two-wednesday-11-november"
+    # ADR-0030: solo il link, per i colori della copertina; l'immagine non si scarica qui.
+    immagine = grezzi[0].dati["immagine_url"]
+    assert isinstance(immagine, str)
+    assert immagine.startswith(f"{BASE}/upload/event/")
     assert len({g.id_esterno for g in grezzi}) == 207
 
 

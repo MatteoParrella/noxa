@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field, replace
 from datetime import date, datetime, timedelta
@@ -494,3 +494,32 @@ async def test_decisione_eventi_distinti_crea_un_evento() -> None:
     # Rieseguito (job ripetuto): la decisione è già applicata, nessun altro evento.
     await gestore.applica_decisione(job)
     assert len(archivio.eventi) == 2
+
+
+class ColoriCheFalliscono:
+    """Servizio dei colori che va in errore (ADR-0030)."""
+
+    chiamate = 0
+
+    async def aggiorna(self, fonte: Fonte, grezzi: Sequence[EventoGrezzo]) -> int:
+        ColoriCheFalliscono.chiamate += 1
+        raise RuntimeError("database non raggiungibile")
+
+
+async def test_errore_dei_colori_non_tocca_la_fonte() -> None:
+    adattatore = AdattatoreFinto([grezzo("Notte Ferrovia")])
+    gestore, archivio, _ = _ambiente(adattatore)
+    gestore._colori = ColoriCheFalliscono()  # type: ignore[assignment]
+    await gestore.esegui_fonte(_job())
+    assert ColoriCheFalliscono.chiamate == 1
+    assert archivio.esiti[-1].codice_errore is None
+    assert [e.titolo for e in archivio.eventi.values()] == ["Notte Ferrovia"]
+
+
+async def test_nessun_colore_in_prova() -> None:
+    adattatore = AdattatoreFinto([grezzo("Notte Ferrovia")])
+    gestore, _, _ = _ambiente(adattatore)
+    ColoriCheFalliscono.chiamate = 0
+    gestore._colori = ColoriCheFalliscono()  # type: ignore[assignment]
+    await gestore.esegui_fonte(_job(prova=True))
+    assert ColoriCheFalliscono.chiamate == 0

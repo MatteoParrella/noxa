@@ -22,6 +22,8 @@ from pydantic import BaseModel
 from noxa_worker.coda import EsecutoreCoda, GestoreJob, TipoJob
 from noxa_worker.coda_postgres import ArchivioJobPostgres
 from noxa_worker.configurazione import Impostazioni, leggi_impostazioni
+from noxa_worker.copertine.postgres import ArchivioColoriPostgres
+from noxa_worker.copertine.servizio import ColoriCopertine
 from noxa_worker.database import VerificaDatabase, crea_pool, verifica_con_pool
 from noxa_worker.flyer.archivio import ArchivioFlyerPostgres
 from noxa_worker.flyer.jobs import GestoreFlyer
@@ -140,6 +142,9 @@ async def risorse_postgres(impostazioni: Impostazioni) -> AsyncIterator[Risorse]
             crea_registro(impostazioni),
             crea_http,
             adesso=lambda: datetime.now(UTC),
+            colori=ColoriCopertine(
+                ArchivioColoriPostgres(pool), crea_http, adesso=lambda: datetime.now(UTC)
+            ),
         )
         flyer = GestoreFlyer(
             ArchivioFlyerPostgres(pool),

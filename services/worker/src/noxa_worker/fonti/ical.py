@@ -22,6 +22,8 @@ class EventoIcal:
     descrizione: str | None
     url: str | None
     annullato: bool
+    # ADR-0030: link dell'immagine allegata (ATTACH con FMTTYPE image/*), solo per i colori.
+    immagine: str | None = None
 
 
 def e_ical(testo: str) -> bool:
@@ -118,4 +120,17 @@ def _evento(campi: dict[str, tuple[dict[str, str], str]]) -> EventoIcal:
         descrizione=testo("DESCRIPTION"),
         url=testo("URL"),
         annullato=(testo("STATUS") or "").upper() == "CANCELLED",
+        immagine=_immagine(campi.get("ATTACH")),
     )
+
+
+def _immagine(voce: tuple[dict[str, str], str] | None) -> str | None:
+    if voce is None:
+        return None
+    parametri, valore = voce
+    valore = valore.strip()
+    if parametri.get("FMTTYPE", "").lower().startswith("image/") and valore.startswith(
+        ("http://", "https://")
+    ):
+        return valore
+    return None
