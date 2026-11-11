@@ -37,8 +37,9 @@ completa solo se rispetta la definizione di completato del §6.
   `dark` e `light` personalizzati con i design token; job trimestrale di aggiornamento
   (ADR-0016).
 - Shell Capacitor iOS e Android compilabile, con la PWA servita dallo stesso export.
-- Pratiche esterne avviate: App Review Meta per Business Discovery, account sviluppatore Apple
-  e Google, bozza di termini, informativa e DPIA con un legale (D-07).
+- Pratiche esterne avviate: app Meta per Business Discovery (in modalità sviluppo, senza App
+  Review: EVENT_INGESTION.md §2.5), account sviluppatore Apple e Google, bozza di termini,
+  informativa e DPIA con un legale (D-07).
 
 **Criteri di completamento**
 
@@ -50,7 +51,8 @@ completa solo se rispetta la definizione di completato del §6.
 4. L'app si compila in export statico e gira su simulatore iOS, emulatore Android e browser.
 5. I token del design system sono in `apps/web/src/styles/tokens.css`, usati dalla
    configurazione di Tailwind e documentati in DESIGN.md.
-6. La richiesta di App Review Meta è stata inviata.
+6. L'app Meta è configurata e Business Discovery risponde con il token di sistema del worker
+   (l'App Review non serve: EVENT_INGESTION.md §2.5).
 
 La decisione sul dominio (D-01) è stata chiusa il 2026-11-10 con la creazione dello staging:
 `noxanight.it`.
@@ -242,7 +244,7 @@ Ogni iterazione ha:
   moderazione per locali (con caricamento e approvazione della foto, ADR-0018, registrati in
   `azioni_moderazione`), fonti e duplicati; correzione di età e riferimenti all'alcol degli
   eventi da parte dei moderatori con la riga in `azioni_moderazione` (R-22).
-- **Prerequisiti esterni**: App Review Meta approvata; chiave Google Places; foto autorizzate
+- **Prerequisiti esterni**: app Meta e token di sistema del worker; chiave Google Places; foto autorizzate
   o con licenza libera dei locali verificati (ADR-0018).
 - **Criteri**: test degli adattatori su fixture; precisione della deduplicazione ≥ 98% e
   richiamo ≥ 90% sul golden set; almeno 40 locali verificati.
