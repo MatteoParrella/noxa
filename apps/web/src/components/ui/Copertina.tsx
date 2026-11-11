@@ -1,7 +1,25 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { classi } from '@/lib/classi';
+import {
+  corpoTitolo,
+  elementiMotivo,
+  parametri,
+  titoloCorto,
+  titoloManifesto,
+  type ColoriCopertina,
+  type ElementoMotivo,
+  type Famiglia,
+} from '@/lib/copertinaGenerata';
+
+/** Copertina generata (design/F-01-copertine-generate): seme, famiglia e colori della fonte. */
+export type DatiGenerata = {
+  seme: string;
+  famiglia: Famiglia;
+  /** Colori letti dall'immagine della fonte (ADR-0030); senza, quelli della famiglia. */
+  colori?: ColoriCopertina | null;
+};
 
 export type DatiCopertina = {
   /**
@@ -14,6 +32,8 @@ export type DatiCopertina = {
   url?: string | undefined;
   /** Testo alternativo, per esempio "Foto di Club Binario 7". */
   alt: string;
+  /** Al posto del fondo tipografico, quando c'è il seme della serata. */
+  generata?: DatiGenerata;
 };
 
 type Props = {
@@ -38,6 +58,22 @@ export function Copertina({ copertina, forma, ora, titolo, sopra, className, chi
     (copertina.tipo === 'locale' || copertina.tipo === 'flyer') && copertina.url && !rotta;
   const sostitutiva = copertina.tipo === 'sostitutiva';
   const tipo = immagine ? copertina.tipo : 'tipografica';
+  const generata = tipo === 'tipografica' && !sostitutiva ? copertina.generata : undefined;
+
+  if (generata) {
+    return (
+      <CopertinaGenerata
+        generata={generata}
+        forma={forma}
+        ora={ora}
+        titolo={titolo}
+        sopra={sopra}
+        className={className}
+      >
+        {children}
+      </CopertinaGenerata>
+    );
+  }
 
   return (
     <div
@@ -80,6 +116,112 @@ export function Copertina({ copertina, forma, ora, titolo, sopra, className, chi
       )}
       {children}
     </div>
+  );
+}
+
+type PropsGenerata = Omit<Props, 'copertina' | 'sopra' | 'className'> & {
+  generata: DatiGenerata;
+  sopra: string | undefined;
+  className: string | undefined;
+};
+
+/**
+ * Locandina astratta della serata: motivo dal seme, colori dalla fonte o dal genere, testo su
+ * velatura del fondo (contrasto ≥ 12,7:1, ALGORITMO §5). Decorativa: le informazioni sono
+ * scritte nella scheda, quindi è nascosta ai lettori di schermo.
+ */
+function CopertinaGenerata({
+  generata,
+  forma,
+  ora,
+  titolo,
+  sopra,
+  className,
+  children,
+}: PropsGenerata) {
+  const p = useMemo(() => parametri(generata.seme), [generata.seme]);
+  const elementi = useMemo(() => elementiMotivo(p), [p]);
+  const manifesto = titoloManifesto(titolo);
+  const colori = generata.colori;
+  const stile = {
+    '--cg-gx': `${p.bagliore.x}%`,
+    '--cg-gy': `${p.bagliore.y}%`,
+    '--cg-gr': `${p.bagliore.r}%`,
+    ...(colori
+      ? {
+          '--cgs-fondo': colori.scuro.fondo,
+          '--cgs-1': colori.scuro[1],
+          '--cgs-2': colori.scuro[2],
+          '--cgs-bagliore': colori.scuro.bagliore,
+          '--cgc-fondo': colori.chiaro.fondo,
+          '--cgc-1': colori.chiaro[1],
+          '--cgc-2': colori.chiaro[2],
+          '--cgc-bagliore': colori.chiaro.bagliore,
+        }
+      : {}),
+  } as CSSProperties;
+
+  return (
+    <div
+      className={classi(
+        'copertina',
+        `copertina-${forma}`,
+        'cg',
+        colori ? 'cg-dati' : `cg-${generata.famiglia}`,
+        className,
+      )}
+      style={stile}
+      data-motivo={p.motivo}
+    >
+      <svg
+        viewBox="0 0 400 250"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <g transform={`rotate(${p.angolo} 200 125) scale(1.18) translate(-30 -19)`}>
+          {elementi.map((elemento, indice) => (
+            <ElementoSvg key={indice} elemento={elemento} />
+          ))}
+        </g>
+      </svg>
+      <span className={classi('cg-velo', forma === 'miniatura' && 'alto')} aria-hidden="true" />
+      {forma === 'miniatura' && (
+        <span className="cg-mini" aria-hidden="true">
+          <span className="cg-ora">{ora}</span>
+          <b className="cg-titolo">{titoloCorto(manifesto)}</b>
+        </span>
+      )}
+      {forma === 'dettaglio' && (
+        <span className="cg-det" aria-hidden="true">
+          {sopra && <span className="cg-etichetta">{sopra}</span>}
+          <span className="cg-ora">{ora}</span>
+          <span className={classi('cg-titolo', corpoTitolo(manifesto))}>{manifesto}</span>
+        </span>
+      )}
+      {children}
+    </div>
+  );
+}
+
+function ElementoSvg({ elemento }: { elemento: ElementoMotivo }) {
+  // var(--cg-*) vale solo nello stile, non negli attributi di presentazione SVG.
+  const { fill, stroke, strokeWidth, opacity } = elemento.stile;
+  const comuni = {
+    style: { fill, stroke, strokeWidth, opacity, strokeLinecap: stroke ? 'round' : undefined },
+  } satisfies { style: CSSProperties };
+  if (elemento.tipo === 'path') return <path d={elemento.d} {...comuni} />;
+  if (elemento.tipo === 'circle')
+    return <circle cx={elemento.cx} cy={elemento.cy} r={elemento.r} {...comuni} />;
+  return (
+    <rect
+      x={elemento.x}
+      y={elemento.y}
+      width={elemento.width}
+      height={elemento.height}
+      rx={2}
+      {...comuni}
+    />
   );
 }
 
