@@ -328,6 +328,7 @@ Per ogni candidato:
 | `s_titolo ≥ 90` | **stesso evento** |
 | `75 ≤ s_titolo < 90` e (`artisti_comuni ≥ 1` oppure `delta_inizio ≤ 60`) | **stesso evento** |
 | `75 ≤ s_titolo < 90` senza le condizioni sopra | **revisione** (`in_revisione_dedup`) |
+| `s_titolo < 75` e il candidato è già stato raccolto dalla **stessa fonte** con un altro identificativo esterno | **eventi distinti** (per esempio due sale nella stessa sera) |
 | `s_titolo < 75`, entrambi sono l'unico evento del blocco e (`artisti_comuni ≥ 1` oppure `delta_inizio ≤ 90`) | **revisione** |
 | altrimenti | **eventi distinti** |
 

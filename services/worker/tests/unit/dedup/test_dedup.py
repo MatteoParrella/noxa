@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 
@@ -86,6 +87,27 @@ def test_titoli_diversi_unico_evento_con_artista_in_revisione() -> None:
 def test_titoli_diversi_eventi_distinti() -> None:
     decisione = decidi(_c("Hip hop in sala 2", 200), [_c("Techno in sala 1"), _c("Live")], None)
     assert decisione.esito is EsitoDedup.DISTINTI
+
+
+def test_stessa_fonte_titolo_diverso_eventi_distinti() -> None:
+    fonte = uuid4()
+    sala_1 = replace(_c("Techno in sala 1"), fonti=frozenset({fonte}))
+    decisione = decidi(_c("Hip hop in sala 2"), [sala_1], None, stessa_fonte=fonte)
+    assert decisione.esito is EsitoDedup.DISTINTI
+
+
+def test_altra_fonte_titolo_diverso_resta_in_revisione() -> None:
+    sala_1 = replace(_c("Techno in sala 1"), fonti=frozenset({uuid4()}))
+    decisione = decidi(_c("Hip hop in sala 2"), [sala_1], None, stessa_fonte=uuid4())
+    assert decisione.esito is EsitoDedup.REVISIONE
+
+
+def test_stessa_fonte_titolo_simile_resta_in_revisione() -> None:
+    fonte = uuid4()
+    esistente = replace(_c("Notte Ferrovia techno all night"), fonti=frozenset({fonte}))
+    altro = _c("Notte Ferrovia: la festa", minuti=180)
+    decisione = decidi(altro, [esistente], None, stessa_fonte=fonte)
+    assert decisione.esito is EsitoDedup.REVISIONE
 
 
 def test_flyer_simile_va_in_revisione() -> None:

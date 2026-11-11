@@ -34,6 +34,8 @@ class EventoEsistente:
     url_biglietti: str | None
     stato: str
     priorita_migliore: int
+    # Fonti che hanno già raccolto l'evento (regola della stessa fonte, §6.3).
+    fonti: frozenset[UUID] = frozenset()
 
 
 @dataclass(frozen=True)
