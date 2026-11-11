@@ -55,6 +55,7 @@ def _confronto(evento: EventoEsistente | EventoNormalizzato) -> EventoConfronto:
         inizio=evento.inizio,
         artisti=tuple(evento.artisti),
         id=identificativo,
+        fonti=evento.fonti if isinstance(evento, EventoEsistente) else frozenset(),
     )
 
 
@@ -197,7 +198,10 @@ class GestoreRaccolta:
 
             candidati = await tx.eventi_del_blocco(fonte.locale_id, data_serata(evento.inizio))
             decisione = decidi(
-                _confronto(evento), [_confronto(c) for c in candidati], fonte.locale_nome
+                _confronto(evento),
+                [_confronto(c) for c in candidati],
+                fonte.locale_nome,
+                stessa_fonte=fonte.id if evento.origine.id_esterno else None,
             )
             if decisione.esito is EsitoDedup.STESSO_EVENTO:
                 scelto = next(c for c in candidati if c.id == decisione.evento_id)

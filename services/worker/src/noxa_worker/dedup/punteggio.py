@@ -28,6 +28,7 @@ class EventoConfronto:
     inizio: datetime | None
     artisti: tuple[str, ...]
     id: UUID | None = None
+    fonti: frozenset[UUID] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -80,9 +81,15 @@ def decidi(
     nome_locale: str | None,
     *,
     da_flyer: bool = False,
+    stessa_fonte: UUID | None = None,
 ) -> Decisione:
     """Decisione per un grezzo rispetto agli eventi dello stesso blocco (stesso locale e
-    stessa serata, esclusi rifiutati e annullati)."""
+    stessa serata, esclusi rifiutati e annullati).
+
+    `stessa_fonte` è la fonte del grezzo quando ha un identificativo esterno: un candidato già
+    raccolto da questa fonte con un altro identificativo e un titolo diverso è un evento
+    distinto (due sale nella stessa sera), non un possibile duplicato.
+    """
     migliori: list[tuple[int, float, float, EventoConfronto, str]] = []
     unico = len(candidati) == 1
     for candidato in candidati:
@@ -93,6 +100,8 @@ def decidi(
             simili = comuni >= 1 or delta <= soglie.DELTA_STESSO_MINUTI
             # Un flyer si unisce da solo solo con il titolo quasi identico (R-51).
             esito = 2 if simili and not da_flyer else 1
+        elif stessa_fonte is not None and stessa_fonte in candidato.fonti:
+            continue
         elif unico and (comuni >= 1 or delta <= soglie.DELTA_UNICO_MINUTI):
             esito = 1
         else:

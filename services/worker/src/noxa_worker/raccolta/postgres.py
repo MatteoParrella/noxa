@@ -35,7 +35,9 @@ select e.id, e.locale_id, e.titolo, e.descrizione, e.inizio, e.fine, e.eta_minim
        coalesce((select max(case ef.tipo_origine when 'sito_locale' then 4
                                                  when 'instagram' then 3
                                                  when 'flyer' then 1 else 2 end)
-                 from public.eventi_fonti ef where ef.evento_id = e.id), 0) as priorita_migliore
+                 from public.eventi_fonti ef where ef.evento_id = e.id), 0) as priorita_migliore,
+       coalesce((select array_agg(distinct ef.fonte_id) from public.eventi_fonti ef
+                 where ef.evento_id = e.id and ef.fonte_id is not null), '{}') as fonti
 from public.eventi e
 """)
 
@@ -74,6 +76,7 @@ def _evento(riga: dict[str, Any]) -> EventoEsistente:
         url_biglietti=riga["url_biglietti"],
         stato=riga["stato"],
         priorita_migliore=riga["priorita_migliore"],
+        fonti=frozenset(riga["fonti"]),
     )
 
 

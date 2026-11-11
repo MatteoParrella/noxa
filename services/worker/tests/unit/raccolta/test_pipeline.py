@@ -182,7 +182,14 @@ class ArchivioMemoria:
 
     async def eventi_del_blocco(self, locale_id: UUID, serata: date) -> list[EventoEsistente]:
         return [
-            e
+            replace(
+                e,
+                fonti=frozenset(
+                    c.fonte_id
+                    for c in self.collegamenti
+                    if c.evento_id == e.id and c.fonte_id is not None
+                ),
+            )
             for e in self.eventi.values()
             if e.locale_id == locale_id
             and data_serata(e.inizio) == serata
@@ -380,6 +387,20 @@ async def test_possibile_duplicato_da_un_altra_fonte_in_revisione() -> None:
     assert revisione.punteggio is not None
     assert revisione.punteggio >= 75
     assert archivio.esiti[-1].eventi_in_revisione == 1
+
+
+async def test_due_sale_della_stessa_fonte_sono_eventi_distinti() -> None:
+    # Gate: due serate nella stessa sera, con link diversi sulla stessa pagina.
+    adattatore = AdattatoreFinto([grezzo("Techno in sala grande", id_esterno="a")])
+    gestore, archivio, _ = _ambiente(adattatore)
+    await gestore.esegui_fonte(_job())
+    adattatore.grezzi = [
+        grezzo("Techno in sala grande", id_esterno="a"),
+        grezzo("Reggaeton al piano di sopra", id_esterno="b"),
+    ]
+    await gestore.esegui_fonte(_job())
+    assert len(archivio.eventi) == 2
+    assert not any(g.stato == "in_revisione_dedup" for g in archivio.grezzi.values())
 
 
 async def test_eventi_passati_scartati_senza_dati_della_fonte() -> None:
