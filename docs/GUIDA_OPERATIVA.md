@@ -145,8 +145,8 @@ DECISIONI_APERTE.md, aggiorna i documenti e, se serve, scrive un ADR.
 | Prima dell'iterazione 0 | Creare il repository GitHub e l'account Supabase |
 | Prima dell'iterazione 1 | Design system in Claude Design |
 | Quando si crea lo staging | Il dominio `noxanight.it` è registrato su OVH con il DNS su Cloudflare (D-01); account Supabase, Cloudflare (Pages, R2) e Brevo, tutti gratuiti (ADR-0021); poi la procedura del §9 |
-| Durante la Fase 0 | Avviare con un legale DPIA, termini e informativa (D-07); inviare la richiesta di App Review a Meta |
-| Prima dell'iterazione 5 | App Review Meta approvata; chiave Google Places facoltativa (senza, solo OpenStreetMap) |
+| Durante la Fase 0 | Avviare con un legale DPIA, termini e informativa (D-07); creare l'app Meta in modalità sviluppo con l'account Instagram professionale di Noxa (senza App Review, EVENT_INGESTION.md §2.5) |
+| Prima dell'iterazione 5 | Token dell'utente di sistema Meta nei segreti del worker; chiave Google Places facoltativa (senza, solo OpenStreetMap) |
 | Prima dell'iterazione 6 | Organizzazione della moderazione (D-10). Facoltativi finché non si apre la beta: chiave Claude API con limite di spesa e accordo sul trattamento dei dati con Anthropic (D-12); senza chiave i flyer si compilano a mano in moderazione (ADR-0021) |
 | Prima dell'iterazione 9 | Niente: le chiavi VAPID del Web Push le genera Claude in locale |
 | Prima dell'iterazione 10 | Progetto Firebase gratuito per le notifiche Android; un telefono Android con le opzioni sviluppatore per installare l'APK di debug. Nessun account degli store (ADR-0027) |
@@ -171,7 +171,7 @@ locale che lo script legge e copia su GitHub e Supabase.
 4. **Dominio e Brevo** (facoltativi per partire): senza dominio l'app sta su
    `<progetto>.pages.dev`, la mappa su `r2.dev` e le email partono dal server di prova di
    Supabase, che scrive solo ai membri del progetto. Il dominio (Cloudflare Registrar non vende
-   i `.it`) serve per Brevo, per l'informativa online e per l'App Review di Meta.
+   i `.it`) serve per Brevo, per l'informativa online e per l'app Meta (URL dell'informativa).
 
 **2. File dell'ambiente (tu)**: `cp .env.ambiente.example .env.staging`, poi compila i valori
 seguendo i commenti. Il file è escluso da git.

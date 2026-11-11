@@ -96,8 +96,15 @@ database). La procedura completa è nella skill `add-event-source`.
 - Il token sta nell'intestazione `Authorization`, mai nell'URL, così non finisce nei log.
 - `url_originale` = `permalink` del post.
 - Prerequisiti (Fase 0, ROADMAP.md): app Meta, account Instagram professionale di Noxa
-  collegato a una pagina Facebook, App Review approvata per i permessi richiesti da Business
-  Discovery, token di sistema conservato solo nel worker.
+  collegato a una pagina Facebook, token di un utente di sistema del portfolio aziendale
+  conservato solo nel worker (segreti `META_ACCESS_TOKEN` e `META_IG_USER_ID`).
+- **App Review non necessaria.** L'app Meta resta in modalità sviluppo: i permessi
+  (`instagram_basic`, `instagram_manage_insights`, `pages_read_engagement`,
+  `pages_show_list`) hanno l'accesso Standard, che vale per gli account con un ruolo
+  nell'app. Business Discovery legge comunque i profili pubblici degli altri account Business
+  o Creator, perché la chiamata parte dall'account di Noxa. L'App Review (accesso Advanced)
+  servirebbe solo se l'app dovesse agire per conto di account di terzi, cosa esclusa da
+  questo perimetro. Verificato il 2026-11-10 con Graph API Explorer.
 - Gli account dei locali non Business o Creator non sono raggiungibili: per loro restano i
   flyer caricati dagli utenti.
 
