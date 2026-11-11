@@ -675,6 +675,7 @@ export type Database = {
         Row: {
           aggiornato_il: string;
           artisti: string[];
+          copertina_colori: Json | null;
           creato_il: string;
           data_serata: string;
           descrizione: string | null;
@@ -696,6 +697,7 @@ export type Database = {
         Insert: {
           aggiornato_il?: string;
           artisti?: string[];
+          copertina_colori?: Json | null;
           creato_il?: string;
           data_serata: string;
           descrizione?: string | null;
@@ -716,6 +718,7 @@ export type Database = {
         Update: {
           aggiornato_il?: string;
           artisti?: string[];
+          copertina_colori?: Json | null;
           creato_il?: string;
           data_serata?: string;
           descrizione?: string | null;
@@ -2012,6 +2015,7 @@ export type Database = {
           amici_interessati: number;
           amici_partecipano: number;
           copertina_attribuzione: string;
+          copertina_colori: Json;
           copertina_path: string;
           copertina_tipo: string;
           data_serata: string;
@@ -2172,6 +2176,7 @@ export type Database = {
           amici: Json;
           artisti: string[];
           copertina_attribuzione: string;
+          copertina_colori: Json;
           copertina_path: string;
           copertina_tipo: string;
           data_serata: string;
