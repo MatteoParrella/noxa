@@ -1,8 +1,8 @@
 """Date e ore nel fuso `Europe/Rome` (EVENT_INGESTION.md §3.1, passo 3).
 
 Le fonti scrivono date in forme diverse: ISO 8601 (dati strutturati), "sabato 17 ottobre",
-"17/10", "17.10.2026"; ore come "23:30", "23.30", "h 23". Una data senza fuso è un orario di
-Milano.
+"17/10", "17.10.2026", e in inglese "Sat, 17th Oct 2026"; ore come "23:30", "23.30",
+"h 23". Una data senza fuso è un orario di Milano.
 """
 
 from __future__ import annotations
@@ -40,6 +40,31 @@ MESI = {
     "dicembre": 12,
     "dic": 12,
 }
+# Molti siti dei locali di Milano sono in inglese ("Wed, 11th Nov 2026"). Le abbreviazioni
+# uguali all'italiano ("feb", "mar", "apr", "nov") sono già sopra.
+MESI_INGLESI = {
+    "january": 1,
+    "jan": 1,
+    "february": 2,
+    "march": 3,
+    "april": 4,
+    "may": 5,
+    "june": 6,
+    "jun": 6,
+    "july": 7,
+    "jul": 7,
+    "august": 8,
+    "aug": 8,
+    "september": 9,
+    "sep": 9,
+    "sept": 9,
+    "october": 10,
+    "oct": 10,
+    "november": 11,
+    "december": 12,
+    "dec": 12,
+}
+MESI |= MESI_INGLESI
 
 _ISO = re.compile(
     r"^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?"
@@ -47,7 +72,7 @@ _ISO = re.compile(
 )
 _NOMI_MESI = "|".join(sorted(MESI, key=len, reverse=True))
 _DATA_TESTO = re.compile(
-    rf"\b(\d{{1,2}})(?:°|º)?\s+({_NOMI_MESI})\.?(?:\s+(\d{{4}}))?\b", re.IGNORECASE
+    rf"\b(\d{{1,2}})(?:°|º|st|nd|rd|th)?\s+({_NOMI_MESI})\.?(?:\s+(\d{{4}}))?\b", re.IGNORECASE
 )
 _DATA_NUMERI = re.compile(r"\b(\d{1,2})[/.\-](\d{1,2})(?:[/.\-](\d{2,4}))?\b")
 _ORA = re.compile(

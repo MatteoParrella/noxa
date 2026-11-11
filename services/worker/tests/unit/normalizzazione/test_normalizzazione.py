@@ -59,6 +59,11 @@ def test_ha_ora() -> None:
         ("17.10.2026 ore 23", date(2026, 10, 17)),
         ("2 gennaio", date(2027, 1, 2)),
         ("ieri 14/10 è stato bello", date(2026, 10, 14)),
+        ("Wed, 11th Nov 2026 | 23:30", date(2026, 11, 11)),
+        ("Sun, 1st March 2027", date(2027, 3, 1)),
+        ("Sat 22nd Aug", date(2027, 8, 22)),
+        ("Thu, 3rd Dec 2026", date(2026, 12, 3)),
+        ("2 May", date(2027, 5, 2)),
     ],
 )
 def test_trova_data(testo: str, attesa: date) -> None:
