@@ -9,6 +9,9 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { X } from 'lucide-react';
+import { messaggi } from '@/lib/messaggi/it';
+import { Icona } from './Icona';
 import { Pulsante } from './Pulsante';
 
 type Props = {
@@ -17,12 +20,24 @@ type Props = {
   /** Azione per tornare indietro, per esempio "Annulla" dopo un blocco. */
   azione?: { etichetta: string; onScegli: () => void };
   onChiudi: () => void;
-  /** Millisecondi prima che sparisca; si ferma con il dito o il focus sopra. */
-  durata?: number;
+  /**
+   * Millisecondi prima che sparisca; si ferma con il dito o il focus sopra. Con `null` resta
+   * finché l'utente non sceglie l'azione o lo chiude.
+   */
+  durata?: number | null;
+  /** Mostra il pulsante per chiuderlo (utile con `durata: null`). */
+  chiudibile?: boolean;
 };
 
 /** Messaggio breve in fondo allo schermo, annunciato con cortesia ai lettori di schermo. */
-export function Toast({ testo, icona, azione, onChiudi, durata = 6000 }: Props) {
+export function Toast({
+  testo,
+  icona,
+  azione,
+  onChiudi,
+  durata = 6000,
+  chiudibile = false,
+}: Props) {
   const [fermo, setFermo] = useState(false);
   const ultimoOnChiudi = useRef(onChiudi);
   useEffect(() => {
@@ -30,7 +45,7 @@ export function Toast({ testo, icona, azione, onChiudi, durata = 6000 }: Props) 
   });
 
   useEffect(() => {
-    if (fermo) return;
+    if (fermo || durata === null) return;
     const timer = window.setTimeout(() => ultimoOnChiudi.current(), durata);
     return () => window.clearTimeout(timer);
   }, [fermo, durata]);
@@ -49,6 +64,17 @@ export function Toast({ testo, icona, azione, onChiudi, durata = 6000 }: Props) 
       {azione && (
         <Pulsante variante="testo" dimensione="s" onClick={azione.onScegli}>
           {azione.etichetta}
+        </Pulsante>
+      )}
+      {chiudibile && (
+        <Pulsante
+          variante="neutro"
+          dimensione="s"
+          soloIcona
+          aria-label={messaggi.comune.chiudi}
+          onClick={onChiudi}
+        >
+          <Icona icona={X} dimensione="s" />
         </Pulsante>
       )}
     </div>
@@ -88,7 +114,8 @@ export function FornitoreToast({ children }: { children: ReactNode }) {
                 },
               }
             : {})}
-          {...(attuale.durata ? { durata: attuale.durata } : {})}
+          {...(attuale.durata !== undefined ? { durata: attuale.durata } : {})}
+          {...(attuale.chiudibile ? { chiudibile: true } : {})}
           onChiudi={() => setAttuale(null)}
         />
       )}
