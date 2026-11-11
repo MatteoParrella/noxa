@@ -21,7 +21,7 @@ def leggi_dato(percorso: str) -> str:
 @dataclass
 class Risposta:
     stato: int = 200
-    corpo: str = ""
+    corpo: str | bytes = ""
     intestazioni: Mapping[str, str] = field(default_factory=dict)
 
 
@@ -35,7 +35,7 @@ class SitoFinto:
     def aggiungi(
         self,
         url: str,
-        corpo: str = "",
+        corpo: str | bytes = "",
         stato: int = 200,
         tipo: str | None = None,
         **intestazioni: str,
@@ -51,7 +51,13 @@ class SitoFinto:
         if risposta is None:
             return httpx.Response(404, text="non trovato")
         return httpx.Response(
-            risposta.stato, text=risposta.corpo, headers=dict(risposta.intestazioni)
+            risposta.stato,
+            headers=dict(risposta.intestazioni),
+            **(
+                {"content": risposta.corpo}
+                if isinstance(risposta.corpo, bytes)
+                else {"text": risposta.corpo}
+            ),
         )
 
     def percorsi(self) -> list[str]:

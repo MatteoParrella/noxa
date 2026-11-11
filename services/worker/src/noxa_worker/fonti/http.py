@@ -151,6 +151,33 @@ class ClientHttpConforme:
             return self._interpreta(corrente, risposta)
         raise ErroreFonte("troppi redirect", codice="REDIRECT")
 
+    async def get_immagine(self, url: str) -> bytes:
+        """Immagine di una fonte, letta solo in memoria per i colori della copertina
+        (ADR-0030): stesse regole delle pagine (robots.txt, intervallo, 5 MB, 403 e 429, limite
+        di pagine), nessuna cache e nessun salvataggio. Rifiuta ciò che non è un'immagine."""
+        if self.pagine_rimanenti <= 0:
+            raise ErroreConformita(
+                f"raggiunto il limite di {self._pagine_massime} pagine", codice="LIMITE_PAGINE"
+            )
+        corrente = url
+        for _ in range(REDIRECT_MASSIMI + 1):
+            _verifica_url(corrente)
+            await self._verifica_robots(corrente)
+            risposta = await self._richiedi(corrente, segui_robots=False)
+            if risposta.e_redirect:
+                destinazione = risposta.intestazioni.get("location")
+                if not destinazione:
+                    raise ErroreFonte("redirect senza destinazione", codice="REDIRECT")
+                corrente = urljoin(corrente, destinazione)
+                continue
+            self.pagine_lette += 1
+            self._interpreta(corrente, risposta, usa_cache=False)
+            tipo = risposta.intestazioni.get("content-type", "").lower()
+            if not tipo.startswith("image/"):
+                raise ErroreFonte(f"non è un'immagine: {tipo[:40]}", codice="NON_IMMAGINE")
+            return risposta.corpo
+        raise ErroreFonte("troppi redirect", codice="REDIRECT")
+
     async def get_html(self, url: str) -> tuple[RispostaHttp, BeautifulSoup]:
         """Pagina HTML già analizzata."""
         risposta = await self.get_testo(url)

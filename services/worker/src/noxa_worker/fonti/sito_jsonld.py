@@ -135,6 +135,7 @@ def _grezzo_da_oggetto(oggetto: dict[str, JsonValue], url_pagina: str) -> Evento
         "note_ingresso": note,
         "prezzo_centesimi": offerte[0],
         "url_biglietti": offerte[1],
+        "immagine_url": _immagine(oggetto.get("image"), url_pagina),
     }
     return EventoGrezzo(
         url=url,
@@ -241,10 +242,24 @@ def _da_ical(testo: str, url_pagina: str) -> list[EventoGrezzo]:
                     "note_ingresso": [],
                     "prezzo_centesimi": None,
                     "url_biglietti": None,
+                    "immagine_url": evento.immagine,
                 },
             )
         )
     return _senza_doppioni(eventi)
+
+
+def _immagine(valore: JsonValue | None, url_pagina: str) -> str | None:
+    """Link dell'immagine dell'evento (stringa, lista o ImageObject), solo per i colori della
+    copertina (ADR-0030): l'immagine non si salva e non si mostra."""
+    if isinstance(valore, list):
+        valore = valore[0] if valore else None
+    if isinstance(valore, dict):
+        valore = valore.get("url") or valore.get("contentUrl")
+    if isinstance(valore, str) and valore.strip():
+        link = urljoin(url_pagina, valore.strip())
+        return link if link.startswith(("http://", "https://")) else None
+    return None
 
 
 def _senza_doppioni(eventi: list[EventoGrezzo]) -> list[EventoGrezzo]:

@@ -42,6 +42,8 @@ class SelettoriHtml:
     prezzo: str | None = None
     note_ingresso: str | None = None
     pagina_successiva: str | None = None
+    # ADR-0030: <img> dell'evento, letto solo per i colori della copertina.
+    immagine: str | None = None
 
 
 def _testo(nodo: Tag, selettore: str | None) -> str | None:
@@ -118,12 +120,23 @@ class AdattatoreSitoHtml:
             "note_ingresso": _testi(nodo, s.note_ingresso),
             "prezzo_centesimi": prezzo,
             "url_biglietti": None,
+            "immagine_url": self._immagine(nodo, base),
         }
         return EventoGrezzo(
             url=url,
             id_esterno=(url if url != base else id_esterno_da(titolo, str(dati["inizio"])))[:200],
             dati=dati,
         )
+
+    def _immagine(self, nodo: Tag, base: str) -> str | None:
+        if not self.selettori.immagine:
+            return None
+        elemento = nodo.select_one(self.selettori.immagine)
+        sorgente = elemento.get("src") if elemento else None
+        if not isinstance(sorgente, str) or not sorgente.strip():
+            return None
+        link = urljoin(base, sorgente.strip())
+        return link if link.startswith(("http://", "https://")) else None
 
     def _inizio(self, nodo: Tag) -> datetime | None:
         s = self.selettori
