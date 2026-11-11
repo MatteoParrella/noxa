@@ -14,7 +14,8 @@ esplicitamente la raccolta automatica.
 - Instagram solo con l'API ufficiale Graph (Business Discovery), mai scraping.
 - Aggregatori (RA, Xceed, Dice) solo con accordo scritto o API ufficiale (D-05).
 - Si salvano solo i campi dello schema evento; nessun dato personale; nessuna immagine
-  ripubblicata dalle fonti; link alla fonte sempre visibile.
+  ripubblicata dalle fonti (i soli colori dominanti si leggono in memoria, ADR-0030); link alla
+  fonte sempre visibile.
 - Da Google Places si conserva solo il `place_id`.
 - Richieste di rimozione eseguite entro 72 ore.
 - Tutte le richieste HTTP passano da `ClientHttpConforme` (EVENT_INGESTION.md §4).

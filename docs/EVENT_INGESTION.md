@@ -83,7 +83,7 @@ database). La procedura completa è nella skill `add-event-source`.
 | Cache | `ETag` e `If-Modified-Since` quando supportati |
 | Errori | Con 429 o 403 la fonte si ferma per quell'esecuzione: niente nuovi tentativi immediati. Il backoff è nella pianificazione: dopo ogni errore l'intervallo raddoppia (fino a 8 volte la frequenza). Dopo 5 errori consecutivi viene disattivata (`disattivata_automaticamente_il`) e il worker registra l'allarme `fonte_disattivata` |
 | Vietato | Login, aggiramento di CAPTCHA o paywall, rotazione di IP o di user agent per eludere blocchi, raccolta di dati personali (commenti, partecipanti, foto di persone) |
-| Immagini | Non si scaricano né si ripubblicano immagini dai siti o da Instagram: si salva solo il link alla fonte. Le foto dei locali arrivano solo da fonti lecite, caricate dai moderatori (ADR-0018) |
+| Immagini | Non si ripubblicano né si salvano immagini dai siti o da Instagram. Unica eccezione (ADR-0030): il worker legge in memoria un'immagine per serata, ne estrae solo i colori dominanti per la copertina generata (`eventi.copertina_colori`) e la scarta subito, senza altre analisi. Le foto dei locali arrivano solo da fonti lecite, caricate dai moderatori (ADR-0018) |
 | Fonte | Ogni evento mostra sempre il link alla pagina originale (`eventi_fonti.url_originale`) |
 | Rimozione | Una richiesta di rimozione del titolare del sito viene eseguita entro 72 ore: fonte disattivata e `stato_conformita = 'vietata'` |
 
