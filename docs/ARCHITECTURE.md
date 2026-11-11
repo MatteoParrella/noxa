@@ -111,7 +111,7 @@ flowchart LR
 | `normalizzazione` | Modello Pydantic dello schema evento v1 (verificato in CI contro `packages/schemas/evento.schema.json`), date nel fuso di Milano, età minima, riferimenti all'alcol, generi, regole di validazione e impronta dei grezzi. |
 | `dedup` | Normalizzazione dei titoli, confronto fuzzy con rapidfuzz, decisione e fusione (ADR-0009), golden set in `tests/dati/dedup_golden.jsonl`. |
 | `raccolta` | Gestori dei job `esegui_fonte` e `deduplica_grezzo` (`pipeline.py`) dietro il protocollo `ArchivioRaccolta`, con l'implementazione Postgres in `postgres.py`; una transazione per ogni evento raccolto. |
-| `api` | FastAPI con i soli endpoint interni `GET /salute` (liveness) e `GET /pronto` (readiness: database raggiungibile), usati dal healthcheck di `docker compose` in locale; il worker non è raggiungibile da internet. I comandi di amministrazione (per esempio "esegui ora una fonte") passano da RPC che inseriscono job in `coda_job`. Nel lifespan dell'applicazione avvia `CODA_CONCORRENZA` esecutori della coda (in locale). In staging e produzione il workflow `worker.yml` di GitHub Actions avvia ogni 15 minuti la stessa immagine in modalità a esaurimento: svuota la coda, al massimo per 10 minuti, e termina (ADR-0021). |
+| `api` | FastAPI con i soli endpoint interni `GET /salute` (liveness) e `GET /pronto` (readiness: database raggiungibile), usati dal healthcheck di `docker compose` in locale; il worker non è raggiungibile da internet. I comandi di amministrazione (per esempio "esegui ora una fonte") passano da RPC che inseriscono job in `coda_job`. Nel lifespan dell'applicazione avvia `CODA_CONCORRENZA` esecutori della coda (in locale). In staging e produzione il workflow `worker.yml` di GitHub Actions avvia la stessa immagine in modalità a esaurimento: svuota la coda, al massimo per 10 minuti, e termina (ADR-0021). Lo avvia `pg_cron` ogni 15 minuti con `workflow_dispatch` quando ci sono job pronti (`private.sveglia_worker()`, ADR-0031); lo `schedule` di GitHub resta come riserva. |
 | `osservabilita` | Log JSON strutturati (structlog), Sentry, metriche per job. |
 
 Il worker accede a Postgres con il ruolo `noxa_worker` (permessi limitati, senza
@@ -402,7 +402,8 @@ flowchart LR
     CI -->|supabase functions deploy| SBP
     CI -->|next build export| CFP[Cloudflare Pages<br/>PWA statica]
     CI -->|pmtiles + assets| R2[Cloudflare R2<br/>mappa]
-    CRONGH[GitHub Actions<br/>ogni 15 minuti] -->|worker a esaurimento| SBP
+    SBP -->|pg_cron: workflow_dispatch<br/>se ci sono job, ADR-0031| CRONGH[GitHub Actions<br/>worker.yml]
+    CRONGH -->|worker a esaurimento| SBP
     CI -->|cap sync + fastlane<br/>dall'iterazione 12| STORE[Google Play<br/>ADR-0027]
     SBS[(Supabase staging)] -.stesse migrazioni.-> SBP
 ```

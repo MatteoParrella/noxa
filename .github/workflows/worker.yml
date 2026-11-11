@@ -1,5 +1,7 @@
-# Worker in modalità a esaurimento (ADR-0021): ogni 15 minuti esegue i job pronti in coda_job e
-# termina. pg_cron resta l'unico scheduler: questo workflow sveglia solo l'esecutore.
+# Worker in modalità a esaurimento (ADR-0021): esegue i job pronti in coda_job e termina.
+# pg_cron resta l'unico scheduler: ogni 15 minuti, se ci sono job pronti, private.sveglia_worker()
+# avvia questo workflow con workflow_dispatch e l'input `ambiente` (ADR-0031). Lo `schedule`
+# resta come riserva: GitHub lo esegue in ritardo, anche di ore.
 # Gira per ogni ambiente di AMBIENTI_SERVIZI (JSON, predefinito ["staging"]); i segreti stanno
 # negli environment di GitHub, limitati al branch main. I log sono pubblici e il worker non vi
 # scrive dati personali.
@@ -9,6 +11,12 @@ on:
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
+    inputs:
+      ambiente:
+        description: 'Ambiente da svegliare (tutti: quelli di AMBIENTI_SERVIZI)'
+        type: choice
+        options: [tutti, staging, produzione]
+        default: tutti
 
 permissions:
   contents: read
@@ -23,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ambiente: ${{ fromJSON(vars.AMBIENTI_SERVIZI || '["staging"]') }}
+        ambiente: ${{ fromJSON(inputs.ambiente && inputs.ambiente != 'tutti' && format('["{0}"]', inputs.ambiente) || vars.AMBIENTI_SERVIZI || '["staging"]') }}
     environment: ${{ matrix.ambiente }}
     # Una sola esecuzione alla volta per ambiente: la successiva aspetta.
     concurrency:
