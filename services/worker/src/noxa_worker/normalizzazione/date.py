@@ -8,7 +8,7 @@ Le fonti scrivono date in forme diverse: ISO 8601 (dati strutturati), "sabato 17
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, time, timedelta
+from datetime import UTC, date, datetime, time, timedelta, timezone, tzinfo
 from zoneinfo import ZoneInfo
 
 FUSO_ROMA = ZoneInfo("Europe/Rome")
@@ -67,8 +67,8 @@ MESI_INGLESI = {
 MESI |= MESI_INGLESI
 
 _ISO = re.compile(
-    r"^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?"
-    r"(Z|[+-]\d{2}:?\d{2})?)?$"
+    r"^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ](\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?"
+    r"(Z|[+-]\d{2}:?\d{2}|[+-]\d:\d{2})?)?$"
 )
 _NOMI_MESI = "|".join(sorted(MESI, key=len, reverse=True))
 _DATA_TESTO = re.compile(
@@ -83,17 +83,27 @@ _ORA = re.compile(
 
 
 def interpreta_iso(testo: str) -> datetime:
-    """ISO 8601 con o senza fuso; senza ora vale le 00:00. Senza fuso è un orario di Milano."""
+    """ISO 8601 con o senza fuso; senza ora vale le 00:00. Senza fuso è un orario di Milano.
+
+    Si tollerano gli errori comuni dei siti WordPress: mese, giorno o ora senza lo zero
+    ("2026-12-8T20:00") e fuso con un'ora a una cifra ("+1:00"). Un fuso così è scritto a mano
+    e spesso è sbagliato (Live Club scrive "+1:00" anche d'estate): l'orario si legge come
+    orario di Milano e il fuso si ignora."""
     valore = testo.strip()
     trovato = _ISO.match(valore)
     if not trovato:
         raise ValueError(f"data non in formato ISO: {valore[:40]!r}")
     anno, mese, giorno, ore, minuti, secondi, fuso = trovato.groups()
-    if fuso:
-        normalizzato = valore.replace("Z", "+00:00")
-        if re.search(r"[+-]\d{4}$", normalizzato):
-            normalizzato = normalizzato[:-2] + ":" + normalizzato[-2:]
-        return datetime.fromisoformat(normalizzato.replace(" ", "T"))
+    fuso_esplicito: tzinfo = FUSO_ROMA
+    if fuso and re.fullmatch(r"Z|[+-]\d{2}:?\d{2}", fuso):
+        if fuso == "Z":
+            fuso_esplicito = UTC
+        else:
+            segno = -1 if fuso[0] == "-" else 1
+            cifre = fuso[1:].replace(":", "")
+            fuso_esplicito = timezone(
+                segno * timedelta(hours=int(cifre[:2]), minutes=int(cifre[2:]))
+            )
     return datetime(
         int(anno),
         int(mese),
@@ -101,8 +111,20 @@ def interpreta_iso(testo: str) -> datetime:
         int(ore or 0),
         int(minuti or 0),
         int(secondi or 0),
-        tzinfo=FUSO_ROMA,
+        tzinfo=fuso_esplicito,
     )
+
+
+def correggi_fine(inizio: datetime, fine: datetime | None) -> datetime | None:
+    """Errori comuni dei siti sulla fine di una serata. Una fine uguale all'inizio vuol dire
+    "non indicata"; una fine prima dell'inizio ma entro 24 ore ha il giorno sbagliato (23:30 →
+    04:00 dello stesso giorno) e passa al giorno dopo. Gli altri casi restano com'erano e la
+    validazione li scarta."""
+    if fine is None or fine == inizio:
+        return None
+    if fine < inizio < fine + timedelta(days=1):
+        return fine + timedelta(days=1)
+    return fine
 
 
 def ha_ora(testo: str) -> bool:
