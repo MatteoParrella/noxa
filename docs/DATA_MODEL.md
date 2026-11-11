@@ -202,7 +202,7 @@ Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `verifica_codice_invito`, `accoda_analisi_flyer`, `proteggi_caricamento_flyer`,
 `ritira_evento_del_flyer`, `esito_caricamento_flyer`, `sincronizza_avatar_nascosto`,
 `occulta_in_attesa`) sono descritte insieme alle tabelle a cui si applicano; quelle
-pianificate (`elimina_account_non_confermati`, `elimina_codici_invito_scaduti`, `verifica_invariante_gruppi`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`,
+pianificate (`elimina_account_non_confermati`, `elimina_codici_invito_scaduti`, `verifica_invariante_gruppi`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`, `sveglia_worker`,
 `assegna_badge`, `genera_riepiloghi`, `accoda_pulizia_flyer`) nel §8.
 
 ## 5. Tabelle
@@ -1131,6 +1131,7 @@ RLS (iterazione 7).
 | Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); dall'iterazione 8 `azioni_moderazione` e `segnalazioni` chiuse dopo 12 mesi (salvo prove e decisioni con un reclamo conservato), il riferimento alla foto dei locali disattivati da 7 giorni, `private.tentativi_eliminazione` e `private.esportazioni_dati` dopo 24 ore; dall'iterazione 9 `checkin` (con i destinatari) 24 ore dopo la fine e `dispositivi_push` dopo 90 giorni senza uso; dall'iterazione 10 `ritorni_sicuri` (con destinatari e posizioni) 24 ore dopo la fine. Gli account inattivi da 24 mesi sono nell'iterazione 12 (ROADMAP.md §5) |
 | Invariante dei gruppi | ogni giorno alle 04:00 | `private.verifica_invariante_gruppi()` |
 | Accodamento job del worker | ogni 5 minuti | `private.accoda_fonti_da_eseguire()`: inserisce `esegui_fonte` per le fonti attive scadute; dopo un errore l'intervallo raddoppia (fino a 8 volte la frequenza), che è il backoff delle fonti |
+| Sveglia del worker | ogni 15 minuti | `private.sveglia_worker()`: se ci sono job pronti e nessun esecutore attivo, avvia `worker.yml` con `workflow_dispatch` di GitHub (`pg_net`, token nel Vault); senza segreti nel Vault non fa nulla (ADR-0031) |
 | Metriche | ogni giorno alle 02:00 | `refresh materialized view private.metriche_settimanali` |
 | Badge | ogni giorno alle 05:00 | `private.assegna_badge()` |
 | Riepiloghi annuali | 1° dicembre alle 03:00 | `private.genera_riepiloghi(extract(year from now())::smallint)` |

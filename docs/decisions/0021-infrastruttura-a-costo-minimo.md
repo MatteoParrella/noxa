@@ -33,7 +33,8 @@ ADR-0016.
 | Dominio | `noxanight.it` su OVH, perché Cloudflare Registrar non vende i `.it`; DNS su Cloudflare, gratuito (D-01, 2026-11-10) | pochi euro l'anno |
 
 **Worker su GitHub Actions.**
-- Il workflow `worker.yml` parte ogni 15 minuti (`schedule`) e a mano (`workflow_dispatch`),
+- Il workflow `worker.yml` parte ogni 15 minuti (`schedule`) e a mano (`workflow_dispatch`;
+  dal 2026-11-11 lo avvia anche `pg_cron` quando ci sono job pronti, ADR-0031),
   solo dal branch `main`, con `concurrency` che impedisce due esecuzioni sovrapposte. Avvia
   la stessa immagine Docker del worker in **modalità a esaurimento**: preleva i job pronti da
   `coda_job` finché la coda è vuota o finché non passa la durata massima (10 minuti), poi

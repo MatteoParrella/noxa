@@ -186,7 +186,10 @@ e l'environment di GitHub con segreti e variabili. Si può rieseguire.
 - `gh workflow run pubblica.yml -f ambiente=staging` applica le migrazioni da GitHub e
   pubblica l'app; da lì in poi `pubblica.yml` parte da solo dopo ogni CI verde su `main`.
 - Di nuovo `scripts/configura_ambiente.sh .env.staging`: ora che le migrazioni ci sono imposta
-  la password di `noxa_worker`, i segreti del Vault e l'hook dell'età di Auth.
+  la password di `noxa_worker`, i segreti del Vault e l'hook dell'età di Auth. Con
+  `GITHUB_TOKEN_WORKER` compilato (token fine-grained del solo repository, permesso
+  "Actions: Read and write") scrive nel Vault anche il token con cui `pg_cron` sveglia il
+  worker quando ci sono job (ADR-0031).
 - `gh workflow run mappa.yml -f ambiente=staging` carica la basemap su R2.
 - `gh variable set AMBIENTI_SERVIZI --body '["staging"]'` e
   `gh variable set SERVIZI_ATTIVI --body true` accendono worker (ogni 15 minuti), backup

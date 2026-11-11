@@ -11,7 +11,7 @@
 # Turnstile, SMTP); progetto Cloudflare Pages e bucket R2 nell'UE (mappa con CORS, backup);
 # environment di GitHub con segreti e variabili per pubblica.yml, worker.yml, backup.yml e
 # mappa.yml. Quando le migrazioni sono applicate: password del ruolo noxa_worker, segreti del
-# Vault per il Web Push (ADR-0026) e hook dell'età di Auth.
+# Vault per il Web Push (ADR-0026) e per la sveglia del worker (ADR-0031), hook dell'età di Auth.
 #
 # Lo script usa solo HTTPS (porta 443): il SQL passa dall'API di gestione di Supabase, perché
 # molte reti bloccano la porta 5432. Le migrazioni le applica pubblica.yml da GitHub; alla
@@ -134,15 +134,26 @@ if [[ -z "${VAPID_PRIVATE_KEY:-}" ]]; then
 fi
 
 if [[ "$MIGRAZIONI_APPLICATE" == "true" ]]; then
-  passo "Password del ruolo noxa_worker e segreti del Vault per il Web Push"
+  passo "Password del ruolo noxa_worker e segreti del Vault (Web Push, sveglia del worker)"
   URL_PUSH="https://$SUPABASE_PROJECT_REF.supabase.co/functions/v1/invia-push"
+  # Sveglia del worker (ADR-0031): senza GITHUB_TOKEN_WORKER resta spenta e vale solo lo
+  # schedule di GitHub, che può tardare di ore.
+  SVEGLIA="'{}'::jsonb"
+  if [[ -n "${GITHUB_TOKEN_WORKER:-}" ]]; then
+    SVEGLIA="jsonb_build_object(
+    'github_worker_token', $(letterale "$GITHUB_TOKEN_WORKER"),
+    'github_worker_repository', $(letterale "$(gh repo view --json nameWithOwner -q .nameWithOwner)"),
+    'github_worker_ambiente', $(letterale "$AMBIENTE"))"
+  else
+    echo "GITHUB_TOKEN_WORKER vuoto: sveglia del worker spenta."
+  fi
   sql_remoto >/dev/null <<SQL
 alter role noxa_worker with login password $(letterale "$WORKER_DB_PASSWORD");
 do \$\$
 declare
   segreti constant jsonb := jsonb_build_object(
     'invia_push_url', $(letterale "$URL_PUSH"),
-    'invia_push_segreto', $(letterale "$NOXA_PUSH_SEGRETO"));
+    'invia_push_segreto', $(letterale "$NOXA_PUSH_SEGRETO")) || $SVEGLIA;
   nome text;
 begin
   for nome in select jsonb_object_keys(segreti) loop

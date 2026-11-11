@@ -39,3 +39,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0028](0028-ritorno-sicuro-sessione-e-posizioni.md) | Ritorno sicuro: servizio in primo piano, posizioni lette con la RLS e dati solo sul telefono | Accettato |
 | [0029](0029-esclusione-locali-per-adulti.md) | Esclusione dei locali di intrattenimento per adulti | Accettato |
 | [0030](0030-colori-delle-copertine-dalle-immagini.md) | Colori delle copertine dalle immagini delle fonti | Accettato |
+| [0031](0031-sveglia-del-worker-da-pg-cron.md) | Sveglia del worker da pg_cron con workflow_dispatch | Accettato |
