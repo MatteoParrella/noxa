@@ -12,8 +12,13 @@ nella colonna `esclusione` del CSV e non vengono importati.
 Il comando scrive un CSV da rivedere; con `--importa` inserisce i candidati nuovi in
 `candidati_locali` con il ruolo `noxa_worker`. Non scrive mai in `locali`.
 
+Con `--da-csv` non interroga Overpass né Google e importa un CSV già scritto e rivisto: il
+motivo di esclusione del file resta, e il controllo sul nome e sul sito viene ripetuto, così
+una riga rivista a mano non può far entrare un locale per adulti.
+
 Uso (da services/worker):
     uv run python -m noxa_worker.fonti.bootstrap_locali --csv candidati.csv [--importa]
+    uv run python -m noxa_worker.fonti.bootstrap_locali --csv candidati.csv --da-csv --importa
 """
 
 from __future__ import annotations
@@ -209,6 +214,38 @@ def candidati_importabili(candidati: list[Candidato]) -> list[Candidato]:
     return [c for c in candidati if c.esclusione is None]
 
 
+def leggi_csv(origine: Path) -> list[Candidato]:
+    """Rilegge un CSV di `scrivi_csv`, ripetendo il controllo R-44 su nome e sito."""
+
+    def testo(valore: str | None) -> str | None:
+        return valore.strip() or None if valore else None
+
+    def numero(valore: str | None) -> float | None:
+        return float(valore) if valore and valore.strip() else None
+
+    candidati: list[Candidato] = []
+    with origine.open(encoding="utf-8", newline="") as file:
+        for riga in csv.DictReader(file):
+            nome, sito = testo(riga.get("nome")), testo(riga.get("sito_web"))
+            candidati.append(
+                Candidato(
+                    origine=riga["origine"],
+                    osm_id=testo(riga.get("osm_id")),
+                    google_place_id=testo(riga.get("google_place_id")),
+                    nome=nome,
+                    indirizzo=testo(riga.get("indirizzo")),
+                    comune=testo(riga.get("comune")),
+                    provincia=testo(riga.get("provincia")),
+                    lat=numero(riga.get("lat")),
+                    lon=numero(riga.get("lon")),
+                    sito_web=sito,
+                    esclusione=testo(riga.get("esclusione"))
+                    or (motivo_esclusione({}, nome, sito) if nome else None),
+                )
+            )
+    return candidati
+
+
 async def importa(candidati: list[Candidato], url_database: str) -> int:
     """Inserisce i candidati non ancora noti; segnala un possibile doppione entro 200 m o con
     lo stesso nome normalizzato. Salta i locali per adulti (R-44). Restituisce il numero di
@@ -261,9 +298,20 @@ async def principale(argomenti: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0] if __doc__ else None)
     parser.add_argument("--csv", type=Path, required=True, help="file CSV da scrivere")
     parser.add_argument("--importa", action="store_true", help="inserisce in candidati_locali")
+    parser.add_argument(
+        "--da-csv", action="store_true", help="legge il CSV indicato invece di interrogare le API"
+    )
     opzioni = parser.parse_args(argomenti)
     impostazioni = leggi_impostazioni()
     configura_log("console", impostazioni.log_livello)
+    if opzioni.da_csv:
+        candidati = leggi_csv(opzioni.csv)
+        esclusi = len(candidati) - len(candidati_importabili(candidati))
+        log.info("csv_letto", candidati=len(candidati), esclusi=esclusi, file=str(opzioni.csv))
+        if opzioni.importa:
+            nuovi = await importa(candidati, impostazioni.url_database())
+            log.info("candidati_importati", nuovi=nuovi)
+        return 0
     async with crea_client_httpx(90.0) as client:
         http = ClientHttpConforme(
             client,

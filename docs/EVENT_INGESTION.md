@@ -42,9 +42,11 @@ Lo script di bootstrap è `services/worker/src/noxa_worker/fonti/bootstrap_local
 interroga Overpass per le due province e Google Places (Text Search con
 `X-Goog-FieldMask: places.id`, quindi solo identificativi) con `ClientHttpConforme`, scrive
 un CSV da rivedere (con la colonna `esclusione` per i locali esclusi da R-44) e, con
-`--importa`, inserisce i candidati nuovi non esclusi in `candidati_locali`
-segnalando il possibile doppione (locale entro 200 m o con lo stesso nome normalizzato). Non
-scrive mai in `locali`: i candidati si verificano nell'area di moderazione ("Verifica e
+`--importa`, inserisce i candidati nuovi non esclusi in `candidati_locali`, segnalando il
+possibile doppione (locale entro 200 m o con lo stesso nome normalizzato). Con `--da-csv`
+importa un CSV già rivisto senza interrogare di nuovo le API (il server pubblico di Overpass
+è spesso al limite di capacità); alla lettura il controllo R-44 su nome e sito viene
+ripetuto. Non scrive mai in `locali`: i candidati si verificano nell'area di moderazione ("Verifica e
 crea", "Unisci", "Scarta" con motivazione).
 
 ### 2.2 Tipi di fonte

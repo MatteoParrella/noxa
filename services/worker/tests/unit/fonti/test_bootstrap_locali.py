@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from pydantic import JsonValue
 
@@ -6,9 +8,11 @@ from noxa_worker.fonti.bootstrap_locali import (
     candidati_da_overpass,
     candidati_da_places,
     candidati_importabili,
+    leggi_csv,
     motivo_esclusione,
     normalizza_nome,
     query_overpass,
+    scrivi_csv,
 )
 
 
@@ -113,3 +117,20 @@ def test_esclusi_nel_csv_ma_non_importati() -> None:
     assert topless.esclusione == "nome: topless"
     assert candidati_importabili([dock, topless]) == [dock]
     assert candidati_importabili([Candidato(origine="google", google_place_id="x")])
+
+
+def test_csv_riletto_uguale_e_ricontrollato(tmp_path: Path) -> None:
+    file = tmp_path / "candidati.csv"
+    dock = Candidato(origine="osm", osm_id="node/1", nome="Dock", lat=45.5, lon=9.2, comune="Monza")
+    escluso = Candidato(origine="osm", osm_id="node/2", nome="Velvet", esclusione="tag adult=yes")
+    # Riga con il motivo cancellato a mano: il controllo sul nome la esclude di nuovo (R-44).
+    ripulito = Candidato(origine="osm", osm_id="node/3", nome="Disco Topless")
+    google = Candidato(origine="google", google_place_id="ChIJ-prova")
+    scrivi_csv([dock, escluso, ripulito, google], file)
+
+    riletti = leggi_csv(file)
+    assert riletti[0] == dock
+    assert riletti[1].esclusione == "tag adult=yes"
+    assert riletti[2].esclusione == "nome: topless"
+    assert riletti[3] == google
+    assert candidati_importabili(riletti) == [dock, google]
