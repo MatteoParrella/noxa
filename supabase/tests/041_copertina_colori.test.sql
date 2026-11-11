@@ -48,6 +48,8 @@ select throws_ok(
 
 -- Il worker scrive la tavolozza
 grant noxa_worker to postgres;
+-- Come in 018_eventi: il worker usa la funzione di supporto tests.colori.
+grant usage on schema tests to noxa_worker;
 set local role noxa_worker;
 select lives_ok(
   $$ update public.eventi set copertina_colori = tests.colori()
