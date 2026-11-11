@@ -1,0 +1,240 @@
+/* Copertina generata (design/F-01-copertine-generate, ALGORITMO.md): una locandina astratta
+   per serata quando non ci sono né la foto del locale né il flyer. Colori dai token
+   --copertina-* della famiglia o, con la classe .cg-dati, dai colori dell'immagine della fonte
+   (ADR-0030) passati come variabili; il testo sta sempre su una velatura del fondo. */
+
+.cg-techno {
+  --cg-fondo: var(--copertina-techno-fondo);
+  --cg-1: var(--copertina-techno-1);
+  --cg-2: var(--copertina-techno-2);
+  --cg-bagliore: var(--copertina-techno-bagliore);
+}
+.cg-house {
+  --cg-fondo: var(--copertina-house-fondo);
+  --cg-1: var(--copertina-house-1);
+  --cg-2: var(--copertina-house-2);
+  --cg-bagliore: var(--copertina-house-bagliore);
+}
+.cg-hiphop {
+  --cg-fondo: var(--copertina-hiphop-fondo);
+  --cg-1: var(--copertina-hiphop-1);
+  --cg-2: var(--copertina-hiphop-2);
+  --cg-bagliore: var(--copertina-hiphop-bagliore);
+}
+.cg-reggaeton {
+  --cg-fondo: var(--copertina-reggaeton-fondo);
+  --cg-1: var(--copertina-reggaeton-1);
+  --cg-2: var(--copertina-reggaeton-2);
+  --cg-bagliore: var(--copertina-reggaeton-bagliore);
+}
+.cg-commerciale {
+  --cg-fondo: var(--copertina-commerciale-fondo);
+  --cg-1: var(--copertina-commerciale-1);
+  --cg-2: var(--copertina-commerciale-2);
+  --cg-bagliore: var(--copertina-commerciale-bagliore);
+}
+.cg-latino {
+  --cg-fondo: var(--copertina-latino-fondo);
+  --cg-1: var(--copertina-latino-1);
+  --cg-2: var(--copertina-latino-2);
+  --cg-bagliore: var(--copertina-latino-bagliore);
+}
+.cg-dnb {
+  --cg-fondo: var(--copertina-dnb-fondo);
+  --cg-1: var(--copertina-dnb-1);
+  --cg-2: var(--copertina-dnb-2);
+  --cg-bagliore: var(--copertina-dnb-bagliore);
+}
+.cg-elettronica {
+  --cg-fondo: var(--copertina-elettronica-fondo);
+  --cg-1: var(--copertina-elettronica-1);
+  --cg-2: var(--copertina-elettronica-2);
+  --cg-bagliore: var(--copertina-elettronica-bagliore);
+}
+.cg-indie {
+  --cg-fondo: var(--copertina-indie-fondo);
+  --cg-1: var(--copertina-indie-1);
+  --cg-2: var(--copertina-indie-2);
+  --cg-bagliore: var(--copertina-indie-bagliore);
+}
+.cg-live {
+  --cg-fondo: var(--copertina-live-fondo);
+  --cg-1: var(--copertina-live-1);
+  --cg-2: var(--copertina-live-2);
+  --cg-bagliore: var(--copertina-live-bagliore);
+}
+.cg-altro {
+  --cg-fondo: var(--copertina-altro-fondo);
+  --cg-1: var(--copertina-altro-1);
+  --cg-2: var(--copertina-altro-2);
+  --cg-bagliore: var(--copertina-altro-bagliore);
+}
+.cg-accento {
+  --cg-fondo: var(--copertina-accento-fondo);
+  --cg-1: var(--copertina-accento-1);
+  --cg-2: var(--copertina-accento-2);
+  --cg-bagliore: var(--copertina-accento-bagliore);
+}
+
+/* Colori dell'immagine della fonte: --cgs-* per il tema scuro, --cgc-* per il chiaro. */
+:root .cg-dati,
+[data-tema='scuro'] .cg-dati {
+  --cg-fondo: var(--cgs-fondo);
+  --cg-1: var(--cgs-1);
+  --cg-2: var(--cgs-2);
+  --cg-bagliore: var(--cgs-bagliore);
+}
+:root[data-tema='chiaro'] .cg-dati,
+[data-tema='chiaro'] .cg-dati {
+  --cg-fondo: var(--cgc-fondo);
+  --cg-1: var(--cgc-1);
+  --cg-2: var(--cgc-2);
+  --cg-bagliore: var(--cgc-bagliore);
+}
+
+.cg {
+  isolation: isolate;
+  color: var(--copertina-testo);
+  --cg-gx: 50%;
+  --cg-gy: 30%;
+  --cg-gr: 50%;
+  background:
+    radial-gradient(
+      circle at var(--cg-gx) var(--cg-gy),
+      var(--cg-bagliore) 0,
+      transparent var(--cg-gr)
+    ),
+    var(--cg-fondo);
+  animation: a-fuoco var(--movimento-ingresso) var(--curva-standard) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cg {
+    animation: none;
+  }
+}
+.cg > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: -2;
+  pointer-events: none;
+}
+.cg-velo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--cg-fondo) 92%, transparent) 0%,
+    color-mix(in srgb, var(--cg-fondo) 90%, transparent) 46%,
+    transparent 80%
+  );
+}
+.cg-velo.alto {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--cg-fondo) 92%, transparent) 0%,
+      color-mix(in srgb, var(--cg-fondo) 90%, transparent) 26%,
+      transparent 46%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--cg-fondo) 92%, transparent) 0%,
+      color-mix(in srgb, var(--cg-fondo) 90%, transparent) 40%,
+      transparent 70%
+    );
+}
+/* Il testo che la scheda in evidenza sovrappone alla copertina usa il colore della copertina. */
+.cg.copertina-evidenza {
+  color: var(--copertina-testo);
+}
+
+.cg-ora {
+  font-family: var(--tipo-famiglia-mono);
+  font-size: var(--tipo-copertina-ora);
+  font-weight: var(--tipo-peso-medio);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.cg-titolo {
+  margin: 0;
+  font-weight: var(--tipo-peso-forte);
+  font-stretch: var(--tipo-larghezza-manifesto);
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: -0.005em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  hyphens: none;
+}
+.cg-titolo.xl {
+  font-size: var(--tipo-copertina-xl);
+  -webkit-line-clamp: 1;
+}
+.cg-titolo.l {
+  font-size: var(--tipo-copertina-l);
+  -webkit-line-clamp: 2;
+}
+.cg-titolo.m {
+  font-size: var(--tipo-copertina-m);
+}
+.cg-titolo.s {
+  font-size: var(--tipo-copertina-s);
+}
+
+/* Miniatura: orario in alto, titolo corto in basso */
+.cg-mini {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spazio-2);
+}
+.cg-mini .cg-ora {
+  font-size: var(--tipo-didascalia);
+}
+.cg-mini .cg-titolo {
+  font-size: var(--tipo-corpo-piccolo);
+  line-height: 0.95;
+  font-stretch: var(--tipo-larghezza-stretta);
+  -webkit-line-clamp: 2;
+}
+
+/* Dettaglio: etichetta, orario e titolo da manifesto in basso */
+.cg-det {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spazio-1);
+  padding: var(--spazio-5);
+}
+.cg-etichetta {
+  font-size: var(--tipo-etichetta);
+  font-weight: var(--tipo-peso-medio);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.cg-det .cg-ora {
+  font-size: var(--tipo-mono-orario);
+}
+
+@media (max-width: 370px) {
+  .cg-titolo.xl {
+    font-size: var(--tipo-copertina-xl-stretta);
+  }
+  .cg-titolo.l {
+    font-size: var(--tipo-copertina-l-stretta);
+  }
+  .cg-titolo.m {
+    font-size: var(--tipo-copertina-m-stretta);
+  }
+}

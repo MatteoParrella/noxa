@@ -1,4 +1,5 @@
 import type { DatiCopertina } from '@/components/ui/Copertina';
+import { famigliaDaGeneri, semeCopertina, type ColoriCopertina } from '@/lib/copertinaGenerata';
 import type { DatiSchedaEvento } from '@/components/ui/SchedaEvento';
 import { daIso } from '@/lib/date';
 import { messaggi } from '@/lib/messaggi/it';
@@ -6,13 +7,18 @@ import type { EventoElenco, TipoCopertina } from './api';
 import { nomeGenere } from './dati';
 import { distanza, etichettaEta, giornoBreve, ora, orario, prezzo, testoAmici } from './formato';
 
-/** Copertina con il link firmato, se c'è (ADR-0018). */
+/**
+ * Copertina con il link firmato, se c'è (ADR-0018); senza foto né flyer, la copertina generata
+ * della serata con i colori della fonte (ADR-0030) o del primo genere.
+ */
 export function copertina(
   evento: {
     copertina_tipo: TipoCopertina;
     copertina_path: string | null;
     locale_nome: string;
     titolo: string;
+    generi_evento?: readonly string[];
+    copertina_colori?: ColoriCopertina | null;
   },
   link: Record<string, string> | undefined,
 ): DatiCopertina {
@@ -24,6 +30,11 @@ export function copertina(
       evento.copertina_tipo === 'flyer'
         ? messaggi.evento.flyer(evento.titolo)
         : messaggi.evento.fotoLocale(evento.locale_nome),
+    generata: {
+      seme: semeCopertina(evento.titolo, evento.locale_nome),
+      famiglia: famigliaDaGeneri(evento.generi_evento ?? []),
+      colori: evento.copertina_colori ?? null,
+    },
   };
 }
 

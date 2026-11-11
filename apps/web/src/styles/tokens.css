@@ -26,6 +26,16 @@
   --tipo-mono-dato: 0.8125rem; /* 13 / 16 */
   --tipo-mono-orario: 1.25rem; /* 20 / 24 */
   --tipo-mono-statistica: 2.75rem; /* 44 / 44 */
+  /* Copertina generata, titolo da manifesto (design/F-01-copertine-generate, ALGORITMO §5) */
+  --tipo-larghezza-manifesto: 62%;
+  --tipo-copertina-ora: 0.9375rem; /* 15 */
+  --tipo-copertina-xl: 4rem; /* fino a 8 caratteri, 1 riga */
+  --tipo-copertina-l: 3.25rem; /* fino a 14, 2 righe */
+  --tipo-copertina-m: 2.5rem; /* fino a 24, 3 righe */
+  --tipo-copertina-s: 1.875rem; /* oltre, 3 righe */
+  --tipo-copertina-xl-stretta: 3.5rem; /* sotto i 370 px */
+  --tipo-copertina-l-stretta: 2.875rem;
+  --tipo-copertina-m-stretta: 2.25rem;
   /* spazio — scala di 4 px */
   --spazio-0: 0;
   --spazio-1: 4px;
@@ -99,6 +109,57 @@
   --mappa-etichette: #8d95a2;
   --mappa-alone: #0e1116;
   color-scheme: dark;
+
+  /* Copertine generate per famiglia (design/F-01-copertine-generate, ALGORITMO §4) */
+  --copertina-testo: #f4f1eb;
+  --copertina-techno-fondo: #0e1619;
+  --copertina-techno-1: #7ed6cc;
+  --copertina-techno-2: #2f6a70;
+  --copertina-techno-bagliore: #1f5a5e;
+  --copertina-house-fondo: #1a0f1c;
+  --copertina-house-1: #e58ad0;
+  --copertina-house-2: #6e2f66;
+  --copertina-house-bagliore: #5a2453;
+  --copertina-hiphop-fondo: #19140a;
+  --copertina-hiphop-1: #f2c94c;
+  --copertina-hiphop-2: #7a6020;
+  --copertina-hiphop-bagliore: #5e4a14;
+  --copertina-reggaeton-fondo: #1c0f0c;
+  --copertina-reggaeton-1: #ff8a66;
+  --copertina-reggaeton-2: #7a3424;
+  --copertina-reggaeton-bagliore: #6a2c1e;
+  --copertina-commerciale-fondo: #10132a;
+  --copertina-commerciale-1: #9cb1ff;
+  --copertina-commerciale-2: #3a4890;
+  --copertina-commerciale-bagliore: #2e3a7a;
+  --copertina-latino-fondo: #121a0c;
+  --copertina-latino-1: #b8e06a;
+  --copertina-latino-2: #4f6f24;
+  --copertina-latino-bagliore: #3e5a1c;
+  --copertina-dnb-fondo: #150f22;
+  --copertina-dnb-1: #b79cff;
+  --copertina-dnb-2: #50388f;
+  --copertina-dnb-bagliore: #3f2c74;
+  --copertina-elettronica-fondo: #0b1424;
+  --copertina-elettronica-1: #6ec3ff;
+  --copertina-elettronica-2: #22517e;
+  --copertina-elettronica-bagliore: #1c4570;
+  --copertina-indie-fondo: #0f1913;
+  --copertina-indie-1: #8fd9ae;
+  --copertina-indie-2: #2f6447;
+  --copertina-indie-bagliore: #24503a;
+  --copertina-live-fondo: #1e0d14;
+  --copertina-live-1: #ff7fa0;
+  --copertina-live-2: #7a2840;
+  --copertina-live-bagliore: #66213a;
+  --copertina-altro-fondo: #151515;
+  --copertina-altro-1: #cfc8be;
+  --copertina-altro-2: #5a554f;
+  --copertina-altro-bagliore: #48443f;
+  --copertina-accento-fondo: #12151a;
+  --copertina-accento-1: #f28c28;
+  --copertina-accento-2: #6b3e14;
+  --copertina-accento-bagliore: #5a3410;
 }
 
 /* ---------- Tema chiaro ---------- */
@@ -144,6 +205,57 @@
   --mappa-etichette: #5f646c;
   --mappa-alone: #f3f0e9;
   color-scheme: light;
+
+  /* Copertine generate per famiglia (design/F-01-copertine-generate, ALGORITMO §4) */
+  --copertina-testo: #15181e;
+  --copertina-techno-fondo: #e3f2f0;
+  --copertina-techno-1: #0e5c58;
+  --copertina-techno-2: #7cc2ba;
+  --copertina-techno-bagliore: #bfe6e1;
+  --copertina-house-fondo: #f6e6f2;
+  --copertina-house-1: #8a2a76;
+  --copertina-house-2: #d79acb;
+  --copertina-house-bagliore: #efc8e7;
+  --copertina-hiphop-fondo: #f7efd6;
+  --copertina-hiphop-1: #6e5308;
+  --copertina-hiphop-2: #d6b04a;
+  --copertina-hiphop-bagliore: #f0dc9c;
+  --copertina-reggaeton-fondo: #fbe7e0;
+  --copertina-reggaeton-1: #9a3a20;
+  --copertina-reggaeton-2: #e59a82;
+  --copertina-reggaeton-bagliore: #f5c8b9;
+  --copertina-commerciale-fondo: #e7ebfb;
+  --copertina-commerciale-1: #2f3f9a;
+  --copertina-commerciale-2: #9aa8e8;
+  --copertina-commerciale-bagliore: #cbd3f6;
+  --copertina-latino-fondo: #edf4dd;
+  --copertina-latino-1: #43611a;
+  --copertina-latino-2: #a6c870;
+  --copertina-latino-bagliore: #d4e7ae;
+  --copertina-dnb-fondo: #eee7fb;
+  --copertina-dnb-1: #57379e;
+  --copertina-dnb-2: #b39ce6;
+  --copertina-dnb-bagliore: #d8cbf5;
+  --copertina-elettronica-fondo: #e2eef9;
+  --copertina-elettronica-1: #155a93;
+  --copertina-elettronica-2: #8ec0ea;
+  --copertina-elettronica-bagliore: #c3ddf3;
+  --copertina-indie-fondo: #e4f2ea;
+  --copertina-indie-1: #22603f;
+  --copertina-indie-2: #93cfad;
+  --copertina-indie-bagliore: #c4e6d2;
+  --copertina-live-fondo: #fae6ec;
+  --copertina-live-1: #96274a;
+  --copertina-live-2: #e596ad;
+  --copertina-live-bagliore: #f4c6d3;
+  --copertina-altro-fondo: #efece7;
+  --copertina-altro-1: #4a4540;
+  --copertina-altro-2: #b5aea5;
+  --copertina-altro-bagliore: #dcd7cf;
+  --copertina-accento-fondo: #f6ede3;
+  --copertina-accento-1: #b5560a;
+  --copertina-accento-2: #edb27a;
+  --copertina-accento-bagliore: #f6d3ae;
 }
 
 /*

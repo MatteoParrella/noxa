@@ -1,3 +1,4 @@
+import { SchemaColoriCopertina } from '@/lib/copertinaGenerata';
 import { z } from 'zod';
 import { converti } from '@/lib/errori';
 import { supabase } from '@/lib/supabase';
@@ -47,6 +48,8 @@ const SchemaEvento = z.object({
   copertina_tipo: SchemaCopertina,
   copertina_path: z.string().nullable(),
   copertina_attribuzione: z.string().nullable(),
+  // ADR-0030: colori della copertina generata; un valore assente o non valido vale null.
+  copertina_colori: SchemaColoriCopertina,
   amici_partecipano: z.number().int(),
   amici_interessati: z.number().int(),
   amici: z.array(SchemaAmico),

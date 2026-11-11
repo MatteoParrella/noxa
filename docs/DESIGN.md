@@ -85,7 +85,12 @@ flowchart LR
 - Immagini degli eventi: la scheda in evidenza e il dettaglio mostrano la foto del locale,
   con una velatura costruita sul colore di sfondo del tema che garantisce il contrasto del
   testo (componente `Copertina`; se l'immagine non si carica vale il fondo tipografico); in mancanza della foto,
-  il flyer approvato e poi il fondo tipografico (ADR-0018). L'accento del design system
+  il flyer approvato e poi la **copertina generata** della serata (design/F-01-copertine-generate):
+  motivo astratto dal seme titolo + locale (`src/lib/copertinaGenerata.ts`), colori letti
+  dall'immagine della fonte (`copertina_colori`, ADR-0030) o, se mancano, la famiglia del primo
+  genere (token `--copertina-*` in `tokens.css`, classi in `src/styles/copertine.css`); testo
+  sempre su velatura del fondo, contrasto ≥ 12,7:1. Il fondo tipografico resta solo per le
+  copertine sostitutive (ADR-0023). L'accento del design system
   (arancio "lampione al sodio", esplorazione A) resta per azioni e stati attivi.
 
 - `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda,
