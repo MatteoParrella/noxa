@@ -1,4 +1,4 @@
-from datetime import UTC, date, datetime, time
+from datetime import UTC, date, datetime, time, timedelta
 
 import pytest
 
@@ -6,6 +6,7 @@ from noxa_worker.normalizzazione.alcol import contiene_riferimenti_alcol, termin
 from noxa_worker.normalizzazione.date import (
     FUSO_ROMA,
     combina,
+    correggi_fine,
     ha_ora,
     interpreta_iso,
     trova_data,
@@ -191,3 +192,34 @@ def test_tronca_sullo_spazio() -> None:
 
 def test_senza_accenti() -> None:
     assert senza_accenti("Città ÜBER") == "citta uber"
+
+
+def test_fuso_scritto_a_mano_vale_come_orario_di_milano() -> None:
+    """Live Club (WordPress) scrive "2026-12-8T20:00+1:00" e "+1:00" anche d'estate."""
+    assert interpreta_iso("2026-11-14T23:30+1:00") == interpreta_iso("2026-11-14T23:30+01:00")
+    maggio = interpreta_iso("2027-5-2T14:30+1:00")
+    assert maggio == datetime(2027, 5, 2, 14, 30, tzinfo=FUSO_ROMA)
+    assert maggio.utcoffset() == timedelta(hours=2)
+    assert interpreta_iso("2026-12-8T20:00") == datetime(2026, 12, 8, 20, 0, tzinfo=FUSO_ROMA)
+
+
+def test_fuso_standard_rispettato() -> None:
+    assert interpreta_iso("2026-11-11T20:00:00.000Z") == datetime(2026, 11, 11, 20, 0, tzinfo=UTC)
+    assert interpreta_iso("2026-07-01T22:00-05:30").utcoffset() == -timedelta(hours=5, minutes=30)
+    assert interpreta_iso("2026-07-01T22:00+0200").utcoffset() == timedelta(hours=2)
+
+
+def test_correggi_fine() -> None:
+    inizio = datetime(2026, 11, 14, 23, 30, tzinfo=FUSO_ROMA)
+    # Fine uguale all'inizio (The Events Calendar senza fine): non indicata.
+    assert correggi_fine(inizio, inizio) is None
+    # 23:30 → 04:00 "dello stesso giorno": è la mattina dopo.
+    assert correggi_fine(inizio, datetime(2026, 11, 14, 4, 0, tzinfo=FUSO_ROMA)) == datetime(
+        2026, 11, 15, 4, 0, tzinfo=FUSO_ROMA
+    )
+    giusta = datetime(2026, 11, 15, 5, 0, tzinfo=FUSO_ROMA)
+    assert correggi_fine(inizio, giusta) == giusta
+    # Più di un giorno prima: resta sbagliata e la validazione la scarta.
+    lontana = datetime(2026, 11, 12, 4, 0, tzinfo=FUSO_ROMA)
+    assert correggi_fine(inizio, lontana) == lontana
+    assert correggi_fine(inizio, None) is None

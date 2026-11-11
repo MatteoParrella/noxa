@@ -11,7 +11,7 @@ from pydantic import JsonValue
 
 from noxa_worker.errori import ErroreValidazione
 from noxa_worker.fonti.base import EventoGrezzo, Fonte
-from noxa_worker.normalizzazione.date import interpreta_iso
+from noxa_worker.normalizzazione.date import correggi_fine, interpreta_iso
 from noxa_worker.normalizzazione.evento import costruisci_evento
 from noxa_worker.normalizzazione.modelli import (
     EventoNormalizzato,
@@ -80,6 +80,7 @@ def evento_da_campi(
         inizio = interpreta_iso(inizio_testo)
         fine_testo = testo_o_none(dati.get("fine"))
         fine = interpreta_iso(fine_testo) if fine_testo and dati.get("fine_ha_ora") else None
+        fine = correggi_fine(inizio, fine)
     except ValueError as errore:
         raise ErroreValidazione("data non leggibile", codice="DATA_NON_VALIDA") from errore
     prezzo = dati.get("prezzo_centesimi")
