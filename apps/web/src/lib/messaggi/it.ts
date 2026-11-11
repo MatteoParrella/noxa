@@ -32,6 +32,10 @@ export const messaggi = {
       testo: 'Riprova tra qualche minuto.',
     },
     verificaUmanaInCorso: 'Stiamo completando la verifica di sicurezza: riprova tra un attimo.',
+    nuovaVersione: {
+      testo: 'È disponibile una nuova versione di Noxa.',
+      azione: 'Ricarica',
+    },
   },
 
   benvenuto: {

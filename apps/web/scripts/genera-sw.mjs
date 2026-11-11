@@ -16,7 +16,9 @@ const { count, size, warnings } = await generateSW({
   navigateFallbackDenylist: [/^\/sw\.js$/],
   cleanupOutdatedCaches: true,
   clientsClaim: true,
-  skipWaiting: true,
+  // Il nuovo service worker resta in attesa finché l'utente non sceglie «Ricarica»
+  // (lib/aggiornamento.ts): così la pagina aperta non perde i file della versione precedente.
+  skipWaiting: false,
   sourcemap: false,
   // Gestori del Web Push (F-22, ADR-0026), condivisi con lo sviluppo.
   importScripts: ['sw-push.js'],

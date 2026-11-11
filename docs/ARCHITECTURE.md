@@ -393,6 +393,15 @@ azioni spente; dall'iterazione 8 TanStack Query salva in IndexedDB le query in s
 messe in coda e inviate al ritorno della connessione; le altre scritture richiedono la rete
 e lo comunicano all'utente.
 
+Aggiornamenti della PWA: il service worker è generato con `skipWaiting: false`
+(`scripts/genera-sw.mjs`), quindi una versione nuova si installa e resta in attesa senza
+togliere i file a una pagina aperta. L'app controlla gli aggiornamenti quando torna in primo
+piano e una volta all'ora (`lib/aggiornamento.ts`) e, se c'è una versione in attesa, mostra
+l'avviso «È disponibile una nuova versione di Noxa» con «Ricarica»: la scelta invia
+`SKIP_WAITING` al service worker e ricarica la pagina quando prende il controllo. L'avviso si
+può chiudere; la versione nuova si attiva comunque alla chiusura di tutte le schede. Nelle app
+native l'aggiornamento passa dagli store.
+
 ## 6. Deployment
 
 ```mermaid
