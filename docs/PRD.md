@@ -125,6 +125,7 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 | Verifica dell'età con documenti | R-03. |
 | Post, foto o recensioni pubbliche dei locali | Moderazione sproporzionata per il MVP. |
 | Scraping di Instagram o di servizi che lo vietano | ADR-0008. |
+| Locali di intrattenimento per adulti (strip club, locali topless, club per scambisti, saune), anche per i maggiorenni | R-44, ADR-0029. |
 
 ## 7. Matrice di tracciabilità
 

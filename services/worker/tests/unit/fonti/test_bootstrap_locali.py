@@ -1,8 +1,12 @@
+import pytest
 from pydantic import JsonValue
 
 from noxa_worker.fonti.bootstrap_locali import (
+    Candidato,
     candidati_da_overpass,
     candidati_da_places,
+    candidati_importabili,
+    motivo_esclusione,
     normalizza_nome,
     query_overpass,
 )
@@ -57,3 +61,55 @@ def test_da_google_solo_il_place_id() -> None:
 
 def test_nome_normalizzato_come_nel_database() -> None:
     assert normalizza_nome("Caffè Ünico & C.") == "caffe unico c"
+
+
+@pytest.mark.parametrize(
+    ("tag", "nome", "atteso"),
+    [
+        ({"amenity": "stripclub"}, "Il Salotto", "tag amenity=stripclub"),
+        ({"leisure": "sauna"}, "Metro", "tag leisure=sauna"),
+        ({"amenity": "nightclub", "adult": "yes"}, "Velvet", "tag adult=yes"),
+        ({"amenity": "nightclub"}, "Extasià Disco Topless", "nome: topless"),
+        ({"amenity": "nightclub"}, "Venus Night Club", "nome: night club"),
+        ({"amenity": "nightclub"}, "Luna NightClub", "nome: nightclub"),
+        ({"amenity": "nightclub"}, "Sauna Centrale", "nome: sauna"),
+        ({"amenity": "nightclub"}, "Club Scambisti", "nome: scambisti"),
+        ({"amenity": "nightclub"}, "Lap-Dance Club", "nome: lap dance"),
+    ],
+)
+def test_locali_per_adulti_esclusi(tag: dict[str, JsonValue], nome: str, atteso: str) -> None:
+    """R-44: strip club, locali topless, saune e club per scambisti non diventano candidati."""
+    assert motivo_esclusione(tag, nome) == atteso
+
+
+def test_locale_per_adulti_dal_sito() -> None:
+    assert (
+        motivo_esclusione(
+            {"amenity": "nightclub"}, "Extasià", "https://www.extasiadiscotopless.com/"
+        )
+        == "sito: topless"
+    )
+    assert motivo_esclusione({}, "Exotica") == "nome: exotica"
+    assert motivo_esclusione({}, "Alcatraz", "https://alcatrazmilano.it/") is None
+
+
+@pytest.mark.parametrize(
+    "nome",
+    ["Alcatraz", "Magazzini Generali", "Armani Privè", "Gate", "Club Plastic", "Stripes Bar"],
+)
+def test_locali_ordinari_non_esclusi(nome: str) -> None:
+    assert motivo_esclusione({"amenity": "nightclub", "adult": "no"}, nome) is None
+
+
+def test_esclusi_nel_csv_ma_non_importati() -> None:
+    risposta: JsonValue = {
+        "elements": [
+            {"type": "node", "id": 1, "tags": {"amenity": "nightclub", "name": "Dock"}},
+            {"type": "node", "id": 2, "tags": {"amenity": "nightclub", "name": "Disco Topless"}},
+        ]
+    }
+    dock, topless = candidati_da_overpass(risposta, "MI")
+    assert dock.esclusione is None
+    assert topless.esclusione == "nome: topless"
+    assert candidati_importabili([dock, topless]) == [dock]
+    assert candidati_importabili([Candidato(origine="google", google_place_id="x")])

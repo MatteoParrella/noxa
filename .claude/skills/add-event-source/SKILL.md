@@ -33,6 +33,9 @@ fonti), `packages/schemas/evento.schema.json` (contratto).
 1. Nell'area di moderazione → Locali → Nuovo: nome, indirizzo, comune, provincia (`MI` o
    `MB`), posizione sulla mappa, `osm_id` se esiste, `sito_web`, `instagram_username`.
 2. Verifica che non sia un doppione (ricerca per nome e per distanza entro 200 m).
+3. Verifica che non sia un locale di intrattenimento per adulti (R-44: strip club, topless,
+   lap dance, scambisti, saune), guardando sito, foto e recensioni. Se lo è → nessun locale,
+   nessuna fonte, candidato scartato con motivazione "R-44".
 
 ## 2. Verifica di conformità (obbligatoria, prima di scrivere codice)
 

@@ -91,6 +91,7 @@ non può essere rilasciata, indipendentemente da scadenze o richieste commercial
 | R-41 | Nessun badge premia la spesa, il consumo di alcol, il numero di serate in un periodo breve o l'orario di rientro. I badge per soli maggiorenni (`badge.solo_maggiorenni`) non vengono assegnati né mostrati ai minorenni. | La gamification non deve incentivare comportamenti a rischio. | Catalogo dei badge nel seed revisionato con `safety-review`; policy `SELECT` su `badge`. |
 | R-42 | Il riepilogo annuale condivisibile non contiene nomi, username o foto di altri utenti (solo conteggi) né riferimenti all'alcol per i minorenni. | Gli altri utenti non hanno acconsentito a comparire in un contenuto pubblico. | Generazione in `private.genera_riepiloghi()` nel database; il formato di `riepiloghi_annuali.dati` non prevede campi per altri utenti. |
 | R-43 | L'interfaccia non contiene pubblicità di alcolici, conti alla rovescia artificiali, notifiche di pressione sociale ("tutti i tuoi amici ci vanno, tu no?") né altri dark pattern. | DSA art. 25 (divieto di interfacce ingannevoli) e tutela dei minorenni. | Checklist di `safety-review` e di `implement-design`. |
+| R-44 | Noxa non elenca **locali di intrattenimento per adulti** (strip club, locali topless o di lap dance, night club con spettacoli di spogliarello, club per scambisti, saune e centri a sfondo sessuale, sexy shop) né i loro eventi, nemmeno per gli utenti maggiorenni. La regola riguarda il tipo di attività, non il pubblico: i locali LGBTQ+ non sono esclusi in quanto tali. | I locali sono visibili a tutti gli utenti, quattordicenni compresi (mappa e schede): un locale per adulti nel catalogo esporrebbe i minorenni a contenuti sessuali. Un catalogo unico è più semplice e sicuro di una visibilità per età sui locali (ADR-0029). | Il bootstrap (`bootstrap_locali.py`) marca i candidati per tag OSM, nome e dominio del sito, li riporta nella colonna `esclusione` del CSV e non li importa; test `test_bootstrap_locali.py`. Verifica dei moderatori prima di creare un locale, di approvare un flyer o di attivare una fonte (§11, skill `add-event-source`); scarto con motivazione "R-44". |
 
 ## 8. Contenuti caricati e moderazione
 
@@ -160,6 +161,9 @@ non può essere rilasciata, indipendentemente da scadenze o richieste commercial
    compromettere le indagini.
 5. Revisione dei flyer: verifica di titolo, data, locale ed età minima confrontandoli con il
    flyer; impostazione di `riferimenti_alcol`; approvazione o rifiuto motivato.
+6. Verifica dei locali (candidati del bootstrap, locali nuovi creati a mano o citati nei
+   flyer): attività aperta, dati corretti e nessun intrattenimento per adulti (R-44),
+   controllando sito, foto e recensioni; altrimenti scarto con motivazione "R-44".
 
 ## 12. Verifica
 

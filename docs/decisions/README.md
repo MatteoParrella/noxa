@@ -37,3 +37,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0026](0026-notifiche-web-push.md) | Notifiche sul telefono con il Web Push, testi di sistema e webhook dal database | Accettato |
 | [0027](0027-distribuzione-android-e-posizione-in-background.md) | Distribuzione su Google Play per ultima e posizione in background open source | Accettato |
 | [0028](0028-ritorno-sicuro-sessione-e-posizioni.md) | Ritorno sicuro: servizio in primo piano, posizioni lette con la RLS e dati solo sul telefono | Accettato |
+| [0029](0029-esclusione-locali-per-adulti.md) | Esclusione dei locali di intrattenimento per adulti | Accettato |

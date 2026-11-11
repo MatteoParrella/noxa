@@ -127,7 +127,8 @@ invece di implementarla.
    confermati scelti, a scadenza, cancellati dopo 24 ore; nessun indirizzo di casa sul
    server; nessuna posizione salvata per la ricerca degli eventi.
 7. **Niente alcol per i minorenni**: nessuna categoria di spesa, badge, testo o evento legato
-   all'alcol.
+   all'alcol. **Nessun locale per adulti** (strip club, topless, scambisti, saune) nel
+   catalogo, per nessuna età (R-44).
 8. **Ogni contenuto caricato è segnalabile e moderabile**; i flyer sono pubblicati solo dopo
    una revisione umana.
 9. **Nessuna pubblicità, nessun tracciamento di terze parti, dati minimi**; nessun nuovo

@@ -6,6 +6,9 @@ e da Google Places, da verificare a mano nell'area di moderazione.
 - Google Places: **solo il `place_id`** (Text Search con `X-Goog-FieldMask: places.id`),
   come consentono i termini di Google Maps Platform (ADR-0008).
 
+I locali di intrattenimento per adulti (R-44, ADR-0029) sono marcati con il motivo
+nella colonna `esclusione` del CSV e non vengono importati.
+
 Il comando scrive un CSV da rivedere; con `--importa` inserisce i candidati nuovi in
 `candidati_locali` con il ruolo `noxa_worker`. Non scrive mai in `locali`.
 
@@ -42,6 +45,21 @@ RICERCHE_GOOGLE = ("discoteca", "club", "locale notturno")
 AREE_GOOGLE = {"MI": "provincia di Milano", "MB": "provincia di Monza e della Brianza"}
 DISTANZA_DOPPIONE_M = 200
 
+# R-44 (ADR-0029): tag OSM dei locali per adulti. Il controllo è prudente: nel dubbio il
+# candidato è escluso, e un moderatore può comunque creare il locale a mano dopo la verifica.
+TAG_ADULTI: dict[str, frozenset[str]] = {
+    "amenity": frozenset({"stripclub", "brothel", "swingerclub", "love_hotel", "sauna"}),
+    "leisure": frozenset({"sauna", "adult_gaming_centre"}),
+    "shop": frozenset({"erotic"}),
+}
+CHIAVI_ADULTI = ("adult", "adult_entertainment", "striptease", "stripclub", "swingerclub")
+NOME_ADULTI = re.compile(
+    r"\b(topless|strip|striptease|lap ?dance|sexy|erotic\w*|eros|scambist\w*|swinger\w*"
+    r"|exotic\w*|sauna|night ?club|gentlem[ae]n|hard club)\b"
+)
+# Nel dominio del sito le parole sono attaccate: si cercano come sottostringhe.
+SITO_ADULTI = re.compile(r"topless|striptease|stripclub|lapdance|sexy|erotic|scambist|swinger")
+
 
 @dataclass(frozen=True)
 class Candidato:
@@ -55,11 +73,31 @@ class Candidato:
     lat: float | None = None
     lon: float | None = None
     sito_web: str | None = None
+    esclusione: str | None = None
 
 
 def normalizza_nome(nome: str) -> str:
     """Come `private.normalizza_nome` nel database."""
     return " ".join(re.sub(r"[^a-z0-9]+", " ", senza_accenti(nome)).split())
+
+
+def motivo_esclusione(
+    tag: dict[str, JsonValue], nome: str, sito_web: str | None = None
+) -> str | None:
+    """Motivo per cui il candidato è un locale per adulti (R-44), oppure `None`."""
+    for chiave, valori in TAG_ADULTI.items():
+        valore = tag.get(chiave)
+        if isinstance(valore, str) and valore in valori:
+            return f"tag {chiave}={valore}"
+    for chiave in CHIAVI_ADULTI:
+        valore = tag.get(chiave)
+        if isinstance(valore, str) and valore != "no":
+            return f"tag {chiave}={valore}"
+    trovato = NOME_ADULTI.search(normalizza_nome(nome))
+    if trovato:
+        return f"nome: {trovato.group(0)}"
+    trovato = SITO_ADULTI.search(sito_web.lower()) if sito_web else None
+    return f"sito: {trovato.group(0)}" if trovato else None
 
 
 def query_overpass(codice_iso: str) -> str:
@@ -109,6 +147,7 @@ def candidati_da_overpass(risposta: JsonValue, provincia: str) -> list[Candidato
                 sito_web=sito
                 if isinstance(sito, str) and sito.startswith(("http://", "https://"))
                 else None,
+                esclusione=motivo_esclusione(tag, nome, sito if isinstance(sito, str) else None),
             )
         )
     return candidati
@@ -165,12 +204,18 @@ def scrivi_csv(candidati: list[Candidato], destinazione: Path) -> None:
             scrittore.writerow(asdict(candidato))
 
 
+def candidati_importabili(candidati: list[Candidato]) -> list[Candidato]:
+    """I candidati senza motivo di esclusione (R-44)."""
+    return [c for c in candidati if c.esclusione is None]
+
+
 async def importa(candidati: list[Candidato], url_database: str) -> int:
     """Inserisce i candidati non ancora noti; segnala un possibile doppione entro 200 m o con
-    lo stesso nome normalizzato. Restituisce il numero di candidati nuovi."""
+    lo stesso nome normalizzato. Salta i locali per adulti (R-44). Restituisce il numero di
+    candidati nuovi."""
     nuovi = 0
     async with await psycopg.AsyncConnection.connect(url_database) as connessione:
-        for c in candidati:
+        for c in candidati_importabili(candidati):
             cursore = await connessione.execute(
                 """insert into public.candidati_locali
                      (origine, osm_id, google_place_id, nome, indirizzo, comune, provincia,
@@ -233,7 +278,8 @@ async def principale(argomenti: list[str] | None = None) -> int:
             log.warning("bootstrap_fallito", codice=errore.codice, errore=str(errore))
             return 1
     scrivi_csv(candidati, opzioni.csv)
-    log.info("csv_scritto", candidati=len(candidati), file=str(opzioni.csv))
+    esclusi = len(candidati) - len(candidati_importabili(candidati))
+    log.info("csv_scritto", candidati=len(candidati), esclusi=esclusi, file=str(opzioni.csv))
     if opzioni.importa:
         nuovi = await importa(candidati, impostazioni.url_database())
         log.info("candidati_importati", nuovi=nuovi)

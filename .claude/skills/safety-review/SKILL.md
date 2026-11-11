@@ -53,12 +53,13 @@ anche un solo punto "NO" non è completa.
 - [ ] Non si introducono messaggi liberi tra utenti (R-16); i testi liberi hanno un limite di lunghezza e sono segnalabili.
 - [ ] Le notifiche non contengono testi scritti da altri utenti.
 
-### C. Eventi e contenuti (R-20…R-24, R-40…R-43)
+### C. Eventi e contenuti (R-20…R-24, R-40…R-44)
 - [ ] Gli eventi mostrati passano dalla policy di `eventi` (nessuna copia di dati evento in tabelle senza lo stesso filtro).
 - [ ] Età sconosciuta = 18; con fonti discordanti vale il massimo.
 - [ ] Nessun contenuto legato all'alcol è visibile ai minorenni (eventi con `riferimenti_alcol`, categorie di spesa, badge, testi, icone).
 - [ ] Nessun incentivo a spendere, bere o uscire più spesso; nessun dark pattern (R-43).
 - [ ] I contenuti condivisibili fuori dall'app non includono dati di altri utenti (R-42).
+- [ ] Nessun locale di intrattenimento per adulti entra nel catalogo, nemmeno da una nuova fonte o da un flyer (R-44).
 
 ### D. Posizione (R-30…R-34)
 - [ ] Ogni funzione di posizione è disattivata di default e si avvia con un'azione esplicita.

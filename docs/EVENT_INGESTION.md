@@ -28,15 +28,21 @@ curato di locali dell'area e, per ognuno, le sue fonti. Questo approccio:
    conserva solo il `place_id` (`locali.google_place_id`), come consentito dai termini di
    Google Maps Platform; gli altri dati del locale si inseriscono dopo la verifica manuale,
    da OSM o dal sito ufficiale.
-3. **Pulizia manuale** nell'area di moderazione: unione dei doppioni OSM/Google, verifica che
-   il locale sia attivo, aggiunta di sito web, username Instagram e pagine sugli aggregatori,
+3. **Esclusione dei locali per adulti** (R-44, ADR-0029): i candidati con tag OSM come
+   `amenity=stripclub`, `leisure=sauna` o `adult=*`, oppure con parole del nome come
+   «topless», «night club», «sauna» o «scambisti» (anche nel dominio del sito), non vengono
+   importati. Il filtro è
+   prudente: un falso positivo si recupera creando il locale a mano.
+4. **Pulizia manuale** nell'area di moderazione: unione dei doppioni OSM/Google, verifica che
+   il locale sia attivo e che non rientri in R-44, aggiunta di sito web, username Instagram e pagine sugli aggregatori,
    creazione delle righe in `fonti` con `stato_conformita = 'da_verificare'`.
 
 Lo script di bootstrap è `services/worker/src/noxa_worker/fonti/bootstrap_locali.py`
 (`uv run python -m noxa_worker.fonti.bootstrap_locali --csv candidati.csv [--importa]`):
 interroga Overpass per le due province e Google Places (Text Search con
 `X-Goog-FieldMask: places.id`, quindi solo identificativi) con `ClientHttpConforme`, scrive
-un CSV da rivedere e, con `--importa`, inserisce i candidati nuovi in `candidati_locali`
+un CSV da rivedere (con la colonna `esclusione` per i locali esclusi da R-44) e, con
+`--importa`, inserisce i candidati nuovi non esclusi in `candidati_locali`
 segnalando il possibile doppione (locale entro 200 m o con lo stesso nome normalizzato). Non
 scrive mai in `locali`: i candidati si verificano nell'area di moderazione ("Verifica e
 crea", "Unisci", "Scarta" con motivazione).
