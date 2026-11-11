@@ -1,0 +1,103 @@
+/* =========================================================
+   NOXA — layer "copertine generate" (F-01 · Scopri).
+   Copertina di un evento senza foto del locale né flyer approvato.
+   Nuovi token: famiglie di colore per genere, scuro e chiaro.
+   Testo sempre su velatura del fondo della famiglia: orario ≥ 4,5:1, titolo ≥ 3:1 (misurato ≥ 12:1).
+   ========================================================= */
+.nx, .nx-scuro {
+  --copertina-testo: #F4F1EB;
+  --copertina-velo: 0.9;           /* opacità della velatura dietro il testo */
+  --copertina-techno-fondo: #0E1619; --copertina-techno-1: #7ED6CC; --copertina-techno-2: #2F6A70; --copertina-techno-bagliore: #1F5A5E; /* techno */
+  --copertina-house-fondo: #1A0F1C; --copertina-house-1: #E58AD0; --copertina-house-2: #6E2F66; --copertina-house-bagliore: #5A2453; /* house */
+  --copertina-hiphop-fondo: #19140A; --copertina-hiphop-1: #F2C94C; --copertina-hiphop-2: #7A6020; --copertina-hiphop-bagliore: #5E4A14; /* hip hop */
+  --copertina-reggaeton-fondo: #1C0F0C; --copertina-reggaeton-1: #FF8A66; --copertina-reggaeton-2: #7A3424; --copertina-reggaeton-bagliore: #6A2C1E; /* reggaeton */
+  --copertina-commerciale-fondo: #10132A; --copertina-commerciale-1: #9CB1FF; --copertina-commerciale-2: #3A4890; --copertina-commerciale-bagliore: #2E3A7A; /* commerciale */
+  --copertina-latino-fondo: #121A0C; --copertina-latino-1: #B8E06A; --copertina-latino-2: #4F6F24; --copertina-latino-bagliore: #3E5A1C; /* latino */
+  --copertina-dnb-fondo: #150F22; --copertina-dnb-1: #B79CFF; --copertina-dnb-2: #50388F; --copertina-dnb-bagliore: #3F2C74; /* drum and bass */
+  --copertina-elettronica-fondo: #0B1424; --copertina-elettronica-1: #6EC3FF; --copertina-elettronica-2: #22517E; --copertina-elettronica-bagliore: #1C4570; /* elettronica */
+  --copertina-indie-fondo: #0F1913; --copertina-indie-1: #8FD9AE; --copertina-indie-2: #2F6447; --copertina-indie-bagliore: #24503A; /* indie */
+  --copertina-live-fondo: #1E0D14; --copertina-live-1: #FF7FA0; --copertina-live-2: #7A2840; --copertina-live-bagliore: #66213A; /* live */
+  --copertina-altro-fondo: #151515; --copertina-altro-1: #CFC8BE; --copertina-altro-2: #5A554F; --copertina-altro-bagliore: #48443F; /* altro */
+  --copertina-accento-fondo: #12151A; --copertina-accento-1: #F28C28; --copertina-accento-2: #6B3E14; --copertina-accento-bagliore: #5A3410; /* senza genere (accento) */
+}
+.nx-chiaro {
+  --copertina-testo: #15181E;
+  --copertina-techno-fondo: #E3F2F0; --copertina-techno-1: #0E5C58; --copertina-techno-2: #7CC2BA; --copertina-techno-bagliore: #BFE6E1; /* techno */
+  --copertina-house-fondo: #F6E6F2; --copertina-house-1: #8A2A76; --copertina-house-2: #D79ACB; --copertina-house-bagliore: #EFC8E7; /* house */
+  --copertina-hiphop-fondo: #F7EFD6; --copertina-hiphop-1: #6E5308; --copertina-hiphop-2: #D6B04A; --copertina-hiphop-bagliore: #F0DC9C; /* hip hop */
+  --copertina-reggaeton-fondo: #FBE7E0; --copertina-reggaeton-1: #9A3A20; --copertina-reggaeton-2: #E59A82; --copertina-reggaeton-bagliore: #F5C8B9; /* reggaeton */
+  --copertina-commerciale-fondo: #E7EBFB; --copertina-commerciale-1: #2F3F9A; --copertina-commerciale-2: #9AA8E8; --copertina-commerciale-bagliore: #CBD3F6; /* commerciale */
+  --copertina-latino-fondo: #EDF4DD; --copertina-latino-1: #43611A; --copertina-latino-2: #A6C870; --copertina-latino-bagliore: #D4E7AE; /* latino */
+  --copertina-dnb-fondo: #EEE7FB; --copertina-dnb-1: #57379E; --copertina-dnb-2: #B39CE6; --copertina-dnb-bagliore: #D8CBF5; /* drum and bass */
+  --copertina-elettronica-fondo: #E2EEF9; --copertina-elettronica-1: #155A93; --copertina-elettronica-2: #8EC0EA; --copertina-elettronica-bagliore: #C3DDF3; /* elettronica */
+  --copertina-indie-fondo: #E4F2EA; --copertina-indie-1: #22603F; --copertina-indie-2: #93CFAD; --copertina-indie-bagliore: #C4E6D2; /* indie */
+  --copertina-live-fondo: #FAE6EC; --copertina-live-1: #96274A; --copertina-live-2: #E596AD; --copertina-live-bagliore: #F4C6D3; /* live */
+  --copertina-altro-fondo: #EFECE7; --copertina-altro-1: #4A4540; --copertina-altro-2: #B5AEA5; --copertina-altro-bagliore: #DCD7CF; /* altro */
+  --copertina-accento-fondo: #F6EDE3; --copertina-accento-1: #B5560A; --copertina-accento-2: #EDB27A; --copertina-accento-bagliore: #F6D3AE; /* senza genere (accento) */
+}
+
+/* famiglia → variabili locali usate dai motivi (mai colori fissi nei motivi) */
+.cg-techno { --cg-fondo: var(--copertina-techno-fondo); --cg-1: var(--copertina-techno-1); --cg-2: var(--copertina-techno-2); --cg-bagliore: var(--copertina-techno-bagliore); }
+.cg-house { --cg-fondo: var(--copertina-house-fondo); --cg-1: var(--copertina-house-1); --cg-2: var(--copertina-house-2); --cg-bagliore: var(--copertina-house-bagliore); }
+.cg-hiphop { --cg-fondo: var(--copertina-hiphop-fondo); --cg-1: var(--copertina-hiphop-1); --cg-2: var(--copertina-hiphop-2); --cg-bagliore: var(--copertina-hiphop-bagliore); }
+.cg-reggaeton { --cg-fondo: var(--copertina-reggaeton-fondo); --cg-1: var(--copertina-reggaeton-1); --cg-2: var(--copertina-reggaeton-2); --cg-bagliore: var(--copertina-reggaeton-bagliore); }
+.cg-commerciale { --cg-fondo: var(--copertina-commerciale-fondo); --cg-1: var(--copertina-commerciale-1); --cg-2: var(--copertina-commerciale-2); --cg-bagliore: var(--copertina-commerciale-bagliore); }
+.cg-latino { --cg-fondo: var(--copertina-latino-fondo); --cg-1: var(--copertina-latino-1); --cg-2: var(--copertina-latino-2); --cg-bagliore: var(--copertina-latino-bagliore); }
+.cg-dnb { --cg-fondo: var(--copertina-dnb-fondo); --cg-1: var(--copertina-dnb-1); --cg-2: var(--copertina-dnb-2); --cg-bagliore: var(--copertina-dnb-bagliore); }
+.cg-elettronica { --cg-fondo: var(--copertina-elettronica-fondo); --cg-1: var(--copertina-elettronica-1); --cg-2: var(--copertina-elettronica-2); --cg-bagliore: var(--copertina-elettronica-bagliore); }
+.cg-indie { --cg-fondo: var(--copertina-indie-fondo); --cg-1: var(--copertina-indie-1); --cg-2: var(--copertina-indie-2); --cg-bagliore: var(--copertina-indie-bagliore); }
+.cg-live { --cg-fondo: var(--copertina-live-fondo); --cg-1: var(--copertina-live-1); --cg-2: var(--copertina-live-2); --cg-bagliore: var(--copertina-live-bagliore); }
+.cg-altro { --cg-fondo: var(--copertina-altro-fondo); --cg-1: var(--copertina-altro-1); --cg-2: var(--copertina-altro-2); --cg-bagliore: var(--copertina-altro-bagliore); }
+.cg-accento { --cg-fondo: var(--copertina-accento-fondo); --cg-1: var(--copertina-accento-1); --cg-2: var(--copertina-accento-2); --cg-bagliore: var(--copertina-accento-bagliore); }
+
+/* contenitore */
+.cg { position: relative; overflow: hidden; isolation: isolate; color: var(--copertina-testo);
+  --cg-gx: 50%; --cg-gy: 30%; --cg-gr: 50%;
+  background: radial-gradient(circle at var(--cg-gx) var(--cg-gy), var(--cg-bagliore) 0, transparent var(--cg-gr)), var(--cg-fondo); }
+.cg > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: -2; pointer-events: none; }
+/* velatura dietro il testo: il fondo della famiglia, come per le foto dei locali */
+.cg-velo { position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(to top, color-mix(in srgb, var(--cg-fondo) 92%, transparent) 0%, color-mix(in srgb, var(--cg-fondo) 90%, transparent) 46%, transparent 80%); }
+.cg-velo.alto { background: linear-gradient(to bottom, color-mix(in srgb, var(--cg-fondo) 92%, transparent) 0%, color-mix(in srgb, var(--cg-fondo) 90%, transparent) 26%, transparent 46%), linear-gradient(to top, color-mix(in srgb, var(--cg-fondo) 92%, transparent) 0%, color-mix(in srgb, var(--cg-fondo) 90%, transparent) 40%, transparent 70%); }
+.cg-velo.tutta { background: linear-gradient(to top, color-mix(in srgb, var(--cg-fondo) 92%, transparent) 0%, color-mix(in srgb, var(--cg-fondo) 90%, transparent) 58%, color-mix(in srgb, var(--cg-fondo) 40%, transparent) 100%); }
+
+/* testo da manifesto */
+.cg-ora { font-family: var(--tipo-famiglia-mono); font-size: 0.9375rem; font-weight: 500; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.cg-titolo { margin: 0; font-weight: 700; font-stretch: 62%; text-transform: uppercase; line-height: .9; letter-spacing: -0.005em;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; hyphens: none; }
+.cg-titolo.xl { font-size: 4rem; -webkit-line-clamp: 1; }
+.cg-titolo.l  { font-size: 3.25rem; -webkit-line-clamp: 2; }
+.cg-titolo.m  { font-size: 2.5rem; }
+.cg-titolo.s  { font-size: 1.875rem; }
+
+/* forma 1 · evidenza (16:10) */
+.cg.evid { aspect-ratio: 16 / 10; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; padding: 16px; }
+/* forma 2 · miniatura (quadrata, 84 o 64 px) */
+.cg.mini { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 7px; }
+.cg.mini .cg-ora { font-size: 0.75rem; }
+.cg.mini .cg-titolo { font-size: 0.875rem; line-height: .95; font-stretch: 70%; -webkit-line-clamp: 2; }
+/* forma 3 · dettaglio (testata 260 px) */
+.cg.det { display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; padding: 108px 20px 20px; }
+.cg.det .cg-etichetta { font-size: 0.6875rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+.cg.det .cg-ora { font-size: 1.125rem; }
+
+/* ingresso: lo stesso delle schede (dal sfocato al nitido), una sola volta */
+.cg.entra { animation: ax-nitido 320ms var(--curva-standard) both; }
+@media (prefers-reduced-motion: reduce) { .cg.entra { animation: none; } }
+
+/* scheda in evidenza con copertina generata: titolo vero nella scheda */
+.evidenza .cg.evid { border-radius: 0; }
+.evid-corpo-titolo { margin: 0; font-size: 1.25rem; line-height: 1.15; font-weight: 700; font-stretch: 80%; }
+
+/* tavole: campioni e alfabeto */
+.cg-campione { display: grid; grid-template-columns: repeat(4, 1fr); height: 36px; border-radius: var(--raggio-2); overflow: hidden; box-shadow: 0 0 0 1px var(--colore-linea); }
+.cg-campione i { display: block; }
+.cg-seme { font-family: var(--tipo-famiglia-mono); font-size: 0.75rem; color: var(--colore-testo-secondario); overflow-wrap: anywhere; }
+
+@container fl (max-width: 370px) {
+  .cg-titolo.xl { font-size: 3.5rem; }
+  .cg-titolo.l { font-size: 2.875rem; }
+  .cg-titolo.m { font-size: 2.25rem; }
+}
+.cg.det { flex: 1 1 auto; }
+.cg.nudo { flex: 1 1 auto; }

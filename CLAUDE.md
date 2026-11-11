@@ -144,7 +144,8 @@ invece di implementarla.
   robots.txt, 1 richiesta ogni 5 secondi per dominio, massimo 50 pagine per esecuzione,
   stop su 403 e 429. Vietati login, aggiramento di CAPTCHA o paywall, rotazione di IP.
 - Si salvano solo i campi di `packages/schemas/evento.schema.json`; nessun dato personale;
-  nessuna immagine ripubblicata; link alla fonte sempre presente.
+  nessuna immagine salvata o ripubblicata (solo i colori dominanti letti in memoria,
+  ADR-0030); link alla fonte sempre presente.
 - **Instagram solo con l'API Graph ufficiale (Business Discovery). Mai scraping.**
 - Google Places: si conserva solo il `place_id`.
 - Claude API: SDK ufficiale `anthropic`, `client.messages.parse()` con schema Pydantic,
