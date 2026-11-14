@@ -9,6 +9,7 @@ from noxa_worker.configurazione import Impostazioni
 from noxa_worker.fonti.base import Adattatore
 from noxa_worker.fonti.instagram_business_discovery import AdattatoreInstagramBusinessDiscovery
 from noxa_worker.fonti.sito_html_alcatraz import AdattatoreSitoHtmlAlcatraz
+from noxa_worker.fonti.sito_html_the_beach import AdattatoreSitoHtmlTheBeach
 from noxa_worker.fonti.sito_html_the_club import AdattatoreSitoHtmlTheClub
 from noxa_worker.fonti.sito_jsonld import AdattatoreSitoJsonLd
 
@@ -18,6 +19,7 @@ def crea_registro(impostazioni: Impostazioni) -> dict[str, Adattatore]:
         AdattatoreSitoJsonLd(),
         AdattatoreSitoHtmlTheClub(),
         AdattatoreSitoHtmlAlcatraz(),
+        AdattatoreSitoHtmlTheBeach(),
         AdattatoreInstagramBusinessDiscovery(
             impostazioni.meta_ig_user_id, impostazioni.meta_access_token
         ),

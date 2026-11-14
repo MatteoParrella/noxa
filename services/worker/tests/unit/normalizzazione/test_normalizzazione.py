@@ -141,6 +141,8 @@ def test_eta_piu_alta_tra_le_dichiarate() -> None:
         "Gin tonic a 5 euro",
         "promo Heineken",
         "Spritz party",
+        "Tavolo 150€ a bottiglia x 5 persone",
+        "Tavoli con bottiglia inclusa",
     ],
 )
 def test_riferimenti_alcol(testo: str) -> None:

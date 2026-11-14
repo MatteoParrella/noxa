@@ -45,7 +45,7 @@ type Aggregatore = 'resident_advisor' | 'xceed' | 'dice';
 const ADATTATORI: Record<Famiglia, string[]> = {
   // Stessi nomi del registro del worker (services/worker/src/noxa_worker/fonti/registro.py):
   // lo verifica tests/unit/test_adattatori_in_moderazione.py.
-  sito_locale: ['sito_jsonld', 'sito_html_the_club', 'sito_html_alcatraz'],
+  sito_locale: ['sito_jsonld', 'sito_html_the_club', 'sito_html_alcatraz', 'sito_html_the_beach'],
   instagram: ['instagram_business_discovery'],
   aggregatore: [],
 };
