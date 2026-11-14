@@ -348,6 +348,10 @@ Ogni iterazione ha:
   - prova dell'apertura, del Benvenuto e delle copertine su telefoni reali (iPhone e Android);
   - scadenza delle sessioni dei moderatori quando il piano di Supabase la consente; repository
     privato o segreti del worker in un environment protetto; esito della prima analisi CodeQL;
+  - dopo l'analisi delle schermate del 2026-11-14: layout desktop a più colonne anche per
+    Organizza, Vivi, Ricorda e Profilo (ADR-0033); carattere monospazio solo per orari e date;
+    «Privacy e dati» più leggibile; titoli delle pagine allineati ai nomi delle aree; tinta
+    delle foto d'atmosfera per il tema chiaro; identità visiva dei gruppi (colore o copertina);
   - decisioni D-18 (pagine evento pubbliche), D-19 (tono dei testi), D-20 (locandine vere) e
     D-21 (età dichiarata).
 - **Prerequisiti esterni**: penetration test esterno, consulente legale.

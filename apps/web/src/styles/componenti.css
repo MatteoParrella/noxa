@@ -901,6 +901,15 @@
   align-items: flex-start;
   gap: var(--spazio-3);
 }
+/* L'icona dello stato vuoto ha il fondo tenue dell'accento: si nota senza gridare. */
+.stato-vuoto > .cornice-icona {
+  width: var(--spazio-16);
+  height: var(--spazio-16);
+  border-color: transparent;
+  border-radius: var(--raggio-3);
+  background: var(--colore-accento-tenue);
+  color: var(--colore-accento-testo);
+}
 .cornice-icona {
   display: inline-flex;
   align-items: center;
@@ -1251,9 +1260,13 @@
   min-height: 100dvh;
   overflow-x: clip;
 }
+.guscio {
+  /* Altezza della barra in fondo: la usano anche le barre delle azioni che le stanno sopra. */
+  --nav-altezza: 66px;
+}
 .guscio-contenuto {
   flex: 1 1 auto;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  padding-bottom: calc(var(--nav-altezza) + var(--spazio-4) + env(safe-area-inset-bottom));
 }
 .guscio .barra-nav {
   position: fixed;
@@ -1261,14 +1274,28 @@
   right: 0;
   bottom: 0;
   z-index: 10;
+  box-sizing: border-box;
+  height: calc(var(--nav-altezza) + env(safe-area-inset-bottom));
   padding-bottom: calc(4px + env(safe-area-inset-bottom));
+}
+/* Marchio e piè di pagina esistono solo nel layout desktop (ADR-0033). */
+.nav-marchio,
+.piede-sito {
+  display: none;
+}
+/* La campanella è neutra: prende l'accento solo quando c'è qualcosa da leggere. */
+.campanella {
+  color: var(--colore-testo-secondario);
+}
+.campanella.con-nuove {
+  color: var(--colore-accento-testo);
 }
 .intestazione-area {
   padding: calc(var(--spazio-6) + env(safe-area-inset-top)) var(--spazio-5) var(--spazio-4);
 }
 .pagina {
   padding: 0 var(--spazio-5);
-  max-width: 720px;
+  max-width: var(--larghezza-pagina, 720px);
   margin: 0 auto;
 }
 
@@ -1278,10 +1305,10 @@
   color: var(--colore-testo-primario);
 }
 
-/* ---------- LAYOUT RESPONSIVE — sidebar ≥ 768 px (ADR-0022) ---------- */
+/* ---------- LAYOUT RESPONSIVE (ADR-0022, ADR-0033) ---------- */
 
-/* Tablet landscape e desktop: la navigazione diventa una sidebar fissa a sinistra. */
-@media (min-width: 48rem) {
+/* Tablet (768–1023 px): la navigazione è una barra laterale stretta a sinistra, sole icone. */
+@media (min-width: 48rem) and (max-width: 63.999rem) {
   .guscio {
     flex-direction: row;
     align-items: stretch;
@@ -1290,17 +1317,16 @@
     flex: 1 1 auto;
     min-height: 100dvh;
     overflow-y: auto;
-    /* Tolto il padding-bottom pensato per la bottom bar mobile. */
     padding-bottom: 0;
   }
   .guscio .barra-nav {
-    /* Da griglia orizzontale in fondo a colonna fissa a sinistra. */
+    /* Nel documento viene dopo il contenuto: l'ordine la porta a sinistra. */
+    order: -1;
     position: sticky;
     top: 0;
     left: 0;
     right: auto;
     bottom: auto;
-    z-index: 10;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1311,22 +1337,17 @@
     border-top: none;
     border-right: 1px solid var(--colore-linea);
     overflow-y: auto;
-    /* Reset della griglia mobile. */
     grid-template-columns: unset;
   }
   .guscio .nav-voce {
     width: 100%;
-    flex-direction: column;
     min-height: 60px;
     padding: var(--spazio-2) 0;
-    gap: 3px;
     font-size: var(--tipo-didascalia);
   }
-  /* L'indicatore orizzontale è pensato per la bottom nav; non si usa in sidebar. */
   .guscio .nav-indicatore {
     display: none;
   }
-  /* Al posto dell'indicatore orizzontale: un bordo sinistro sul link attivo. */
   .guscio .nav-voce.is-on::before {
     content: '';
     position: absolute;
@@ -1337,38 +1358,125 @@
     margin: 0;
     background: var(--colore-accento);
   }
+}
+
+@media (min-width: 48rem) {
   /* Il padding dell'intestazione non deve compensare la safe-area verticale del telefono. */
   .intestazione-area {
     padding-top: var(--spazio-6);
   }
 }
 
-/* Desktop: sidebar più larga con icone e etichette su una riga. */
+/* Desktop (≥ 1024 px): Noxa si presenta come un sito. Barra in alto con marchio e aree,
+   contenuti più larghi e a griglia, piè di pagina con i documenti (ADR-0033). */
 @media (min-width: 64rem) {
+  .guscio {
+    --nav-altezza: 0px;
+  }
+  .guscio-contenuto {
+    flex: 1 0 auto;
+    padding-bottom: var(--spazio-12);
+  }
   .guscio .barra-nav {
-    align-items: flex-start;
-    width: var(--sidebar-larga, 200px);
-    padding: var(--spazio-4) var(--spazio-3) var(--spazio-6);
+    order: -1;
+    position: sticky;
+    top: 0;
+    bottom: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--spazio-1);
+    height: var(--spazio-16);
+    padding: 0 max(var(--spazio-8), calc((100% - 1120px) / 2));
+    border-top: none;
+    border-bottom: 1px solid var(--colore-linea);
+    background: color-mix(in srgb, var(--colore-sfondo) 86%, transparent);
+    backdrop-filter: blur(14px);
+    grid-template-columns: unset;
+  }
+  .nav-marchio {
+    display: flex;
+    align-items: baseline;
+    margin-right: auto;
+    color: var(--colore-testo-primario);
+    font-size: var(--tipo-titolo-2);
+    line-height: 1;
+    font-weight: var(--tipo-peso-forte);
+    font-stretch: var(--tipo-larghezza-stretta);
+    letter-spacing: -0.02em;
+  }
+  .nav-marchio .marchio-punto,
+  .piede-sito-marchio .marchio-punto {
+    width: 6px;
+    height: 6px;
+    margin-left: 2px;
   }
   .guscio .nav-voce {
     flex-direction: row;
-    justify-content: flex-start;
     min-height: var(--area-tocco);
-    padding: 0 var(--spazio-3);
-    gap: var(--spazio-3);
+    padding: 0 var(--spazio-4) 0 var(--spazio-2);
+    gap: var(--spazio-1);
     font-size: var(--tipo-corpo-piccolo);
-    border-radius: var(--raggio-2);
+    border-radius: var(--raggio-tondo);
+  }
+  .guscio .nav-voce:hover {
+    color: var(--colore-testo-primario);
   }
   .guscio .nav-voce.is-on {
     background: var(--colore-accento-tenue);
   }
-  /* Con sfondo sul link attivo il bordo sinistro diventa un padding invisibile. */
+  .guscio .nav-voce.is-on .nav-icona {
+    background: none;
+  }
+  .guscio .nav-indicatore,
   .guscio .nav-voce.is-on::before {
     display: none;
   }
-  /* Contatore di notifiche: si sposta per allinearsi con l'icona nella riga orizzontale. */
   .guscio .nav-icona .contatore {
     top: -8px;
     left: 12px;
+  }
+  /* Intestazione e contenuto condividono la stessa colonna centrata. */
+  .intestazione-area {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--larghezza-pagina, 720px);
+    margin: 0 auto;
+    padding-top: var(--spazio-10);
+  }
+  .piede-sito {
+    display: block;
+    border-top: 1px solid var(--colore-linea);
+  }
+  .piede-sito-riga {
+    display: flex;
+    align-items: center;
+    gap: var(--spazio-4);
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--spazio-6) var(--spazio-8);
+  }
+  .piede-sito-marchio {
+    display: flex;
+    align-items: baseline;
+    font-size: var(--tipo-titolo-3);
+    font-weight: var(--tipo-peso-forte);
+    font-stretch: var(--tipo-larghezza-stretta);
+  }
+  .piede-sito-link {
+    display: flex;
+    gap: var(--spazio-5);
+    margin-left: auto;
+    font-size: var(--tipo-corpo-piccolo);
+  }
+  .piede-sito-link a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--area-tocco);
+    color: var(--colore-testo-secondario);
+    text-decoration: none;
+  }
+  .piede-sito-link a:hover {
+    color: var(--colore-testo-primario);
+    text-decoration: underline;
   }
 }

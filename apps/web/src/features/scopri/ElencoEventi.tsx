@@ -170,7 +170,7 @@ export function ElencoEventi({
               {serata.etichetta}
             </h2>
           </div>
-          <ul className="m-0 list-none p-0">
+          <ul className="elenco-serata m-0 list-none p-0">
             {serata.eventi.map((evento, numero) => {
               const dati = {
                 ...datiScheda(evento, copertine.data, nomiGeneri),
@@ -178,7 +178,12 @@ export function ElencoEventi({
               };
               const inEvidenza = posizione === 0 && numero === 0;
               return (
-                <Rivela as="li" key={evento.id} indice={Math.min(indice++, 6)}>
+                <Rivela
+                  as="li"
+                  key={evento.id}
+                  indice={Math.min(indice++, 6)}
+                  className={inEvidenza ? 'in-evidenza' : ''}
+                >
                   {inEvidenza ? <SchedaEvidenza dati={dati} /> : <RigaEvento dati={dati} />}
                 </Rivela>
               );

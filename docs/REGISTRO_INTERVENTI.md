@@ -93,3 +93,55 @@ controllo umano di ogni foto a piena risoluzione resta consigliato prima della b
 | Pagine evento pubbliche | Tocca le regole di visibilità degli eventi: serve un ADR | D-18 |
 | Scadenza delle sessioni | Non disponibile nel piano gratuito di Supabase | ROADMAP, iterazione 12 |
 | Repository privato | Scelta del product owner nelle impostazioni di GitHub | ROADMAP, iterazione 12 |
+
+## 2026-11-14 (sera) — Rifiniture dell'interfaccia e layout desktop da sito
+
+Richiesta: dopo l'analisi delle schermate reali, correggere i difetti trovati, applicare le
+migliorie di interfaccia e rendere la versione desktop «più sito che applicazione», diversa
+dal telefono. Ramo `feat/rifiniture-e-layout-desktop`.
+
+### Pubblicazione e CI
+
+- PR #71 e #72 unite dal product owner; la CI di `main` è fallita per un test nuovo
+  (anteprima dei link, corretto con la PR #82) e per la mappa su Firefox nei runner, che
+  falliva già prima. Lo staging è stato pubblicato a mano con `workflow_dispatch`.
+- Firefox in CI: i driver Mesa non sono bastati; in questo ramo Firefox gira con uno schermo
+  virtuale (Xvfb, `NOXA_FIREFOX_CON_SCHERMO`). Esito da verificare nella CI della PR.
+- PR di Dependabot #73–#81: nessuna unita; su sette c'è il motivo in un commento. #74
+  (`setup-uv`) e #81 (ESLint 10) si possono unire quando la CI di `main` è verde.
+
+### Correzioni
+
+- Barra laterale del tablet a sinistra (compariva a destra).
+- Campanella neutra, in accento solo con notifiche da leggere.
+- Barra «Salva» del diario e delle serate esattamente sopra la navigazione (`--nav-altezza`):
+  prima restava un varco da cui spuntava il contenuto.
+- Diario vuoto senza il riquadro tratteggiato riservato alla Fase 2.
+- Serata libera con la copertina della serata (foto e titolo) al posto del rettangolo grigio.
+- Dettaglio evento: con la copertina generata il titolo non si ripete sotto (resta per i
+  lettori di schermo).
+- Stati vuoti con l'icona su fondo tenue dell'accento.
+- «Cerca amici» al posto di «Cerca per username» nel pulsante; il conteggio dei membri non va
+  più a capo.
+- Tolta dalla libreria una foto con un testo leggibile su uno schermo (restano 43 foto).
+
+### Layout desktop (ADR-0033)
+
+Sopra i 1024 px: barra in alto con marchio e aree, piè di pagina con i documenti, colonna
+centrata, Scopri a griglia con l'evento in evidenza a tutta riga, dettaglio evento a due
+colonne con la locandina che resta in vista, Benvenuto come pagina di presentazione.
+
+### Due falsi allarmi dell'analisi
+
+- La data in formato `mm/dd/yyyy` nel diario e la scritta «Verifica completata» nell'accesso
+  compaiono solo nel browser dei test (lingua inglese, Turnstile simulato): con un browser in
+  italiano il campo data è `gg/mm/aaaa` e il controllo è il riquadro di Cloudflare.
+
+### Non fatto
+
+| Voce | Motivo | Dove è nel piano |
+|---|---|---|
+| Profilo con statistiche e badge | È l'iterazione 11 | ROADMAP, iterazione 11 |
+| Layout a più colonne per Organizza, Vivi, Ricorda e Profilo su desktop | Ogni area va pensata a sé | ROADMAP, iterazione 12 |
+| Meno carattere monospazio, «Privacy e dati» più leggibile, nomi di area e titoli allineati | Toccano molte schermate e i loro test | ROADMAP, iterazione 12 |
+| Resa delle foto nel tema chiaro | Serve una tinta diversa per il tema chiaro | ROADMAP, iterazione 12 |

@@ -28,6 +28,7 @@ export function Benvenuto() {
     <Schermata
       bagliore
       inFondo
+      largo
       piedeSenzaFilo
       piede={
         <>

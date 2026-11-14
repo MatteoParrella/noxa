@@ -200,7 +200,7 @@
 /* Sul telefono la navigazione è una barra fissa in fondo (componenti.css, «Guscio dell'app»):
    la barra delle azioni si ferma sopra di lei, alla stessa altezza che il contenuto le lascia. */
 .guscio .gr-barra-fondo {
-  bottom: calc(80px + env(safe-area-inset-bottom));
+  bottom: calc(var(--nav-altezza) + env(safe-area-inset-bottom));
 }
 @media (min-width: 48rem) {
   .guscio .gr-barra-fondo {
@@ -300,16 +300,6 @@
   justify-content: flex-end;
   gap: 6px;
   padding: 64px var(--spazio-5) 18px;
-}
-.se-cop-tipo {
-  background: var(--colore-superficie-3);
-  color: var(--colore-testo-primario);
-}
-.se-cop-tipo .se-data-grande {
-  font-family: var(--tipo-famiglia-mono);
-  font-size: 3.5rem;
-  line-height: 0.9;
-  letter-spacing: -0.05em;
 }
 .se-cop .se-cop-titolo {
   font-size: 2.5rem;
@@ -878,4 +868,9 @@
     padding-left: 0;
     padding-right: 0;
   }
+}
+
+/* Il conteggio dei membri non si spezza a capo tra numero e parola. */
+.gr-conteggio {
+  white-space: nowrap;
 }

@@ -47,6 +47,11 @@ export function BarraNavigazione({ children }: { children?: ReactNode }) {
   );
   return (
     <nav className="barra-nav" aria-label="Principale">
+      {/* Marchio nella barra in alto del layout desktop (ADR-0033); decorativo. */}
+      <span className="nav-marchio" aria-hidden="true">
+        noxa
+        <span className="marchio-punto" />
+      </span>
       {attiva >= 0 && (
         <span
           className="nav-indicatore"

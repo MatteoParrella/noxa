@@ -888,3 +888,76 @@
 .copertina-sostitutiva .cop-tipo {
   position: relative;
 }
+
+/* ---------- Layout desktop «da sito» (ADR-0033) ---------- */
+@media (min-width: 64rem) {
+  /* Scopri usa tutta la colonna larga: eventi in griglia, evento in evidenza a tutta riga. */
+  .scopri-sito {
+    --larghezza-pagina: 1120px;
+  }
+  .scopri-sito .scopri-comandi {
+    max-width: 720px;
+  }
+  .elenco-serata {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--spazio-10);
+  }
+  .elenco-serata > .in-evidenza {
+    grid-column: 1 / -1;
+    margin-bottom: var(--spazio-4);
+  }
+  .elenco-serata .evidenza {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: stretch;
+  }
+  .elenco-serata .copertina-evidenza {
+    aspect-ratio: auto;
+    min-height: 340px;
+    padding: var(--spazio-8);
+  }
+  .elenco-serata .evidenza-titolo {
+    font-size: var(--tipo-display);
+  }
+  .elenco-serata .evidenza-corpo {
+    justify-content: center;
+    gap: var(--spazio-4);
+    padding: var(--spazio-8);
+  }
+  .elenco-serata .riga-compatta {
+    --miniatura: 132px;
+    height: 100%;
+    column-gap: var(--spazio-5);
+  }
+  .con-amici-fila {
+    margin: 0;
+    padding: 0 0 var(--spazio-2);
+  }
+  .con-amici-fila > li {
+    width: 260px;
+  }
+
+  /* Dettaglio evento: locandina a sinistra che resta in vista, informazioni a destra. */
+  .dettaglio {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: start;
+    gap: var(--spazio-12);
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--spazio-10) var(--spazio-8) 0;
+  }
+  .dettaglio > .copertina-dettaglio {
+    position: sticky;
+    top: calc(var(--spazio-16) + var(--spazio-6));
+    height: min(560px, calc(100dvh - 140px));
+    overflow: hidden;
+    border-radius: var(--raggio-3);
+  }
+  .dettaglio > .dettaglio-corpo {
+    max-width: none;
+    margin: 0;
+    padding: 0 0 var(--spazio-8);
+  }
+}

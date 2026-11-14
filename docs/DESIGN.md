@@ -72,9 +72,11 @@ flowchart LR
   tra route con View Transitions API (fade + leggero traslato, 180/280 ms). Nessuna
   animazione infinita; con `prefers-reduced-motion` solo dissolvenze brevi (ADR-0019,
   ADR-0022, `src/styles/movimento.css`).
-- Layout responsive (ADR-0022): l'app è portrait-first ma funziona pienamente in landscape e
-  su browser desktop. A **≥ 768 px** la barra di navigazione diventa una sidebar sinistra
-  (68 px, sole icone); a **≥ 1024 px** la sidebar si allarga a 200 px con icone e etichette.
+- Layout responsive (ADR-0022, ADR-0033): l'app è portrait-first ma funziona pienamente in
+  landscape e su browser desktop. Tra **768 e 1023 px** la barra di navigazione è una sidebar
+  sinistra (68 px, sole icone); a **≥ 1024 px** Noxa si presenta come un sito: barra in alto
+  con marchio e aree, piè di pagina con i documenti, colonna centrata da 720 o 1120 px
+  (`--larghezza-pagina`), Scopri a griglia, dettaglio evento a due colonne, Benvenuto largo.
   L'area di moderazione usa container query e si adatta a qualsiasi larghezza, compreso il
   portrait su tablet. Token di riferimento: `--bp-tablet` (768 px), `--bp-desktop` (1024 px),
   `--sidebar-stretta` (68 px), `--sidebar-larga` (200 px) in `tokens.css`.

@@ -22,14 +22,6 @@
   height: 14px;
 }
 
-/* spazio riservato alla Fase 2: vuoto, senza contenuti finti */
-.ri-riservato {
-  height: 88px;
-  margin: var(--spazio-3) 0 var(--spazio-1);
-  border: 1px dashed var(--colore-linea);
-  border-radius: var(--raggio-3);
-}
-
 .ri-azioni {
   display: flex;
   justify-content: flex-end;

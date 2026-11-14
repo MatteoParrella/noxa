@@ -27,6 +27,8 @@ type Props = {
   testoOffline?: string;
   /** Classe del corpo, per esempio il passaggio orizzontale tra i passi. */
   classeCorpo?: string;
+  /** Su desktop occupa la colonna larga del sito (Benvenuto, ADR-0033). */
+  largo?: boolean;
 };
 
 /**
@@ -46,9 +48,14 @@ export function Schermata({
   inFondo = false,
   testoOffline,
   classeCorpo,
+  largo = false,
 }: Props) {
   return (
-    <main id="contenuto" className="schermo-accesso" tabIndex={-1}>
+    <main
+      id="contenuto"
+      className={classi('schermo-accesso', largo && 'schermo-largo')}
+      tabIndex={-1}
+    >
       {bagliore && <div className="bagliore-benvenuto" aria-hidden="true" />}
       {testoOffline ? <StatoConnessione testo={testoOffline} /> : <StatoConnessione />}
       <div className="schermo-testa">
