@@ -178,7 +178,7 @@ jobs:
         working-directory: services/worker
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
       - run: uv sync --frozen
@@ -220,7 +220,7 @@ jobs:
       - run: pnpm exec supabase test db
       - run: pnpm exec supabase db lint --schema public,private --level warning --fail-on error
       # Coda e pipeline del worker sul database vero, con il ruolo noxa_worker (ADR-0003).
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
       - name: Test di integrazione del worker
@@ -247,7 +247,7 @@ jobs:
       # Solo informativo sugli strumenti di sviluppo (lint, test), che non vengono pubblicati.
       - run: pnpm audit --audit-level high
         continue-on-error: true
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - name: pip-audit sulle dipendenze del worker
         working-directory: services/worker
         run: |
