@@ -26,6 +26,10 @@ TERMINI_ALCOL = (
     "beer pong",
     "bottle service",
     "tavolo con bottiglia",
+    "tavoli con bottiglia",
+    "bottiglia inclusa",
+    # "Tavolo 150€ a bottiglia" (The Beach, 2026-11-14).
+    "a bottiglia",
     "bottiglia omaggio",
     "shot",
     "shots",
