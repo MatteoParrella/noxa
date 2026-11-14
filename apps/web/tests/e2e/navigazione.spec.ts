@@ -103,8 +103,12 @@ test('un indirizzo che non esiste mostra la pagina 404 con il ritorno a Scopri',
 
 test('l’anteprima dei link condivisi ha titolo, descrizione e immagine', async ({ page }) => {
   await page.goto('/benvenuto/');
-  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Noxa');
-  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+  // React può ripetere i meta nel documento dopo l'aggancio: basta il primo.
+  await expect(page.locator('meta[property="og:title"]').first()).toHaveAttribute(
+    'content',
+    'Noxa',
+  );
+  await expect(page.locator('meta[property="og:image"]').first()).toHaveAttribute(
     'content',
     /\/icone\/anteprima\.png$/,
   );
