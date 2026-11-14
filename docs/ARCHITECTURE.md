@@ -162,6 +162,11 @@ sequenceDiagram
   DATA_MODEL.md §8), così lo username torna libero.
 - Accesso, recupero e reinvio dell'email passano dallo stesso Turnstile (ADR-0020); dopo il
   recupero della password l'app chiude le sessioni sugli altri dispositivi.
+- Il cambio della password richiede un accesso recente (`secure_password_change`): una
+  sessione rubata da tempo non basta per cambiarla. Il recupero via email apre una sessione
+  nuova, quindi non è toccato.
+- `elimina-account` risponde solo alle origini di `NOXA_ORIGINI_APP` (il sito e le app
+  native); senza la variabile valgono solo le origini di sviluppo locale.
 
 ### 4.2 Ricerca eventi
 

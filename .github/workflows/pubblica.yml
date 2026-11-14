@@ -61,11 +61,11 @@ jobs:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
       PROGETTO: ${{ vars.SUPABASE_PROJECT_REF }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -73,6 +73,15 @@ jobs:
       - run: pnpm exec supabase link --project-ref "$PROGETTO"
       # Solo migrazioni: il seed con gli utenti di test non va mai fuori dal locale.
       - run: pnpm exec supabase db push --yes
+      # Origini a cui risponde elimina-account: il sito e le app native (Capacitor). Stesso
+      # valore di scripts/configura_ambiente.sh, ripetuto qui perché valga a ogni pubblicazione.
+      - name: Origini ammesse dalle funzioni
+        env:
+          URL_APP: ${{ vars.NEXT_PUBLIC_URL_APP }}
+        run: |
+          test -n "$URL_APP"
+          pnpm exec supabase secrets set --project-ref "$PROGETTO" \
+            "NOXA_ORIGINI_APP=${URL_APP%/},https://localhost,capacitor://localhost"
       # verify_jwt di ogni funzione viene da config.toml (invia-push senza JWT, ADR-0026).
       - run: pnpm exec supabase functions deploy --use-api --project-ref "$PROGETTO"
 
@@ -87,11 +96,11 @@ jobs:
         ambiente: ${{ fromJSON(needs.ambienti.outputs.elenco) }}
     environment: ${{ matrix.ambiente }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .nvmrc
           cache: pnpm

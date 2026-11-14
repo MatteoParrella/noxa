@@ -178,6 +178,8 @@ passo "Segreti delle Edge Functions"
   printf 'VAPID_PRIVATE_KEY=%s\n' "$VAPID_PRIVATE_KEY"
   printf 'VAPID_SUBJECT=%s\n' "mailto:${EMAIL_MITTENTE:-sicurezza@noxanight.it}"
   printf 'NOXA_PUSH_SEGRETO=%s\n' "$NOXA_PUSH_SEGRETO"
+  # Origini a cui risponde elimina-account: il sito e le app native (Capacitor).
+  printf 'NOXA_ORIGINI_APP=%s\n' "$URL_APP,https://localhost,capacitor://localhost"
 } >"$TEMP/segreti_funzioni"
 pnpm exec supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
   --env-file "$TEMP/segreti_funzioni" </dev/null
@@ -197,6 +199,7 @@ jq -n \
     mailer_otp_exp: 3600,
     smtp_max_frequency: 60,
     password_min_length: 10,
+    security_update_password_require_reauthentication: true,
     jwt_exp: 3600,
     refresh_token_rotation_enabled: true,
     security_refresh_token_reuse_interval: 10,
