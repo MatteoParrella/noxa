@@ -126,15 +126,19 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps ${{ matrix.browser }}
-      # Firefox sui runner senza GPU non crea il contesto WebGL della mappa («Exhausted GL driver
-      # options»): servono i driver software di Mesa, che l'immagine del runner non ha più.
+      # Firefox senza schermo sui runner non crea il contesto WebGL della mappa («Exhausted GL
+      # driver options»): lo si avvia con uno schermo virtuale (Xvfb) e i driver software di Mesa.
       - if: matrix.browser == 'firefox'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libgl1-mesa-dri libglx-mesa0 libegl-mesa0 libegl1 libgles2
-      - run: pnpm --filter web test:e2e --project=${{ matrix.progetto }}
+          sudo apt-get install -y --no-install-recommends xvfb libgl1-mesa-dri libglx-mesa0
+      - if: matrix.browser == 'firefox'
+        run: xvfb-run --auto-servernum pnpm --filter web test:e2e --project=${{ matrix.progetto }}
         env:
+          NOXA_FIREFOX_CON_SCHERMO: '1'
           LIBGL_ALWAYS_SOFTWARE: '1'
+      - if: matrix.browser != 'firefox'
+        run: pnpm --filter web test:e2e --project=${{ matrix.progetto }}
       - if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:

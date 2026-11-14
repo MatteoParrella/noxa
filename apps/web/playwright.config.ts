@@ -29,6 +29,9 @@ export default defineConfig({
       name: 'desktop-firefox',
       use: {
         ...devices['Desktop Firefox'],
+        // In CI Firefox gira con uno schermo virtuale (Xvfb): senza schermo sui runner il WebGL
+        // non parte nemmeno forzato (.github/workflows/ci.yml).
+        ...(process.env.NOXA_FIREFOX_CON_SCHERMO ? { headless: false } : {}),
         // I runner di GitHub non hanno GPU: Firefox headless mette in blocklist il WebGL
         // software (llvmpipe) e la mappa MapLibre va in errore. Lo si forza solo nei test.
         launchOptions: {
