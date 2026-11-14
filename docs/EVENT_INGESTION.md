@@ -54,7 +54,7 @@ crea", "Unisci", "Scarta" con motivazione).
 | Tipo (`tipo_fonte`) | Adattatore | Stato nel MVP | Note |
 |---|---|---|---|
 | `sito_locale` | `sito_jsonld` | Fase 1 | Legge dati strutturati schema.org `Event` (JSON-LD o microdata) e feed iCal se presenti. È il primo da provare per ogni sito. |
-| `sito_locale` | `sito_html_<locale>` | Fase 1 | Adattatore specifico per un sito senza dati strutturati: estende `AdattatoreSitoHtml` (`fonti/sito_html.py`) dichiarando i selettori CSS. Il primo è `sito_html_the_club` (The Club, Milano), del 2026-11-11. Playwright solo se la pagina richiede JavaScript. |
+| `sito_locale` | `sito_html_<locale>` | Fase 1 | Adattatore specifico per un sito senza dati strutturati: estende `AdattatoreSitoHtml` (`fonti/sito_html.py`) dichiarando i selettori CSS. Il primo è `sito_html_the_club` (The Club, Milano), del 2026-11-11; poi `sito_html_alcatraz` (Alcatraz, Milano), del 2026-11-14, perché il JSON-LD delle sue pagine ha date sbagliate. Playwright solo se la pagina richiede JavaScript. |
 | `instagram` | `instagram_business_discovery` | Fase 1 | Instagram Graph API, endpoint Business Discovery, solo per account Business o Creator. |
 | `resident_advisor`, `xceed`, `dice` | `aggregatore_<nome>` | Fase 3 | Solo con accordo scritto o API ufficiale (D-05). Fino ad allora `stato_conformita = 'vietata'`. |
 | *(flyer)* | estrattore flyer | Fase 1 | Caricati dagli utenti; non sono righe di `fonti` (§5). |
