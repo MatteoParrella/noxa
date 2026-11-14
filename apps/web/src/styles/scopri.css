@@ -149,8 +149,9 @@
 
 /* ---------- riga evento compatta ---------- */
 .riga-compatta {
+  --miniatura: 108px;
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
+  grid-template-columns: var(--miniatura) minmax(0, 1fr);
   column-gap: 14px;
   padding: 14px 0;
   border-bottom: 1px solid var(--colore-linea);
@@ -162,9 +163,16 @@
   flex-direction: column;
 }
 .miniatura {
-  width: 84px;
-  height: 84px;
-  border-radius: var(--raggio-2);
+  width: var(--miniatura, 108px);
+  height: var(--miniatura, 108px);
+  border-radius: var(--raggio-3);
+}
+/* Sotto i 370 px la copertina cede spazio al testo. */
+@media (max-width: 369px) {
+  .riga-compatta,
+  .riga-scheletro {
+    --miniatura: 92px;
+  }
 }
 .rc-titolo {
   margin: 0;
@@ -202,7 +210,7 @@
   gap: var(--spazio-1) var(--spazio-3);
   margin-top: 6px;
   font-family: var(--tipo-famiglia-mono);
-  font-size: var(--tipo-mono-dato);
+  font-size: var(--tipo-corpo-piccolo);
   color: var(--colore-testo-secondario);
 }
 .evidenza-corpo .rc-meta {
@@ -234,18 +242,22 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 28px;
-  margin-top: var(--spazio-1);
+  min-height: var(--spazio-8);
+  margin-top: var(--spazio-2);
   font-size: var(--tipo-corpo-piccolo);
+  font-weight: var(--tipo-peso-medio);
   color: var(--colore-testo-primario);
 }
 .riga-amici-part .avatar {
-  width: 26px;
-  height: 26px;
-  font-size: 0.5625rem;
+  width: var(--spazio-8);
+  height: var(--spazio-8);
+  font-size: var(--tipo-etichetta);
 }
 .riga-amici-part .avatar-gruppo > .avatar + .avatar {
-  margin-left: -7px;
+  margin-left: calc(var(--spazio-2) * -1);
+}
+.evidenza-corpo .riga-amici-part {
+  margin-top: 0;
 }
 .riga-amici-apri {
   width: 100%;
@@ -264,9 +276,68 @@
   color: var(--colore-testo-secondario);
 }
 .riga-amici-dettaglio {
-  min-height: 56px;
+  min-height: var(--spazio-16);
   border-top: 1px solid var(--colore-linea);
   border-bottom: 1px solid var(--colore-linea);
+  font-size: var(--tipo-corpo);
+}
+.riga-amici-dettaglio .avatar {
+  width: var(--spazio-10);
+  height: var(--spazio-10);
+  font-size: var(--tipo-didascalia);
+}
+
+/* ---------- con i tuoi amici: fila in cima all'elenco ---------- */
+.con-amici {
+  padding-bottom: var(--spazio-2);
+}
+.con-amici-fila {
+  display: flex;
+  gap: var(--spazio-3);
+  margin: 0 calc(var(--spazio-5) * -1);
+  padding: 0 var(--spazio-5) var(--spazio-2);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--spazio-5);
+  scrollbar-width: none;
+}
+.con-amici-fila::-webkit-scrollbar {
+  display: none;
+}
+.con-amici-fila > li {
+  flex: none;
+  width: min(72%, 260px);
+  scroll-snap-align: start;
+}
+.scheda-amici {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--colore-linea);
+  border-radius: var(--raggio-3);
+  background: var(--colore-superficie-1);
+  color: inherit;
+  text-decoration: none;
+}
+.scheda-amici .miniatura {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 0;
+}
+.scheda-amici-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--spazio-3);
+}
+.scheda-amici-corpo .rc-titolo {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 }
 
 /* ---------- Mi interessa / Partecipo ---------- */
@@ -302,11 +373,31 @@
   border-color: var(--colore-testo-primario);
   color: var(--colore-sfondo);
 }
-/* Partecipo è l'unico arancio della schermata. */
+/* Partecipo è l'unico arancio della schermata: tenue a riposo, pieno quando è scelto. */
+.partecipa-opz.forte {
+  background: var(--colore-accento-tenue);
+  border-color: var(--colore-accento);
+  color: var(--colore-accento-testo);
+  font-weight: var(--tipo-peso-forte);
+}
+.partecipa-opz.forte:hover {
+  background: var(--colore-accento-tenue);
+}
 .partecipa-opz.is-on.forte {
   background: var(--colore-accento);
   border-color: var(--colore-accento);
   color: var(--colore-testo-su-accento);
+}
+/* Riscontro alla scelta: un solo battito, solo dopo il tocco (ADR-0019). */
+@media (prefers-reduced-motion: no-preference) {
+  .partecipa-opz.appena-scelto {
+    animation: battito 400ms var(--curva-standard) 1;
+  }
+  @keyframes battito {
+    40% {
+      transform: scale(1.05);
+    }
+  }
 }
 .partecipa-opz:disabled {
   background: var(--colore-superficie-2);
@@ -482,16 +573,18 @@
   padding: var(--spazio-6) 0;
 }
 .scheletro-miniatura {
-  width: 84px;
-  height: 84px;
+  width: var(--miniatura, 108px);
+  height: var(--miniatura, 108px);
+  border-radius: var(--raggio-3);
 }
 .scheletro-evidenza {
   height: 210px;
   border-radius: var(--raggio-3);
 }
 .riga-scheletro {
+  --miniatura: 108px;
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
+  grid-template-columns: var(--miniatura) minmax(0, 1fr);
   gap: 14px;
 }
 @keyframes dissolvi {

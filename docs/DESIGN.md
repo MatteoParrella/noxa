@@ -93,6 +93,17 @@ flowchart LR
   copertine sostitutive (ADR-0023). L'accento del design system
   (arancio "lampione al sodio", esplorazione A) resta per azioni e stati attivi.
 
+- Rinfresco dell'interfaccia (`design/F-01-rinfresco-interfaccia/brief.md`), implementato su
+  richiesta del product owner direttamente nel codice con i soli token esistenti, senza tavole
+  di Claude Design: Benvenuto con le quattro promesse dell'app su copertine generate di
+  esempio (nessun evento reale); in Scopri miniature più grandi, riga degli amici subito sotto
+  l'orario e fila «Con i tuoi amici» in cima (`SchedaAmici`: solo amici confermati con la
+  scelta visibile, R-67; non ripete l'evento in evidenza e non compare con il filtro «solo
+  eventi con amici»); «Partecipo» in accento tenue a riposo e pieno quando è scelto, con un
+  battito singolo dopo il tocco; fondo tenue dietro l'icona dell'area attiva e luna per Vivi.
+  Le tavole di `design/F-01-scopri/` e `design/F-10-accesso/` restano il riferimento per
+  tutto il resto; il progetto Claude Design va riallineato a queste modifiche.
+
 - `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda,
   SchedaEvidenza e RigaEvento, Copertina, Genere, AmiciPartecipano, SelettorePartecipazione,
   LinkEsterno, Calendario, Avviso, Foglio, Badge e Contatore, Avatar e GruppoAvatar, Interruttore,

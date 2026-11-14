@@ -159,6 +159,40 @@ test('le schede mostrano solo quello che serve, senza pressione (F-01, F-04, R-4
   await expect(page.getByText('Vedi solo gli eventi a cui puoi entrare.')).toBeVisible();
 });
 
+test('con i tuoi amici: una fila in cima, senza ripetere l’evento in evidenza (F-04, R-67)', async ({
+  page,
+  supabase,
+}) => {
+  // Con i dati di prova solo l'evento in evidenza ha amici: la fila non compare.
+  await page.goto('/scopri/');
+  await expect(page.getByRole('link', { name: /Notte Ferrovia/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Con i tuoi amici' })).toHaveCount(0);
+
+  const conAmici = EVENTI_DI_PROVA.map((evento) =>
+    evento.titolo === 'Open Decks'
+      ? {
+          ...evento,
+          amici: [
+            {
+              id: '00000000-0000-4000-8000-0000000000f4',
+              nome_visualizzato: 'Sara',
+              avatar_path: null,
+              stato: 'interessato',
+            },
+          ],
+          amici_interessati: 1,
+        }
+      : evento,
+  );
+  supabase.rispondi('cerca_eventi', { stato: 200, corpo: conAmici });
+  await page.reload();
+  const fila = page.getByRole('region', { name: 'Con i tuoi amici' });
+  await expect(fila.getByRole('link')).toHaveCount(1);
+  await expect(fila.getByRole('link', { name: /Open Decks/ })).toContainText('Sara');
+  // L'evento in evidenza resta una volta sola.
+  await expect(page.getByRole('link', { name: /Notte Ferrovia/ })).toHaveCount(1);
+});
+
 test('quando: stasera, domani, weekend e una data dal calendario', async ({ page, supabase }) => {
   await page.goto('/scopri/');
   await expect(page.getByRole('link', { name: /Notte Ferrovia/ })).toBeVisible();

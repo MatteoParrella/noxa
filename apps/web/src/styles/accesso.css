@@ -491,3 +491,49 @@
     transform: none;
   }
 }
+
+/* ---------- Benvenuto: le promesse dell'app, in una fila che scorre ---------- */
+.promesse {
+  display: flex;
+  gap: var(--spazio-3);
+  margin: 0 calc(var(--spazio-5) * -1);
+  padding: 0 var(--spazio-5) var(--spazio-1);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--spazio-5);
+  scrollbar-width: none;
+}
+.promesse::-webkit-scrollbar {
+  display: none;
+}
+.promessa {
+  flex: none;
+  width: min(74%, 280px);
+  overflow: hidden;
+  scroll-snap-align: start;
+  border: 1px solid var(--colore-linea);
+  border-radius: var(--raggio-3);
+  background: var(--colore-superficie-1);
+}
+.promessa-copertina {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+}
+.promessa-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spazio-1);
+  padding: var(--spazio-3);
+}
+/* Da tablet in su le quattro promesse stanno in una griglia due per due. */
+@media (min-width: 768px) {
+  .promesse {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .promessa {
+    width: auto;
+  }
+}

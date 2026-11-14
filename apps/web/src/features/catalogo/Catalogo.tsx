@@ -26,7 +26,12 @@ import { RigaPersona } from '@/components/ui/RigaPersona';
 import { Rivela } from '@/components/ui/Movimento';
 import { Pillole } from '@/components/ui/Pillole';
 import { Pulsante } from '@/components/ui/Pulsante';
-import { RigaEvento, SchedaEvidenza, type DatiSchedaEvento } from '@/components/ui/SchedaEvento';
+import {
+  RigaEvento,
+  SchedaAmici,
+  SchedaEvidenza,
+  type DatiSchedaEvento,
+} from '@/components/ui/SchedaEvento';
 import {
   SelettorePartecipazione,
   type SceltaPartecipazione,
@@ -300,6 +305,25 @@ export function Catalogo({ tema }: { tema: Tema }) {
             ),
           }}
         />
+      </Sezione>
+
+      <Sezione titolo="Scheda della fila «Con i tuoi amici»">
+        <ul className="con-amici-fila">
+          <li>
+            <SchedaAmici
+              dati={{
+                ...EVENTO,
+                amici: (
+                  <AmiciPartecipano
+                    persone={[{ nome: 'Sara' }]}
+                    altri={0}
+                    testo="Sara è interessata"
+                  />
+                ),
+              }}
+            />
+          </li>
+        </ul>
       </Sezione>
 
       <Sezione titolo="Riga evento compatta">

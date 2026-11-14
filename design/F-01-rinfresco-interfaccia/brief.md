@@ -10,6 +10,12 @@ servono token nuovi (vedi "Token") si aggiornano prima `design/sistema/noxa.css`
 `tokens.css`, nella stessa PR dell'implementazione (DESIGN.md §2). Il prompt da incollare in
 Claude Design è tutto quello che segue la riga `---`.
 
+**Stato.** Le sezioni 1, 2 (miniature più grandi al posto delle varianti A e B, fila «Con i
+tuoi amici», riga degli amici, testo piccolo), 3 e 5 sono già nel codice, implementate su
+richiesta del product owner con i soli token esistenti (DESIGN.md §3). Restano da disegnare
+la sezione 4 (momenti di riscontro) e le varianti A e B di Scopri; le tavole servono anche a
+riallineare il progetto Claude Design a ciò che è in produzione.
+
 ---
 
 Nello **stesso progetto "Noxa — Design system"** rivedi le schermate elencate sotto. Oggi
