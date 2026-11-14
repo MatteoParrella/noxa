@@ -3,11 +3,16 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, type CSSProperties } from 'react';
+import { Copertina } from '@/components/ui/Copertina';
 import { Entra } from '@/components/ui/Movimento';
+import type { Famiglia } from '@/lib/copertinaGenerata';
 import { messaggi } from '@/lib/messaggi/it';
 import { PERCORSI } from './documenti';
 import { Schermata } from './Schermata';
 import { useSessione } from './sessione';
+
+/** Una copertina generata per promessa: motivi di esempio, nessun evento reale (R-07). */
+const FAMIGLIE_PROMESSE: readonly Famiglia[] = ['house', 'techno', 'accento', 'dnb'];
 
 /** Prima schermata senza account: l'unica con il bagliore arancio (design/F-10-accesso). */
 export function Benvenuto() {
@@ -55,13 +60,36 @@ export function Benvenuto() {
         </span>
         <span className="marchio-punto" aria-hidden="true" />
       </h1>
-      <Entra className="mt-5 flex flex-col gap-5" indice={2}>
+      <Entra className="mt-5" indice={2}>
         <p className="frase-benvenuto">{testi.frase}</p>
-        <p className="t-mono-dato c-2 m-0 flex flex-wrap gap-x-3.5 gap-y-1">
-          {testi.aree.map((area) => (
-            <span key={area}>{area}</span>
+      </Entra>
+      <Entra className="mt-6" indice={3}>
+        <h2 className="sr-only">{testi.promesseTitolo}</h2>
+        {/* Fila che scorre: raggiungibile da tastiera, come chiede WCAG per le aree scorrevoli. */}
+        <ul className="promesse" tabIndex={0} aria-label={testi.promesseTitolo}>
+          {testi.promesse.map((promessa, indice) => (
+            <li key={promessa.area} className="promessa">
+              <Copertina
+                copertina={{
+                  tipo: 'tipografica',
+                  alt: '',
+                  generata: {
+                    seme: `benvenuto-${promessa.area}`,
+                    famiglia: FAMIGLIE_PROMESSE[indice] ?? 'accento',
+                  },
+                }}
+                forma="miniatura"
+                ora={`0${indice + 1}`}
+                titolo={promessa.area}
+                className="promessa-copertina"
+              />
+              <div className="promessa-corpo">
+                <h3 className="rc-titolo">{promessa.titolo}</h3>
+                <p className="t-corpo-s c-2 m-0">{promessa.testo}</p>
+              </div>
+            </li>
           ))}
-        </p>
+        </ul>
       </Entra>
     </Schermata>
   );

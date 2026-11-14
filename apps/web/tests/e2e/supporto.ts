@@ -1386,6 +1386,8 @@ export async function simulaTurnstile(pagina: Page) {
 type Opzioni = {
   /** Account con cui si apre l'app; null = nessuna sessione sul dispositivo. */
   account: AccountSimulato | null;
+  /** true = la schermata animata di apertura compare come alla prima visita. */
+  apertura: boolean;
 };
 
 /**
@@ -1398,7 +1400,17 @@ export const test = base.extend<Opzioni & { supabase: SupabaseSimulato }>({
    * genera gli eventi online/offline (Safari vero sì): nei test lo stato della rete segue
    * `setOffline`, come negli altri browser.
    */
-  context: async ({ context, browserName }, usa) => {
+  context: async ({ context, browserName, apertura }, usa) => {
+    if (!apertura) {
+      // La schermata di apertura copre la pagina per più di un secondo: nei test è già vista.
+      await context.addInitScript(() => {
+        try {
+          window.sessionStorage.setItem('noxa-apertura', '1');
+        } catch {
+          // Pagine senza archiviazione (about:blank): niente da segnare.
+        }
+      });
+    }
     if (browserName === 'webkit') {
       const impostaRete = (inRete: boolean) => {
         const finestra = window as Window & { __noxaInRete?: boolean };
@@ -1453,6 +1465,7 @@ export const test = base.extend<Opzioni & { supabase: SupabaseSimulato }>({
     await usa(page);
   },
   account: [ACCOUNT_DI_PROVA, { option: true }],
+  apertura: [false, { option: true }],
   supabase: [
     async ({ page, account }, usa) => {
       const simulato = new SupabaseSimulato(account);

@@ -1,7 +1,7 @@
 'use client';
 
-import { Check, Eye, EyeOff, Star } from 'lucide-react';
-import { useId } from 'react';
+import { CalendarPlus, Check, Eye, EyeOff, Star } from 'lucide-react';
+import { useId, useState } from 'react';
 import { classi } from '@/lib/classi';
 import { messaggi } from '@/lib/messaggi/it';
 import { Icona } from './Icona';
@@ -33,6 +33,17 @@ export function SelettorePartecipazione({
 }: Props) {
   const testi = messaggi.evento.partecipazione;
   const id = useId();
+  // Il battito parte solo dopo un tocco, non quando la schermata si apre con la scelta già fatta.
+  const [appenaScelto, setAppenaScelto] = useState(false);
+  const scegliPartecipo = () => {
+    const nuova = scelta === 'partecipo' ? null : 'partecipo';
+    setAppenaScelto(nuova === 'partecipo');
+    // Vibrazione breve dove il dispositivo la offre; altrove non succede nulla.
+    if (nuova === 'partecipo' && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(12);
+    }
+    onScegli(nuova);
+  };
   const stato =
     scelta === 'partecipo'
       ? testi.statoPartecipo
@@ -48,19 +59,26 @@ export function SelettorePartecipazione({
           className={classi('partecipa-opz', scelta === 'interessato' && 'is-on')}
           aria-pressed={scelta === 'interessato'}
           disabled={disattivato}
-          onClick={() => onScegli(scelta === 'interessato' ? null : 'interessato')}
+          onClick={() => {
+            setAppenaScelto(false);
+            onScegli(scelta === 'interessato' ? null : 'interessato');
+          }}
         >
           <Icona icona={Star} />
           {testi.interessa}
         </button>
         <button
           type="button"
-          className={classi('partecipa-opz forte', scelta === 'partecipo' && 'is-on')}
+          className={classi(
+            'partecipa-opz forte',
+            scelta === 'partecipo' && 'is-on',
+            scelta === 'partecipo' && appenaScelto && 'appena-scelto',
+          )}
           aria-pressed={scelta === 'partecipo'}
           disabled={disattivato}
-          onClick={() => onScegli(scelta === 'partecipo' ? null : 'partecipo')}
+          onClick={scegliPartecipo}
         >
-          <Icona icona={Check} />
+          <Icona icona={scelta === 'partecipo' ? Check : CalendarPlus} />
           {testi.partecipo}
         </button>
       </div>

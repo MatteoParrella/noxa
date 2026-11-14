@@ -152,6 +152,7 @@ export function VistaScopri() {
             online={online}
             oggi={oggi}
             conFiltri={attivi > 0}
+            soloAmici={filtri.soloAmici}
             onTogliFiltri={() => applica({ ...FILTRI_INIZIALI, quando: filtri.quando })}
           />
         </div>

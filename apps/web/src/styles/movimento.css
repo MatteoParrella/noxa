@@ -232,3 +232,88 @@
     transform: none;
   }
 }
+
+/* ---------- Schermata di apertura (una volta per sessione) ---------- */
+/*
+  Solo il simbolo: la «n» sale, il lampione si accende e il bagliore si allarga, poi il simbolo
+  cresce e la schermata si apre sulla pagina sotto. 2 s in totale, una sola volta. Non
+  intercetta i tocchi; con il movimento ridotto o nelle pagine successive non c'è.
+*/
+.apertura {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-apertura='vista']) .apertura {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--colore-sfondo);
+    pointer-events: none;
+    animation: apertura-esci 400ms var(--curva-uscita) 1600ms both;
+  }
+  .apertura-bagliore {
+    position: absolute;
+    width: min(150vw, 760px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, var(--bagliore-accento), transparent 100%);
+    animation: apertura-bagliore var(--movimento-ingresso) var(--curva-espressiva) 700ms both;
+  }
+  .apertura-simbolo {
+    position: relative;
+    width: min(44vw, 200px);
+    overflow: visible;
+    animation: apertura-apri 400ms var(--curva-uscita) 1600ms both;
+  }
+  .apertura-lettera {
+    fill: var(--colore-testo-primario);
+    /* La lettera sale da sotto la sua linea di base. */
+    clip-path: inset(0);
+  }
+  .apertura-lettera path {
+    animation: apertura-sali var(--movimento-espressivo) var(--curva-espressiva) 100ms both;
+  }
+  .apertura-punto {
+    fill: var(--colore-accento);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: apertura-accendi 600ms var(--curva-espressiva) 600ms both;
+  }
+  @keyframes apertura-sali {
+    from {
+      transform: translateY(200px);
+    }
+  }
+  @keyframes apertura-accendi {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.35);
+      opacity: 1;
+    }
+  }
+  @keyframes apertura-bagliore {
+    from {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+  }
+  @keyframes apertura-apri {
+    to {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+  @keyframes apertura-esci {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+}

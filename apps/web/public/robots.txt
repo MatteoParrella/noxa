@@ -1,0 +1,8 @@
+# Noxa è un'app con accesso: i motori di ricerca vedono solo le pagine pubbliche.
+User-agent: *
+Allow: /benvenuto/
+Allow: /privacy/
+Allow: /termini/
+Allow: /sicurezza/
+Allow: /bot/
+Disallow: /

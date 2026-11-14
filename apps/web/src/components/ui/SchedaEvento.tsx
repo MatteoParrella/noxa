@@ -74,9 +74,9 @@ export function SchedaEvidenza({ dati }: { dati: DatiSchedaEvento }) {
         </span>
       </Copertina>
       <span className="evidenza-corpo">
+        {dati.amici}
         <Etichette dati={dati} conEta={false} />
         <Meta meta={dati.meta} />
-        {dati.amici}
       </span>
     </Link>
   );
@@ -99,8 +99,31 @@ export function RigaEvento({ dati }: { dati: DatiSchedaEvento }) {
           {dati.locale} · {dati.comune}
         </span>
         <span className="rc-ora">{dati.orario}</span>
+        {dati.amici}
         <Etichette dati={dati} conEta />
         <Meta meta={dati.meta} />
+      </span>
+    </Link>
+  );
+}
+
+/** Scheda della fila "Con i tuoi amici": copertina larga, titolo e amici che partecipano. */
+export function SchedaAmici({ dati }: { dati: DatiSchedaEvento }) {
+  return (
+    <Link className="scheda-amici" href={dati.href} aria-label={dati.nome}>
+      <Copertina
+        copertina={dati.copertina}
+        forma="miniatura"
+        ora={dati.ora}
+        titolo={dati.titolo}
+        className="miniatura"
+      />
+      <span className="scheda-amici-corpo">
+        <h3 className="rc-titolo">{dati.titolo}</h3>
+        <span className="rc-luogo">
+          {dati.locale} · {dati.comune}
+        </span>
+        <span className="rc-ora">{dati.quando}</span>
         {dati.amici}
       </span>
     </Link>

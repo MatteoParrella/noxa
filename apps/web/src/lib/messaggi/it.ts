@@ -38,11 +38,40 @@ export const messaggi = {
     },
   },
 
+  nonTrovata: {
+    etichetta: 'Errore 404',
+    titolo: 'Questa pagina non esiste',
+    testo: 'Il link è sbagliato o la pagina è stata spostata.',
+    azione: 'Vai a Scopri',
+  },
+
   benvenuto: {
     luogo: 'Milano · Brianza',
     marchio: 'noxa',
     frase: 'Le tue serate a Milano e in Brianza, dall’idea al ritorno a casa.',
-    aree: ['Scopri', 'Organizza', 'Vivi', 'Ricorda'],
+    promesseTitolo: 'Cosa trovi in Noxa',
+    promesse: [
+      {
+        area: 'Scopri',
+        titolo: 'Cosa c’è stasera',
+        testo: 'Solo eventi a cui puoi entrare davvero.',
+      },
+      {
+        area: 'Organizza',
+        titolo: 'Decidete insieme',
+        testo: 'Chi viene, chi guida, come si torna.',
+      },
+      {
+        area: 'Vivi',
+        titolo: 'Torna a casa tranquillo',
+        testo: 'Solo gli amici che scegli vedono che sei arrivato.',
+      },
+      {
+        area: 'Ricorda',
+        titolo: 'Il diario delle tue serate',
+        testo: 'È solo tuo: nessun altro lo vede.',
+      },
+    ],
     creaAccount: 'Crea un account',
     hoGiaUnAccount: 'Ho già un account',
     termini: 'Termini',
@@ -488,6 +517,7 @@ export const messaggi = {
     entro: (km: number) => `entro ${km} km`,
     fino: (eta: number) => `fino a ${eta}+`,
     conAmici: 'con amici',
+    conITuoiAmici: 'Con i tuoi amici',
     tuttiGliEventi: 'Tutti gli eventi',
     vista: 'Vista',
     elenco: 'Elenco',

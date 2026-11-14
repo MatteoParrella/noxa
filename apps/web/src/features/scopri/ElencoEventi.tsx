@@ -7,7 +7,7 @@ import { AmiciPartecipano } from '@/components/ui/AmiciPartecipano';
 import { Icona } from '@/components/ui/Icona';
 import { Rivela } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
-import { RigaEvento, SchedaEvidenza } from '@/components/ui/SchedaEvento';
+import { RigaEvento, SchedaAmici, SchedaEvidenza } from '@/components/ui/SchedaEvento';
 import type { DataCalendario } from '@/lib/date';
 import { messaggi } from '@/lib/messaggi/it';
 import type { EventoElenco } from './api';
@@ -25,8 +25,13 @@ type Props = {
   online: boolean;
   oggi: DataCalendario | null;
   conFiltri: boolean;
+  /** Con il filtro "solo eventi con amici" la fila in cima ripeterebbe l'elenco. */
+  soloAmici?: boolean;
   onTogliFiltri: () => void;
 };
+
+/** Schede mostrate al massimo nella fila "Con i tuoi amici". */
+const MASSIMO_CON_AMICI = 8;
 
 /** Amici che partecipano a un evento della lista (F-04, R-67). */
 export function RigaAmici({ evento }: { evento: EventoElenco }) {
@@ -53,7 +58,14 @@ export function RigaAmici({ evento }: { evento: EventoElenco }) {
  * Elenco di Scopri (design/F-01-scopri, tavola 01): la prima serata si apre con la scheda in
  * evidenza, poi righe compatte; le sezioni dividono le serate di un intervallo.
  */
-export function ElencoEventi({ eventi, online, oggi, conFiltri, onTogliFiltri }: Props) {
+export function ElencoEventi({
+  eventi,
+  online,
+  oggi,
+  conFiltri,
+  soloAmici = false,
+  onTogliFiltri,
+}: Props) {
   const elenco = eventi.data ?? [];
   const copertine = useCopertine(
     elenco.map((evento) => ({ tipo: evento.copertina_tipo, path: evento.copertina_path })),
@@ -116,9 +128,41 @@ export function ElencoEventi({ eventi, online, oggi, conFiltri, onTogliFiltri }:
   }
 
   const serate = perSerata(elenco, oggi ?? undefined);
+  // Solo amici confermati con la scelta visibile (R-67): gli stessi eventi del filtro, mai un
+  // contatore di persone in generale (R-43). Senza amici la fila non compare.
+  // L'evento in evidenza mostra già i suoi amici subito sotto: non si ripete nella fila.
+  const inEvidenzaId = serate[0]?.eventi[0]?.id;
+  const conAmici = elenco.filter(
+    (evento) =>
+      evento.id !== inEvidenzaId &&
+      evento.stato !== 'annullato' &&
+      evento.amici_partecipano + evento.amici_interessati > 0,
+  );
+  const mostraConAmici = !soloAmici && conAmici.length > 0;
   let indice = 0;
   return (
     <div className="pagina pb-6" aria-busy={eventi.isFetching}>
+      {mostraConAmici && (
+        <section className="con-amici" aria-labelledby="con-i-tuoi-amici">
+          <div className="etichetta-riga scopri-sezione">
+            <h2 id="con-i-tuoi-amici" className="etichetta m-0">
+              {testi.conITuoiAmici}
+            </h2>
+          </div>
+          <ul className="con-amici-fila">
+            {conAmici.slice(0, MASSIMO_CON_AMICI).map((evento) => (
+              <li key={evento.id}>
+                <SchedaAmici
+                  dati={{
+                    ...datiScheda(evento, copertine.data, nomiGeneri),
+                    amici: <RigaAmici evento={evento} />,
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {serate.map((serata, posizione) => (
         <section key={serata.data} aria-labelledby={`serata-${serata.data}`}>
           <div className="etichetta-riga scopri-sezione">

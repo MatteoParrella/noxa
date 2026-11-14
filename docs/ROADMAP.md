@@ -334,6 +334,22 @@ Ogni iterazione ha:
   solo se D-13 si chiude per Apple;
   eliminazione degli account senza accessi da 24 mesi, con l'avviso via email 30 giorni
   prima (SAFETY_PRIVACY.md §10): nessun account della beta può arrivarci prima.
+- **Consolidamento proposto il 2026-11-14** (REGISTRO_INTERVENTI.md), da fare qui o prima
+  della beta se c'è tempo:
+  - link di biglietti e fonti solo `https` (migrazione su `eventi.url_biglietti`,
+    `eventi_fonti.url_originale`, `locali.sito_web`, con i test pgTAP);
+  - momenti di riscontro del rinfresco (amicizia confermata, gruppo creato, serata confermata
+    da tutti), dopo le tavole di `design/F-01-rinfresco-interfaccia/brief.md` §4;
+  - libreria delle foto d'atmosfera portata ad almeno 120 foto e nessuna foto ripetuta nello
+    stesso elenco (ADR-0032); controllo umano di ogni foto a piena risoluzione;
+  - icona, schermata di apertura e anteprima dei link definitive da Claude Design
+    (`design/store/`), con il carattere del marchio; progetto Claude Design riallineato al
+    rinfresco;
+  - prova dell'apertura, del Benvenuto e delle copertine su telefoni reali (iPhone e Android);
+  - scadenza delle sessioni dei moderatori quando il piano di Supabase la consente; repository
+    privato o segreti del worker in un environment protetto; esito della prima analisi CodeQL;
+  - decisioni D-18 (pagine evento pubbliche), D-19 (tono dei testi), D-20 (locandine vere) e
+    D-21 (età dichiarata).
 - **Prerequisiti esterni**: penetration test esterno, consulente legale.
 - **Criteri**: criteri della **Fase 2** (§Fase 2) verificati.
 

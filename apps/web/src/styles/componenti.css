@@ -968,6 +968,17 @@
 .nav-icona {
   position: relative;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--spazio-12);
+  padding: 3px 0;
+  border-radius: var(--raggio-tondo);
+  transition: background-color var(--movimento-base) var(--curva-standard);
+}
+/* L'area attiva ha un fondo tenue dietro l'icona, oltre al testo in grassetto e alla linea. */
+.nav-voce.is-on .nav-icona {
+  background: var(--colore-accento-tenue);
+  color: var(--colore-accento-testo);
 }
 .nav-icona .contatore {
   position: absolute;
