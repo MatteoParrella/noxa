@@ -232,3 +232,86 @@
     transform: none;
   }
 }
+
+/* ---------- Schermata di apertura (una volta per sessione) ---------- */
+/*
+  Il marchio sale, il lampione si accende, poi tutto si dissolve: 1,5 s in totale, una sola
+  volta. Non intercetta i tocchi; con il movimento ridotto o nelle pagine successive non c'è.
+*/
+.apertura {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-apertura='vista']) .apertura {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--colore-sfondo);
+    pointer-events: none;
+    animation: apertura-esci 300ms var(--curva-uscita) 1200ms both;
+  }
+  .apertura-bagliore {
+    position: absolute;
+    width: min(140vw, 720px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, var(--bagliore-accento), transparent 100%);
+    animation: apertura-bagliore var(--movimento-ingresso) var(--curva-espressiva) 350ms both;
+  }
+  .apertura-marchio {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    color: var(--colore-testo-primario);
+    font-size: var(--tipo-marchio);
+    line-height: 0.9;
+    font-weight: var(--tipo-peso-forte);
+    font-stretch: var(--tipo-larghezza-marchio);
+    letter-spacing: -0.03em;
+  }
+  .apertura-parola {
+    display: inline-block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+  }
+  .apertura-parola > span {
+    display: inline-block;
+    animation: apertura-sali var(--movimento-espressivo) var(--curva-espressiva) both;
+  }
+  .apertura-punto {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-left: var(--spazio-1);
+    border-radius: 50%;
+    background: var(--colore-accento);
+    animation: apertura-accendi 500ms var(--curva-espressiva) 450ms both;
+  }
+  @keyframes apertura-sali {
+    from {
+      transform: translateY(110%);
+    }
+  }
+  @keyframes apertura-accendi {
+    from {
+      transform: scale(0);
+      opacity: 0;
+    }
+  }
+  @keyframes apertura-bagliore {
+    from {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+  }
+  @keyframes apertura-esci {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+}

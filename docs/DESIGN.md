@@ -103,6 +103,11 @@ flowchart LR
   battito singolo dopo il tocco; fondo tenue dietro l'icona dell'area attiva e luna per Vivi.
   Le tavole di `design/F-01-scopri/` e `design/F-10-accesso/` restano il riferimento per
   tutto il resto; il progetto Claude Design va riallineato a queste modifiche.
+- Schermata di apertura (`src/components/guscio/Apertura.tsx`, classi in `movimento.css`): alla
+  prima pagina di ogni sessione il marchio sale e il lampione si accende, poi la schermata si
+  dissolve da sola in 1,5 s. Solo CSS, non intercetta i tocchi, nascosta ai lettori di
+  schermo; non compare con `prefers-reduced-motion` né nelle pagine successive (lo script del
+  tema la segna come vista nel `sessionStorage`, mai sul server).
 
 - `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda,
   SchedaEvidenza e RigaEvento, Copertina, Genere, AmiciPartecipano, SelettorePartecipazione,

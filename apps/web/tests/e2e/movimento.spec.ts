@@ -58,3 +58,33 @@ test.describe('movimento espressivo (ADR-0019)', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Il mio diario' })).toBeVisible();
   });
 });
+
+test.describe('schermata di apertura', () => {
+  test.use({ apertura: true });
+
+  test('compare una volta per sessione, non blocca i tocchi e si dissolve da sola', async ({
+    page,
+  }) => {
+    await page.goto('/scopri/');
+    const apertura = page.locator('.apertura');
+    // La dissolvenza è un'animazione CSS che parte da sola: si controlla che ci sia, non il
+    // momento in cui è visibile (su WebKit la pagina si aggancia quando è già finita).
+    await expect(apertura).toHaveCSS('position', 'fixed');
+    await expect(apertura).toHaveCSS('animation-name', 'apertura-esci');
+    await expect(apertura).toHaveAttribute('aria-hidden', 'true');
+    await expect(apertura).toHaveCSS('pointer-events', 'none');
+    await expect(apertura).toBeHidden({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'Scopri', level: 1 })).toBeVisible();
+
+    // Stessa sessione: alla pagina successiva non si ripete.
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-apertura', 'vista');
+    await expect(apertura).toHaveCSS('display', 'none');
+  });
+
+  test('con il movimento ridotto non compare', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/scopri/');
+    await expect(page.locator('.apertura')).toBeHidden();
+  });
+});
