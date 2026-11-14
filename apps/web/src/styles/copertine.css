@@ -121,6 +121,34 @@
   z-index: -2;
   pointer-events: none;
 }
+/* Foto d'atmosfera (ADR-0032): in bianco e nero sotto la tinta dei colori della serata, così
+   la stessa foto cambia volto da una serata all'altra. */
+.cg-foto {
+  position: absolute;
+  inset: 0;
+  z-index: -4;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.15);
+  pointer-events: none;
+}
+.cg-foto.specchiata {
+  transform: scaleX(-1);
+}
+.cg-tinta {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background: linear-gradient(135deg, var(--cg-1), var(--cg-2));
+  mix-blend-mode: color;
+  pointer-events: none;
+}
+/* Con la foto il motivo disegnato non serve: torna se la foto non si carica. */
+.cg > svg.cg-motivo-su-foto {
+  display: none;
+}
+
 .cg-velo {
   position: absolute;
   inset: 0;

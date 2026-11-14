@@ -109,6 +109,12 @@ flowchart LR
   schermo; non compare con `prefers-reduced-motion` né nelle pagine successive (lo script del
   tema la segna come vista nel `sessionStorage`, mai sul server).
 
+- Foto d'atmosfera (ADR-0032): la copertina generata mostra una foto di pubblico dominio o
+  CC0 scelta dal seme della serata tra i temi del genere (`src/lib/fotoSerata.ts`, elenco con
+  le licenze in `fotoSerata.json`, file in `public/copertine/`), in bianco e nero sotto la
+  tinta dei colori della serata (`.cg-foto`, `.cg-tinta` in `copertine.css`); il motivo
+  disegnato resta solo se la foto non si carica.
+
 - `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda,
   SchedaEvidenza e RigaEvento, Copertina, Genere, AmiciPartecipano, SelettorePartecipazione,
   LinkEsterno, Calendario, Avviso, Foglio, Badge e Contatore, Avatar e GruppoAvatar, Interruttore,

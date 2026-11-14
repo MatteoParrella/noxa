@@ -12,6 +12,7 @@ import {
   type ElementoMotivo,
   type Famiglia,
 } from '@/lib/copertinaGenerata';
+import { fotoSerata } from '@/lib/fotoSerata';
 
 /** Copertina generata (design/F-01-copertine-generate): seme, famiglia e colori della fonte. */
 export type DatiGenerata = {
@@ -140,6 +141,13 @@ function CopertinaGenerata({
   children,
 }: PropsGenerata) {
   const p = useMemo(() => parametri(generata.seme), [generata.seme]);
+  // Foto d'atmosfera della serata (ADR-0032); se non si carica resta il motivo disegnato.
+  const [fotoRotta, setFotoRotta] = useState(false);
+  const scelta = useMemo(
+    () => fotoSerata(generata.seme, generata.famiglia),
+    [generata.seme, generata.famiglia],
+  );
+  const foto = fotoRotta ? null : scelta;
   const elementi = useMemo(() => elementiMotivo(p), [p]);
   const manifesto = titoloManifesto(titolo);
   const colori = generata.colori;
@@ -173,7 +181,24 @@ function CopertinaGenerata({
       style={stile}
       data-motivo={p.motivo}
     >
+      {foto && (
+        <>
+          {/* Foto servita dall'app, già ridotta: niente ottimizzazione di next/image nell'export statico. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className={classi('cg-foto', foto.specchiata && 'specchiata')}
+            src={foto.src}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            style={{ objectPosition: `${foto.x}% ${foto.y}%` }}
+            onError={() => setFotoRotta(true)}
+          />
+          <span className="cg-tinta" aria-hidden="true" />
+        </>
+      )}
       <svg
+        className={foto ? 'cg-motivo-su-foto' : undefined}
         viewBox="0 0 400 250"
         preserveAspectRatio="xMidYMid slice"
         aria-hidden="true"
