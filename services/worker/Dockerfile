@@ -1,7 +1,7 @@
 # Immagine del worker Noxa (ADR-0003).
 # Richiede pyproject.toml e uv.lock, creati nella Fase 0 (docs/ROADMAP.md).
 
-FROM python:3.12-slim-bookworm
+FROM python:3.15-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
