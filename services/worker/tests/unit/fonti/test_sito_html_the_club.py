@@ -8,8 +8,8 @@ import pytest
 
 from noxa_worker.errori import ErroreConformita, ErroreFonte
 from noxa_worker.fonti.base import EventoGrezzo, Fonte, TipoFonte
-from noxa_worker.fonti.sito_html import AdattatoreSitoHtml
-from noxa_worker.fonti.sito_html_the_club import AdattatoreSitoHtmlTheClub, entro_il_limite
+from noxa_worker.fonti.sito_html import AdattatoreSitoHtml, entro_il_limite
+from noxa_worker.fonti.sito_html_the_club import AdattatoreSitoHtmlTheClub
 from noxa_worker.normalizzazione.date import FUSO_ROMA
 from tests.supporto import Orologio, SitoFinto, client_conforme, leggi_dato
 from tests.unit.test_schema_evento import SCHEMA

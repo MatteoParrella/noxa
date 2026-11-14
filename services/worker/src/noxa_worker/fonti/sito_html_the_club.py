@@ -23,9 +23,8 @@ from bs4 import Tag
 
 from noxa_worker.fonti.base import EventoGrezzo, Fonte
 from noxa_worker.fonti.http import ClientHttpConforme
-from noxa_worker.fonti.sito_html import AdattatoreSitoHtml, SelettoriHtml
+from noxa_worker.fonti.sito_html import AdattatoreSitoHtml, SelettoriHtml, entro_il_limite
 from noxa_worker.normalizzazione.date import combina, interpreta_iso, trova_data, trova_ora
-from noxa_worker.normalizzazione.evento import FUTURO_MASSIMO
 from noxa_worker.normalizzazione.testo import pulisci
 
 _DATA_NEL_TITOLO = re.compile(
@@ -78,12 +77,3 @@ def _fine(nodo: Tag, inizio_iso: object) -> datetime | None:
     # `combina` sposta al giorno dopo gli orari prima delle 6, ma qui il giorno è già quello.
     fine = combina(giorno, ora) - (timedelta(days=1) if ora.hour < 6 else timedelta())
     return fine if fine > inizio else None
-
-
-def entro_il_limite(grezzi: list[EventoGrezzo], adesso: datetime) -> list[EventoGrezzo]:
-    limite = adesso + FUTURO_MASSIMO
-    return [
-        g
-        for g in grezzi
-        if not isinstance(inizio := g.dati.get("inizio"), str) or interpreta_iso(inizio) <= limite
-    ]

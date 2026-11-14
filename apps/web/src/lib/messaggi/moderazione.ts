@@ -372,6 +372,7 @@ export const moderazione = {
     adattatori: {
       sito_jsonld: 'sito_jsonld · dati strutturati e iCal',
       sito_html_the_club: 'sito_html_the_club · sito di The Club',
+      sito_html_alcatraz: 'sito_html_alcatraz · sito di Alcatraz',
       instagram_business_discovery: 'instagram_business_discovery · API ufficiale',
     },
     nessunAdattatore: 'Nessun adattatore',

@@ -21,6 +21,7 @@ from noxa_worker.fonti.base import EventoGrezzo, Fonte, TipoFonte
 from noxa_worker.fonti.comuni import evento_da_campi, id_esterno_da, prezzo_in_centesimi
 from noxa_worker.fonti.http import ClientHttpConforme
 from noxa_worker.normalizzazione.date import combina, interpreta_iso, trova_data, trova_ora
+from noxa_worker.normalizzazione.evento import FUTURO_MASSIMO
 from noxa_worker.normalizzazione.modelli import EventoNormalizzato
 from noxa_worker.normalizzazione.testo import pulisci
 
@@ -158,3 +159,14 @@ class AdattatoreSitoHtml:
         if giorno is None or ora is None:
             return None
         return combina(giorno, ora)
+
+
+def entro_il_limite(grezzi: list[EventoGrezzo], adesso: datetime) -> list[EventoGrezzo]:
+    """Solo le serate entro il limite della validazione (180 giorni): i siti che pubblicano
+    il calendario per molti mesi non riempiono gli scarti a ogni esecuzione."""
+    limite = adesso + FUTURO_MASSIMO
+    return [
+        g
+        for g in grezzi
+        if not isinstance(inizio := g.dati.get("inizio"), str) or interpreta_iso(inizio) <= limite
+    ]
