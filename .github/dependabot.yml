@@ -1,0 +1,36 @@
+# Aggiornamenti di sicurezza e di versione delle dipendenze: una PR alla settimana per
+# ecosistema, raggruppata, così la CI (pnpm audit, pip-audit) non resta rossa per giorni.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      javascript:
+        update-types: [minor, patch]
+  - package-ecosystem: uv
+    directory: /services/worker
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      python:
+        update-types: [minor, patch]
+  - package-ecosystem: docker
+    directory: /services/worker
+    schedule:
+      interval: weekly
+      day: monday
+  # Tiene aggiornati gli SHA a cui sono fissate le azioni dei workflow.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      azioni:
+        patterns: ['*']

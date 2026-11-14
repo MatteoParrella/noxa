@@ -17,11 +17,17 @@ const ORIGINI = (Deno.env.get('NOXA_ORIGINI_APP') ?? '')
   .map((origine) => origine.trim())
   .filter(Boolean);
 
+// Senza elenco valgono solo le origini di sviluppo e quelle delle app native (Capacitor):
+// un ambiente pubblicato senza NOXA_ORIGINI_APP non risponde mai a un sito qualsiasi.
+const ORIGINI_PREDEFINITE = /^(https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?|capacitor:\/\/localhost)$/;
+
+function origineAmmessa(origine: string): boolean {
+  return ORIGINI.length > 0 ? ORIGINI.includes(origine) : ORIGINI_PREDEFINITE.test(origine);
+}
+
 function intestazioni(richiesta: Request): Record<string, string> {
   const origine = richiesta.headers.get('Origin') ?? '';
-  // Senza elenco (in locale) si risponde a qualsiasi origine: la richiesta vale solo con il
-  // JWT dell'utente, mai con i cookie.
-  const consentita = ORIGINI.length === 0 || ORIGINI.includes(origine) ? origine || '*' : 'null';
+  const consentita = origineAmmessa(origine) ? origine : 'null';
   return {
     'Access-Control-Allow-Origin': consentita,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
