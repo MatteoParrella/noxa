@@ -90,3 +90,24 @@ test('«indietro» torna alla pagina da cui si è arrivati, altrimenti alla pagi
   await contenuto.getByRole('link', { name: 'Indietro: Amici' }).click();
   await expect(page).toHaveURL(/\/amici\/$/);
 });
+
+test('un indirizzo che non esiste mostra la pagina 404 con il ritorno a Scopri', async ({
+  page,
+}) => {
+  await page.goto('/pagina-che-non-esiste/');
+  await expect(page.getByRole('heading', { name: 'Questa pagina non esiste' })).toBeVisible();
+  await verificaAccessibilita(page);
+  await page.getByRole('link', { name: 'Vai a Scopri' }).click();
+  await expect(page).toHaveURL(/\/scopri\/$/);
+});
+
+test('l’anteprima dei link condivisi ha titolo, descrizione e immagine', async ({ page }) => {
+  await page.goto('/benvenuto/');
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Noxa');
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    'content',
+    /\/icone\/anteprima\.png$/,
+  );
+  const robots = await page.request.get('/robots.txt');
+  expect(await robots.text()).toContain('Disallow: /');
+});

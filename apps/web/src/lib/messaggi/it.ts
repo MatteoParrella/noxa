@@ -38,6 +38,13 @@ export const messaggi = {
     },
   },
 
+  nonTrovata: {
+    etichetta: 'Errore 404',
+    titolo: 'Questa pagina non esiste',
+    testo: 'Il link è sbagliato o la pagina è stata spostata.',
+    azione: 'Vai a Scopri',
+  },
+
   benvenuto: {
     luogo: 'Milano · Brianza',
     marchio: 'noxa',

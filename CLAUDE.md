@@ -21,6 +21,7 @@ badge e riepilogo annuale. È un prodotto destinato al lancio pubblico, non un p
 | [docs/SAFETY_PRIVACY.md](docs/SAFETY_PRIVACY.md) | Regole `R-xx` sui minorenni e la privacy, con i motivi |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Fasi, 15 iterazioni, criteri di completamento, definizione di completato |
 | [docs/REGISTRO_ITERAZIONI.md](docs/REGISTRO_ITERAZIONI.md) | Stato delle iterazioni e cicli di revisione (aggiornato dalla skill `iterazione`) |
+| [docs/REGISTRO_INTERVENTI.md](docs/REGISTRO_INTERVENTI.md) | Lavori fatti fuori iterazione su richiesta diretta: che cosa è cambiato, come è stato verificato, che cosa resta |
 | [docs/GUIDA_OPERATIVA.md](docs/GUIDA_OPERATIVA.md) | Come lavorare: iterazioni, skill, calendario di Claude Design |
 | [docs/DESIGN.md](docs/DESIGN.md) | Flusso con Claude Design, token, accessibilità, tono |
 | [docs/DECISIONI_APERTE.md](docs/DECISIONI_APERTE.md) | **Unico** elenco delle decisioni aperte `D-xx` |

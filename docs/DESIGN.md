@@ -104,8 +104,8 @@ flowchart LR
   Le tavole di `design/F-01-scopri/` e `design/F-10-accesso/` restano il riferimento per
   tutto il resto; il progetto Claude Design va riallineato a queste modifiche.
 - Schermata di apertura (`src/components/guscio/Apertura.tsx`, classi in `movimento.css`): alla
-  prima pagina di ogni sessione il marchio sale e il lampione si accende, poi la schermata si
-  dissolve da sola in 1,5 s. Solo CSS, non intercetta i tocchi, nascosta ai lettori di
+  prima pagina di ogni sessione compare solo il simbolo: la «n» sale e il lampione si accende
+  con il bagliore, poi la schermata si apre sulla pagina sotto in 2 s. Solo CSS, non intercetta i tocchi, nascosta ai lettori di
   schermo; non compare con `prefers-reduced-motion` né nelle pagine successive (lo script del
   tema la segna come vista nel `sessionStorage`, mai sul server).
 
@@ -114,6 +114,10 @@ flowchart LR
   le licenze in `fotoSerata.json`, file in `public/copertine/`), in bianco e nero sotto la
   tinta dei colori della serata (`.cg-foto`, `.cg-tinta` in `copertine.css`); il motivo
   disegnato resta solo se la foto non si carica.
+
+- Pagina 404 (`src/app/not-found.tsx`) con il ritorno a Scopri; anteprima dei link condivisi
+  (Open Graph) con `public/icone/anteprima.png`, generata con le icone da
+  `pnpm --filter web icone`; `public/robots.txt` lascia ai motori solo le pagine pubbliche.
 
 - `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda,
   SchedaEvidenza e RigaEvento, Copertina, Genere, AmiciPartecipano, SelettorePartecipazione,

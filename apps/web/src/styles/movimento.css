@@ -235,8 +235,9 @@
 
 /* ---------- Schermata di apertura (una volta per sessione) ---------- */
 /*
-  Il marchio sale, il lampione si accende, poi tutto si dissolve: 1,5 s in totale, una sola
-  volta. Non intercetta i tocchi; con il movimento ridotto o nelle pagine successive non c'è.
+  Solo il simbolo: la «n» sale, il lampione si accende e il bagliore si allarga, poi il simbolo
+  cresce e la schermata si apre sulla pagina sotto. 2 s in totale, una sola volta. Non
+  intercetta i tocchi; con il movimento ridotto o nelle pagine successive non c'è.
 */
 .apertura {
   display: none;
@@ -252,59 +253,60 @@
     overflow: hidden;
     background: var(--colore-sfondo);
     pointer-events: none;
-    animation: apertura-esci 300ms var(--curva-uscita) 1200ms both;
+    animation: apertura-esci 400ms var(--curva-uscita) 1600ms both;
   }
   .apertura-bagliore {
     position: absolute;
-    width: min(140vw, 720px);
+    width: min(150vw, 760px);
     aspect-ratio: 1;
     border-radius: 50%;
     background: radial-gradient(closest-side, var(--bagliore-accento), transparent 100%);
-    animation: apertura-bagliore var(--movimento-ingresso) var(--curva-espressiva) 350ms both;
+    animation: apertura-bagliore var(--movimento-ingresso) var(--curva-espressiva) 700ms both;
   }
-  .apertura-marchio {
+  .apertura-simbolo {
     position: relative;
-    display: flex;
-    align-items: baseline;
-    color: var(--colore-testo-primario);
-    font-size: var(--tipo-marchio);
-    line-height: 0.9;
-    font-weight: var(--tipo-peso-forte);
-    font-stretch: var(--tipo-larghezza-marchio);
-    letter-spacing: -0.03em;
+    width: min(44vw, 200px);
+    overflow: visible;
+    animation: apertura-apri 400ms var(--curva-uscita) 1600ms both;
   }
-  .apertura-parola {
-    display: inline-block;
-    overflow: hidden;
-    padding-bottom: 0.08em;
+  .apertura-lettera {
+    fill: var(--colore-testo-primario);
+    /* La lettera sale da sotto la sua linea di base. */
+    clip-path: inset(0);
   }
-  .apertura-parola > span {
-    display: inline-block;
-    animation: apertura-sali var(--movimento-espressivo) var(--curva-espressiva) both;
+  .apertura-lettera path {
+    animation: apertura-sali var(--movimento-espressivo) var(--curva-espressiva) 100ms both;
   }
   .apertura-punto {
-    flex: none;
-    width: 18px;
-    height: 18px;
-    margin-left: var(--spazio-1);
-    border-radius: 50%;
-    background: var(--colore-accento);
-    animation: apertura-accendi 500ms var(--curva-espressiva) 450ms both;
+    fill: var(--colore-accento);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: apertura-accendi 600ms var(--curva-espressiva) 600ms both;
   }
   @keyframes apertura-sali {
     from {
-      transform: translateY(110%);
+      transform: translateY(200px);
     }
   }
   @keyframes apertura-accendi {
-    from {
+    0% {
       transform: scale(0);
       opacity: 0;
+    }
+    60% {
+      transform: scale(1.35);
+      opacity: 1;
     }
   }
   @keyframes apertura-bagliore {
     from {
-      transform: scale(0.6);
+      transform: scale(0.4);
+      opacity: 0;
+    }
+  }
+  @keyframes apertura-apri {
+    to {
+      transform: scale(1.6);
       opacity: 0;
     }
   }
