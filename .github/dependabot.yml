@@ -1,36 +1,26 @@
-# Aggiornamenti di sicurezza e di versione delle dipendenze: una PR alla settimana per
-# ecosistema, raggruppata, così la CI (pnpm audit, pip-audit) non resta rossa per giorni.
+# Solo aggiornamenti di sicurezza: con il limite a zero Dependabot non apre le PR settimanali
+# di versione (che restavano in sospeso), ma continua ad aprire quelle che correggono una
+# vulnerabilità nota. Gli aggiornamenti di versione si fanno a mano, un ecosistema alla volta,
+# quando serve (per esempio dopo un avviso di pnpm audit o pip-audit in CI).
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
-      day: monday
-    open-pull-requests-limit: 5
-    groups:
-      javascript:
-        update-types: [minor, patch]
+    open-pull-requests-limit: 0
   - package-ecosystem: uv
     directory: /services/worker
     schedule:
       interval: weekly
-      day: monday
-    open-pull-requests-limit: 5
-    groups:
-      python:
-        update-types: [minor, patch]
+    open-pull-requests-limit: 0
   - package-ecosystem: docker
     directory: /services/worker
     schedule:
       interval: weekly
-      day: monday
-  # Tiene aggiornati gli SHA a cui sono fissate le azioni dei workflow.
+    open-pull-requests-limit: 0
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
-      day: monday
-    groups:
-      azioni:
-        patterns: ['*']
+    open-pull-requests-limit: 0

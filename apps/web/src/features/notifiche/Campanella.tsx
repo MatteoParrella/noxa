@@ -15,7 +15,7 @@ export function Campanella() {
   return (
     <Link
       href="/notifiche/"
-      className="btn btn-testo btn-s relative"
+      className={`btn btn-testo btn-s campanella relative${nonLette > 0 ? ' con-nuove' : ''}`}
       aria-label={nonLette > 0 ? testi.campanella(nonLette) : testi.apriNotifiche}
     >
       <span className="nav-icona">

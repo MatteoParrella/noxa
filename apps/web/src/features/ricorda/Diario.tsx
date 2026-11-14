@@ -30,7 +30,6 @@ export function Diario() {
   return (
     <div className="flex flex-col">
       {/* Spazio delle statistiche e dei badge della Fase 2: vuoto, senza contenuti finti. */}
-      <div className="ri-riservato" aria-hidden="true" />
       <div className="ri-azioni">
         <Link className="btn btn-principale" href="/ricorda/modifica/">
           <Icona icona={Plus} dimensione="s" />

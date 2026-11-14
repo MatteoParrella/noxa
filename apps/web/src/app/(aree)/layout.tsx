@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { BarraNavigazione } from '@/components/guscio/BarraNavigazione';
+import { PiedeSito } from '@/components/guscio/PiedeSito';
 import { StatoConnessione } from '@/components/guscio/StatoConnessione';
 import { ProtezioneAccount } from '@/features/account/ProtezioneAccount';
 import { RinnovaDispositivo } from '@/features/notifiche/RinnovaDispositivo';
@@ -23,6 +24,7 @@ export default function LayoutAree({ children }: Readonly<{ children: ReactNode 
           <RinnovaDispositivo />
         </ProtezioneAccount>
       </main>
+      <PiedeSito />
       <BarraNavigazione>
         <BarraRitorno variante="laterale" />
       </BarraNavigazione>

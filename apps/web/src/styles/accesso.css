@@ -537,3 +537,49 @@
     width: auto;
   }
 }
+
+/* ---------- Benvenuto su desktop: pagina di presentazione (ADR-0033) ---------- */
+@media (min-width: 64rem) {
+  .schermo-accesso.schermo-largo {
+    max-width: 1120px;
+    padding: 0 var(--spazio-8);
+  }
+  .schermo-largo .schermo-corpo.in-fondo {
+    justify-content: center;
+    padding-top: var(--spazio-12);
+  }
+  .schermo-largo .frase-benvenuto {
+    max-width: 36ch;
+    font-size: var(--tipo-titolo-2);
+  }
+  .schermo-largo .promesse {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spazio-4);
+    margin: 0;
+    padding: 0;
+  }
+  .schermo-largo .promessa-copertina {
+    aspect-ratio: 4 / 3;
+  }
+  /* Le due azioni affiancate, larghe quanto il loro testo, come in un sito. */
+  .schermo-largo .schermo-piede {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spazio-3);
+    padding-bottom: var(--spazio-12);
+    background: none;
+  }
+  .schermo-largo .schermo-piede .btn-pieno {
+    width: auto;
+    min-width: 220px;
+  }
+  .schermo-largo .schermo-piede .testo-piccolo {
+    margin-left: auto;
+  }
+  .schermo-largo .bagliore-benvenuto {
+    left: -10%;
+    right: 30%;
+  }
+}

@@ -26,6 +26,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Avviso } from '@/components/ui/Avviso';
 import { Badge } from '@/components/ui/Badge';
 import { Copertina } from '@/components/ui/Copertina';
+import { semeCopertina } from '@/lib/copertinaGenerata';
 import { Foglio } from '@/components/ui/Foglio';
 import { Icona } from '@/components/ui/Icona';
 import { MenuAzioni, type VoceMenu } from '@/components/ui/MenuAzioni';
@@ -266,11 +267,18 @@ function Serata({ io, dati }: { io: string; dati: Dati }) {
           sopra={`${dataBreve(dati.data_serata)} · ${dati.evento.locale_comune}`}
         />
       ) : (
-        <div className="se-cop se-cop-tipo">
-          <span className="se-data-grande" aria-hidden="true">
-            {dataBreve(dati.data_serata).split(' ')[1]}
-          </span>
-        </div>
+        // Serata libera: la sua copertina nasce da titolo e gruppo, come quelle degli eventi.
+        <Copertina
+          copertina={{
+            tipo: 'tipografica',
+            alt: '',
+            generata: { seme: semeCopertina(titolo, dati.gruppo_nome), famiglia: 'accento' },
+          }}
+          forma="dettaglio"
+          ora={oraRitrovo(dati.ora_ritrovo) ?? ''}
+          titolo={titolo}
+          sopra={dataBreve(dati.data_serata)}
+        />
       )}
 
       <div className="se-meta">

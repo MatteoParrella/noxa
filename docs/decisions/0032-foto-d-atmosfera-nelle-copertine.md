@@ -49,7 +49,8 @@ Servono immagini vere, lecite e adatte anche ai minorenni (R-56).
 
 ## Conseguenze
 - Due serate con lo stesso genere possono avere la stessa foto, distinte da inquadratura,
-  verso, tinta e titolo: più la libreria cresce, più il caso è raro. Prima versione: 44 foto.
+  verso, tinta e titolo: più la libreria cresce, più il caso è raro. Prima versione: 43 foto
+  (una delle 44 iniziali è stata tolta perché mostrava un testo leggibile su uno schermo).
 - Circa 0,8 MB in più nell'export statico; le foto non entrano nel precache del service
   worker e si caricano solo quando compaiono.
 - La libreria si amplia con una PR: file in `public/copertine/` e voce in `fotoSerata.json`.

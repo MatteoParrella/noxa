@@ -89,7 +89,7 @@ export function VistaScopri() {
   const attivi = filtriAttivi(filtri);
 
   return (
-    <div className="flex flex-col">
+    <div className="scopri-sito flex flex-col">
       <IntestazioneArea
         sottotitolo={luogoIntestazione(filtri)}
         titolo={testi.titolo}

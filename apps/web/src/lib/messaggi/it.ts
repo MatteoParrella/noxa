@@ -38,6 +38,14 @@ export const messaggi = {
     },
   },
 
+  piede: {
+    frase: 'Le serate di Milano e della Brianza.',
+    documenti: 'Documenti',
+    sicurezza: 'Sicurezza',
+    termini: 'Termini',
+    privacy: 'Informativa privacy',
+  },
+
   nonTrovata: {
     etichetta: 'Errore 404',
     titolo: 'Questa pagina non esiste',
@@ -343,7 +351,7 @@ export const messaggi = {
 
   amici: {
     titolo: 'Amici',
-    cerca: 'Cerca per username',
+    cerca: 'Cerca amici',
     mioCodice: 'Il mio codice',
     caricamento: 'Carico gli amici',
     offline:

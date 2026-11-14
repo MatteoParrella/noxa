@@ -27,6 +27,7 @@ import { useIo } from '@/features/amici/dati';
 import { urlPubblicoApp } from '@/lib/ambiente';
 import { useOnline } from '@/lib/connessione';
 import { daIso } from '@/lib/date';
+import { classi } from '@/lib/classi';
 import { messaggi } from '@/lib/messaggi/it';
 import { registraErrore } from '@/lib/registro';
 import { cambiaPartecipazione, type DettaglioEvento as Dati, type Partecipazione } from './api';
@@ -328,7 +329,14 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
             <Genere key={codice}>{nomeGenere(nomiGeneri, codice)}</Genere>
           ))}
         </div>
-        <TitoloRivelato testo={dati.titolo} className="dettaglio-titolo" />
+        {/* La copertina generata porta già il titolo da manifesto: sotto non si ripete a vista. */}
+        <TitoloRivelato
+          testo={dati.titolo}
+          className={classi(
+            'dettaglio-titolo',
+            (datiCopertina.tipo === 'tipografica' || !datiCopertina.url) && 'sr-only',
+          )}
+        />
 
         <Entra indice={1} className="flex flex-col gap-5">
           {annullato && (
