@@ -19,6 +19,7 @@ from pydantic import JsonValue
 from noxa_worker.errori import ErroreFonte
 from noxa_worker.fonti.base import EventoGrezzo, Fonte, TipoFonte
 from noxa_worker.fonti.comuni import evento_da_campi, id_esterno_da, prezzo_in_centesimi
+from noxa_worker.fonti.dettaglio import DatiDettaglio, leggi_dettaglio
 from noxa_worker.fonti.http import ClientHttpConforme
 from noxa_worker.normalizzazione.date import combina, interpreta_iso, trova_data, trova_ora
 from noxa_worker.normalizzazione.evento import FUTURO_MASSIMO
@@ -66,6 +67,12 @@ class AdattatoreSitoHtml:
     nome: ClassVar[str]
     tipo: ClassVar[TipoFonte] = TipoFonte.SITO_LOCALE
     selettori: ClassVar[SelettoriHtml]
+    # Dopo l'elenco la raccolta legge alcune pagine delle serate (fonti/dettaglio.py).
+    arricchisce_dal_dettaglio: ClassVar[bool] = True
+
+    def dettaglio(self, pagina: BeautifulSoup, url: str) -> DatiDettaglio:
+        """Dati letti dalla pagina di una serata; da ridefinire per i siti particolari."""
+        return leggi_dettaglio(pagina, url)
 
     async def raccogli(self, fonte: Fonte, http: ClientHttpConforme) -> list[EventoGrezzo]:
         grezzi: list[EventoGrezzo] = []

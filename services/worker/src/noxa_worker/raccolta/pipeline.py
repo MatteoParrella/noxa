@@ -15,6 +15,7 @@ import json
 import time
 from collections.abc import Callable, Mapping
 from datetime import date, datetime, timedelta
+from typing import cast
 from uuid import UUID
 
 import structlog
@@ -26,6 +27,7 @@ from noxa_worker.dedup.fusione import EventoEsistente, fondi
 from noxa_worker.dedup.punteggio import EsitoDedup, EventoConfronto, decidi
 from noxa_worker.errori import ErroreRaccolta, ErroreValidazione
 from noxa_worker.fonti.base import Adattatore, EventoGrezzo, Fonte
+from noxa_worker.fonti.dettaglio import AdattatoreConDettaglio, arricchisci
 from noxa_worker.fonti.http import ClientHttpConforme
 from noxa_worker.normalizzazione.date import FUSO_ROMA
 from noxa_worker.normalizzazione.evento import calcola_hash, valida_regole
@@ -114,6 +116,7 @@ class GestoreRaccolta:
         else:
             try:
                 grezzi = await adattatore.raccogli(fonte, http)
+                grezzi = await self._arricchisci(adattatore, grezzi, fonte, http)
             except ErroreRaccolta as errore:
                 esito.codice_errore = errore.codice
                 esito.messaggio_errore = str(errore)[:500]
@@ -138,6 +141,19 @@ class GestoreRaccolta:
             contesto.error("fonte_disattivata", motivo="5 errori consecutivi")
         if esito.codice_errore is None and esito.eventi_letti == 0 and not prova:
             contesto.warning("fonte_senza_eventi")
+
+    async def _arricchisci(
+        self,
+        adattatore: Adattatore,
+        grezzi: list[EventoGrezzo],
+        fonte: Fonte,
+        http: ClientHttpConforme,
+    ) -> list[EventoGrezzo]:
+        """Biglietti, prezzo ed età dalle pagine delle serate (fonti/dettaglio.py)."""
+        if not getattr(adattatore, "arricchisce_dal_dettaglio", False):
+            return grezzi
+        con_dettaglio = cast(AdattatoreConDettaglio, adattatore)
+        return await arricchisci(con_dettaglio, grezzi, fonte, http, self._adesso())
 
     async def _aggiorna_colori(
         self, fonte: Fonte, grezzi: list[EventoGrezzo], contesto: structlog.BoundLogger

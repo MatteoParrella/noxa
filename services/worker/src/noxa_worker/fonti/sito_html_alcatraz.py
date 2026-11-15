@@ -41,6 +41,8 @@ _SOLD_OUT = re.compile(r"\s*[-–]\s*sold\s*out\s*$", re.IGNORECASE)
 
 class AdattatoreSitoHtmlAlcatraz(AdattatoreSitoHtml):
     nome: ClassVar[str] = "sito_html_alcatraz"
+    # Il link ai biglietti è già nella scheda dell'elenco.
+    arricchisce_dal_dettaglio: ClassVar[bool] = False
     selettori: ClassVar[SelettoriHtml] = SelettoriHtml(
         evento="section.ud_block__event-grid div.ud_event",
         titolo=".ud_event__title",
