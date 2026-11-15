@@ -15,7 +15,7 @@ export default function PaginaOrganizza() {
         titolo={messaggi.gruppi.organizza.titolo}
         azioni={<Campanella />}
       />
-      <Rivela className="pagina pt-2 pb-8" indice={2}>
+      <Rivela className="pagina pagina-larga pt-2 pb-8" indice={2}>
         <OrganizzaGruppi />
       </Rivela>
     </>

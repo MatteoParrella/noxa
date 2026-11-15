@@ -143,8 +143,15 @@
   gap: 6px;
 }
 .badge-sopra .badge {
-  background: var(--colore-sfondo);
+  border-color: var(--vetro-bordo);
+  background: var(--vetro-fondo-forte);
+  -webkit-backdrop-filter: var(--vetro-sfocatura);
+  backdrop-filter: var(--vetro-sfocatura);
   color: var(--colore-testo-primario);
+}
+/* Senza amici, generi né prezzo il corpo non lascia una fascia vuota sotto la copertina. */
+.evidenza-corpo:empty {
+  display: none;
 }
 
 /* ---------- riga evento compatta ---------- */
@@ -222,9 +229,10 @@
   display: inline-flex;
   align-items: center;
   min-height: 22px;
-  padding: 2px var(--spazio-2);
-  border-radius: var(--raggio-1);
-  background: var(--colore-superficie-2);
+  padding: 2px 10px;
+  border: 1px solid var(--vetro-bordo);
+  border-radius: var(--raggio-tondo);
+  background: var(--vetro-fondo);
   color: var(--colore-testo-primario);
   font-size: var(--tipo-didascalia);
   line-height: 1.33;
@@ -891,39 +899,53 @@
 
 /* ---------- Layout desktop «da sito» (ADR-0033) ---------- */
 @media (min-width: 64rem) {
-  /* Scopri usa tutta la colonna larga: eventi in griglia, evento in evidenza a tutta riga. */
+  /* Scopri usa tutta la larghezza del sito: eventi in griglia, evento in evidenza a tutta riga. */
   .scopri-sito {
-    --larghezza-pagina: 1120px;
+    --larghezza-pagina: var(--sito-max);
+  }
+  .scopri-sito .intestazione-area,
+  .scopri-sito .pagina {
+    padding-left: var(--sito-margine);
+    padding-right: var(--sito-margine);
   }
   .scopri-sito .scopri-comandi {
     max-width: 720px;
   }
   .elenco-serata {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     column-gap: var(--spazio-10);
   }
   .elenco-serata > .in-evidenza {
     grid-column: 1 / -1;
     margin-bottom: var(--spazio-4);
   }
+  /* L'evento in evidenza è un manifesto a tutta riga: amici, generi e prezzo stanno in un
+     riquadro di vetro appoggiato alla foto, grande quanto il suo contenuto. */
   .elenco-serata .evidenza {
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    align-items: stretch;
+    position: relative;
   }
   .elenco-serata .copertina-evidenza {
     aspect-ratio: auto;
-    min-height: 340px;
-    padding: var(--spazio-8);
+    min-height: clamp(340px, 46vh, 540px);
+    padding: var(--spazio-10);
   }
   .elenco-serata .evidenza-titolo {
-    font-size: var(--tipo-display);
+    max-width: 60%;
+    font-size: clamp(var(--tipo-display), 4.4vw, 4.5rem);
   }
   .elenco-serata .evidenza-corpo {
-    justify-content: center;
-    gap: var(--spazio-4);
-    padding: var(--spazio-8);
+    position: absolute;
+    right: var(--spazio-8);
+    bottom: var(--spazio-8);
+    max-width: min(380px, 36%);
+    gap: var(--spazio-3);
+    padding: var(--spazio-4) var(--spazio-5);
+    border: 1px solid var(--vetro-bordo);
+    border-radius: var(--raggio-3);
+    background: var(--vetro-fondo-forte);
+    -webkit-backdrop-filter: var(--vetro-sfocatura);
+    backdrop-filter: var(--vetro-sfocatura);
   }
   .elenco-serata .riga-compatta {
     --miniatura: 132px;
@@ -935,7 +957,7 @@
     padding: 0 0 var(--spazio-2);
   }
   .con-amici-fila > li {
-    width: 260px;
+    width: 280px;
   }
 
   /* Dettaglio evento: locandina a sinistra che resta in vista, informazioni a destra. */
@@ -943,15 +965,16 @@
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
     align-items: start;
-    gap: var(--spazio-12);
-    max-width: 1120px;
+    gap: clamp(var(--spazio-12), 5vw, 96px);
+    box-sizing: border-box;
+    max-width: var(--sito-max);
     margin: 0 auto;
-    padding: var(--spazio-10) var(--spazio-8) 0;
+    padding: var(--spazio-10) var(--sito-margine) 0;
   }
   .dettaglio > .copertina-dettaglio {
     position: sticky;
     top: calc(var(--spazio-16) + var(--spazio-6));
-    height: min(560px, calc(100dvh - 140px));
+    height: min(760px, calc(100dvh - 140px));
     overflow: hidden;
     border-radius: var(--raggio-3);
   }

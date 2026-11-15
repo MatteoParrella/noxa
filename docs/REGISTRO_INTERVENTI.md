@@ -145,3 +145,85 @@ colonne con la locandina che resta in vista, Benvenuto come pagina di presentazi
 | Layout a più colonne per Organizza, Vivi, Ricorda e Profilo su desktop | Ogni area va pensata a sé | ROADMAP, iterazione 12 |
 | Meno carattere monospazio, «Privacy e dati» più leggibile, nomi di area e titoli allineati | Toccano molte schermate e i loro test | ROADMAP, iterazione 12 |
 | Resa delle foto nel tema chiaro | Serve una tinta diversa per il tema chiaro | ROADMAP, iterazione 12 |
+
+## 2026-11-15 — Interfaccia larga e traslucida, dati delle serate più completi, «Non hai un passaggio?»
+
+Richiesta: (1) sistemare l'interfaccia da computer, che non usava tutto lo schermo, e
+ottimizzare quella da telefono; (2) più trasparenza, soprattutto nei tag, che sembravano
+blocchi neri; nell'evento in evidenza il genere occupava metà scheda; (3) informazioni delle
+serate più accurate e complete, come età e link ai biglietti; (4) integrare «non ho un
+passaggio» dove più opportuno, con Uber o i numeri dei taxi.
+
+### Rami
+
+| Ramo | Contenuto |
+|---|---|
+| `feat/interfaccia-dettagli-e-passaggio` | Punti 1, 2 e 4 e la parte visibile del punto 3 (dettaglio evento): app, migrazione e documenti |
+| `feat/dettagli-serate` | Punto 3 nel worker: lettura della pagina della serata, con EVENT_INGESTION.md §2.6 |
+
+### 1 e 2. Interfaccia
+
+- **Desktop**: la larghezza del sito segue lo schermo fino a 1680 px (prima 1120 px fissi).
+  Scopri: evento in evidenza a tutta riga con amici, generi e prezzo in un riquadro
+  traslucido grande quanto il contenuto, eventi in colonne da almeno 400 px. Vivi, Organizza,
+  Ricorda e Profilo su più colonne. Dettaglio evento con la locandina più alta (ADR-0033,
+  aggiornamento).
+- **Telefono**: intestazione delle aree più bassa (titolo da 48 a 40 px), barra di
+  navigazione traslucida, la scheda in evidenza non lascia una fascia vuota quando non ha
+  amici, generi né prezzo.
+- **Trasparenze**: tag dei generi a pillola con fondo traslucido e bordo sottile; etichetta
+  dell'età sopra le copertine, pulsanti tondi e barra di navigazione «di vetro»
+  (`--vetro-*`, DESIGN.md §2), in entrambi i temi.
+- Verifica: lint, tipi, formattazione, 159 test unitari; e2e su telefono e desktop (Chromium)
+  di Scopri, navigazione, Vivi, gruppi, Ricorda, amici, catalogo e ritorno, axe compreso:
+  206 superati; schermate controllate a vista a 412 e a 1920 px nei due temi. Safari e
+  Firefox girano nella CI della PR.
+
+### 3. Dati delle serate
+
+Stato in staging prima dell'intervento (serate future pubblicate): The Club 126 serate senza
+età dichiarata, prezzo, biglietti né generi; Magazzini Generali 25 e Live Club 16 senza
+biglietti né prezzo; solo Gate completo. Causa: il worker leggeva solo gli elenchi, mentre
+questi dati stanno nella pagina della singola serata.
+
+- **Worker**: dopo l'elenco legge la pagina delle serate dei prossimi 45 giorni ancora senza
+  biglietti, al massimo 8 per esecuzione, sempre con il client conforme
+  (`fonti/dettaglio.py`, EVENT_INGESTION.md §2.6). Ne ricava link ai biglietti, prezzo
+  d'ingresso, età dichiarata e genere. Provato su tre pagine reali salvate come fixture:
+  The Club (prevendita da 20 €, «Non sono ammessi minorenni» = 18 dichiarati, hip hop e
+  house), Magazzini Generali (link TicketOne), Live Club (link Vivaticket, 37 €).
+- **Età**: riconosciute «non sono ammessi minorenni», «under 18 not allowed», «vietato ai
+  minori di 16 anni» (16, non 18). Corretti due errori: «ingresso da 15 €» letto come 15 anni
+  e l'età di un tavolo («privé dai 21 anni») presa per l'età della serata.
+- **App**: il dettaglio mostra sempre età (dichiarata o no, con la spiegazione), prezzo e
+  biglietti; il pulsante dei biglietti porta il nome del sito; se la fonte non indica i
+  biglietti lo dice e rimanda al sito del locale.
+- Verifica: Ruff, mypy, 343 test del worker (22 nuovi). Non provato contro lo staging: i dati
+  si completano dopo l'unione, in qualche esecuzione del worker (8 serate per fonte ogni
+  volta, The Club con 20 secondi tra una richiesta e l'altra).
+- Limite: quando il locale non scrive l'età, resta «18+ non dichiarata» (R-21). Per i
+  concerti aperti a tutti serve la correzione di un moderatore o una regola nuova (ROADMAP,
+  iterazione 12).
+
+### 4. «Non hai un passaggio?» (F-23, ADR-0034, chiude D-17)
+
+- In Vivi, sotto il ritorno sicuro, sempre visibile; nella serata di gruppo un pulsante per chi
+  non ha ancora scelto come torna.
+- Voci verificate su fonti ufficiali il 2026-11-15: rete notturna ATM, Radiotaxi 02 4040 e
+  02 8585, Radiotaxi Monza 039 36379, Uber (solo maggiorenni: i termini chiedono 18 anni).
+- Tabella `servizi_trasporto` con RLS: l'età si confronta nel database, l'app non scrive.
+  Nessun dato personale, nessun SDK, nessuna posizione o destinazione passata a terzi.
+- Verifica: e2e di Vivi e gruppi su telefono e desktop (72 superati, 3 nuovi con axe).
+  **Migrazione e test pgTAP `043` non eseguiti in locale** (Docker Desktop spento): li esegue
+  la CI della PR. I tipi TypeScript della tabella sono scritti a mano con lo stesso formato
+  del generatore: da rigenerare con `supabase gen types` alla prima occasione.
+
+### Non fatto, con il motivo
+
+| Voce | Motivo | Dove è nel piano |
+|---|---|---|
+| 02 7777, 02 6969, FreeNow, itTaxi, treni notturni Trenord | Numero o età minima non confermati su una fonte ufficiale | ROADMAP, iterazione 12 |
+| Gestione dei servizi di trasporto dall'area di moderazione | Richiede nuove azioni nel registro (R-69) e una schermata | ROADMAP, iterazione 12 |
+| Età predefinita per locale | Tocca R-21: serve un ADR | ROADMAP, iterazione 12 |
+| Tavole di Claude Design per vetro e layout largo | Deroga chiesta dal product owner; token da riportare nel progetto | DESIGN.md §2 |
+

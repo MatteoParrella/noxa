@@ -1846,6 +1846,58 @@ export type Database = {
           },
         ];
       };
+      servizi_trasporto: {
+        Row: {
+          aggiornato_il: string;
+          attivo: boolean;
+          creato_il: string;
+          eta_minima: number;
+          fonte_url: string;
+          id: string;
+          nome: string;
+          nota: string | null;
+          ordine: number;
+          telefono: string | null;
+          tipo: Database['public']['Enums']['tipo_servizio_trasporto'];
+          url: string | null;
+          verificato_il: string;
+          zona: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          aggiornato_il?: string;
+          attivo?: boolean;
+          creato_il?: string;
+          eta_minima?: number;
+          fonte_url: string;
+          id?: string;
+          nome: string;
+          nota?: string | null;
+          ordine?: number;
+          telefono?: string | null;
+          tipo: Database['public']['Enums']['tipo_servizio_trasporto'];
+          url?: string | null;
+          verificato_il: string;
+          zona: string;
+        };
+        Update: {
+          aggiornato_il?: string;
+          attivo?: boolean;
+          creato_il?: string;
+          eta_minima?: number;
+          fonte_url?: string;
+          id?: string;
+          nome?: string;
+          nota?: string | null;
+          ordine?: number;
+          telefono?: string | null;
+          tipo?: Database['public']['Enums']['tipo_servizio_trasporto'];
+          url?: string | null;
+          verificato_il?: string;
+          zona?: string;
+        };
+        Relationships: [];
+      };
       tracker_amici: {
         Row: {
           amico_id: string;
@@ -2615,6 +2667,7 @@ export type Database = {
         | 'fonte'
         | 'candidato_locale'
         | 'foto_profilo';
+      tipo_servizio_trasporto: 'mezzi_pubblici' | 'taxi' | 'app_trasporto';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -2842,6 +2895,7 @@ export const Constants = {
         'candidato_locale',
         'foto_profilo',
       ],
+      tipo_servizio_trasporto: ['mezzi_pubblici', 'taxi', 'app_trasporto'],
     },
   },
 } as const;

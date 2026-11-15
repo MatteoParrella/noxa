@@ -80,7 +80,7 @@ function Contenuto({ diario }: { diario: ReturnType<typeof useDiario> }) {
               <h2 id={`mese-${mese}`}>{titoloMese(mese)}</h2>
               <span>{testi.area.serate(voci.length)}</span>
             </div>
-            <ul className="m-0 list-none p-0">
+            <ul className="ri-elenco m-0 list-none p-0">
               {voci.map((voce) => (
                 <li key={voce.id}>
                   <RigaDiario voce={voce} />

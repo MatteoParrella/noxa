@@ -32,6 +32,7 @@ export type DatiSchedaEvento = {
 };
 
 function Etichette({ dati, conEta }: { dati: DatiSchedaEvento; conEta: boolean }) {
+  if (!dati.annullato && !conEta && dati.generi.length === 0) return null;
   return (
     <div className="rc-tag">
       {dati.annullato && (

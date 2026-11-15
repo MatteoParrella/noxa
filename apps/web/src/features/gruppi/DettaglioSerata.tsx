@@ -36,6 +36,7 @@ import { Segmenti } from '@/components/ui/Segmenti';
 import { Caricamento, ElencoVuoto, ErroreConAzione } from '@/components/ui/Stati';
 import { useToast } from '@/components/ui/Toast';
 import { useIo } from '@/features/amici/dati';
+import { FoglioPassaggio } from '@/features/passaggio/FoglioPassaggio';
 import { useCopertine } from '@/features/scopri/dati';
 import { dominio, etichettaEta, ora, orario } from '@/features/scopri/formato';
 import { copertina } from '@/features/scopri/schede';
@@ -624,6 +625,7 @@ function Trasporto({
               opzioni={opzioni}
             />
           </div>
+          {mio.trasporto_ritorno === null && <ApriPassaggio />}
 
           {guidoIo && (
             <div className="se-posti" role="group" aria-label={testi.postiLiberi}>
@@ -742,5 +744,23 @@ function Trasporto({
         </>
       )}
     </section>
+  );
+}
+
+/** Per chi non ha ancora un mezzo per il ritorno: apre «Non hai un passaggio?» (F-23). */
+function ApriPassaggio() {
+  const [aperto, setAperto] = useState(false);
+  return (
+    <>
+      <Pulsante
+        variante="secondario"
+        dimensione="s"
+        className="ps-apri"
+        onClick={() => setAperto(true)}
+      >
+        {messaggi.passaggio.apri}
+      </Pulsante>
+      <FoglioPassaggio aperto={aperto} onChiudi={() => setAperto(false)} />
+    </>
   );
 }

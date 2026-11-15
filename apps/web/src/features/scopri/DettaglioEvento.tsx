@@ -414,8 +414,59 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
                 <dd>{dati.artisti.join(' · ')}</dd>
               </>
             )}
+            <dt>{testi.eta}</dt>
+            <dd>
+              <b className="mono">{dati.eta_minima}+</b>
+              <br />
+              <span className="c-2">
+                {dati.eta_minima_dichiarata ? testi.etaDichiarata : testi.etaNonDichiarataBreve}
+              </span>
+            </dd>
             <dt>{testi.prezzo}</dt>
-            <dd className="mono">{prezzoTesto}</dd>
+            <dd className={dati.prezzo_min_centesimi === null ? 'c-2' : 'mono'}>{prezzoTesto}</dd>
+            {!annullato && !passato && (
+              <>
+                <dt>{testi.biglietti}</dt>
+                <dd>
+                  {dati.url_biglietti ? (
+                    online ? (
+                      <a
+                        className="btn btn-secondario btn-s"
+                        href={dati.url_biglietti}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Icona icona={Ticket} dimensione="s" />
+                        {testi.bigliettiSu(dominio(dati.url_biglietti))}
+                        <Icona icona={ExternalLink} dimensione="s" />
+                        <span className="sr-only">{testi.apreSitoEsterno}</span>
+                      </a>
+                    ) : (
+                      <span className="c-2">{testi.bigliettiSu(dominio(dati.url_biglietti))}</span>
+                    )
+                  ) : (
+                    <>
+                      <span className="c-2">{testi.bigliettiNonIndicati}</span>
+                      {dati.fonte_url && online && (
+                        <>
+                          <br />
+                          <a
+                            className="link-in-testo"
+                            href={dati.fonte_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {testi.controllaSulSito}
+                            <Icona icona={ExternalLink} dimensione="s" />
+                            <span className="sr-only">{testi.apreSitoEsterno}</span>
+                          </a>
+                        </>
+                      )}
+                    </>
+                  )}
+                </dd>
+              </>
+            )}
           </dl>
           <div>
             {dati.fonte_url && (
@@ -424,15 +475,6 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
                 icona={Globe}
                 etichetta={fonteEtichetta}
                 destinazione={dominio(dati.fonte_url)}
-                disattivato={!online}
-              />
-            )}
-            {dati.url_biglietti && !annullato && (
-              <LinkEsterno
-                href={dati.url_biglietti}
-                icona={Ticket}
-                etichetta={testi.biglietti}
-                destinazione={testi.sitoEsterno}
                 disattivato={!online}
               />
             )}

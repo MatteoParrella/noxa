@@ -94,7 +94,7 @@ F-16, F-30, F-40, F-41, F-42, F-43 (PWA; app Android con APK di debug, ADR-0027)
 
 ## Fase 2 — Lancio pubblico (MVP completo)
 
-**Funzionalità**: F-20, F-21, F-22, F-31, F-32, F-33, F-43 (pubblicazione negli store), più
+**Funzionalità**: F-20, F-21, F-22, F-23, F-31, F-32, F-33, F-43 (pubblicazione negli store), più
 il consolidamento di tutte le funzionalità della Fase 1. La pubblicazione su Google Play è
 l'ultimo passo, a funzionalità complete; App Store solo se D-13 si chiude per Apple
 (ADR-0027).
@@ -174,7 +174,7 @@ Ogni iterazione ha:
 | 9 | 2 | Notifiche e check-in | F-22, F-20 | Centro notifiche, permessi, check-in |
 | 10 | 2 | Ritorno sicuro | F-21, F-43 (app Android) | Avvio, ritorno in corso, ritorno di un amico, allerta |
 | 11 | 2 | Statistiche, badge e Wrapped | F-31, F-32, F-33 | Statistiche, bacheca badge, schede del Wrapped |
-| 12 | 2 | Preparazione al lancio | F-43 (Google Play), consolidamento | Icona, schermate e testi per gli store |
+| 12 | 2 | Preparazione al lancio | F-43 (Google Play), F-23 (gestione dall'area di moderazione; primo rilascio fuori iterazione il 2026-11-15, ADR-0034), consolidamento | Icona, schermate e testi per gli store |
 | 13 | 3 | Accesso con Apple e Google | F-17 | Accesso social e completamento del profilo |
 | 14 | 3 | Aggregatori e nuove aree | F-07, F-46 | — |
 
@@ -352,6 +352,12 @@ Ogni iterazione ha:
     Organizza, Vivi, Ricorda e Profilo (ADR-0033); carattere monospazio solo per orari e date;
     «Privacy e dati» più leggibile; titoli delle pagine allineati ai nomi delle aree; tinta
     delle foto d'atmosfera per il tema chiaro; identità visiva dei gruppi (colore o copertina);
+  - dopo gli interventi del 2026-11-15 (REGISTRO_INTERVENTI.md): gestione di
+    `servizi_trasporto` dall'area di moderazione con la data di verifica (F-23, ADR-0034);
+    verifica su fonte ufficiale di 02 7777 e 02 6969 (Milano), dell'età minima di FreeNow e
+    itTaxi e dei treni notturni Trenord, prima di aggiungerli all'elenco; pagina in italiano
+    della rete notturna ATM; adattatori o Instagram per i locali senza pagina della serata;
+    età predefinita del locale verificata da un moderatore, solo con un ADR (tocca R-21);
   - decisioni D-18 (pagine evento pubbliche), D-19 (tono dei testi), D-20 (locandine vere) e
     D-21 (età dichiarata).
 - **Prerequisiti esterni**: penetration test esterno, consulente legale.

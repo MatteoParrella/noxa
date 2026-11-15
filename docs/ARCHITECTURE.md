@@ -500,6 +500,7 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | F-17 Accesso con Apple e Google | Supabase Auth (provider OAuth) | §3.2 |
 | F-20 Check-in | App, RPC `fai_checkin` e `suggerimenti_checkin`, avvisi su `vivi:<utente>` | §5.3 |
 | F-21 Ritorno sicuro | App nativa (servizio in primo piano), Realtime Broadcast con avvisi senza dati, `pg_cron`, `invia-push` (Web Push e FCM) | §4.4, ADR-0006, ADR-0027, ADR-0028 |
+| F-23 Non hai un passaggio? | App: elenco letto dalla tabella `servizi_trasporto` (RLS con l'età), link `tel:` e link esterni; nessun servizio di terze parti nell'app | ADR-0034 |
 | F-22 Notifiche push | Nella Fase 1 campanella e `/notifiche/` con Realtime; dall'iterazione 9 Web Push con l'Edge Function `invia-push` (FCM con l'app Android, ADR-0027; APNs con iOS, D-13) | §5.4, ADR-0026 |
 | F-30 Tracker | App (offline con coda di scritture) | §5.5 |
 | F-31 Statistiche | Vista `statistiche_personali` | §3.2 |

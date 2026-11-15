@@ -105,6 +105,7 @@ erDiagram
 | `stato_biglietto` | `nessuno`, `prevendita`, `lista`, `alla_cassa` |
 | `mezzo_trasporto` | `auto_guido`, `passaggio`, `mezzi_pubblici`, `taxi_ncc`, `a_piedi`, `altro` |
 | `stato_ritorno` | `attivo`, `arrivato`, `annullato`, `scaduto` |
+| `tipo_servizio_trasporto` | `mezzi_pubblici`, `taxi`, `app_trasporto` (F-23) |
 | `categoria_spesa` | `ingresso`, `prevendita`, `trasporto`, `cibo`, `bevande_analcoliche`, `alcolici`, `guardaroba`, `altro` |
 | `piattaforma` | `ios`, `android`, `web` |
 | `tipo_job` | `esegui_fonte`, `analizza_flyer`, `deduplica_grezzo`, `copia_immagine_flyer`, `pulizia_flyer` |
@@ -800,7 +801,7 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 - Trigger `private.verifica_trasporto` (`before insert or update`): serata non annullata né passata (`NX026`); `auto_guido` solo per i maggiorenni, età legale per la patente B (`NX040`); posti non inferiori ai passaggi già scelti (`NX041`); `passaggio_da` indica un membro della stessa serata che guida, non ha risposto `no`, non ha blocchi con chi chiede (R-17, `NX039`) e ha ancora posto (`NX041`). Trigger `private.libera_passaggi` (`after update or delete`): chi non guida più, risponde `no` o toglie la risposta libera i passaggi che offriva.
 - Realtime: i trigger `private.avvisa_cambio_serata` (su `serate_gruppo` e `partecipazioni_serata`) e `private.avvisa_cambio_membri` (su `membri_gruppo`) inviano un avviso senza dati su un canale Broadcast privato; le tabelle **non** sono in Postgres Changes, che non applica la RLS agli eventi `DELETE` (§7, ARCHITECTURE.md §5.3).
 
-### 5.5 Vivi: check-in e ritorno sicuro
+### 5.5 Vivi: check-in, ritorno sicuro e trasporti
 
 #### `checkin`
 *Funzionalità: F-20.*
@@ -889,6 +890,37 @@ l'indirizzo, la destinazione o l'area di arrivo (R-32, ADR-0028).
 - **U/D**: nessuna.
 - Nessuna coordinata passa da Realtime: chi guarda riceve l'avviso sul canale privato `ritorno:<id>` e rilegge l'ultima posizione con `ritorni_vivi` (§7, ADR-0028). La tabella non è mai letta come percorso: le RPC restituiscono solo l'ultima posizione.
 - Conservazione: con il ritorno, 24 ore dopo la fine (R-31).
+
+#### `servizi_trasporto`
+*Funzionalità: F-23 (ADR-0034).* Elenco curato di mezzi notturni, radiotaxi e app di trasporto
+per chi non ha un passaggio. Non contiene dati personali.
+
+| Colonna | Tipo | Vincoli |
+|---|---|---|
+| `id` | `uuid` | PK |
+| `tipo` | `tipo_servizio_trasporto` | |
+| `nome` | `text` | da 2 a 60 caratteri; unico insieme a `zona` |
+| `zona` | `text` | `milano`, `brianza` o `tutte` |
+| `telefono` | `text` | `+39` seguito da 6–11 cifre; obbligatorio per i `taxi`, assente per gli altri tipi |
+| `url` | `text` | solo `https`; obbligatorio per mezzi pubblici e app |
+| `nota` | `text` | al massimo 140 caratteri |
+| `eta_minima` | `smallint` | tra 14 e 18, predefinita 14; 18 per le app che lo richiedono nei loro termini |
+| `ordine` | `smallint` | ordine fisso di presentazione: mezzi pubblici, taxi, app (R-61) |
+| `fonte_url` | `text` | pagina ufficiale da cui viene il dato, solo `https` |
+| `verificato_il` | `date` | ultima verifica sulla fonte |
+| `attivo` | `boolean` | predefinito `true` |
+| `creato_il`, `aggiornato_il` | `timestamptz` | |
+
+- **S** (`authenticated`): `attivo` e `private.eta_di(auth.uid()) >= eta_minima` (R-04): un
+  minorenne non riceve le app di trasporto che richiedono 18 anni. Nessuna policy per `anon`
+  (R-07).
+- **I/U/D**: nessuna, nemmeno per i moderatori: le voci si aggiungono e si correggono con una
+  migrazione, dopo la verifica sulla fonte ufficiale. La gestione dall'area di moderazione è
+  nella roadmap (iterazione 12).
+- Voci iniziali (2026-11-15): Rete notturna ATM, Radiotaxi 02 4040 e 02 8585 (Milano),
+  Radiotaxi Monza 039 36379, Uber (18 anni, link universale con la sola partenza «dove sei»).
+- Test: `043_servizi_trasporto` (lettura per 14, 15, 16, 17, 18, 20, 21 anni e moderatori,
+  nessuna scrittura dall'app, vincoli).
 
 ### 5.6 Ricorda: tracker, badge, riepilogo
 

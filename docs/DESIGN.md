@@ -49,6 +49,12 @@ flowchart LR
   nel colore di sfondo del tema, come nel layer "scopri" di Claude Design; i token
   `--colore-velo-foto` e `--colore-testo-su-foto` della prima versione sono stati tolti con
   l'iterazione 4.
+- Superfici «di vetro» e larghezza del sito (2026-11-15, deroga chiesta dal product owner
+  come per il rinfresco del 2026-11-14: definite nel codice, da riportare nel progetto Claude
+  Design): `--vetro-fondo`, `--vetro-fondo-forte`, `--vetro-barra`, `--vetro-bordo`,
+  `--vetro-sfocatura` per tag dei generi, etichette sopra le copertine, pulsanti tondi, barra
+  di navigazione e riquadri appoggiati alle foto; `--sito-larghezza`, `--sito-margine`,
+  `--sito-max` per il layout desktop (ADR-0033). Il raggio tondo vale anche per i tag.
 - Token delle schermate di accesso, dal layer "accesso" del progetto Claude Design
   (design/F-10-accesso): `--tipo-titolo-accesso`, `--tipo-marchio`,
   `--tipo-larghezza-marchio`, `--movimento-passo`, `--spostamento-passo`. Le classi stanno in

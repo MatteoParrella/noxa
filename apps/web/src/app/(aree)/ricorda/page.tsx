@@ -17,7 +17,7 @@ export default function PaginaRicorda() {
         dopoTitolo={<EtichettaPrivato />}
         azioni={<Campanella />}
       />
-      <Rivela className="pagina pb-8" indice={2}>
+      <Rivela className="pagina pagina-larga pb-8" indice={2}>
         <Diario />
       </Rivela>
     </>

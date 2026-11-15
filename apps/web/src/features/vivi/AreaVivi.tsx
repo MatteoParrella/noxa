@@ -17,6 +17,7 @@ import { messaggi } from '@/lib/messaggi/it';
 import { registraErrore } from '@/lib/registro';
 import { terminaCheckin, type CheckinAmico, type MioCheckin } from './api';
 import { CHIAVI, useAvvisiVivi, useCheckinAbilitato, useCheckinAmici, useMioCheckin } from './dati';
+import { SezionePassaggio } from '@/features/passaggio/SezionePassaggio';
 import { SezioneRitorno } from '@/features/ritorno/SezioneRitorno';
 import { FoglioCheckin } from './FoglioCheckin';
 
@@ -79,14 +80,14 @@ export function AreaVivi() {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="vivi-griglia">
       {!online && <StrisciaOffline testo={testi.offline} />}
       {!abilitato.data ? (
-        <Entra indice={1}>
+        <Entra className="vivi-checkin" indice={1}>
           <CheckinSpento />
         </Entra>
       ) : (
-        <Entra indice={1}>
+        <Entra className="vivi-checkin" indice={1}>
           <section className="ck-sezione" aria-labelledby="ck-mio">
             <div className="ck-sezione-testa">
               <h2 className="etichetta" id="ck-mio">
@@ -119,11 +120,12 @@ export function AreaVivi() {
           </section>
         </Entra>
       )}
-      <Entra indice={2}>
+      <Entra className="vivi-amici" indice={2}>
         <AmiciInGiro elenco={amici.data} aggiornatoIl={amici.dataUpdatedAt} online={online} />
       </Entra>
-      <Entra indice={3}>
+      <Entra className="vivi-ritorno" indice={3}>
         <SezioneRitorno online={online} />
+        <SezionePassaggio />
       </Entra>
       <FoglioCheckin aperto={foglio} onChiudi={() => setFoglio(false)} />
     </div>
