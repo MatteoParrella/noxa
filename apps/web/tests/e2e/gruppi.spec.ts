@@ -56,8 +56,11 @@ test('creare un gruppo: nome obbligatorio, amici non invitabili spenti con il mo
   const marta = page.getByRole('checkbox', { name: /Marta/ });
   await expect(marta).toHaveAttribute('aria-disabled', 'true');
   await expect(page.getByText('Non è amico di tutte le persone del gruppo')).toBeVisible();
-  await marta.click({ force: true });
+  // Il clic va all'elemento e non a un punto dello schermo: a quest'altezza la riga può
+  // trovarsi sotto la barra di navigazione, e un clic forzato alle coordinate toccava la barra.
+  await marta.dispatchEvent('click');
   await expect(marta).toHaveAttribute('aria-checked', 'false');
+  await expect(page).toHaveURL(/\/gruppi\/nuovo\//);
 
   await page.getByLabel('Nome del gruppo').fill('Quelli del sabato');
   await page.getByRole('checkbox', { name: /Davide/ }).click();
