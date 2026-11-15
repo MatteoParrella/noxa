@@ -19,6 +19,7 @@ from noxa_worker.fonti.comuni import (
     id_esterno_da,
     prezzo_in_centesimi,
 )
+from noxa_worker.fonti.dettaglio import DatiDettaglio, leggi_dettaglio
 from noxa_worker.fonti.http import ClientHttpConforme
 from noxa_worker.fonti.ical import e_ical, leggi_ical
 from noxa_worker.normalizzazione.date import ha_ora
@@ -44,6 +45,12 @@ _ANNULLATO = ("EventCancelled", "EventPostponed")
 class AdattatoreSitoJsonLd:
     nome: ClassVar[str] = "sito_jsonld"
     tipo: ClassVar[TipoFonte] = TipoFonte.SITO_LOCALE
+    # I dati strutturati dicono spesso solo titolo e data: biglietti, prezzo ed età si
+    # completano dalla pagina della serata (fonti/dettaglio.py).
+    arricchisce_dal_dettaglio: ClassVar[bool] = True
+
+    def dettaglio(self, pagina: BeautifulSoup, url: str) -> DatiDettaglio:
+        return leggi_dettaglio(pagina, url)
 
     async def raccogli(self, fonte: Fonte, http: ClientHttpConforme) -> list[EventoGrezzo]:
         risposta = await http.get_testo(fonte.url)

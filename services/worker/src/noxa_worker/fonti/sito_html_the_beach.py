@@ -68,6 +68,8 @@ def link_delle_serate(calendario: BeautifulSoup, base: str, dal: date) -> list[s
 
 class AdattatoreSitoHtmlTheBeach(AdattatoreSitoHtml):
     nome: ClassVar[str] = "sito_html_the_beach"
+    # Le pagine delle serate si leggono già qui sotto: nessun secondo passaggio.
+    arricchisce_dal_dettaglio: ClassVar[bool] = False
     selettori: ClassVar[SelettoriHtml] = SelettoriHtml(
         evento="#block-tb-content",
         titolo=".txts-box-title",

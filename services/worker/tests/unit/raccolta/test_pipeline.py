@@ -10,6 +10,7 @@ from typing import ClassVar
 from uuid import UUID, uuid4
 
 import pytest
+from bs4 import BeautifulSoup
 from pydantic import JsonValue
 
 from noxa_worker.coda import ErroreJobDefinitivo, Job, TipoJob
@@ -17,6 +18,7 @@ from noxa_worker.dedup.fusione import EventoEsistente
 from noxa_worker.errori import ErroreFonte
 from noxa_worker.fonti.base import EventoGrezzo, Fonte, TipoFonte
 from noxa_worker.fonti.comuni import evento_da_campi
+from noxa_worker.fonti.dettaglio import DatiDettaglio, leggi_dettaglio
 from noxa_worker.fonti.http import ClientHttpConforme
 from noxa_worker.normalizzazione.date import FUSO_ROMA
 from noxa_worker.normalizzazione.modelli import PRIORITA_ORIGINE, EventoNormalizzato
@@ -544,3 +546,37 @@ async def test_nessun_colore_in_prova() -> None:
     gestore._colori = ColoriCheFalliscono()  # type: ignore[assignment]
     await gestore.esegui_fonte(_job(prova=True))
     assert ColoriCheFalliscono.chiamate == 0
+
+
+class AdattatoreConDettaglioFinto(AdattatoreFinto):
+    """Come il finto, ma dichiara di completare le serate dalla loro pagina."""
+
+    arricchisce_dal_dettaglio: ClassVar[bool] = True
+
+    def dettaglio(self, pagina: BeautifulSoup, url: str) -> DatiDettaglio:
+        return leggi_dettaglio(pagina, url)
+
+
+async def test_biglietti_prezzo_ed_eta_dalla_pagina_della_serata() -> None:
+    serata = grezzo("Notte Ferrovia")
+    adattatore = AdattatoreConDettaglioFinto([serata])
+    gestore, archivio, sito = _ambiente(adattatore)
+    sito.aggiungi(
+        serata.url,
+        "<main><p>Ingresso: 12 € in prevendita</p><p>Non sono ammessi minorenni</p>"
+        '<a href="https://dice.fm/notte-ferrovia">Biglietti</a></main>',
+        tipo="text/html",
+    )
+    await gestore.esegui_fonte(_job())
+    (evento,) = archivio.eventi.values()
+    assert evento.url_biglietti == "https://dice.fm/notte-ferrovia"
+    assert evento.prezzo_min_centesimi == 1200
+    assert (evento.eta_minima, evento.eta_minima_dichiarata) == (18, True)
+    assert archivio.esiti[-1].pagine_lette == 2
+
+
+async def test_senza_dettaglio_la_pagina_della_serata_non_si_chiede() -> None:
+    serata = grezzo("Notte Ferrovia")
+    gestore, _, sito = _ambiente(AdattatoreFinto([serata]))
+    await gestore.esegui_fonte(_job())
+    assert "/eventi/notte-ferrovia" not in sito.percorsi()

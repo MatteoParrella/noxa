@@ -116,6 +116,33 @@ database). La procedura completa è nella skill `add-event-source`.
 - Gli account dei locali non Business o Creator non sono raggiungibili: per loro restano i
   flyer caricati dagli utenti.
 
+### 2.6 Arricchimento dalla pagina della serata
+
+Gli elenchi dei siti (e spesso anche i loro dati strutturati) dicono solo titolo, data e ora:
+link ai biglietti, prezzo d'ingresso, età minima e genere stanno nella pagina della singola
+serata. Dopo la lettura dell'elenco la raccolta legge quindi alcune di queste pagine
+(`fonti/dettaglio.py`), con le stesse regole del §2.4:
+
+| Regola | Valore |
+|---|---|
+| Quali serate | Solo quelle dei prossimi 45 giorni, con una pagina propria sullo stesso sito della fonte e ancora senza link ai biglietti, né nell'elenco né nel catalogo |
+| Quante | Al massimo 8 pagine per esecuzione, dentro `pagine_massime` della fonte: metà alle serate più vicine, metà a rotazione tra le altre |
+| Conformità | Ogni richiesta passa da `ClientHttpConforme` (robots.txt, intervallo per dominio, `Crawl-delay`); un percorso vietato, un 403 o un 429 fermano i dettagli; ogni altro errore salta la pagina e lascia la serata com'era |
+| Che cosa si legge | Link `https` a una biglietteria esterna (un dominio dell'elenco `BIGLIETTERIE` oppure un link verso un altro sito il cui testo parla di biglietti; mai i link interni, i social o le mappe), prezzo minimo d'ingresso (non tavoli, privé o guardaroba), le righe che parlano dell'ingresso per età e alcol, la riga «Musica: …» per i generi |
+| Che cosa non si salva | Il testo della pagina, le immagini, contatti o altri dati: restano solo campi dello schema evento (§3.3) |
+| Fusione | I dati del dettaglio completano il grezzo dell'elenco e non sostituiscono un campo già letto; la fusione non cancella mai un valore con un vuoto (§7) |
+
+Gli adattatori che lo usano dichiarano `arricchisce_dal_dettaglio`: `sito_jsonld` e gli
+adattatori `sito_html_<locale>`, tranne `sito_html_the_beach` (legge già le pagine delle
+serate) e `sito_html_alcatraz` (il link ai biglietti è nell'elenco). `sito_html_the_club`
+aggiunge che la pagina della serata è anche il link alla prevendita. D-05 resta valida: delle
+biglietterie si salva solo il link pubblicato dal sito del locale.
+
+Sull'età: «Non sono ammessi minorenni», «Under 18 are not allowed» e simili dichiarano i 18
+anni; «vietato ai minori di 16 anni» vale 16; un'età scritta nella riga di un tavolo o di un
+privé («privé solo dai 21 anni») non è l'età della serata; «ingresso da 15 €» è un prezzo.
+Senza un'indicazione l'età resta non dichiarata e vale 18 (R-21): non si deduce mai.
+
 ## 3. Pipeline
 
 ```mermaid

@@ -37,6 +37,9 @@ class Fonte(BaseModel):
     url: str
     adattatore: str
     pagine_massime: int = Field(ge=1, le=50)
+    # Pagine delle serate future di questa fonte che nel catalogo hanno già il link ai
+    # biglietti: non si rileggono per l'arricchimento (fonti/dettaglio.py).
+    url_completi: frozenset[str] = frozenset()
 
 
 class EventoGrezzo(BaseModel):

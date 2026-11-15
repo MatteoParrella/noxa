@@ -3,8 +3,11 @@
 Verifica di conformità del 2026-11-11 (skill `add-event-source` §2): robots.txt consente
 tutto con `Crawl-delay: 20`, rispettato da `ClientHttpConforme`; i termini
 (https://www.theclubmilano.com/terms-and-conditions) regolano la vendita dei biglietti e non
-vietano la raccolta automatica. Si legge solo la pagina dell'elenco: una richiesta per
-esecuzione, nessuna pagina di dettaglio, nessuna immagine.
+vietano la raccolta automatica. Si legge la pagina dell'elenco e, per le serate dei
+prossimi 45 giorni ancora senza biglietti, la loro pagina (al massimo 8 per esecuzione,
+`fonti/dettaglio.py`): lì ci sono il prezzo della prevendita, la musica e la regola
+d'ingresso («Non sono ammessi minorenni»). La prevendita si compra sulla pagina stessa
+della serata, che quindi è anche il link ai biglietti. Nessuna immagine scaricata.
 
 Le schede hanno data e ora in inglese ("Wed, 11th Nov 2026 | 23:30 - Thu, 12 Nov 05:30") e
 il titolo ripete la data ("ONE TWO - Wednesday 11 November"): la data si toglie dal titolo e
@@ -16,12 +19,14 @@ scarti a ogni esecuzione.
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from typing import ClassVar
 
-from bs4 import Tag
+from bs4 import BeautifulSoup, Tag
 
 from noxa_worker.fonti.base import EventoGrezzo, Fonte
+from noxa_worker.fonti.dettaglio import DatiDettaglio, leggi_dettaglio
 from noxa_worker.fonti.http import ClientHttpConforme
 from noxa_worker.fonti.sito_html import AdattatoreSitoHtml, SelettoriHtml, entro_il_limite
 from noxa_worker.normalizzazione.date import combina, interpreta_iso, trova_data, trova_ora
@@ -46,6 +51,13 @@ class AdattatoreSitoHtmlTheClub(AdattatoreSitoHtml):
     async def raccogli(self, fonte: Fonte, http: ClientHttpConforme) -> list[EventoGrezzo]:
         grezzi = await super().raccogli(fonte, http)
         return entro_il_limite(grezzi, datetime.now(UTC))
+
+    def dettaglio(self, pagina: BeautifulSoup, url: str) -> DatiDettaglio:
+        letto = leggi_dettaglio(pagina, url)
+        # La prevendita si compra nella finestra «ticketModel» della pagina della serata.
+        if letto.url_biglietti is None and pagina.select_one("#ticketModel") is not None:
+            return replace(letto, url_biglietti=url if url.startswith("https://") else None)
+        return letto
 
     def _grezzo(self, nodo: Tag, base: str) -> EventoGrezzo | None:
         grezzo = super()._grezzo(nodo, base)

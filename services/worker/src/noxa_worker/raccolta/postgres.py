@@ -278,8 +278,15 @@ class ArchivioRaccoltaPostgres:
                 (fonte_id,),
             )
             riga = await cursore.fetchone()
-        if riga is None:
-            return None
+            if riga is None:
+                return None
+            cursore = await c.execute(
+                """select distinct ef.url_originale
+                   from public.eventi_fonti ef join public.eventi e on e.id = ef.evento_id
+                   where ef.fonte_id = %s and e.inizio > now() and e.url_biglietti is not null""",
+                (fonte_id,),
+            )
+            completi = frozenset(str(r["url_originale"]) for r in await cursore.fetchall())
         return FonteDaEseguire(
             fonte=Fonte(
                 id=riga["id"],
@@ -290,6 +297,7 @@ class ArchivioRaccoltaPostgres:
                 url=riga["url"],
                 adattatore=riga["adattatore"],
                 pagine_massime=riga["pagine_massime"],
+                url_completi=completi,
             ),
             stato_conformita=riga["stato_conformita"],
             attiva=riga["attiva"],
