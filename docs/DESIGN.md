@@ -55,6 +55,10 @@ flowchart LR
   `--vetro-sfocatura` per tag dei generi, etichette sopra le copertine, pulsanti tondi, barra
   di navigazione e riquadri appoggiati alle foto; `--sito-larghezza`, `--sito-margine`,
   `--sito-max` per il layout desktop (ADR-0033). Il raggio tondo vale anche per i tag.
+  Dalla sera del 2026-11-15 la trasparenza vale per tutte le aree dell'app
+  (`src/styles/vetro.css`): fondo d'atmosfera (`--atmosfera-1…3`), superfici e linea come
+  veli dentro `.guscio`, `--vetro-foglio` e `--vetro-sfocatura-forte` per fogli e finestre,
+  `--colore-superficie-piena` per chi ha bisogno del colore pieno.
 - Token delle schermate di accesso, dal layer "accesso" del progetto Claude Design
   (design/F-10-accesso): `--tipo-titolo-accesso`, `--tipo-marchio`,
   `--tipo-larghezza-marchio`, `--movimento-passo`, `--spostamento-passo`. Le classi stanno in
