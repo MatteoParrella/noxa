@@ -1,5 +1,6 @@
 """Arricchimento dalla pagina della serata, su tre pagine reali salvate il 2026-11-15
-(The Club, Magazzini Generali, Live Club) con contatti sostituiti."""
+(The Club, Magazzini Generali, Live Club) con contatti sostituiti e senza gli script dei siti
+(restano i dati JSON-LD): il worker li scarta comunque e non sono codice di Noxa."""
 
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
