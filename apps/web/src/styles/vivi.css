@@ -895,3 +895,97 @@
 .nf-sugg p {
   margin: 0;
 }
+
+/* ---------- «Non hai un passaggio?» (F-23) ---------- */
+.ps-scheda {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--spazio-4);
+  border: 1px solid var(--vetro-bordo);
+  border-radius: var(--raggio-3);
+  background: var(--vetro-fondo);
+}
+.ps-scheda h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.05;
+  font-weight: var(--tipo-peso-forte);
+  font-stretch: 72%;
+}
+.ps-scheda > p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--colore-testo-secondario);
+}
+.ps-foglio,
+.ps-elenco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spazio-3);
+}
+.ps-tipo {
+  display: flex;
+  align-items: center;
+  gap: var(--spazio-2);
+  margin: var(--spazio-1) 0 0;
+  font-size: var(--tipo-etichetta);
+  line-height: 1.5;
+  font-weight: var(--tipo-peso-medio);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--colore-testo-secondario);
+}
+.ps-voce {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spazio-2) var(--spazio-3);
+  padding: var(--spazio-3) 0;
+  border-bottom: 1px solid var(--colore-linea);
+}
+.ps-testo {
+  display: flex;
+  flex: 1 1 180px;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+.ps-testo span {
+  font-size: var(--tipo-corpo-piccolo);
+  color: var(--colore-testo-secondario);
+}
+.ps-azione {
+  flex: none;
+  min-height: var(--area-tocco);
+  text-decoration: none;
+}
+.ps-spento,
+.ps-nota,
+.ps-ritorno {
+  margin: 0;
+  font-size: var(--tipo-didascalia);
+  line-height: 1.5;
+  color: var(--colore-testo-secondario);
+}
+.ps-ritorno {
+  font-size: var(--tipo-corpo-piccolo);
+}
+.ps-stato {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spazio-2);
+  margin: 0;
+  font-size: var(--tipo-corpo-piccolo);
+  color: var(--colore-testo-secondario);
+}
+.ps-stato p {
+  margin: 0;
+}
+.ps-apri {
+  align-self: flex-start;
+}

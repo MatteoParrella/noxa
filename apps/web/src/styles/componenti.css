@@ -232,9 +232,11 @@
   height: var(--area-tocco);
   border: 0;
   border-radius: var(--raggio-tondo);
-  background: color-mix(in srgb, var(--colore-sfondo) 86%, transparent);
+  background: var(--vetro-fondo-forte);
+  -webkit-backdrop-filter: var(--vetro-sfocatura);
+  backdrop-filter: var(--vetro-sfocatura);
   color: var(--colore-testo-primario);
-  box-shadow: 0 0 0 1px var(--colore-linea);
+  box-shadow: 0 0 0 1px var(--vetro-bordo);
   cursor: pointer;
   text-decoration: none;
   transition: background-color var(--movimento-veloce) var(--curva-standard);
@@ -404,8 +406,8 @@
   letter-spacing: 0.02em;
 }
 .badge-tenue {
-  border-color: transparent;
-  background: var(--colore-superficie-3);
+  border-color: var(--vetro-bordo);
+  background: var(--vetro-fondo);
   color: var(--colore-testo-primario);
 }
 .badge-accento {
@@ -936,7 +938,9 @@
 .barra-nav {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  background: var(--colore-sfondo);
+  background: var(--vetro-barra);
+  -webkit-backdrop-filter: var(--vetro-sfocatura);
+  backdrop-filter: var(--vetro-sfocatura);
   border-top: 1px solid var(--colore-linea);
   padding: 4px 4px 22px;
 }
@@ -1386,11 +1390,9 @@
     align-items: center;
     gap: var(--spazio-1);
     height: var(--spazio-16);
-    padding: 0 max(var(--spazio-8), calc((100% - 1120px) / 2));
+    padding: 0 max(var(--sito-margine), calc((100% - var(--sito-larghezza)) / 2));
     border-top: none;
     border-bottom: 1px solid var(--colore-linea);
-    background: color-mix(in srgb, var(--colore-sfondo) 86%, transparent);
-    backdrop-filter: blur(14px);
     grid-template-columns: unset;
   }
   .nav-marchio {
@@ -1443,6 +1445,14 @@
     margin: 0 auto;
     padding-top: var(--spazio-10);
   }
+  /* Le aree principali usano tutta la larghezza del sito; moduli e pagine di lettura
+     restano nella colonna stretta, più comoda da leggere. */
+  .pagina-larga,
+  .guscio-contenuto:has(.pagina-larga) .intestazione-area {
+    max-width: var(--sito-max);
+    padding-left: var(--sito-margine);
+    padding-right: var(--sito-margine);
+  }
   .piede-sito {
     display: block;
     border-top: 1px solid var(--colore-linea);
@@ -1451,9 +1461,10 @@
     display: flex;
     align-items: center;
     gap: var(--spazio-4);
-    max-width: 1120px;
+    box-sizing: border-box;
+    max-width: var(--sito-max);
     margin: 0 auto;
-    padding: var(--spazio-6) var(--spazio-8);
+    padding: var(--spazio-6) var(--sito-margine);
   }
   .piede-sito-marchio {
     display: flex;
@@ -1478,5 +1489,97 @@
   .piede-sito-link a:hover {
     color: var(--colore-testo-primario);
     text-decoration: underline;
+  }
+}
+
+/* ---------- GRIGLIE DELLE AREE ---------- */
+/* Telefono e tablet: una colonna. Desktop: le aree si dispongono su più colonne (ADR-0033). */
+.vivi-griglia,
+.organizza-griglia,
+.profilo-griglia {
+  display: flex;
+  flex-direction: column;
+}
+.organizza-griglia,
+.organizza-testa {
+  gap: var(--spazio-4);
+}
+.organizza-testa {
+  display: flex;
+  flex-direction: column;
+}
+.profilo-griglia {
+  gap: var(--spazio-6);
+}
+@media (min-width: 64rem) {
+  .vivi-griglia {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(var(--spazio-8), 4vw, var(--spazio-16));
+    align-items: start;
+  }
+  .vivi-griglia > * {
+    grid-column: 1;
+  }
+  .vivi-griglia > .striscia-offline {
+    grid-column: 1 / -1;
+  }
+  /* A destra il rientro: ritorno sicuro e «Non hai un passaggio?». */
+  .vivi-griglia > .vivi-ritorno {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+  .organizza-griglia {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    column-gap: clamp(var(--spazio-8), 4vw, var(--spazio-16));
+    align-items: start;
+  }
+  .organizza-griglia > * {
+    grid-column: 1;
+  }
+  .organizza-griglia > .organizza-testa {
+    grid-column: 1 / -1;
+  }
+  .organizza-griglia > .organizza-serate {
+    grid-column: 2;
+    grid-row: 2 / span 3;
+  }
+  .profilo-griglia {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    column-gap: clamp(var(--spazio-8), 4vw, var(--spazio-16));
+    row-gap: var(--spazio-8);
+    align-items: start;
+  }
+  .profilo-griglia > * {
+    grid-column: 2;
+  }
+  .profilo-griglia > .persona-grande {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    position: sticky;
+    top: calc(var(--spazio-16) + var(--spazio-6));
+    padding: var(--spazio-8) var(--spazio-6);
+    border: 1px solid var(--vetro-bordo);
+    border-radius: var(--raggio-3);
+    background: var(--vetro-fondo);
+  }
+  .ri-elenco {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    column-gap: var(--spazio-10);
+  }
+}
+
+/* Telefono: l'intestazione delle aree occupa meno altezza, così il contenuto parte prima. */
+@media (max-width: 47.999rem) {
+  .intestazione-area {
+    padding-top: calc(var(--spazio-4) + env(safe-area-inset-top));
+    padding-bottom: var(--spazio-3);
+  }
+  .intestazione-area .t-display {
+    font-size: 2.5rem;
+    line-height: 1;
   }
 }

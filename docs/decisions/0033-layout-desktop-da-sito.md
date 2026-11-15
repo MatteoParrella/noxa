@@ -44,3 +44,19 @@ a sinistra, perché nel documento la navigazione viene dopo il contenuto.
   Claude Design va riallineato (ROADMAP, iterazione 12).
 - Le altre pagine (Organizza, Vivi, Ricorda, Profilo) restano nella colonna da 720 px: un
   layout a più colonne per ciascuna è nel piano.
+
+## Aggiornamento del 2026-11-15
+Sugli schermi grandi la colonna da 1120 px lasciava ancora molto vuoto ai lati, e nell'evento
+in evidenza la metà destra della scheda conteneva solo uno o due generi. Su richiesta del
+product owner:
+- la larghezza del sito segue lo schermo fino a 1680 px, con un margine laterale
+  proporzionale (`--sito-larghezza`, `--sito-margine`); barra, contenuti e piè di pagina
+  condividono gli stessi margini;
+- **Scopri**: l'evento in evidenza è un manifesto a tutta riga; amici, generi e prezzo stanno
+  in un riquadro traslucido appoggiato alla foto, grande quanto il suo contenuto; sotto, gli
+  eventi riempiono la riga in colonne da almeno 400 px;
+- **Vivi**, **Organizza**, **Ricorda** e **Profilo** usano la larghezza del sito su più
+  colonne (`.pagina-larga`); moduli e pagine di lettura restano nella colonna da 720 px;
+- tag dei generi, etichette sopra le copertine, pulsanti tondi e barra di navigazione sono
+  superfici «di vetro» (`--vetro-*` in `tokens.css`): lasciano intravedere quello che hanno
+  dietro invece di essere blocchi pieni, in entrambi i temi.

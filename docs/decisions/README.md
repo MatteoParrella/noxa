@@ -42,3 +42,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0031](0031-sveglia-del-worker-da-pg-cron.md) | Sveglia del worker da pg_cron con workflow_dispatch | Accettato |
 | [0032](0032-foto-d-atmosfera-nelle-copertine.md) | Foto d'atmosfera con licenza libera nelle copertine | Accettato |
 | [0033](0033-layout-desktop-da-sito.md) | Su desktop Noxa si presenta come un sito | Accettato |
+| [0034](0034-non-hai-un-passaggio.md) | «Non hai un passaggio?» con numeri e link, senza integrazioni | Accettato |

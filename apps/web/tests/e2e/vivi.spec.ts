@@ -8,6 +8,7 @@ import {
   mioCheckinDiProva,
   PERSONE,
   TEMI,
+  SERVIZI_TRASPORTO_DI_PROVA,
   test,
   verificaAccessibilita,
 } from './supporto';
@@ -276,4 +277,87 @@ test('i suggerimenti di stasera si scelgono anche con le frecce', async ({ page,
   await expect(serata).toBeFocused();
   await expect(serata).toHaveAttribute('aria-checked', 'true');
   await expect(evento).toHaveAttribute('tabindex', '-1');
+});
+
+// «Non hai un passaggio?» (F-23, ADR-0034): sempre in Vivi, solo link e numeri.
+
+test('non hai un passaggio: mezzi notturni, taxi da chiamare e app, senza avviare nulla', async ({
+  page,
+  supabase,
+}) => {
+  await page.goto('/vivi/');
+  const blocco = page.getByRole('region', { name: 'Senza passaggio' });
+  await expect(blocco.getByRole('heading', { name: 'Non hai un passaggio?' })).toBeVisible();
+  // Ordine fisso e neutro: mezzi pubblici, taxi, app (R-61).
+  await expect(blocco.getByRole('heading', { level: 4 })).toHaveText([
+    'Mezzi pubblici di notte',
+    'Taxi',
+    'App di trasporto',
+  ]);
+  await expect(
+    blocco.getByRole('link', { name: 'Chiama Radiotaxi 02 4040 al 02 4040' }),
+  ).toHaveAttribute('href', 'tel:+39024040');
+  await expect(
+    blocco.getByRole('link', { name: 'Chiama Radiotaxi Monza al 039 36379' }),
+  ).toHaveAttribute('href', 'tel:+3903936379');
+  const uber = blocco.getByRole('link', { name: /Apri Uber/ });
+  // Solo la partenza «dove sei», decisa dall'app di Uber: nessuna destinazione né coordinate
+  // nel link (R-32) e nessun riferimento a Noxa.
+  await expect(uber).toHaveAttribute(
+    'href',
+    'https://m.uber.com/ul/?action=setPickup&pickup=my_location',
+  );
+  await expect(uber).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(blocco.getByText('Contatti controllati il 15.11.2026.')).toBeVisible();
+  // Il blocco c'è senza ritorno sicuro attivo e non chiede la posizione (R-31, R-32).
+  expect(supabase.chiamate('avvia_ritorno')).toHaveLength(0);
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { __posizioneChiesta: number }).__posizioneChiesta,
+    ),
+  ).toBe(0);
+  await verificaAccessibilita(page);
+});
+
+test('non hai un passaggio: un minorenne vede solo le voci che il database gli concede', async ({
+  page,
+  supabase,
+}) => {
+  // La RLS non restituisce le app di trasporto ai minorenni (pgTAP 043): l'app non filtra.
+  supabase.rispondi('servizi_trasporto', {
+    stato: 200,
+    corpo: SERVIZI_TRASPORTO_DI_PROVA.filter((voce) => voce.tipo !== 'app_trasporto'),
+  });
+  await page.goto('/vivi/');
+  const blocco = page.getByRole('region', { name: 'Senza passaggio' });
+  await expect(blocco.getByRole('link', { name: /Chiama Radiotaxi Monza/ })).toBeVisible();
+  await expect(blocco.getByRole('heading', { name: 'App di trasporto' })).toHaveCount(0);
+  await expect(blocco.getByRole('link', { name: /Uber/ })).toHaveCount(0);
+});
+
+test('non hai un passaggio: errore con riprova, elenco vuoto e taxi anche offline', async ({
+  page,
+  context,
+  supabase,
+}) => {
+  supabase.rispondi('servizi_trasporto', { stato: 500, corpo: { message: 'errore' } });
+  await page.goto('/vivi/');
+  const blocco = page.getByRole('region', { name: 'Senza passaggio' });
+  await expect(blocco.getByText('Non siamo riusciti a caricare i contatti.')).toBeVisible({
+    timeout: 15_000,
+  });
+  supabase.rispondi('servizi_trasporto', { stato: 200, corpo: [] });
+  await blocco.getByRole('button', { name: 'Riprova' }).click();
+  await expect(
+    blocco.getByText('Per ora non abbiamo contatti verificati da mostrarti.'),
+  ).toBeVisible();
+
+  supabase.rispondi('servizi_trasporto', { stato: 200, corpo: SERVIZI_TRASPORTO_DI_PROVA });
+  await page.goto('/vivi/');
+  await expect(blocco.getByRole('link', { name: /Chiama Radiotaxi 02 4040/ })).toBeVisible();
+  await context.setOffline(true);
+  // Senza rete i numeri restano da chiamare; i link dicono che serve la rete.
+  await expect(blocco.getByRole('link', { name: /Chiama Radiotaxi 02 4040/ })).toBeVisible();
+  await expect(blocco.getByText('Serve la rete').first()).toBeVisible();
+  await expect(blocco.getByRole('link', { name: /Apri Uber/ })).toHaveCount(0);
 });

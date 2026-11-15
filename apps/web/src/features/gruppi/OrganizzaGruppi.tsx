@@ -96,12 +96,14 @@ function MieiGruppi() {
   const senzaAmici = amici.isSuccess && amici.data.amici.length === 0;
 
   return (
-    <div className="flex flex-col gap-4">
-      {testa}
-      {!online && <Avviso tipo="info">{testi.elenco.offline}</Avviso>}
+    <div className="organizza-griglia">
+      <div className="organizza-testa">
+        {testa}
+        {!online && <Avviso tipo="info">{testi.elenco.offline}</Avviso>}
+      </div>
 
       {inviti.length > 0 && (
-        <Entra indice={1}>
+        <Entra className="organizza-inviti" indice={1}>
           <section aria-labelledby="titolo-inviti" className="flex flex-col gap-2">
             <h3 className="etichetta-riga m-0" id="titolo-inviti">
               {testi.elenco.inviti} · {inviti.length}
@@ -116,25 +118,27 @@ function MieiGruppi() {
       )}
 
       {miei.length === 0 && inviti.length === 0 && (
-        <ElencoVuoto
-          icona={Users}
-          titolo={senzaAmici ? testi.elenco.vuotoSenzaAmici.titolo : testi.elenco.vuoto.titolo}
-          azione={
-            senzaAmici ? (
-              <Link className="btn btn-principale" href="/amici/cerca/">
-                {testi.elenco.vuotoSenzaAmici.azione}
-              </Link>
-            ) : (
-              crea
-            )
-          }
-        >
-          {senzaAmici ? testi.elenco.vuotoSenzaAmici.testo : testi.elenco.vuoto.testo}
-        </ElencoVuoto>
+        <div className="organizza-testa">
+          <ElencoVuoto
+            icona={Users}
+            titolo={senzaAmici ? testi.elenco.vuotoSenzaAmici.titolo : testi.elenco.vuoto.titolo}
+            azione={
+              senzaAmici ? (
+                <Link className="btn btn-principale" href="/amici/cerca/">
+                  {testi.elenco.vuotoSenzaAmici.azione}
+                </Link>
+              ) : (
+                crea
+              )
+            }
+          >
+            {senzaAmici ? testi.elenco.vuotoSenzaAmici.testo : testi.elenco.vuoto.testo}
+          </ElencoVuoto>
+        </div>
       )}
 
       {miei.length > 0 && (
-        <Entra indice={2}>
+        <Entra className="organizza-gruppi" indice={2}>
           <section aria-labelledby="titolo-gruppi">
             <h3 className="etichetta-riga m-0" id="titolo-gruppi">
               {testi.elenco.tuoiGruppi} · {miei.length}
@@ -149,7 +153,7 @@ function MieiGruppi() {
       )}
 
       {serate.isSuccess && serate.data.length > 0 && (
-        <Entra indice={3}>
+        <Entra className="organizza-serate" indice={3}>
           <section aria-labelledby="titolo-prossime">
             <h3 className="etichetta-riga m-0" id="titolo-prossime">
               {testi.elenco.prossimeSerate}

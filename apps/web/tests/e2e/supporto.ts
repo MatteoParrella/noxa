@@ -198,7 +198,8 @@ export type Endpoint =
   | 'proroga_ritorno'
   | 'invia_posizione_ritorno'
   | 'ritorni_aggiorna'
-  | 'ritorni_destinatari_elimina';
+  | 'ritorni_destinatari_elimina'
+  | 'servizi_trasporto';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
@@ -513,6 +514,53 @@ export const GENERI_DI_PROVA = [
 ];
 
 /** Immagine PNG di 1×1 pixel servita al posto delle foto firmate. */
+/**
+ * «Non hai un passaggio?» (F-23): le voci che il database concede a un adulto. Ai minorenni
+ * la RLS non restituisce le app di trasporto (pgTAP 043): i test lo simulano togliendole.
+ */
+export const SERVIZI_TRASPORTO_DI_PROVA = [
+  {
+    id: '00000000-0000-4000-8000-0000000007a1',
+    tipo: 'mezzi_pubblici',
+    nome: 'Rete notturna ATM',
+    zona: 'milano',
+    telefono: null,
+    url: 'https://www.atm.it/EN/ALTRISERVIZI/TRASPORTO/Pages/rete_notturna.aspx',
+    nota: 'Bus notturni di Milano, anche al posto della metropolitana.',
+    verificato_il: '2026-11-15',
+  },
+  {
+    id: '00000000-0000-4000-8000-0000000007a2',
+    tipo: 'taxi',
+    nome: 'Radiotaxi 02 4040',
+    zona: 'milano',
+    telefono: '+39024040',
+    url: null,
+    nota: 'Taxi a Milano, a ogni ora.',
+    verificato_il: '2026-11-15',
+  },
+  {
+    id: '00000000-0000-4000-8000-0000000007a3',
+    tipo: 'taxi',
+    nome: 'Radiotaxi Monza',
+    zona: 'brianza',
+    telefono: '+3903936379',
+    url: null,
+    nota: null,
+    verificato_il: '2026-11-15',
+  },
+  {
+    id: '00000000-0000-4000-8000-0000000007a4',
+    tipo: 'app_trasporto',
+    nome: 'Uber',
+    zona: 'tutte',
+    telefono: null,
+    url: 'https://m.uber.com/ul/?action=setPickup&pickup=my_location',
+    nota: 'Si apre Uber: la partenza è dove sei, la destinazione la scrivi tu lì.',
+    verificato_il: '2026-11-15',
+  },
+];
+
 export const PIXEL_PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
   'base64',
@@ -968,6 +1016,8 @@ export class SupabaseSimulato {
         };
       case 'generi_musicali':
         return { stato: 200, corpo: GENERI_DI_PROVA };
+      case 'servizi_trasporto':
+        return { stato: 200, corpo: SERVIZI_TRASPORTO_DI_PROVA };
       case 'profili_privati_leggi':
         return {
           stato: 200,
@@ -1226,6 +1276,7 @@ export class SupabaseSimulato {
       '/rest/v1/profili': { GET: 'profili_leggi', PATCH: 'profili_aggiorna' },
       '/rest/v1/codici_invito': { GET: 'codici_invito_leggi' },
       '/rest/v1/generi_musicali': { GET: 'generi_musicali' },
+      '/rest/v1/servizi_trasporto': { GET: 'servizi_trasporto' },
       '/rest/v1/profili_privati': { GET: 'profili_privati_leggi' },
       '/rest/v1/membri_gruppo': { PATCH: 'membri_aggiorna', DELETE: 'membri_elimina' },
       '/rest/v1/gruppi': { PATCH: 'gruppi_aggiorna', DELETE: 'gruppi_elimina' },

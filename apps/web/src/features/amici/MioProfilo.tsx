@@ -45,7 +45,7 @@ export function MioProfilo() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="profilo-griglia">
       <Entra className="persona-grande" indice={1}>
         <Avatar
           nome={account.data.nome_visualizzato}
@@ -61,7 +61,7 @@ export function MioProfilo() {
         </Link>
       </Entra>
 
-      <Entra indice={2}>
+      <Entra className="profilo-voci" indice={2}>
         <nav aria-label={testi.account}>
           <Link className="voce-profilo" href="/amici/">
             <Icona icona={Users} />
@@ -102,7 +102,7 @@ export function MioProfilo() {
         </nav>
       </Entra>
 
-      <Entra className="flex flex-col gap-4" indice={3}>
+      <Entra className="profilo-aspetto flex flex-col gap-4" indice={3}>
         <div className="etichetta-riga">
           <h2 className="etichetta m-0">{testi.aspetto}</h2>
         </div>

@@ -10,7 +10,7 @@ export default function Pagina() {
   return (
     <>
       <IntestazioneArea titolo="Profilo" sottotitolo="Il tuo account" azioni={<Campanella />} />
-      <div className="pagina flex flex-col gap-4 pt-4 pb-8">
+      <div className="pagina pagina-larga flex flex-col gap-4 pt-4 pb-8">
         <MioProfilo />
       </div>
     </>

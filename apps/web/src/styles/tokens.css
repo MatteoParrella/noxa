@@ -54,7 +54,7 @@
   --raggio-1: 2px; /* badge, etichette */
   --raggio-2: 4px; /* pulsanti, campi, segmenti */
   --raggio-3: 8px; /* schede, fogli, modali */
-  --raggio-tondo: 999px; /* solo avatar, interruttori, segnaposto */
+  --raggio-tondo: 999px; /* avatar, interruttori, segnaposto, tag e pulsanti tondi */
   /* movimento */
   --movimento-veloce: 150ms;
   --movimento-base: 200ms;
@@ -315,4 +315,29 @@
   --bp-desktop: 64rem; /* 1024 px: sidebar larga (icone + etichette) */
   --sidebar-stretta: 68px;
   --sidebar-larga: 200px;
+}
+
+/*
+  Superfici «di vetro»: tag, etichette sopra le copertine, barra di navigazione e riquadri
+  appoggiati alle foto lasciano intravedere quello che hanno dietro, invece di essere blocchi
+  pieni. I valori derivano dai colori del tema, quindi valgono in scuro e in chiaro; il blocco
+  è ripetuto su [data-tema] perché si ricalcoli dove il tema cambia.
+*/
+:root,
+[data-tema] {
+  --vetro-fondo: color-mix(in srgb, var(--colore-testo-primario) 9%, transparent);
+  --vetro-fondo-forte: color-mix(in srgb, var(--colore-sfondo) 52%, transparent);
+  --vetro-barra: color-mix(in srgb, var(--colore-sfondo) 78%, transparent);
+  --vetro-bordo: color-mix(in srgb, var(--colore-testo-primario) 18%, transparent);
+  --vetro-sfocatura: blur(14px) saturate(1.3);
+}
+
+/*
+  Sito su desktop (ADR-0033): la colonna dei contenuti arriva a questa larghezza e sotto
+  scorre con lo schermo, con un margine laterale proporzionale.
+*/
+:root {
+  --sito-larghezza: 1680px;
+  --sito-margine: clamp(2rem, 4vw, 4.5rem);
+  --sito-max: calc(var(--sito-larghezza) + 2 * var(--sito-margine));
 }
