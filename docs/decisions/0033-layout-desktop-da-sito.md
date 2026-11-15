@@ -60,3 +60,23 @@ product owner:
 - tag dei generi, etichette sopra le copertine, pulsanti tondi e barra di navigazione sono
   superfici «di vetro» (`--vetro-*` in `tokens.css`): lasciano intravedere quello che hanno
   dietro invece di essere blocchi pieni, in entrambi i temi.
+
+## Aggiornamento del 2026-11-15 (sera): trasparenza in tutta l'app
+Il product owner, guardando l'app, vedeva ancora «una striscia nera sotto ogni evento» e non
+la trasparenza chiesta. Due cause: ogni copertina aveva una velatura quasi opaca alta mezza
+foto per far leggere il titolo; e su un fondo nero piatto un elemento traslucido resta nero.
+- **Fondo d'atmosfera**: dietro le aree dell'app ci sono tre aloni di colore fissi (accento,
+  blu, viola), più tenui nel tema chiaro.
+- **Superfici di vetro**: dentro `.guscio` i tre colori di superficie e la linea sono veli del
+  colore del testo, così schede, campi, segmenti, pulsanti secondari e righe lasciano passare
+  il fondo senza cambiare i componenti uno per uno. Fogli e finestre sono vetro denso con una
+  sfocatura forte; le barre che restano ferme sullo scorrimento sono vetro sfocato.
+- **Copertine**: la fascia opaca è sostituita da un vetro smerigliato che sfuma (foto sfocata
+  e velo che cala verso l'alto) sotto il solo testo, con un alone del colore di fondo sul
+  testo; nelle miniature l'orario è una targhetta di vetro e la foto resta scoperta in alto.
+- L'area di moderazione e le schermate di accesso restano piene: sono strumenti di lavoro e
+  moduli, dove la leggibilità viene prima.
+- Stili in `apps/web/src/styles/vetro.css`, caricato per ultimo. Accessibilità: la suite e2e
+  con axe passa nei due temi; il contrasto del testo sulle foto dipende dalla foto e va
+  ricontrollato a vista quando si aggiungono foto alla libreria (ADR-0032).
+

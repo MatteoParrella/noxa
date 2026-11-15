@@ -227,3 +227,24 @@ questi dati stanno nella pagina della singola serata.
 | Età predefinita per locale | Tocca R-21: serve un ADR | ROADMAP, iterazione 12 |
 | Tavole di Claude Design per vetro e layout largo | Deroga chiesta dal product owner; token da riportare nel progetto | DESIGN.md §2 |
 
+## 2026-11-15 (sera) — Trasparenza in tutta l'app e copertine senza fascia scura
+
+Richiesta: dopo l'unione delle PR #84 e #85 il product owner non vedeva cambiamenti: «vedo
+sempre una striscia nera sotto ogni evento e non la trasparenza applicata a tutta l'app».
+Aveva ragione: l'intervento del mattino aveva reso traslucidi solo i tag, e su un fondo nero
+piatto un velo traslucido resta nero. Ramo `feat/trasparenza-in-tutta-l-app`.
+
+- **La striscia nera** era la velatura delle copertine: opaca al 90% su quasi metà della foto
+  (nelle miniature in alto e in basso). Ora sotto il testo c'è un vetro smerigliato che
+  sfuma, e nelle miniature l'orario è una targhetta di vetro.
+- **Tutta l'app**: fondo d'atmosfera con aloni di colore; schede, campi, segmenti, pulsanti
+  secondari, righe e linee traslucidi in tutte le aree; fogli, finestre e barre fisse di
+  vetro sfocato (ADR-0033, secondo aggiornamento; `src/styles/vetro.css`).
+- Restano pieni l'area di moderazione e le schermate di accesso.
+- Verifica: lint, tipi, formattazione; suite e2e completa su telefono e desktop (Chromium),
+  464 test superati con axe nei due temi; schermate controllate a vista. Safari e Firefox
+  nella CI della PR. Il contrasto del testo sulle foto è stato controllato a vista sulle
+  foto dei test, non su tutte le 43 della libreria.
+- Nota per chi prova: l'app installata sul telefono tiene la versione vecchia finché non si
+  tocca «Ricarica» nell'avviso di nuova versione o non si chiudono tutte le schede.
+

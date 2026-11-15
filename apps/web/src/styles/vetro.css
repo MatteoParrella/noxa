@@ -1,0 +1,170 @@
+/*
+  Trasparenza in tutta l'app (ADR-0033, aggiornamento del 2026-11-15).
+
+  Un elemento traslucido su un fondo nero piatto resta nero: perché la trasparenza si veda
+  servono due cose. Dietro, un fondo d'atmosfera con aloni di colore, fisso mentre la pagina
+  scorre. Davanti, superfici che lo lasciano passare: nelle aree dell'app i tre colori di
+  superficie diventano veli del colore del testo, così schede, campi, segmenti e righe sono
+  di vetro senza cambiare i componenti uno per uno. L'area di moderazione e le schermate di
+  accesso restano piene. Ciò che si sovrappone al contenuto (fogli, barre fisse) usa un vetro
+  più denso con la sfocatura, per restare leggibile.
+*/
+
+/* Colore pieno delle superfici, risolto qui prima che le aree lo rendano traslucido. */
+:root,
+[data-tema] {
+  --colore-superficie-piena: var(--colore-superficie-1);
+  --atmosfera-1: color-mix(in srgb, var(--colore-accento) 20%, transparent);
+  --atmosfera-2: color-mix(in srgb, var(--colore-info) 15%, transparent);
+  --atmosfera-3: color-mix(in srgb, var(--copertina-house-1) 10%, transparent);
+  --vetro-foglio: color-mix(in srgb, var(--colore-superficie-piena) 84%, transparent);
+  --vetro-sfocatura-forte: blur(28px) saturate(1.4);
+}
+:root[data-tema='chiaro'],
+[data-tema='chiaro'] {
+  --atmosfera-1: color-mix(in srgb, var(--colore-accento) 13%, transparent);
+  --atmosfera-2: color-mix(in srgb, var(--colore-info) 10%, transparent);
+  --atmosfera-3: color-mix(in srgb, var(--copertina-house-1) 7%, transparent);
+  --vetro-foglio: color-mix(in srgb, var(--colore-superficie-piena) 88%, transparent);
+}
+
+/* ---------- Fondo d'atmosfera ---------- */
+.guscio {
+  isolation: isolate;
+}
+.guscio::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 55% at 88% -5%, var(--atmosfera-1), transparent 70%),
+    radial-gradient(60% 50% at -8% 55%, var(--atmosfera-2), transparent 70%),
+    radial-gradient(65% 50% at 70% 108%, var(--atmosfera-3), transparent 70%);
+}
+
+/* ---------- Superfici di vetro nelle aree dell'app ---------- */
+.guscio {
+  --colore-superficie-1: color-mix(in srgb, var(--colore-testo-primario) 5%, transparent);
+  --colore-superficie-2: color-mix(in srgb, var(--colore-testo-primario) 9%, transparent);
+  --colore-superficie-3: color-mix(in srgb, var(--colore-testo-primario) 14%, transparent);
+  --colore-linea: color-mix(in srgb, var(--colore-testo-primario) 13%, transparent);
+}
+
+/* Schede e riquadri: un filo di luce sul bordo e la sfocatura di quello che hanno dietro. */
+.guscio .scheda,
+.guscio .evidenza,
+.guscio .ck-spento,
+.guscio .rt-invito,
+.guscio .rt-biglietto,
+.guscio .ck-timbro,
+.guscio .ps-scheda,
+.guscio .segmenti,
+.guscio .campo-box {
+  border-color: var(--vetro-bordo);
+  background: var(--colore-superficie-1);
+  -webkit-backdrop-filter: var(--vetro-sfocatura);
+  backdrop-filter: var(--vetro-sfocatura);
+}
+.guscio .scheda {
+  background: var(--colore-superficie-1);
+}
+.guscio .btn-secondario {
+  border-color: var(--vetro-bordo);
+  background: var(--colore-superficie-1);
+}
+.guscio .btn-secondario:hover {
+  background: var(--colore-superficie-2);
+}
+
+/* Fogli e finestre: stanno sopra la pagina, quindi vetro denso e molto sfocato. */
+.foglio,
+.modale {
+  background: var(--vetro-foglio);
+  -webkit-backdrop-filter: var(--vetro-sfocatura-forte);
+  backdrop-filter: var(--vetro-sfocatura-forte);
+}
+
+/* Barre che restano ferme mentre il contenuto scorre sotto. */
+.guscio .se-risposta,
+.guscio .rt-barra-guscio,
+.guscio .gr-barra-fondo {
+  background: var(--vetro-barra);
+  -webkit-backdrop-filter: var(--vetro-sfocatura);
+  backdrop-filter: var(--vetro-sfocatura);
+}
+
+/* ---------- Copertine: niente più fascia scura sotto la foto ---------- */
+/*
+  Prima il titolo stava su una fascia quasi opaca alta mezza copertina. Ora la foto resta
+  visibile fino in fondo: sotto il testo c'è un vetro smerigliato che sfuma (la foto sfocata
+  e un velo che cala verso l'alto), e il testo ha un alone del colore di fondo.
+*/
+.cg-velo {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--cg-fondo) 84%, transparent) 0%,
+    color-mix(in srgb, var(--cg-fondo) 66%, transparent) 26%,
+    color-mix(in srgb, var(--cg-fondo) 26%, transparent) 50%,
+    transparent 72%
+  );
+  -webkit-backdrop-filter: blur(9px);
+  backdrop-filter: blur(9px);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 70%);
+  mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 70%);
+}
+/* Miniatura: nessuna fascia in alto. L'orario è una targhetta di vetro, il titolo sta sul
+   vetro smerigliato in basso e il resto della foto resta scoperto. */
+.cg-velo.alto {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--cg-fondo) 86%, transparent) 0%,
+    color-mix(in srgb, var(--cg-fondo) 58%, transparent) 28%,
+    transparent 56%
+  );
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 28%, transparent 58%);
+  mask-image: linear-gradient(to top, #000 0%, #000 28%, transparent 58%);
+}
+.cg-mini .cg-ora {
+  align-self: flex-start;
+  padding: 1px 6px;
+  border: 1px solid color-mix(in srgb, var(--copertina-testo) 22%, transparent);
+  border-radius: var(--raggio-tondo);
+  background: color-mix(in srgb, var(--cg-fondo) 58%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  text-shadow: none;
+}
+.cg .cg-mini,
+.cg .cg-det,
+.cg.copertina-evidenza > span,
+.cg.copertina-evidenza > h3 {
+  text-shadow:
+    0 1px 2px color-mix(in srgb, var(--cg-fondo) 85%, transparent),
+    0 0 16px color-mix(in srgb, var(--cg-fondo) 75%, transparent);
+}
+/* L'etichetta dell'età sopra la copertina non prende l'alone. */
+.cg.copertina-evidenza > .badge-sopra {
+  text-shadow: none;
+}
+
+/* Scheda in evidenza: il corpo è vetro appoggiato alla foto, non una fascia a parte. */
+.guscio .evidenza-corpo {
+  background: transparent;
+}
+
+/* Tema chiaro: il testo delle copertine è scuro su foto di media luminosità, quindi il vetro
+   sotto il testo sale un po' di più e resta più denso. */
+:root[data-tema='chiaro'] .cg-velo:not(.alto),
+[data-tema='chiaro'] .cg-velo:not(.alto) {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--cg-fondo) 90%, transparent) 0%,
+    color-mix(in srgb, var(--cg-fondo) 78%, transparent) 32%,
+    color-mix(in srgb, var(--cg-fondo) 42%, transparent) 58%,
+    transparent 82%
+  );
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 40%, transparent 82%);
+  mask-image: linear-gradient(to top, #000 0%, #000 40%, transparent 82%);
+}
