@@ -112,6 +112,7 @@ def test_un_orario_dopo_mezzanotte_appartiene_alla_notte_dopo() -> None:
         ("Evento vietato ai minori", 18),
         ("solo maggiorenni", 18),
         ("età minima 14", 14),
+        ("Ingresso riservato ai maggiori di 16 anni", 16),
         ("aperto dai 12 anni", 14),
         ("serata techno", None),
         ("dalle 23:30 alle 05:00", None),

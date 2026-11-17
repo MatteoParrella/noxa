@@ -248,3 +248,29 @@ piatto un velo traslucido resta nero. Ramo `feat/trasparenza-in-tutta-l-app`.
 - Nota per chi prova: l'app installata sul telefono tiene la versione vecchia finché non si
   tocca «Ricarica» nell'avviso di nuova versione o non si chiudono tutte le schede.
 
+
+## 2026-11-17 — Live Club di nuovo raccolto e più pagine per le fonti
+
+Richiesta: «alza le pagine a 10» e «sistema Live Club». Ramo `fix/live-club-nuovo-sito`.
+
+- **Pagine per esecuzione**: in staging `pagine_massime` è passato da 2 a 10 per le fonti di
+  Live Club, Magazzini Generali, Gate, The Club e Alcatraz (dato della tabella `fonti`, non
+  una migrazione). Con 2 pagine The Club completava al massimo una serata per esecuzione.
+- **Live Club** leggeva 0 serate dal 15 novembre: il sito ha tolto i dati strutturati e
+  /eventi/ rimanda a /tutti-gli-eventi/. Nuovo adattatore `sito_html_live_club`: ogni scheda
+  dell'elenco ha già il giorno, l'apertura porte, i prezzi in cassa, il link ai biglietti e
+  la nota d'ingresso. Le serate annullate non si raccolgono. Le serate senza nessun orario
+  vengono scartate (ORARIO_MANCANTE): oggi 7 su 15, quasi tutti concerti lontani.
+- **Età**: la normalizzazione riconosce «Ingresso riservato ai maggiori di 16 anni» come 16,
+  in simmetria con «minori di 16 anni». Le serate di Live Club che lo scrivono (7teen Again,
+  Puro Perreo, Zarro Night, Noche de Travesura) diventano visibili ai sedicenni e diciassettenni.
+- **Fixture**: `salva_fixture` toglie da sé script, `<noscript>` e attributi `on*` (prima si
+  faceva a mano, PR #86); i contatti nella pagina salvata sono sostituiti da testo neutro.
+- Golden set della deduplicazione: 4 coppie reali di Live Club (le serate lette prima con
+  `sito_jsonld` hanno orari diversi e si uniscono con quelle nuove). Precisione e richiamo
+  invariati.
+- Verifica: ruff, mypy e pytest del worker (355 test); `verifica_documentazione.py`.
+- Da fare dopo l'unione: in staging la fonte di Live Club passa a `sito_html_live_club` con
+  l'url /tutti-gli-eventi/, poi «Esegui ora» e controllo di `ultimo_esito`. La serata
+  annullata di Steve 'n' Seagulls (8 dicembre) è ancora pubblicata dalle letture precedenti
+  e va annullata in moderazione.

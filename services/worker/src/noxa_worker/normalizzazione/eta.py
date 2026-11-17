@@ -1,10 +1,11 @@
 """Età minima dichiarata da una fonte (EVENT_INGESTION.md §3.1, R-21, R-22).
 
 Si riconoscono espressioni come "14+", "+16", "dai 16 anni", "18 anni compiuti", "over 21",
-"vietato ai minori", "non sono ammessi minorenni", "under 18 not allowed", "solo
-maggiorenni". «Vietato ai minori di 16 anni» vale 16, non 18; «ingresso da 15 €» è un prezzo
-e non un'età. Se il testo ne contiene più d'una vale la più alta (R-22); se non ne contiene
-nessuna il risultato è `None` e l'evento resta 18+ non dichiarato (R-21).
+"vietato ai minori", "riservato ai maggiori di 16 anni", "non sono ammessi minorenni",
+"under 18 not allowed", "solo maggiorenni". «Vietato ai minori di 16 anni» vale 16, non 18;
+«ingresso da 15 €» è un prezzo e non un'età. Se il testo ne contiene più d'una vale la più
+alta (R-22); se non ne contiene nessuna il risultato è `None` e l'evento resta 18+ non
+dichiarato (R-21).
 """
 
 from __future__ import annotations
@@ -27,6 +28,8 @@ _ESPRESSIONI = [
     re.compile(rf"\b{_NUMERO}\s*anni\s*(?:compiuti|in su)\b", re.I),
     re.compile(rf"\bingresso\s*(?:consentito\s*)?(?:ai|dai)\s*{_NUMERO}\b", re.I),
     re.compile(rf"\bminor[ie]\s*di\s*{_NUMERO}\b", re.I),
+    # «Ingresso riservato ai maggiori di 16 anni» (Live Club): l'età scritta, come «16+».
+    re.compile(rf"\bmaggior[ie]\s*di\s*{_NUMERO}\b", re.I),
     re.compile(
         rf"\b(?:no\s+)?under\s*{_NUMERO}\s*(?:are\s+|is\s+)?not\s+(?:allowed|admitted)", re.I
     ),
