@@ -168,3 +168,31 @@
   -webkit-mask-image: linear-gradient(to top, #000 0%, #000 40%, transparent 82%);
   mask-image: linear-gradient(to top, #000 0%, #000 40%, transparent 82%);
 }
+
+/* Scheda in evidenza sul telefono: amici, generi e prezzo stanno sulla copertina, quindi il
+   testo sale fin quasi in cima e il vetro lo segue (su desktop sono in un riquadro a parte). */
+@media (max-width: 63.98rem) {
+  .cg.copertina-evidenza .cg-velo {
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--cg-fondo) 84%, transparent) 0%,
+      color-mix(in srgb, var(--cg-fondo) 66%, transparent) 45%,
+      color-mix(in srgb, var(--cg-fondo) 30%, transparent) 75%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(to top, #000 0%, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to top, #000 0%, #000 55%, transparent 100%);
+  }
+  :root[data-tema='chiaro'] .cg.copertina-evidenza .cg-velo,
+  [data-tema='chiaro'] .cg.copertina-evidenza .cg-velo {
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--cg-fondo) 90%, transparent) 0%,
+      color-mix(in srgb, var(--cg-fondo) 80%, transparent) 55%,
+      color-mix(in srgb, var(--cg-fondo) 62%, transparent) 85%,
+      color-mix(in srgb, var(--cg-fondo) 50%, transparent) 100%
+    );
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}

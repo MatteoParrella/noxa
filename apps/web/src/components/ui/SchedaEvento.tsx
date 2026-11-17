@@ -73,12 +73,13 @@ export function SchedaEvidenza({ dati }: { dati: DatiSchedaEvento }) {
         <span className="t-corpo-s">
           {dati.locale} · {dati.comune}
         </span>
+        {/* Amici, generi e prezzo stanno sulla copertina, non in una fascia sotto la foto. */}
+        <span className="evidenza-corpo">
+          {dati.amici}
+          <Etichette dati={dati} conEta={false} />
+          <Meta meta={dati.meta} />
+        </span>
       </Copertina>
-      <span className="evidenza-corpo">
-        {dati.amici}
-        <Etichette dati={dati} conEta={false} />
-        <Meta meta={dati.meta} />
-      </span>
     </Link>
   );
 }

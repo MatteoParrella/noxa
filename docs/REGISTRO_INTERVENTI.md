@@ -274,3 +274,17 @@ Richiesta: «alza le pagine a 10» e «sistema Live Club». Ramo `fix/live-club-
   l'url /tutti-gli-eventi/, poi «Esegui ora» e controllo di `ultimo_esito`. La serata
   annullata di Steve 'n' Seagulls (8 dicembre) è ancora pubblicata dalle letture precedenti
   e va annullata in moderazione.
+## 2026-11-17 — Scheda in evidenza senza fascia sotto la copertina sul telefono
+
+Richiesta: «da telefono vedo ancora la banda nera sotto l'evento». Ramo
+`fix/fascia-scura-scheda-in-evidenza`.
+
+- Sul telefono amici, generi e prezzo della scheda in evidenza stavano in una fascia a parte
+  sotto la copertina, sul fondo scuro della pagina. Ora stanno sulla copertina, sotto il
+  luogo, come su desktop dove erano già in un riquadro di vetro sulla foto.
+- La copertina resta almeno 16:10 e si allunga se il contenuto non ci sta
+  (`min-height: 62.5cqi`: con `overflow: hidden` un `aspect-ratio` lo taglierebbe).
+- Il vetro sotto il testo sale fin quasi in cima, perché il testo ora occupa più copertina;
+  nel tema chiaro copre tutta la foto, altrimenti il titolo scuro finiva sulla parte nera.
+- Verifica: lint, tipi, formattazione; schermate su telefono e desktop nei due temi; suite e2e
+  su Chromium (telefono e desktop) con axe.
