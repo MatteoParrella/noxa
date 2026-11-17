@@ -1,8 +1,9 @@
 """Salva una pagina di una fonte come fixture dei test (skill add-event-source §4).
 
 Usa `ClientHttpConforme` (robots.txt, user agent, limiti) e salva solo il corpo della
-pagina, senza cookie né intestazioni. Prima del commit si controlla a mano che il file non
-contenga dati personali.
+pagina, senza cookie né intestazioni e senza il codice eseguibile del sito (script e attributi
+`on*`, che CodeQL scambierebbe per codice del repository): restano il testo e i dati JSON-LD.
+Prima del commit si controlla a mano che il file non contenga dati personali.
 
 Uso (da services/worker):
     uv run python -m noxa_worker.fonti.salva_fixture --url <url> \\
@@ -16,9 +17,26 @@ import asyncio
 import sys
 from pathlib import Path
 
+from bs4 import BeautifulSoup
+
 from noxa_worker.configurazione import leggi_impostazioni
 from noxa_worker.errori import ErroreRaccolta
 from noxa_worker.fonti.http import ClientHttpConforme, StatoCondiviso, crea_client_httpx
+
+
+def senza_script(html: str) -> str:
+    """La pagina senza script eseguibili, `<noscript>` e attributi `on*`; i blocchi JSON-LD
+    restano perché sono i dati letti da `sito_jsonld`."""
+    pagina = BeautifulSoup(html, "html.parser")
+    for script in pagina.find_all("script"):
+        if script.get("type") != "application/ld+json":
+            script.decompose()
+    for nodo in pagina.find_all("noscript"):
+        nodo.decompose()
+    for nodo in pagina.find_all(True):
+        for attributo in [a for a in nodo.attrs if a.lower().startswith("on")]:
+            del nodo[attributo]
+    return str(pagina)
 
 
 async def principale(argomenti: list[str] | None = None) -> int:
@@ -41,7 +59,7 @@ async def principale(argomenti: list[str] | None = None) -> int:
             sys.stderr.write(f"{errore.codice}: {errore}\n")
             return 1
     opzioni.destinazione.parent.mkdir(parents=True, exist_ok=True)
-    opzioni.destinazione.write_text(risposta.testo, encoding="utf-8")
+    opzioni.destinazione.write_text(senza_script(risposta.testo), encoding="utf-8")
     sys.stdout.write(
         f"Salvata {opzioni.destinazione}: controlla che non contenga dati personali.\n"
     )

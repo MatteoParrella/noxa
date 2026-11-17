@@ -54,7 +54,7 @@ crea", "Unisci", "Scarta" con motivazione).
 | Tipo (`tipo_fonte`) | Adattatore | Stato nel MVP | Note |
 |---|---|---|---|
 | `sito_locale` | `sito_jsonld` | Fase 1 | Legge dati strutturati schema.org `Event` (JSON-LD o microdata) e feed iCal se presenti. È il primo da provare per ogni sito. |
-| `sito_locale` | `sito_html_<locale>` | Fase 1 | Adattatore specifico per un sito senza dati strutturati: estende `AdattatoreSitoHtml` (`fonti/sito_html.py`) dichiarando i selettori CSS. Il primo è `sito_html_the_club` (The Club, Milano), del 2026-11-11; poi `sito_html_alcatraz` (Alcatraz, Milano), del 2026-11-14, perché il JSON-LD delle sue pagine ha date sbagliate, e `sito_html_the_beach` (The Beach, Milano), che dal calendario apre le pagine delle serate future entro `pagine_massime`. Playwright solo se la pagina richiede JavaScript. |
+| `sito_locale` | `sito_html_<locale>` | Fase 1 | Adattatore specifico per un sito senza dati strutturati: estende `AdattatoreSitoHtml` (`fonti/sito_html.py`) dichiarando i selettori CSS. Il primo è `sito_html_the_club` (The Club, Milano), del 2026-11-11; poi `sito_html_alcatraz` (Alcatraz, Milano), del 2026-11-14, perché il JSON-LD delle sue pagine ha date sbagliate, `sito_html_the_beach` (The Beach, Milano), che dal calendario apre le pagine delle serate future entro `pagine_massime`, e `sito_html_live_club` (Live Club, Trezzo sull'Adda), del 2026-11-17, perché il sito ha tolto i dati strutturati letti prima da `sito_jsonld` e ogni scheda dell'elenco ha già orari, prezzi in cassa, età e biglietti. Playwright solo se la pagina richiede JavaScript. |
 | `instagram` | `instagram_business_discovery` | Fase 1 | Instagram Graph API, endpoint Business Discovery, solo per account Business o Creator. |
 | `resident_advisor`, `xceed`, `dice` | `aggregatore_<nome>` | Fase 3 | Solo con accordo scritto o API ufficiale (D-05). Fino ad allora `stato_conformita = 'vietata'`. |
 | *(flyer)* | estrattore flyer | Fase 1 | Caricati dagli utenti; non sono righe di `fonti` (§5). |
@@ -134,12 +134,13 @@ serata. Dopo la lettura dell'elenco la raccolta legge quindi alcune di queste pa
 
 Gli adattatori che lo usano dichiarano `arricchisce_dal_dettaglio`: `sito_jsonld` e gli
 adattatori `sito_html_<locale>`, tranne `sito_html_the_beach` (legge già le pagine delle
-serate) e `sito_html_alcatraz` (il link ai biglietti è nell'elenco). `sito_html_the_club`
+serate), `sito_html_alcatraz` (il link ai biglietti è nell'elenco) e `sito_html_live_club`
+(l'elenco ha già biglietti, prezzi ed età). `sito_html_the_club`
 aggiunge che la pagina della serata è anche il link alla prevendita. D-05 resta valida: delle
 biglietterie si salva solo il link pubblicato dal sito del locale.
 
 Sull'età: «Non sono ammessi minorenni», «Under 18 are not allowed» e simili dichiarano i 18
-anni; «vietato ai minori di 16 anni» vale 16; un'età scritta nella riga di un tavolo o di un
+anni; «vietato ai minori di 16 anni» e «riservato ai maggiori di 16 anni» valgono 16; un'età scritta nella riga di un tavolo o di un
 privé («privé solo dai 21 anni») non è l'età della serata; «ingresso da 15 €» è un prezzo.
 Senza un'indicazione l'età resta non dichiarata e vale 18 (R-21): non si deduce mai.
 
