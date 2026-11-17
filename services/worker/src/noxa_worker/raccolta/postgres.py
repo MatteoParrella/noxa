@@ -283,7 +283,8 @@ class ArchivioRaccoltaPostgres:
             cursore = await c.execute(
                 """select distinct ef.url_originale
                    from public.eventi_fonti ef join public.eventi e on e.id = ef.evento_id
-                   where ef.fonte_id = %s and e.inizio > now() and e.url_biglietti is not null""",
+                   where ef.fonte_id = %s and e.inizio > now() and e.url_biglietti is not null
+                     and e.eta_minima_dichiarata""",
                 (fonte_id,),
             )
             completi = frozenset(str(r["url_originale"]) for r in await cursore.fetchall())

@@ -33,6 +33,7 @@ from noxa_worker.errori import ErroreConformita, ErroreFonte
 from noxa_worker.fonti.base import EventoGrezzo, Fonte
 from noxa_worker.fonti.http import ClientHttpConforme
 from noxa_worker.normalizzazione.date import interpreta_iso
+from noxa_worker.normalizzazione.eta import estrai_eta_minima
 from noxa_worker.normalizzazione.testo import pulisci
 
 log = structlog.get_logger(__name__)
@@ -305,8 +306,10 @@ def scegli_da_arricchire(
     """Serate di cui leggere la pagina in questa esecuzione.
 
     Candidata è una serata dei prossimi 45 giorni con una pagina propria sullo stesso sito
-    della fonte e ancora senza link ai biglietti, né nel grezzo né nel catalogo
-    (`fonte.url_completi`). Metà dei posti va alle più vicine, il resto a rotazione."""
+    della fonte a cui manca ancora il link ai biglietti o l'età dichiarata, sia nel grezzo
+    sia nel catalogo (`fonte.url_completi`): molti siti, come Gate, danno i biglietti
+    nell'elenco e scrivono l'età solo nella pagina della serata. Metà dei posti va alle più
+    vicine, il resto a rotazione."""
     if massimo <= 0:
         return []
     sito = _dominio(fonte.url)
@@ -322,7 +325,7 @@ def scegli_da_arricchire(
             or url in completi
             or url == _senza_barra(fonte.url)
             or _dominio(url) != sito
-            or grezzo.dati.get("url_biglietti")
+            or _completo(grezzo)
             or not adesso - PASSATO_TOLLERATO <= inizio <= adesso + ORIZZONTE
         ):
             continue
@@ -337,6 +340,19 @@ def scegli_da_arricchire(
         key=lambda grezzo: hashlib.sha256(f"{turno}:{grezzo.url}".encode()).hexdigest(),
     )
     return [*scelti, *resto[: massimo - len(scelti)]]
+
+
+def _completo(grezzo: EventoGrezzo) -> bool:
+    """Il grezzo ha già il link ai biglietti e un'età dichiarata nei suoi testi."""
+    if not grezzo.dati.get("url_biglietti"):
+        return False
+    note = grezzo.dati.get("note_ingresso")
+    testi = [t for t in note if isinstance(t, str)] if isinstance(note, list) else []
+    for campo in ("titolo", "descrizione"):
+        valore = grezzo.dati.get(campo)
+        if isinstance(valore, str):
+            testi.append(valore)
+    return estrai_eta_minima(*testi) is not None
 
 
 async def arricchisci(
