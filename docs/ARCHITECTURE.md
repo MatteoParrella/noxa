@@ -404,8 +404,11 @@ togliere i file a una pagina aperta. L'app controlla gli aggiornamenti quando to
 piano e una volta all'ora (`lib/aggiornamento.ts`) e, se c'è una versione in attesa, mostra
 l'avviso «È disponibile una nuova versione di Noxa» con «Ricarica»: la scelta invia
 `SKIP_WAITING` al service worker e ricarica la pagina quando prende il controllo. L'avviso si
-può chiudere; la versione nuova si attiva comunque alla chiusura di tutte le schede. Nelle app
-native l'aggiornamento passa dagli store.
+può chiudere. Se resta senza risposta, la versione nuova si applica da sola quando l'app passa
+in secondo piano (cambio di app o telefono bloccato), tranne mentre un campo di testo è attivo:
+una PWA installata non chiude quasi mai tutte le sue finestre e altrimenti resterebbe per
+giorni sulla versione vecchia (dal 2026-11-17). Nelle app native l'aggiornamento passa dagli
+store.
 
 ## 6. Deployment
 
