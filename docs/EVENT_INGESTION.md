@@ -125,7 +125,7 @@ serata. Dopo la lettura dell'elenco la raccolta legge quindi alcune di queste pa
 
 | Regola | Valore |
 |---|---|
-| Quali serate | Solo quelle dei prossimi 45 giorni, con una pagina propria sullo stesso sito della fonte e ancora senza link ai biglietti, né nell'elenco né nel catalogo |
+| Quali serate | Solo quelle dei prossimi 45 giorni, con una pagina propria sullo stesso sito della fonte a cui manca il link ai biglietti o l'età dichiarata, sia nell'elenco sia nel catalogo. Dal 2026-11-17 conta anche l'età: Gate dà i biglietti nell'elenco e scrive «Età minima 18+» solo nella pagina della serata |
 | Quante | Al massimo 8 pagine per esecuzione, dentro `pagine_massime` della fonte: metà alle serate più vicine, metà a rotazione tra le altre |
 | Conformità | Ogni richiesta passa da `ClientHttpConforme` (robots.txt, intervallo per dominio, `Crawl-delay`); un percorso vietato, un 403 o un 429 fermano i dettagli; ogni altro errore salta la pagina e lascia la serata com'era |
 | Che cosa si legge | Link `https` a una biglietteria esterna (un dominio dell'elenco `BIGLIETTERIE` oppure un link verso un altro sito il cui testo parla di biglietti; mai i link interni, i social o le mappe), prezzo minimo d'ingresso (non tavoli, privé o guardaroba), le righe che parlano dell'ingresso per età e alcol, la riga «Musica: …» per i generi |

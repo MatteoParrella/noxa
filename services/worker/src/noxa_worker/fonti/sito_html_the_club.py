@@ -4,7 +4,7 @@ Verifica di conformità del 2026-11-11 (skill `add-event-source` §2): robots.tx
 tutto con `Crawl-delay: 20`, rispettato da `ClientHttpConforme`; i termini
 (https://www.theclubmilano.com/terms-and-conditions) regolano la vendita dei biglietti e non
 vietano la raccolta automatica. Si legge la pagina dell'elenco e, per le serate dei
-prossimi 45 giorni ancora senza biglietti, la loro pagina (al massimo 8 per esecuzione,
+prossimi 45 giorni ancora senza biglietti o età, la loro pagina (al massimo 8 per esecuzione,
 `fonti/dettaglio.py`): lì ci sono il prezzo della prevendita, la musica e la regola
 d'ingresso («Non sono ammessi minorenni»). La prevendita si compra sulla pagina stessa
 della serata, che quindi è anche il link ai biglietti. Nessuna immagine scaricata.

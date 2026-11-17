@@ -288,3 +288,39 @@ Richiesta: «da telefono vedo ancora la banda nera sotto l'evento». Ramo
   nel tema chiaro copre tutta la foto, altrimenti il titolo scuro finiva sulla parte nera.
 - Verifica: lint, tipi, formattazione; schermate su telefono e desktop nei due temi; suite e2e
   su Chromium (telefono e desktop) con axe.
+
+## 2026-11-17 (pomeriggio) — Sistemazioni prima dell'iterazione 11
+
+Richiesta: «vedi te per il resto, sistema tutto prima della IT11». Ramo
+`fix/prima-di-iterazione-11`, più la PR #91.
+
+- **Fascia scura**: la #90 era impilata sulla #89 ed è stata unita nel ramo di Live Club
+  quando la #89 era già in `main`, quindi la correzione non è mai arrivata in `main`. La #91
+  porta lo stesso commit su `main`.
+- **Live Club in staging**: fonte passata a `sito_html_live_club` con l'url
+  /tutti-gli-eventi/ e una nota nelle `note_conformita`; esecuzione lanciata a mano: 15 serate
+  lette, 7 unite a quelle già presenti (orari, prezzi e biglietti aggiornati; 7teen Again,
+  Puro Perreo e Zarro Night ora 16+ dichiarate), 7 scartate perché senza orario, 1 in
+  revisione. Il concerto annullato di Steve 'n' Seagulls resta pubblicato finché un
+  moderatore non lo conferma tra i «possibili annullamenti», dove compare da solo quando il
+  sito smette di confermarlo: non l'ho annullato a nome di un moderatore.
+- **Età delle serate («18+ · non dichiarata» quasi ovunque)**: il worker leggeva la pagina
+  di una serata solo se mancavano i biglietti. Gate dà i biglietti già nell'elenco e scrive
+  «Età minima 18+» solo nella pagina della serata, quindi la sua età non veniva mai letta.
+  Ora si legge la pagina anche quando manca l'età dichiarata, nell'elenco e nel catalogo
+  (`dettaglio.py`, `raccolta/postgres.py`). Con 10 pagine per esecuzione e 8 dettagli per
+  volta, le serate di Gate e The Club dei prossimi 45 giorni si completano in pochi giorni.
+- **Età per locale: non fatta**. Ho letto i siti ufficiali: solo Gate pubblica una regola
+  generale, e con un'eccezione (18+ per le serate, 16+ per i concerti); The Club la scrive in
+  ogni pagina di serata, Magazzini Generali e Alcatraz da nessuna parte. Un'età unica per
+  locale sarebbe sbagliata per i concerti di Gate e, per i locali che la scrivono già nelle
+  serate, la lettura del dettaglio basta. Resta nella ROADMAP (iterazione 12), con il
+  requisito delle eccezioni per tipo di serata.
+- **Next.js 16.4.1 → 16.4.5**: correzione di GHSA-mfr8-8qww-v76h (moderata; riguarda
+  `unstable_cache` e `use cache`, che l'export statico non usa) e della build che a volte si
+  fermava con `SecurityFatalError`. Scelta la 16.4.5 e non la 16.4.6 perché ha più di due
+  settimane. Tolte da `pnpm-workspace.yaml` le eccezioni sull'età minima di rilascio dei
+  pacchetti 16.4.1. `pnpm audit --prod`: nessuna vulnerabilità.
+- Verifica: worker (ruff, mypy, 355 test, 4 test di integrazione sul database locale); app
+  (lint, tipi, 159 test unitari, build, suite e2e su Chromium telefono e desktop);
+  `verifica_documentazione.py`.

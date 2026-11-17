@@ -171,13 +171,23 @@ def test_applica_non_sostituisce_i_campi_gia_letti() -> None:
 # ---------------------------------------------------------------------------------------------
 
 
-def test_scelta_solo_serate_vicine_dello_stesso_sito_ancora_senza_biglietti() -> None:
+def test_scelta_solo_serate_vicine_dello_stesso_sito_senza_biglietti_o_eta() -> None:
     base = "https://locale.example"
     fonte = _fonte(f"{base}/eventi", completi=frozenset({f"{base}/e/completa/"}))
     grezzi = [
         _grezzo(f"{base}/e/vicina", 2),
         _grezzo(f"{base}/e/completa", 3),
-        _grezzo(f"{base}/e/con-link", 4, url_biglietti="https://dice.fm/x"),
+        _grezzo(
+            f"{base}/e/con-link-ed-eta", 4, url_biglietti="https://dice.fm/x", note_ingresso=["18+"]
+        ),
+        _grezzo(
+            f"{base}/e/eta-nella-descrizione",
+            4,
+            url_biglietti="https://dice.fm/y",
+            descrizione="Dalle 23:00 alle 05:00 · 18+",
+        ),
+        # Biglietti nell'elenco ma età solo nella pagina della serata (Gate): si legge.
+        _grezzo(f"{base}/e/con-link-senza-eta", 4, url_biglietti="https://dice.fm/z"),
         _grezzo(f"{base}/e/lontana", 60),
         _grezzo(f"{base}/e/passata", -2),
         _grezzo("https://altro.example/e/esterna", 2),
@@ -185,7 +195,7 @@ def test_scelta_solo_serate_vicine_dello_stesso_sito_ancora_senza_biglietti() ->
         _grezzo(f"{base}/e/senza-ora", 2, ha_ora=False),
     ]
     scelti = scegli_da_arricchire(grezzi, fonte, ADESSO, 8)
-    assert [g.url for g in scelti] == [f"{base}/e/vicina"]
+    assert [g.url for g in scelti] == [f"{base}/e/vicina", f"{base}/e/con-link-senza-eta"]
 
 
 def test_scelta_meta_alle_piu_vicine_e_il_resto_a_rotazione() -> None:
