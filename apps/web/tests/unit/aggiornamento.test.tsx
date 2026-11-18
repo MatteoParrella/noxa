@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Toast } from '@/components/ui/Toast';
 import {
+  aggiornaInSecondoPiano,
   applicaAggiornamento,
   controllaPeriodicamente,
   osservaAggiornamento,
@@ -137,6 +138,60 @@ describe('applicaAggiornamento', () => {
     contenitore.dispatchEvent(new Event('controllerchange'));
     contenitore.dispatchEvent(new Event('controllerchange'));
     expect(ricarica).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('aggiornaInSecondoPiano', () => {
+  class DocumentoFinto extends Bersaglio {
+    visibilityState: DocumentVisibilityState = 'visible';
+    activeElement: Element | null = null;
+    nascondi() {
+      this.visibilityState = 'hidden';
+      this.dispatchEvent(new Event('visibilitychange'));
+    }
+    mostra() {
+      this.visibilityState = 'visible';
+      this.dispatchEvent(new Event('visibilitychange'));
+    }
+  }
+
+  it('applica la versione in attesa quando l’app passa in secondo piano, una volta sola', () => {
+    const documento = new DocumentoFinto();
+    const contenitore = new Bersaglio();
+    const nuovo = new WorkerFinto();
+    const ricarica = vi.fn();
+    aggiornaInSecondoPiano(nuovo, contenitore, documento, ricarica);
+
+    documento.mostra();
+    expect(nuovo.postMessage).not.toHaveBeenCalled();
+    documento.nascondi();
+    documento.nascondi();
+    expect(nuovo.postMessage).toHaveBeenCalledTimes(1);
+    expect(nuovo.postMessage).toHaveBeenCalledWith({ type: 'SKIP_WAITING' });
+    contenitore.dispatchEvent(new Event('controllerchange'));
+    expect(ricarica).toHaveBeenCalledTimes(1);
+  });
+
+  it('non ricarica se l’utente sta scrivendo in un campo', () => {
+    const documento = new DocumentoFinto();
+    documento.activeElement = document.createElement('textarea');
+    const nuovo = new WorkerFinto();
+    aggiornaInSecondoPiano(nuovo, new Bersaglio(), documento, vi.fn());
+    documento.nascondi();
+    expect(nuovo.postMessage).not.toHaveBeenCalled();
+
+    documento.activeElement = document.createElement('button');
+    documento.nascondi();
+    expect(nuovo.postMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it('smette di osservare dopo la pulizia', () => {
+    const documento = new DocumentoFinto();
+    const nuovo = new WorkerFinto();
+    const smetti = aggiornaInSecondoPiano(nuovo, new Bersaglio(), documento, vi.fn());
+    smetti();
+    documento.nascondi();
+    expect(nuovo.postMessage).not.toHaveBeenCalled();
   });
 });
 

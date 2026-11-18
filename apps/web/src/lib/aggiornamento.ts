@@ -3,7 +3,9 @@
  * `skipWaiting: false` (scripts/genera-sw.mjs): una versione nuova si installa e resta in
  * attesa. L'app lo segnala e, quando l'utente sceglie «Ricarica», chiede al service worker in
  * attesa di attivarsi (messaggio `SKIP_WAITING`, gestito da Workbox) e ricarica la pagina
- * appena prende il controllo.
+ * appena prende il controllo. Se l'avviso resta senza risposta, l'aggiornamento si applica da
+ * solo quando l'app passa in secondo piano (`aggiornaInSecondoPiano`): una PWA installata non
+ * chiude quasi mai tutte le sue finestre e altrimenti resterebbe a lungo sulla versione vecchia.
  */
 
 /** Ogni quanto controllare una versione nuova mentre l'app resta aperta. */
@@ -88,4 +90,44 @@ export function applicaAggiornamento(
     ricarica();
   });
   inAttesa.postMessage({ type: 'SKIP_WAITING' });
+}
+
+type Documento = Pick<
+  Document,
+  'visibilityState' | 'activeElement' | 'addEventListener' | 'removeEventListener'
+>;
+
+/** Un campo in cui l'utente sta scrivendo: ricaricare gli farebbe perdere il testo. */
+function staScrivendo(elemento: Element | null): boolean {
+  if (!elemento) return false;
+  const tag = elemento.tagName;
+  return (
+    tag === 'INPUT' ||
+    tag === 'TEXTAREA' ||
+    tag === 'SELECT' ||
+    (elemento as HTMLElement).isContentEditable === true
+  );
+}
+
+/**
+ * Con una versione nuova in attesa, la applica quando l'app passa in secondo piano (l'utente
+ * è andato su un'altra app o ha bloccato il telefono), così alla riapertura vede l'ultima
+ * versione senza dover toccare «Ricarica». Non lo fa se un campo di testo è attivo.
+ * Restituisce la funzione che smette di osservare.
+ */
+export function aggiornaInSecondoPiano(
+  inAttesa: Pick<ServiceWorker, 'postMessage'>,
+  contenitore: Pick<ServiceWorkerContainer, 'addEventListener'>,
+  documento: Documento,
+  ricarica: () => void,
+): () => void {
+  let applicato = false;
+  const suVisibilita = () => {
+    if (applicato || documento.visibilityState !== 'hidden') return;
+    if (staScrivendo(documento.activeElement)) return;
+    applicato = true;
+    applicaAggiornamento(inAttesa, contenitore, ricarica);
+  };
+  documento.addEventListener('visibilitychange', suVisibilita);
+  return () => documento.removeEventListener('visibilitychange', suVisibilita);
 }

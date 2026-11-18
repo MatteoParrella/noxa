@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Icona } from '@/components/ui/Icona';
 import { Toast } from '@/components/ui/Toast';
 import {
+  aggiornaInSecondoPiano,
   applicaAggiornamento,
   controllaPeriodicamente,
   osservaAggiornamento,
@@ -16,7 +17,8 @@ import { avviaSentry } from '@/lib/sentry';
 /**
  * Registra il service worker generato da Workbox dopo la build (scripts/genera-sw.mjs).
  * Solo in produzione e solo nel browser: nelle app native i file sono già nel pacchetto.
- * Quando una versione nuova è pronta mostra l'avviso «Ricarica» (lib/aggiornamento.ts).
+ * Quando una versione nuova è pronta mostra l'avviso «Ricarica» e, se resta senza risposta, la
+ * applica quando l'app passa in secondo piano (lib/aggiornamento.ts).
  * In produzione avvia anche Sentry, se configurato (lib/sentry.ts).
  */
 export function RegistraServiceWorker() {
@@ -51,6 +53,13 @@ export function RegistraServiceWorker() {
       for (const pulisci of pulizie) pulisci();
     };
   }, []);
+
+  useEffect(() => {
+    if (!inAttesa) return;
+    return aggiornaInSecondoPiano(inAttesa, navigator.serviceWorker, document, () =>
+      window.location.reload(),
+    );
+  }, [inAttesa]);
 
   if (!inAttesa || nascosto) return null;
   const testi = messaggi.comune.nuovaVersione;

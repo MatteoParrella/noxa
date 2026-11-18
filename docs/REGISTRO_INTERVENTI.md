@@ -324,3 +324,10 @@ Richiesta: «vedi te per il resto, sistema tutto prima della IT11». Ramo
 - Verifica: worker (ruff, mypy, 355 test, 4 test di integrazione sul database locale); app
   (lint, tipi, 159 test unitari, build, suite e2e su Chromium telefono e desktop);
   `verifica_documentazione.py`.
+- **Aggiornamento dell'app** (dopo «vedo ancora la banda nera»): la correzione era online
+  dalle 11:28, ma il telefono mostrava la versione salvata. L'avviso «Ricarica» si poteva
+  chiudere e la versione nuova si attivava solo chiudendo tutte le finestre dell'app, cosa
+  che una PWA installata non fa quasi mai. Ora, con una versione in attesa, l'app la applica
+  quando passa in secondo piano, tranne mentre un campo di testo è attivo
+  (`lib/aggiornamento.ts`, ARCHITECTURE.md §5.5). Ramo
+  `fix/aggiornamento-app-in-secondo-piano`.
