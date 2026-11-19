@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ChevronRight, Flag, LockKeyhole, Pencil, ShieldCheck, Users } from 'lucide-react';
+import { Award, ChevronRight, Flag, LockKeyhole, Pencil, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Contatore } from '@/components/ui/Badge';
@@ -12,6 +12,8 @@ import { ImpostazioniAspetto } from '@/features/account/ImpostazioniAspetto';
 import { PulsanteEsci } from '@/features/account/PulsanteEsci';
 import { useMioAccount, useSessione } from '@/features/account/sessione';
 import { leggiMieiRuoli } from '@/features/moderazione/api';
+import { useBadge } from '@/features/ricorda/dati-anno';
+import { EtichettaPrivato } from '@/features/ricorda/Diario';
 import { messaggi } from '@/lib/messaggi/it';
 import { useAmici, useMioAvatar } from './dati';
 
@@ -22,6 +24,8 @@ export function MioProfilo() {
   const account = useMioAccount(sessione);
   const amici = useAmici();
   const mioAvatar = useMioAvatar();
+  // La bacheca è solo nel proprio profilo: il profilo visto dagli amici non la mostra (F-32).
+  const badge = useBadge();
   const richieste = amici.data?.ricevute.length ?? 0;
   const utenteId = sessione.stato === 'presente' ? sessione.utenteId : null;
   // La voce compare solo a chi ha un ruolo; l'area chiede comunque i due fattori (R-06).
@@ -70,6 +74,22 @@ export function MioProfilo() {
               {richieste > 0 && (
                 <Contatore valore={richieste} descrizione={testi.richieste(richieste)} />
               )}
+              <Icona icona={ChevronRight} dimensione="s" />
+            </span>
+          </Link>
+          <Link className="voce-profilo" href="/ricorda/badge/">
+            <Icona icona={Award} />
+            <span>
+              {messaggi.ricorda.badge.profilo}
+              {badge.data && (
+                <span className="mono">
+                  {' · '}
+                  {badge.data.filter((b) => b.ottenutoIl !== null).length}
+                </span>
+              )}
+            </span>
+            <span className="valore">
+              <EtichettaPrivato />
               <Icona icona={ChevronRight} dimensione="s" />
             </span>
           </Link>

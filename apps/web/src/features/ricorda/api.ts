@@ -82,7 +82,7 @@ export const SchemaSalvataggio = z.object({
 });
 export type Salvataggio = z.infer<typeof SchemaSalvataggio>;
 
-function valida<T>(schema: z.ZodType<T>, dati: unknown): T {
+export function valida<T>(schema: z.ZodType<T>, dati: unknown): T {
   const esito = schema.safeParse(dati);
   if (!esito.success) throw converti(esito.error);
   return esito.data;

@@ -24,6 +24,22 @@ export function testoNotifica(tipo: TipoNotifica, dati: Record<string, unknown>)
       motivazione: null,
     };
   }
+  if (tipo === 'badge_ottenuto') {
+    const quanti = typeof dati.quanti === 'number' ? dati.quanti : 1;
+    const nome = testo(dati.nome);
+    return {
+      titolo:
+        quanti > 1
+          ? testi.badge.molti(quanti)
+          : nome
+            ? testi.badge.uno(nome)
+            : testi.tipi.badge_ottenuto,
+      motivazione: null,
+    };
+  }
+  if (tipo === 'riepilogo_pronto' && typeof dati.anno === 'number') {
+    return { titolo: testi.riepilogo(dati.anno), motivazione: null };
+  }
   if (tipo !== 'esito_moderazione') return { titolo: testi.tipi[tipo], motivazione: null };
   const esito = testo(dati.esito);
   const chiave =
@@ -50,6 +66,11 @@ export function linkNotifica(tipo: TipoNotifica, dati: Record<string, unknown>):
   const ritorno = testo(dati.ritorno_id);
   if (tipo.startsWith('ritorno_') && uuid.test(ritorno))
     return `/vivi/ritorno-amico/?id=${ritorno}`;
+  const badge = testo(dati.badge_codice);
+  if (tipo === 'badge_ottenuto' && /^[a-z0-9_]{2,40}$/.test(badge))
+    return `/ricorda/badge/?badge=${badge}`;
+  if (tipo === 'riepilogo_pronto' && typeof dati.anno === 'number' && Number.isInteger(dati.anno))
+    return `/ricorda/wrapped/?anno=${dati.anno}`;
   return LINK[tipo];
 }
 
