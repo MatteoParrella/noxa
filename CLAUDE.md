@@ -35,7 +35,7 @@ badge e riepilogo annuale. È un prodotto destinato al lancio pubblico, non un p
   (ADR-0016).
 - **Interfaccia**: stile iOS con materiali traslucidi (ADR-0035, DESIGN.md §2.1): colori
   semantici, carattere di sistema con la scala Dynamic Type, vetro solo su barre, fogli e
-  menu, tinta ambra al sodio, tema scuro predefinito.
+  menu, tinta ciano neon, tema scuro predefinito.
 - **Backend**: Supabase in UE (Postgres + PostGIS, Auth, Storage, Realtime, Edge Functions
   Deno, `pg_cron`). **La RLS è l'unico punto di autorizzazione** (ADR-0002).
 - **Worker**: Python 3.12, FastAPI, httpx, Playwright, rapidfuzz, Pydantic, structlog, SDK

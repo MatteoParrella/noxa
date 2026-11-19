@@ -45,6 +45,7 @@
 }
 .ri-mese span {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }
@@ -72,6 +73,7 @@
   padding-right: 10px;
   border-right: 1px solid var(--colore-linea);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
   line-height: 1.2;
   color: var(--colore-testo-secondario);
@@ -107,6 +109,7 @@
 }
 .ri-voto-mini {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }
@@ -163,6 +166,7 @@
 }
 .ri-sez-testa .mono {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* evento scelto, in forma compatta */
@@ -186,6 +190,7 @@
   border-radius: var(--raggio-2);
   background: var(--colore-superficie-3);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
   line-height: 1.15;
   overflow: hidden;
@@ -263,6 +268,7 @@
   border-radius: var(--raggio-2);
   background: var(--colore-superficie-1);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.9375rem;
 }
 .ri-importo:focus-within {
@@ -296,6 +302,7 @@
 }
 .ri-totale .mono {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
 }
 .ri-categorie {
   display: flex;
@@ -364,6 +371,7 @@
   background: transparent;
   color: var(--colore-testo-primario);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 1.0625rem;
   cursor: pointer;
 }
@@ -400,6 +408,7 @@
 }
 .ri-dt-data {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.875rem;
   color: var(--colore-testo-secondario);
   text-transform: uppercase;
@@ -409,6 +418,7 @@
   align-items: baseline;
   gap: 6px;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
 }
 .ri-dt-voto b {
   font-size: 1.5rem;
@@ -431,6 +441,7 @@
 }
 .ri-dt-spesa .mono {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
 }
 .ri-dt-spesa.totale {
   border-bottom: 0;

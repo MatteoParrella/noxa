@@ -156,6 +156,7 @@
 .passi-testo {
   flex: none;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-mono-dato);
   font-weight: var(--tipo-peso-medio);
   color: var(--colore-testo-secondario);
@@ -255,17 +256,20 @@
 .campo-conta {
   margin-left: auto;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-didascalia);
   color: var(--colore-testo-secondario);
 }
 .prefisso {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--colore-testo-secondario);
 }
 
 /* ---------- campo data e calendario ---------- */
 .campo-data input {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-corpo);
   letter-spacing: 0.02em;
 }
@@ -310,6 +314,7 @@
   background: transparent;
   color: var(--colore-testo-primario);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-corpo);
   cursor: pointer;
 }
@@ -440,6 +445,7 @@
 }
 .illustrazione text {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 12px;
   fill: var(--colore-testo-primario);
 }

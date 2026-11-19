@@ -5,7 +5,7 @@
   strato funzionale (barre, fogli, menu). I nomi storici (--colore-superficie-*,
   --colore-testo-*…) restano come alias dei ruoli iOS, così tutte le schermate li ereditano.
   Tema scuro predefinito; tema chiaro con <html data-tema="chiaro">; data-tema su un elemento
-  applica il tema solo a quella parte (catalogo dei componenti). Tinta: ambra al sodio.
+  applica il tema solo a quella parte (catalogo dei componenti). Tinta: ciano neon.
 */
 
 :root {
@@ -18,7 +18,10 @@
     'Segoe UI', system-ui, sans-serif;
   /* Carattere del marchio: solo nei momenti di marca (copertine, marchio, Wrapped). */
   --tipo-famiglia-marchio: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
-  --tipo-famiglia-mono: ui-monospace, 'SF Mono', 'IBM Plex Mono', Menlo, monospace;
+  /* Dati (orari, prezzi, contatori): carattere di sistema con cifre tabulari, come in iOS. */
+  --tipo-famiglia-mono: var(--tipo-famiglia-testo);
+  /* Codici da leggere o copiare carattere per carattere (codice amico, codice a sei cifre). */
+  --tipo-famiglia-codice: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --tipo-peso-normale: 400;
   --tipo-peso-medio: 500;
   --tipo-peso-semi: 600;
@@ -136,10 +139,10 @@
   --colore-riempimento-terziario: rgba(118, 118, 128, 0.24);
   --colore-separatore: rgba(84, 84, 88, 0.65);
   --colore-separatore-opaco: #38383a;
-  /* tinta: ambra al sodio, il lampione della notte */
-  --colore-tinta: #ffb340; /* 11,8:1 su nero */
-  --colore-tinta-premuta: #e89a26;
-  --colore-tinta-tenue: rgba(255, 179, 64, 0.18);
+  /* tinta: ciano neon, la luce delle insegne e dei laser */
+  --colore-tinta: #3ee0cf; /* 12,8:1 su nero, 8,5:1 su #2c2c2e */
+  --colore-tinta-premuta: #2bc2b2;
+  --colore-tinta-tenue: rgba(62, 224, 207, 0.18);
   /* alias storici, usati da tutte le schermate */
   --colore-superficie-1: var(--colore-cella);
   --colore-superficie-2: var(--colore-sfondo-terziario);
@@ -153,7 +156,7 @@
   --colore-testo-su-accento: #000000;
   --colore-accento: var(--colore-tinta);
   --colore-accento-premuto: var(--colore-tinta-premuta);
-  --colore-accento-tenue: #33260f;
+  --colore-accento-tenue: #0d3632;
   --colore-accento-testo: var(--colore-tinta);
   --colore-focus: #409cff;
   --colore-successo: #30d158;
@@ -230,10 +233,10 @@
   --copertina-altro-1: #cfc8be;
   --copertina-altro-2: #5a554f;
   --copertina-altro-bagliore: #48443f;
-  --copertina-accento-fondo: #12151a;
-  --copertina-accento-1: #f28c28;
-  --copertina-accento-2: #6b3e14;
-  --copertina-accento-bagliore: #5a3410;
+  --copertina-accento-fondo: #0c1716;
+  --copertina-accento-1: #3ee0cf;
+  --copertina-accento-2: #1d6a62;
+  --copertina-accento-bagliore: #165450;
 }
 
 /* ---------- Tema chiaro ---------- */
@@ -252,9 +255,9 @@
   --colore-riempimento-terziario: rgba(118, 118, 128, 0.12);
   --colore-separatore: rgba(60, 60, 67, 0.29);
   --colore-separatore-opaco: #c6c6c8;
-  --colore-tinta: #a35200; /* 5,6:1 su bianco, 5,0:1 su #f2f2f7 */
-  --colore-tinta-premuta: #8a4500;
-  --colore-tinta-tenue: rgba(163, 82, 0, 0.12);
+  --colore-tinta: #00756b; /* 5,6:1 su bianco, 5,0:1 su #f2f2f7 */
+  --colore-tinta-premuta: #005f57;
+  --colore-tinta-tenue: rgba(0, 117, 107, 0.12);
   --colore-superficie-1: var(--colore-cella);
   --colore-superficie-2: var(--colore-sfondo-terziario);
   --colore-superficie-3: #d1d1d6;
@@ -267,7 +270,7 @@
   --colore-testo-su-accento: #ffffff;
   --colore-accento: var(--colore-tinta);
   --colore-accento-premuto: var(--colore-tinta-premuta);
-  --colore-accento-tenue: #fbead2;
+  --colore-accento-tenue: #d5f3ef;
   --colore-accento-testo: var(--colore-tinta);
   --colore-focus: #0062cc;
   --colore-successo: #1a7431;
@@ -343,10 +346,10 @@
   --copertina-altro-1: #4a4540;
   --copertina-altro-2: #b5aea5;
   --copertina-altro-bagliore: #dcd7cf;
-  --copertina-accento-fondo: #f6ede3;
-  --copertina-accento-1: #b5560a;
-  --copertina-accento-2: #edb27a;
-  --copertina-accento-bagliore: #f6d3ae;
+  --copertina-accento-fondo: #e3f4f1;
+  --copertina-accento-1: #00756b;
+  --copertina-accento-2: #7fd3c8;
+  --copertina-accento-bagliore: #bfe8e2;
 }
 
 /*

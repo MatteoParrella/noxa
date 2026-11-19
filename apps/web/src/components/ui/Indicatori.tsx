@@ -2,7 +2,7 @@ import { classi } from '@/lib/classi';
 
 type PropsPassi = { passo: number; totale: number; testo: string; etichetta: string };
 
-/** "1 di 4" in monospaziato con le barre: fatte in testo primario, l'attuale in arancio. */
+/** "1 di 4" in monospaziato con le barre: fatte in testo primario, l'attuale nella tinta. */
 export function IndicatorePassi({ passo, totale, testo, etichetta }: PropsPassi) {
   return (
     <div className="passi" role="img" aria-label={etichetta}>
@@ -23,7 +23,7 @@ export function IndicatorePassi({ passo, totale, testo, etichetta }: PropsPassi)
 
 type PropsPunti = { attuale: number; totale: number; etichetta: string };
 
-/** Indicatore a punti: quello attuale è più lungo e arancio. */
+/** Indicatore a punti: quello attuale è più lungo e nella tinta. */
 export function IndicatorePunti({ attuale, totale, etichetta }: PropsPunti) {
   return (
     <div className="punti" role="img" aria-label={etichetta}>

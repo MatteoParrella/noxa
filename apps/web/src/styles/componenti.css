@@ -429,6 +429,7 @@
   border-radius: var(--raggio-1);
   border: 1px solid var(--colore-linea-forte);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 500;
@@ -493,6 +494,7 @@
   background: var(--colore-testo-primario);
   color: var(--colore-sfondo);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
   font-weight: 500;
   line-height: 1;
@@ -534,6 +536,7 @@
   background: var(--colore-superficie-1);
   color: var(--colore-testo-secondario);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
   box-shadow: inset 0 0 0 1px var(--colore-linea-forte);
 }
@@ -1309,6 +1312,7 @@ button.cella {
   border: 1px solid var(--colore-linea-forte);
   border-radius: var(--raggio-2);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   font-weight: 500;
   white-space: nowrap;
@@ -1365,6 +1369,7 @@ button.cella {
     0 0 0 4px var(--colore-sfondo),
     0 0 0 5px var(--colore-linea-forte);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   font-weight: 500;
 }

@@ -19,7 +19,7 @@ export function IllustrazioneOrizzonte() {
   );
 }
 
-/** Verifica dell'email: una busta con il punto arancio. */
+/** Verifica dell'email: una busta con il punto nella tinta. */
 export function IllustrazioneBusta() {
   return (
     <svg className="illustrazione is-bassa" viewBox="0 0 350 180" aria-hidden="true">

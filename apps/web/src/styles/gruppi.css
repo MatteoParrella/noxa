@@ -6,6 +6,7 @@
 /* ---------- Gruppi ---------- */
 .gr-conteggio {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
   font-variant-numeric: tabular-nums;
@@ -55,6 +56,7 @@
 }
 .gr-prossima .mono {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--colore-testo-primario);
   font-weight: 500;
 }
@@ -140,6 +142,7 @@
 .sel-username {
   display: block;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
 }
@@ -160,6 +163,7 @@
 }
 .sel-conta {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
 }
 .sel-regola {
@@ -312,6 +316,7 @@
 }
 .se-cop .se-cop-meta {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.875rem;
 }
 .se-cop .se-cop-badge {
@@ -404,6 +409,7 @@
 
 .se-conti {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -446,6 +452,7 @@
 .pr-username {
   display: block;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
 }
@@ -507,6 +514,7 @@
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
 }
 .se-link .se-fuori {
   margin-left: auto;
@@ -571,6 +579,7 @@
 }
 .se-mezzo-testa small {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--colore-testo-secondario);
 }
 
@@ -583,6 +592,7 @@
 }
 .se-posti .se-valore {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 1.25rem;
   text-align: center;
 }
@@ -619,6 +629,7 @@
 .se-passaggio small {
   display: block;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
 }
@@ -668,6 +679,7 @@
 }
 .se-auto-posti {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
 }
 .se-sedili {
@@ -694,6 +706,7 @@
   background: transparent;
   color: var(--colore-testo-secondario);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
 }
 
@@ -747,6 +760,7 @@
   display: flex;
   flex-direction: column;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
   line-height: 1.2;
   color: var(--colore-testo-secondario);
@@ -773,6 +787,7 @@
 }
 .sr-risposte {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
 }
@@ -847,6 +862,7 @@
   margin-top: 4px;
   align-items: center;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
 }
 

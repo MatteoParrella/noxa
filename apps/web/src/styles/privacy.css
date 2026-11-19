@@ -76,6 +76,7 @@
   align-items: center;
   gap: var(--spazio-2);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.875rem;
   color: var(--colore-testo-secondario);
 }
@@ -158,17 +159,20 @@
   border: 1px solid var(--colore-linea-forte);
   border-radius: var(--raggio-2);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.625rem;
 }
 .pv-file b {
   display: block;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.875rem;
   font-weight: 500;
   overflow-wrap: anywhere;
 }
 .pv-file small {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }
@@ -179,6 +183,7 @@
   align-items: center;
   gap: 8px;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -231,6 +236,7 @@
 }
 .pv-effetto-testa span {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }
@@ -294,6 +300,7 @@
 }
 .pv-numero {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
   padding-top: 4px;
@@ -326,6 +333,7 @@
   margin: 0;
   padding-top: var(--spazio-3);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }

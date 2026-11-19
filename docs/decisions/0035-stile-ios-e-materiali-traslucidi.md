@@ -28,9 +28,11 @@ Design (deroga a DESIGN.md §1 per questo rifacimento).
   `--colore-accento*`) restano come alias dei nuovi ruoli, così ogni schermata li eredita.
   Tutti i testi su colore pieno sono almeno a 4,5:1 in entrambi i temi; i valori e i
   rapporti sono scritti accanto ai token.
-- **Tinta: ambra al sodio**, `#FFB340` in scuro (11,8:1 sul nero) e `#A35200` in chiaro
-  (5,0:1 su `#F2F2F7`). Resta l'idea del lampione di ADR-0011, ma più vicina alla luce gialla
-  delle lampade al sodio e meno arancio.
+- **Tinta: ciano neon**, `#3EE0CF` in scuro (12,8:1 sul nero) e `#00756B` in chiaro (5,0:1
+  su `#F2F2F7`), al posto dell'arancio «lampione al sodio» di ADR-0011: richiama le insegne
+  e i laser dei club, si distingue dal blu di sistema usato per il focus e non è uno dei
+  modelli più diffusi (magenta o verde acido sul nero). Le copertine della famiglia
+  «accento» seguono la stessa tinta.
 - **Tema scuro predefinito**, nero puro come fondo di pagina e celle `#1C1C1E`. Il tema
   chiaro (fondo `#F2F2F7`, celle bianche) si sceglie con l'interruttore del profilo e resta
   salvato sul dispositivo. Le HIG sconsigliano una scelta del tema dentro l'app; il product
@@ -74,8 +76,9 @@ Design (deroga a DESIGN.md §1 per questo rifacimento).
   product owner, che vuole lo scuro sempre come predefinito.
 - **Tenere Archivo per tutto il testo**: dà carattere, ma non segue Dynamic Type su iOS e
   allontana i controlli da quelli del sistema. Resta per la marca.
-- **Altri accenti** (magenta neon, viola elettrico): contrasti buoni, ma senza un legame con
-  il prodotto; il magenta sul nero è un modello molto diffuso.
+- **Altri accenti**: l'arancio al sodio (anche nella versione ambra `#FFB340`) è stato
+  scartato dal product owner; magenta neon e viola elettrico hanno contrasti buoni, ma il
+  magenta sul nero è un modello molto diffuso e il viola non ha un legame con il prodotto.
 
 ## Conseguenze
 - Tutte le schermate cambiano aspetto senza toccare logica, route o dati; il lavoro

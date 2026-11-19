@@ -299,7 +299,7 @@ export function Mappa({
     }
   }, [luoghi, stato]);
 
-  // Il segnaposto selezionato è l'unico arancio.
+  // Il segnaposto selezionato è l'unico nella tinta.
   useEffect(() => {
     sincronizzaRef.current();
   }, [selezionato]);

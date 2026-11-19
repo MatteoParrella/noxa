@@ -75,6 +75,7 @@
 }
 .rt-tratta .freccia {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-weight: 400;
   font-size: 1.25rem;
   color: var(--colore-testo-secondario);
@@ -84,6 +85,7 @@
   flex-wrap: wrap;
   gap: 4px 12px;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -201,6 +203,7 @@
 }
 .rt-barra .testo span {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -234,6 +237,7 @@
 }
 .rt-rail span {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -338,6 +342,7 @@
 }
 .rt-ora b {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 1.5rem;
   font-weight: 500;
 }
@@ -412,6 +417,7 @@
 .rt-area small {
   display: block;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }
@@ -514,6 +520,7 @@
   background: var(--colore-superficie-elevata);
   box-shadow: var(--ombra-2);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -583,6 +590,7 @@
   border-radius: 50%;
   border: 1px solid var(--colore-linea-forte);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
 }
 
@@ -608,6 +616,7 @@
 }
 .rt-dato b {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.9375rem;
   font-weight: 500;
 }
@@ -685,6 +694,7 @@
   border-radius: var(--raggio-1);
   background: var(--colore-superficie-2);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
 }
 .rt-permessi {
