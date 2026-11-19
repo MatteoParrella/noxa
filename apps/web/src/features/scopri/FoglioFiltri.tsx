@@ -291,7 +291,7 @@ export function FoglioFiltri({
             {testi.azzera}
           </Pulsante>
           <Pulsante
-            variante="secondario"
+            variante="principale"
             onClick={() => onApplica(bozza)}
             disabled={bozza.dove.tipo === 'posizione' && !coordinate}
           >

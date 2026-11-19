@@ -536,14 +536,16 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid var(--colore-linea-forte);
+  min-height: var(--area-tocco);
+  padding: 0 var(--spazio-4);
+  border: 0;
   border-radius: var(--raggio-tondo);
-  background: transparent;
+  background: var(--colore-riempimento-terziario);
   color: var(--colore-testo-primario);
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--tipo-corpo-piccolo);
+  letter-spacing: -0.015em;
+  -webkit-tap-highlight-color: transparent;
   cursor: pointer;
 }
 .pillola:focus-visible {
@@ -551,18 +553,16 @@
   outline-offset: 2px;
 }
 .pillola[aria-checked='true'] {
-  background: var(--colore-testo-primario);
-  border-color: var(--colore-testo-primario);
-  color: var(--colore-sfondo);
-  font-weight: 500;
+  background: var(--colore-tinta);
+  color: var(--colore-testo-su-accento);
+  font-weight: var(--tipo-peso-semi);
 }
 .pillola:disabled {
   color: var(--colore-testo-terziario);
-  border-color: var(--colore-superficie-3);
   cursor: not-allowed;
 }
 .pillola[aria-checked='true']:disabled {
-  background: var(--colore-superficie-3);
+  background: var(--colore-riempimento);
   color: var(--colore-testo-secondario);
 }
 .se-mezzo {
