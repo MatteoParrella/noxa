@@ -42,8 +42,9 @@
   flex-wrap: wrap;
 }
 .gr-titolo b {
-  font-size: 1.0625rem;
-  line-height: 1.25;
+  font-size: var(--tipo-titoletto);
+  line-height: 1.29;
+  font-weight: var(--tipo-peso-semi);
 }
 .gr-membri {
   display: flex;
@@ -78,10 +79,9 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 14px;
-  border: 1px solid var(--colore-linea);
+  padding: var(--spazio-4);
   border-radius: var(--raggio-3);
-  background: var(--colore-superficie-1);
+  background: var(--colore-cella);
 }
 .inv-testa {
   display: grid;
@@ -378,12 +378,11 @@
 /* la mia risposta, sempre in alto */
 .se-risposta {
   position: sticky;
-  top: 0;
   z-index: 4;
-  margin: 0 calc(-1 * var(--spazio-5));
-  padding: 10px var(--spazio-5) 12px;
-  background: var(--colore-sfondo);
-  border-bottom: 1px solid var(--colore-linea);
+  top: env(safe-area-inset-top);
+  margin: 0 calc(-1 * var(--margine-schermo));
+  padding: 10px var(--margine-schermo) 12px;
+  border-bottom: 0.5px solid var(--colore-separatore);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -410,8 +409,8 @@
 .se-conti {
   font-family: var(--tipo-famiglia-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 0.8125rem;
-  letter-spacing: 0.04em;
+  font-size: var(--tipo-nota);
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--colore-testo-secondario);
 }
@@ -761,7 +760,7 @@
   flex-direction: column;
   font-family: var(--tipo-famiglia-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 0.6875rem;
+  font-size: var(--tipo-didascalia-2);
   line-height: 1.2;
   color: var(--colore-testo-secondario);
   text-transform: uppercase;
@@ -778,8 +777,9 @@
   min-width: 0;
 }
 .sr-corpo b {
-  font-size: 0.9375rem;
-  line-height: 1.3;
+  font-size: var(--tipo-titoletto);
+  line-height: 1.29;
+  font-weight: var(--tipo-peso-semi);
 }
 .sr-corpo small {
   font-size: 0.8125rem;

@@ -1872,3 +1872,61 @@ button.cella {
   transition: none;
   cursor: grabbing;
 }
+
+/*
+  Elenchi delle aree come liste raggruppate (inset grouped): l'elenco diventa un blocco con
+  gli angoli ampi sullo sfondo della pagina, le righe hanno il margine interno di iOS e i
+  separatori partono dal testo. Vale per le righe già esistenti (persone, gruppi, serate,
+  membri, presenti), senza cambiare il markup.
+*/
+:is(ul, ol):has(> li.riga-persona, > li.mb-riga, > li.pr-riga, > li > .gr-voce, > li > .sr-riga) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--raggio-3);
+  background: var(--colore-cella);
+  overflow: hidden;
+}
+li:is(.riga-persona, .mb-riga, .pr-riga),
+li > :is(.gr-voce, .sr-riga) {
+  box-sizing: border-box;
+  padding-left: var(--spazio-4);
+  padding-right: var(--spazio-4);
+  border-bottom: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+li + li:is(.riga-persona, .mb-riga, .pr-riga),
+li + li > :is(.gr-voce, .sr-riga) {
+  background-image: linear-gradient(var(--colore-separatore), var(--colore-separatore));
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: calc(100% - var(--rientro-separatore, 68px)) 0.5px;
+}
+li + li > .gr-voce {
+  --rientro-separatore: var(--spazio-4);
+}
+li + li > .sr-riga {
+  --rientro-separatore: 84px;
+}
+a.gr-voce:active,
+a.sr-riga:active {
+  background-color: var(--colore-cella-premuta);
+}
+li > .gr-voce:hover,
+li > .sr-riga:hover {
+  background-color: transparent;
+}
+
+/* Intestazione di sezione: Footnote maiuscolo, come sopra i gruppi di celle di iOS. */
+.etichetta-riga {
+  padding: 0 var(--spazio-4);
+  font-size: var(--tipo-nota);
+  line-height: 1.38;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--colore-testo-secondario);
+}
+.etichetta-riga::after {
+  display: none;
+}

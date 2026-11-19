@@ -73,6 +73,11 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spazio-2);
 }
+/* Due capsule affiancate: etichette su una riga anche quando sono lunghe. */
+.azioni-doppie > .btn {
+  padding: 0 var(--spazio-3);
+  font-size: var(--tipo-richiamo);
+}
 .inviata {
   display: inline-flex;
   align-items: center;

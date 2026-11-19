@@ -90,21 +90,6 @@
   filter: none;
 }
 
-/* ---------- Linea che si disegna sotto le etichette da pensilina ---------- */
-.etichetta-riga::after {
-  transform-origin: left;
-  animation: traccia var(--movimento-ingresso) var(--curva-espressiva) both;
-  animation-delay: 200ms;
-}
-@keyframes traccia {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
 /* ---------- Capsula della scheda attiva che scivola a molla ---------- */
 .barra-nav {
   position: relative;
