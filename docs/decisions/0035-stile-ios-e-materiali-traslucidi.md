@@ -28,8 +28,8 @@ Design (deroga a DESIGN.md §1 per questo rifacimento).
   `--colore-accento*`) restano come alias dei nuovi ruoli, così ogni schermata li eredita.
   Tutti i testi su colore pieno sono almeno a 4,5:1 in entrambi i temi; i valori e i
   rapporti sono scritti accanto ai token.
-- **Tinta: ciano neon**, `#3EE0CF` in scuro (12,8:1 sul nero) e `#00756B` in chiaro (5,0:1
-  su `#F2F2F7`), al posto dell'arancio «lampione al sodio» di ADR-0011: richiama le insegne
+- **Tinta: ciano neon**, `#3EE0CF` in scuro (12,8:1 sul nero) e `#005A52` in chiaro (7,3:1
+  su `#F2F2F7` e almeno 4,6:1 sui riempimenti grigi dei pulsanti tinti), al posto dell'arancio «lampione al sodio» di ADR-0011: richiama le insegne
   e i laser dei club, si distingue dal blu di sistema usato per il focus e non è uno dei
   modelli più diffusi (magenta o verde acido sul nero). Le copertine della famiglia
   «accento» seguono la stessa tinta.

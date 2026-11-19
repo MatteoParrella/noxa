@@ -255,9 +255,9 @@
   --colore-riempimento-terziario: rgba(118, 118, 128, 0.12);
   --colore-separatore: rgba(60, 60, 67, 0.29);
   --colore-separatore-opaco: #c6c6c8;
-  --colore-tinta: #00756b; /* 5,6:1 su bianco, 5,0:1 su #f2f2f7 */
-  --colore-tinta-premuta: #005f57;
-  --colore-tinta-tenue: rgba(0, 117, 107, 0.12);
+  --colore-tinta: #005a52; /* 7,3:1 su #f2f2f7, ≥ 4,6:1 anche sui riempimenti grigi premuti */
+  --colore-tinta-premuta: #00443e;
+  --colore-tinta-tenue: rgba(0, 90, 82, 0.12);
   --colore-superficie-1: var(--colore-cella);
   --colore-superficie-2: var(--colore-sfondo-terziario);
   --colore-superficie-3: #d1d1d6;
@@ -277,7 +277,7 @@
   --colore-successo-tenue: #dcf3e2;
   --colore-avviso: #8a6100;
   --colore-avviso-tenue: #fbf0cc;
-  --colore-errore: #c4001a;
+  --colore-errore: #ad0017; /* 5,0:1 anche sul fondo tinto del pulsante pericolo */
   --colore-errore-tenue: #fbe0e2;
   --colore-info: #0062cc;
   --colore-info-tenue: #dde9fa;
@@ -347,7 +347,7 @@
   --copertina-altro-2: #b5aea5;
   --copertina-altro-bagliore: #dcd7cf;
   --copertina-accento-fondo: #e3f4f1;
-  --copertina-accento-1: #00756b;
+  --copertina-accento-1: #005a52;
   --copertina-accento-2: #7fd3c8;
   --copertina-accento-bagliore: #bfe8e2;
 }

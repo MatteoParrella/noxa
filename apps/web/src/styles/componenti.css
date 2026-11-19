@@ -1891,7 +1891,17 @@ button.cella {
   list-style: none;
   border-radius: var(--raggio-3);
   background: var(--colore-cella);
-  overflow: hidden;
+}
+/* Angoli sulle righe e non overflow sull'elenco: i menu ⋯ delle righe devono poter uscire. */
+:is(ul, ol) > li:is(.riga-persona, .mb-riga, .pr-riga):first-child,
+:is(ul, ol) > li:first-child > :is(.gr-voce, .sr-riga, .ri-riga) {
+  border-top-left-radius: var(--raggio-3);
+  border-top-right-radius: var(--raggio-3);
+}
+:is(ul, ol) > li:is(.riga-persona, .mb-riga, .pr-riga):last-child,
+:is(ul, ol) > li:last-child > :is(.gr-voce, .sr-riga, .ri-riga) {
+  border-bottom-left-radius: var(--raggio-3);
+  border-bottom-right-radius: var(--raggio-3);
 }
 li:is(.riga-persona, .mb-riga, .pr-riga),
 li > :is(.gr-voce, .sr-riga, .ri-riga) {
