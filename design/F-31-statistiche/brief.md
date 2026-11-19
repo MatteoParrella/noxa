@@ -8,6 +8,8 @@ lasciato vuoto. La bacheca dei badge è in `design/F-32-badge/`, il riepilogo an
 `design/F-33-wrapped/`. Il prompt da incollare in Claude Design è tutto quello che segue la
 riga `---`.
 
+
+**Stato (2026-11-18).** Tavole pronte in questa cartella: `f31-01`…`f31-05`, `componenti-statistiche.png`, `statistiche.html` e il layer `noxa-statistiche.css`. Le ha disegnate Claude Code su richiesta del product owner con i token e i caratteri di `design/sistema/noxa.css`, non nel progetto Claude Design, che va riallineato. Scelte aggiunte al prompt: con il periodo «Sempre» il grafico mostra le serate per anno, non per mese; l'alternativa testuale del grafico è un elenco che si apre con «Vedi come elenco» (`aria-expanded`).
 ---
 
 Nello **stesso progetto "Noxa — Design system"** progetta le **statistiche personali**

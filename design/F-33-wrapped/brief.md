@@ -9,6 +9,8 @@ Wrapped (resta nelle statistiche, R-43); servono almeno 3 serate nell'anno; il r
 generato il 1° dicembre si può rigenerare a fine anno per includere dicembre. Il prompt da
 incollare in Claude Design è tutto quello che segue la riga `---`.
 
+
+**Stato (2026-11-18).** Tavole pronte in questa cartella: `f33-01`…`f33-08`, `componenti-wrapped.png`, `wrapped.html` e il layer `noxa-wrapped.css`. Le ha disegnate Claude Code su richiesta del product owner con i token e i caratteri di `design/sistema/noxa.css`, non nel progetto Claude Design, che va riallineato. Le schede si dimensionano sulla propria larghezza (unità `cqw`), quindi lo stesso disegno vale per il visualizzatore, per 1280 px e per l'immagine da 1080 × 1920. Proposte applicate e da confermare nell'iterazione 11: niente spesa, almeno 3 serate, «Aggiorna» una volta al giorno.
 ---
 
 Nello **stesso progetto "Noxa — Design system"** progetta il **riepilogo annuale** dell'area
