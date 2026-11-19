@@ -160,7 +160,7 @@
   border-radius: var(--raggio-2);
   font-family: var(--tipo-famiglia-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 0.625rem;
+  font-size: var(--tipo-didascalia-2);
 }
 .pv-file b {
   display: block;
