@@ -321,7 +321,7 @@ Ogni iterazione ha:
   criterio 1 della Fase 2.
 
 ### Iterazione 11 — Statistiche, badge e Wrapped
-- **Contenuto**: vista `statistiche_personali`; catalogo dei badge e `assegna_badge`;
+- **Contenuto**: RPC `mie_statistiche` (al posto della vista prevista); catalogo dei badge e `assegna_badge`;
   `genera_riepiloghi` e `rigenera_mio_riepilogo`; Wrapped con esportazione dell'immagine
   sul dispositivo.
 - **Criteri**: test pgTAP di R-41 e R-42; `safety-review` del catalogo dei badge.

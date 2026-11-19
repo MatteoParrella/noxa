@@ -4,7 +4,7 @@
 -- Regole: R-40, R-41, R-42, R-43, R-64, R-69. Funzioni: assegna_badge, calcola_riepilogo,
 -- genera_riepiloghi, rigenera_riepilogo.
 begin;
-select plan(67);
+select plan(68);
 
 -- ---------------------------------------------------------------------------------------------
 -- Dati del diario (inseriti senza passare dalla RLS, con date fisse del 2025)
@@ -217,6 +217,8 @@ select tests.autentica_come('minore_17');
 select is_empty($$ select 1 from public.riepiloghi_annuali $$, 'Un amico non vede il riepilogo');
 select tests.autentica_come('moderatore');
 select is_empty($$ select 1 from public.riepiloghi_annuali $$, 'R-69: il moderatore non vede i riepiloghi');
+select tests.autentica_come('moderatore_senza_mfa');
+select is_empty($$ select 1 from public.riepiloghi_annuali $$, 'R-69: nemmeno senza due fattori');
 
 -- Aggiornamento: dal 1° dicembre al 31 gennaio, una volta al giorno.
 select tests.esci();

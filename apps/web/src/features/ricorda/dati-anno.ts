@@ -15,12 +15,13 @@ export const CHIAVI_ANNO = {
   riepiloghi: (io: string) => ['diario', 'riepiloghi', io] as const,
 };
 
-export function useStatistiche(anno: number | null) {
+/** `attivo` falso finché l'anno di oggi non è noto (export statico: si legge sul telefono). */
+export function useStatistiche(anno: number | null, attivo = true) {
   const io = useIo();
   return useQuery({
     queryKey: CHIAVI_ANNO.statistiche(io ?? '', anno),
     queryFn: () => leggiStatistiche(anno),
-    enabled: io !== null,
+    enabled: io !== null && attivo,
   });
 }
 

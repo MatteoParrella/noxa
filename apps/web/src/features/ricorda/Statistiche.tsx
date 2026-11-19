@@ -43,7 +43,7 @@ export function Statistiche() {
   const anno = montato ? annoDiRoma() : null;
   const annoScelto =
     periodo === 'sempre' || anno === null ? null : periodo === 'quest' ? anno : anno - 1;
-  const query = useStatistiche(montato ? annoScelto : null);
+  const query = useStatistiche(annoScelto, montato);
   const online = useOnline();
   const diario = useDiario();
   const diarioVuoto = diario.stato === 'pronto' && diario.voci.length === 0;
