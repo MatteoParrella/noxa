@@ -174,6 +174,10 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `ritorno_attivo(ritorno uuid)` | `boolean` | Il ritorno è `attivo`: le posizioni si mostrano ai destinatari solo in questo caso. |
 | `avvisa_ritorno(ritorno uuid)` | `void` | Avviso `cambio` senza dati sul canale privato `ritorno:<id>` (§7): posizione nuova, proroga, fine. |
 | `avvisa_persone_ritorno(ritorno uuid)` | `void` | `avvisa_ritorno` più l'avviso su `vivi:<utente>` del titolare e dei destinatari. |
+| `esporta_dati_vivi()` | `jsonb` | L'esportazione dell'iterazione 10, spostata in `private` dall'iterazione 11: `public.esporta_miei_dati()` le aggiunge badge e riepiloghi annuali. Nessun permesso per `authenticated`. |
+| `calcola_riepilogo(utente uuid, anno smallint)` | `jsonb` | Riepilogo di un anno solare dal diario della persona, o null con meno di 3 serate: solo le chiavi ammesse da `riepiloghi_annuali.dati`, locali del catalogo per nome e luoghi scritti a mano solo contati, amici solo contati, nessuna spesa (R-42, R-43). |
+| `scrivi_riepilogo(utente uuid, anno smallint)` | `boolean` | Scrive il riepilogo (o lo toglie sotto le 3 serate); vero se la riga è nuova, per la notifica `riepilogo_pronto`. |
+| `rigenera_riepilogo(utente uuid, oggi date)` | `jsonb` | Corpo di `rigenera_mio_riepilogo()` con la data passata da fuori (i test la scelgono): a dicembre l'anno in corso, a gennaio quello chiuso, altrimenti `NX062`; una volta al giorno (`NX063`). |
 
 Le policy di due tabelle che si riferiscono l'una all'altra (`checkin` ↔ `checkin_destinatari`,
 `ritorni_sicuri` ↔ `ritorni_destinatari`, `gruppi` ↔ `membri_gruppo`) usano **sempre** queste
@@ -988,11 +992,17 @@ per chi non ha un passaggio. Non contiene dati personali.
 |---|---|---|
 | `codice` | `text` | PK |
 | `nome`, `descrizione` | `text` | |
-| `criterio` | `jsonb` | regola valutata da `private.assegna_badge()` (es. `{"tipo": "locali_diversi", "soglia": 10}`); i tipi di criterio ammessi sono solo quelli implementati nella funzione e conformi a R-41 |
+| `criterio` | `jsonb` | regola valutata da `private.assegna_badge()` (es. `{"tipo": "locali_diversi", "soglia": 10}`); check `badge_criterio`: solo le chiavi `tipo` e `soglia` (1–1000), tipo tra `serate`, `locali_diversi`, `generi_diversi`, `dj_diversi`, `serate_con_note`, `quattro_stagioni`, `stesso_locale`, `serate_con_amici`. Nessun tipo sulla spesa, sull'alcol o sugli orari e nessuna finestra di tempo, quindi nessun criterio può premiare molte serate in poco tempo (R-41) |
 | `solo_maggiorenni` | `boolean` | default `false` |
+| `ordine` | `smallint` | ordine nella bacheca; il badge con l'ordine più alto dà il nome alla notifica |
 
 - **S**: `authenticated` e (`not solo_maggiorenni` oppure `not private.e_minorenne(auth.uid())`) (R-41).
-- **I/U/D**: solo migrazioni o seed, revisionati con `safety-review`.
+- **I/U/D**: solo migrazioni, revisionate con `safety-review`. Catalogo dell'iterazione 11 (10
+  badge, nessuno per soli maggiorenni): Prima pagina (1 serata), Esploratore I, II, III (5, 10,
+  25 luoghi diversi, del catalogo o scritti a mano), Orecchio curioso (5 generi), Cacciatore di
+  DJ (10 DJ diversi, senza distinguere le maiuscole), Cronista (10 serate con le note), Quattro
+  stagioni (una serata per stagione nello stesso anno solare), Di casa (5 serate nello stesso
+  luogo), In compagnia (10 serate con almeno un amico).
 
 #### `badge_utente`
 *Funzionalità: F-32.*
@@ -1005,6 +1015,7 @@ per chi non ha un passaggio. Non contiene dati personali.
 
 - **S**: `utente_id = auth.uid()`.
 - **I/U/D**: nessuna per `authenticated`. Le righe sono create da `private.assegna_badge()` (`pg_cron`, ogni giorno), che valuta i criteri sui dati del tracker **dentro il database** e non assegna badge `solo_maggiorenni` ai minorenni (R-41). Il tracker non esce mai dal database: il worker non vi ha accesso (ADR-0003).
+- Un giro crea al massimo una notifica `badge_ottenuto` per persona, con `dati` `{badge_codice, nome, quanti}` (il badge nuovo con l'ordine più alto e il numero dei nuovi); il testo push resta generico (F-22). I badge ottenuti restano anche se poi si cancellano serate.
 
 #### `riepiloghi_annuali`
 *Funzionalità: F-33.*
@@ -1013,11 +1024,11 @@ per chi non ha un passaggio. Non contiene dati personali.
 |---|---|---|
 | `utente_id` | `uuid` | FK `on delete cascade` |
 | `anno` | `smallint` | PK composta |
-| `dati` | `jsonb` | conteggi e classifiche personali, senza riferimenti ad altri utenti (R-42) |
+| `dati` | `jsonb` | conteggi e classifiche personali, senza riferimenti ad altri utenti (R-42); check `riepiloghi_annuali_formato`: solo le chiavi `anno`, `serate`, `per_mese`, `mese_top`, `locali_diversi`, `locali_top` (3, solo locali del catalogo), `genere_top`, `dj_top` (3), `serate_con_amici`, `amici_diversi`, `badge` (codici ottenuti nell'anno), `voto_top` (data, locale del catalogo, voto). Nessuna spesa (R-43), nessun titolo di evento, nessuna nota |
 | `generato_il` | `timestamptz` | |
 
 - **S**: `utente_id = auth.uid()`.
-- **I/U/D**: nessuna per `authenticated`. Le righe sono create da `private.genera_riepiloghi(anno smallint)` (`pg_cron`, 1° dicembre), che elabora gli utenti a blocchi di 1.000 per non tenere lock lunghi; un utente può rigenerare il proprio riepilogo con la RPC `public.rigenera_mio_riepilogo()` (al massimo una volta al giorno).
+- **I/U/D**: nessuna per `authenticated`. Le righe sono create da `private.genera_riepiloghi(anno smallint)` (`pg_cron`, 1° dicembre per l'anno in corso e 1° gennaio per quello appena chiuso), che elabora le persone con serate nell'anno a blocchi di 1.000 in ordine di identificativo, scrive solo chi ha almeno 3 serate, toglie i riepiloghi scesi sotto la soglia e notifica `riepilogo_pronto` (`dati` `{anno}`) solo per i riepiloghi nuovi. Una persona può aggiornare il proprio con la RPC `public.rigenera_mio_riepilogo()` dal 1° dicembre al 31 gennaio, una volta al giorno.
 - La condivisione avviene esportando un'immagine generata sul dispositivo; non esiste un link pubblico.
 
 ### 5.7 Infrastruttura
@@ -1047,7 +1058,6 @@ per chi non ha un passaggio. Non contiene dati personali.
 
 | Vista | Tipo | Accesso | Contenuto |
 |---|---|---|---|
-| `statistiche_personali` (F-31) | `security_invoker = true` | eredita la RLS di `serate_tracker` e `tracker_spese` (solo il titolare) | serate per mese, spesa totale e per categoria, locali, generi e DJ più frequenti (PRD F-31) |
 | `metriche_settimanali` (F-40, PRD §2) | vista materializzata nello schema `private`, aggiornata ogni giorno da `pg_cron` | RPC `public.leggi_metriche()` riservata agli amministratori (`private.e_amministratore()`) | solo aggregati senza identificativi: utenti attivi, eventi pubblicati, serate di gruppo, segnalazioni e tempi di gestione (PRD §2, ADR-0014) |
 
 ### 5.9 Funzionalità senza tabelle dedicate
@@ -1090,7 +1100,7 @@ per chi non ha un passaggio. Non contiene dati personali.
 | `salva_serata_diario(serata jsonb)` | invoker | utenti | Crea o modifica una serata con spese (al massimo 8), DJ (20) e amici (30) in un'unica transazione; l'`id` arriva dal dispositivo; un `id` di un'altra persona dà `42501` (F-30, R-40, R-69) |
 | `cerca_per_diario(testo text)` | invoker | utenti | Campo «Dove»: eventi pubblicati visibili dell'ultimo anno fino a oggi e locali attivi, almeno 2 caratteri, 10 risultati per tipo |
 | `categorie_spesa_disponibili()` | definer | utenti | Categorie di spesa per chi chiama, senza `alcolici` per i minorenni: l'app non decide da sé (R-40) |
-| `esporta_miei_dati()` | definer | utenti | Tutti i propri dati in un JSON, dall'iterazione 9 con check-in e dispositivi (senza endpoint né chiavi), dall'iterazione 10 con i ritorni sicuri e le loro posizioni (`formato` `noxa-esportazione-1`); delle altre persone solo username e nome di chi ha un legame con te; nessuna segnalazione ricevuta (R-50, R-69). Una richiesta all'ora (`private.esportazioni_dati`), `NX047` con l'ora della prossima (R-64, ADR-0025) |
+| `esporta_miei_dati()` | definer | utenti | Tutti i propri dati in un JSON, dall'iterazione 9 con check-in e dispositivi (senza endpoint né chiavi), dall'iterazione 10 con i ritorni sicuri e le loro posizioni, dall'iterazione 11 con badge e riepiloghi annuali (`formato` `noxa-esportazione-1`); delle altre persone solo username e nome di chi ha un legame con te; nessuna segnalazione ricevuta (R-50, R-69). Una richiesta all'ora (`private.esportazioni_dati`), `NX047` con l'ora della prossima (R-64, ADR-0025) |
 | `elimina_mio_account(password text)` | definer | utenti | Verifica la password (5 tentativi sbagliati all'ora in `private.tentativi_eliminazione`, poi `NX048`) e i due fattori se attivi (`serve_codice` senza `aal2`); conserva l'identità in `private.account_conservati` solo se c'è un'escalation (R-55); elimina `auth.users` e restituisce i file della foto profilo che l'Edge Function `elimina-account` cancella (R-64, ADR-0025) |
 | `fai_checkin(locale uuid, evento uuid, destinatari uuid[])` | invoker | utenti | Check-in con i destinatari in un'unica transazione; restituisce `id`, `scade_il`, `destinatari` ed `esclusi` (non più amici confermati); `NX049`…`NX053` (F-20, R-30) |
 | `suggerimenti_checkin()` | invoker | utenti | Eventi a cui partecipi e serate di gruppo della serata in corso, con gli amici confermati da proporre (F-20) |
@@ -1100,7 +1110,8 @@ per chi non ha un passaggio. Non contiene dati personali.
 | `invia_posizione_ritorno(ritorno, latitudine, longitudine, precisione_m)` | invoker | titolare | Una posizione del ritorno attivo, al massimo una ogni 30 secondi (`NX060`); avvisa `ritorno:<id>` (ADR-0028) |
 | `ritorni_vivi()` | invoker | utenti | Proprio ritorno attivo con i destinatari e ritorni ricevuti (attivi o conclusi da meno di 15 minuti) con il profilo e l'ultima posizione solo se attivi (R-17, R-31) |
 | `suggerimenti_ritorno()` | invoker | utenti | Locale del check-in attivo e serate di stasera con gli amici del gruppo e chi torna con te (F-16, F-21) |
-| `rigenera_mio_riepilogo()` | definer | utenti | Rigenera il proprio riepilogo annuale (F-33) |
+| `mie_statistiche(anno smallint default null)` | invoker | utenti | Statistiche del proprio diario (F-31) per un anno solare (`per_mese`, 12 valori) o per sempre (`anno` null: `per_anno`): serate, i primi 5 locali (del catalogo o scritti a mano), generi (dagli eventi annotati e visibili) e DJ (senza distinguere le maiuscole) per numero di serate e poi in ordine alfabetico, spesa totale e per categoria. Valgono la RLS del diario, di eventi e di locali (R-69); nessun confronto (R-43). Sostituisce la vista `statistiche_personali` prevista in progettazione: un'unica chiamata per periodo invece di più viste |
+| `rigenera_mio_riepilogo()` | definer | utenti | Aggiorna il proprio riepilogo annuale (F-33) con `private.rigenera_riepilogo(auth.uid(), oggi a Roma)`: dati del riepilogo o null sotto le 3 serate (la riga sparisce); `NX062` fuori dal periodo 1° dicembre–31 gennaio, `NX063` se già aggiornato oggi |
 | `coda_flyer()` | definer | moderatori | Caricamenti in revisione o non leggibili con estrazione, percorso dell'immagine, evento in revisione e possibile corrispondenza con un evento pubblicato, senza `utente_id` né dati del profilo di chi ha caricato (il percorso contiene solo l'uuid pseudonimo usato per la cartella) (F-40, R-69) |
 | `decidi_flyer(caricamento, esito, dati, motivazione, evento_esistente)` | definer | moderatori | Approvazione con le due conferme e la scelta esplicita sull'alcol (R-23), unione a un evento pubblicato o rifiuto motivato (R-51); sotto i 18 anni serve la motivazione (R-22); se l'immagine è adatta accoda `copia_immagine_flyer` |
 | `escalation_flyer(caricamento, motivazione, conferma)`, `escalation_segnalazione(segnalazione, motivazione, conferma)` | definer | moderatori | Escalation alle autorità con la parola `ESCALATION` (R-55, `private.applica_escalation`) |
@@ -1165,8 +1176,9 @@ RLS (iterazione 7).
 | Accodamento job del worker | ogni 5 minuti | `private.accoda_fonti_da_eseguire()`: inserisce `esegui_fonte` per le fonti attive scadute; dopo un errore l'intervallo raddoppia (fino a 8 volte la frequenza), che è il backoff delle fonti |
 | Sveglia del worker | ogni 15 minuti | `private.sveglia_worker()`: se ci sono job pronti e nessun esecutore attivo, avvia `worker.yml` con `workflow_dispatch` di GitHub (`pg_net`, token nel Vault); senza segreti nel Vault non fa nulla (ADR-0031) |
 | Metriche | ogni giorno alle 02:00 | `refresh materialized view private.metriche_settimanali` |
-| Badge | ogni giorno alle 05:00 | `private.assegna_badge()` |
-| Riepiloghi annuali | 1° dicembre alle 03:00 | `private.genera_riepiloghi(extract(year from now())::smallint)` |
+| Badge (`assegna-badge`) | ogni giorno alle 04:00 UTC | `private.assegna_badge()` |
+| Riepiloghi annuali (`genera-riepiloghi`) | 1° dicembre alle 03:00 UTC | `private.genera_riepiloghi(extract(year from now())::smallint)` |
+| Chiusura dei riepiloghi (`chiudi-riepiloghi`) | 1° gennaio alle 03:00 UTC | `private.genera_riepiloghi((extract(year from now()) - 1)::smallint)`: il riepilogo dell'anno appena chiuso include dicembre |
 | Pulizia flyer | ogni giorno alle 03:30 | `private.accoda_pulizia_flyer()`: inserisce `pulizia_flyer` in `coda_job`; il worker elimina i file di `private.immagini_da_eliminare()` (SAFETY_PRIVACY.md §10) |
 
 `pg_cron` è l'**unico scheduler** del sistema: il worker si limita a consumare `coda_job`

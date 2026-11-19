@@ -895,9 +895,15 @@ export const messaggi = {
       ritorno_arrivato: 'Un amico è rientrato sano e salvo.',
       esito_moderazione: 'Il tuo contenuto è stato esaminato.',
       rimozione_gruppo: 'Non fai più parte di un gruppo.',
-      badge_ottenuto: 'Hai ottenuto un nuovo badge.',
-      riepilogo_pronto: 'Il tuo Wrapped è pronto.',
+      badge_ottenuto: 'Hai un nuovo badge in Ricorda.',
+      riepilogo_pronto: 'Il tuo riepilogo dell’anno è pronto in Ricorda.',
     } as const,
+    /** Badge: il nome compare solo nell'app, mai nel testo push (F-22). */
+    badge: {
+      uno: (nome: string) => `Hai un nuovo badge in Ricorda: ${nome}.`,
+      molti: (n: number) => `Hai ${n} nuovi badge in Ricorda.`,
+    },
+    riepilogo: (anno: number) => `Il tuo riepilogo del ${anno} è pronto in Ricorda.`,
     /** Titoli degli esiti di moderazione (`dati.esito`); la motivazione segue sotto. */
     esiti: {
       segnalazione_decisa: 'Abbiamo esaminato la tua segnalazione',

@@ -1,0 +1,40 @@
+/* =========================================================
+   NOXA — layer "statistiche" (F-31). Usa il layer "ricorda" (F-30).
+   ========================================================= */
+.grafico{position:relative;margin:4px 0 6px;}
+.barre{display:grid;grid-template-columns:repeat(12,1fr);align-items:end;height:132px;border-bottom:1px solid var(--colore-linea-forte);}
+.barra{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;}
+.barra b{font:500 12px/14px 'IBM Plex Mono',monospace;color:var(--colore-testo-primario);}
+.barra i{display:block;width:12px;background:var(--colore-accento);border-radius:1px 1px 0 0;}
+.barra.zero b{color:var(--colore-testo-terziario);font-weight:400;}
+.barra.zero i{height:0;}
+.mesi{display:grid;grid-template-columns:repeat(12,1fr);margin-top:6px;}
+.mesi span{text-align:center;font:400 11px/14px 'IBM Plex Mono',monospace;color:var(--colore-testo-secondario);text-transform:uppercase;}
+.barre.anni{grid-template-columns:repeat(3,1fr);}
+.mesi.anni{grid-template-columns:repeat(3,1fr);}
+.barre.anni .barra i{width:28px;}
+.alt-testo{display:flex;align-items:center;gap:6px;min-height:44px;font-size:14px;color:var(--colore-accento-testo);text-decoration:underline;text-underline-offset:3px;}
+.alt-testo .ico{width:16px;height:16px;}
+.elenco-mesi{display:grid;grid-template-columns:1fr 1fr;column-gap:20px;margin:0;padding:0;list-style:none;font-size:14px;}
+.elenco-mesi li{display:flex;justify-content:space-between;min-height:30px;align-items:center;border-bottom:1px dashed var(--colore-linea);}
+.elenco-mesi li span{font-family:'IBM Plex Mono',monospace;color:var(--colore-testo-secondario);}
+.classifica{list-style:none;margin:0;padding:0;}
+.classifica li{display:grid;grid-template-columns:28px 1fr auto;align-items:center;min-height:40px;border-bottom:1px dashed var(--colore-linea);font-size:15px;}
+.classifica li:last-child{border-bottom:0;}
+.classifica .pos{font:400 12px 'IBM Plex Mono',monospace;color:var(--colore-testo-terziario);}
+.classifica .num{font:500 14px 'IBM Plex Mono',monospace;color:var(--colore-testo-secondario);}
+.niente{font-size:14px;color:var(--colore-testo-terziario);padding:6px 0 2px;}
+.richiudi{display:flex;width:100%;align-items:center;justify-content:space-between;min-height:48px;border:0;border-top:1px solid var(--colore-linea-forte);background:transparent;color:inherit;padding:0;font:inherit;}
+.richiudi h3{margin:0;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;}
+.richiudi .apri{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--colore-testo-secondario);}
+.richiudi .ico{width:18px;height:18px;}
+.spese{list-style:none;margin:0 0 6px;padding:0;}
+.spese li{display:flex;justify-content:space-between;align-items:center;min-height:40px;border-bottom:1px dashed var(--colore-linea);font-size:15px;}
+.spese li span{font-family:'IBM Plex Mono',monospace;color:var(--colore-testo-secondario);}
+.spese li.tot{border-bottom:1px solid var(--colore-linea-forte);font-size:14px;color:var(--colore-testo-secondario);}
+.spese-nota{font-size:13px;line-height:18px;color:var(--colore-testo-secondario);margin:8px 0 0;}
+.aggiornate{font-size:13px;color:var(--colore-testo-secondario);margin:0 0 10px;}
+.componenti{display:grid;grid-template-columns:repeat(4,300px);gap:40px;padding:32px;border-radius:16px;border:1px solid var(--colore-linea);}
+.componenti h5{margin:0 0 14px;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--colore-testo-secondario);}
+.componenti .tema{grid-column:1/-1;font:400 13px 'IBM Plex Mono',monospace;color:var(--colore-testo-secondario);margin-bottom:-16px;}
+.desk-griglia{display:grid;grid-template-columns:1fr 1fr;column-gap:32px;}

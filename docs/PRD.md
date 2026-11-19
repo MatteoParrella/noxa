@@ -84,9 +84,9 @@ La fase è quella di [ROADMAP.md](ROADMAP.md).
 | ID | Funzionalità | Priorità | Fase | Criteri di accettazione |
 |---|---|---|---|---|
 | F-30 | Tracker personale delle serate | P0 | 1 | Voce collegata a un evento o a un locale, oppure libera; data, spese per categoria (R-40), amici confermati presenti, DJ, voto da 1 a 5, note; sempre privato; creazione rapida "ero a questo evento" dal dettaglio di un evento passato. |
-| F-31 | Statistiche personali | P1 | 2 | Serate per mese, spesa totale e per categoria, locali e generi più frequenti, DJ più visti. |
-| F-32 | Badge | P1 | 2 | Catalogo conforme a R-41; notifica all'ottenimento; bacheca dei badge nel profilo personale (visibile solo al titolare). |
-| F-33 | Riepilogo annuale "Wrapped" | P1 | 2 | Disponibile dal 1° dicembre; da 5 a 8 schede animate (con `prefers-reduced-motion` rispettato); esportazione come immagine generata sul dispositivo; nessun dato di altri utenti (R-42). |
+| F-31 | Statistiche personali | P1 | 2 | Serate per mese (quest'anno, anno scorso) o per anno (sempre), spesa totale e per categoria in una sezione chiusa di default, i primi 5 locali, generi e DJ per numero di serate; ogni grafico con un elenco testuale; nessun obiettivo, freccia o confronto (R-43). |
+| F-32 | Badge | P1 | 2 | Catalogo conforme a R-41 (10 badge, criteri senza spesa, alcol, orari né finestre di tempo); assegnazione una volta al giorno con una sola notifica per persona; bacheca in Ricorda con ottenuti e da ottenere (criterio scritto, nessuna percentuale), riga nel proprio profilo (visibile solo al titolare), nessun pulsante per condividere. |
+| F-33 | Riepilogo annuale "Wrapped" | P1 | 2 | Disponibile dal 1° dicembre con almeno 3 serate nell'anno; fino a 8 schede (le schede senza dati si saltano) con avanzamento ogni 6 secondi fermabile e assente con `prefers-reduced-motion`; esportazione come immagine 1080 × 1920 generata sul dispositivo, senza link; aggiornabile una volta al giorno fino al 31 gennaio; nessun dato di altri utenti (R-42), nessuna spesa (R-43). |
 
 ### 4.5 Piattaforma
 
@@ -155,9 +155,9 @@ fase della roadmap. La matrice va aggiornata insieme alla funzionalità (skill `
 | F-22 | Edge Function `invia-push` · Web Push (FCM con Android, ADR-0027; APNs con D-13) · `pg_net` · RPC `registra_dispositivo_push` | `dispositivi_push`, `notifiche`, `profili_privati` | R-43, R-66 | 2 |
 | F-23 | App | `servizi_trasporto` | R-04, R-32, R-43, R-61, R-62 | 2 |
 | F-30 | App (offline) | `serate_tracker`, `tracker_spese`, `tracker_dj`, `tracker_amici` | R-40 | 1 |
-| F-31 | App · viste SQL | come F-30 | R-40 | 2 |
+| F-31 | App · RPC `mie_statistiche` | come F-30 | R-40, R-43 | 2 |
 | F-32 | `pg_cron` · funzione SQL `private.assegna_badge()` | `badge`, `badge_utente` | R-41 | 2 |
-| F-33 | `pg_cron` · funzione SQL `private.genera_riepiloghi()` · App | `riepiloghi_annuali` | R-42 | 2 |
+| F-33 | `pg_cron` · funzione SQL `private.genera_riepiloghi()` · RPC `rigenera_mio_riepilogo` · App (canvas) | `riepiloghi_annuali` | R-42, R-43 | 2 |
 | F-40 | App (area di moderazione) · RPC di moderazione | `segnalazioni`, `azioni_moderazione`, `contenuti_occultati`, `reclami`, `caricamenti_flyer`, `eventi_grezzi`, `locali`, `fonti`, `esecuzioni_fonte`, `candidati_locali` | R-06, R-51, R-53, R-55, R-69 | 1 |
 | F-41 | RPC `esporta_miei_dati`, `elimina_mio_account`; Edge Function `elimina-account` | tutte le tabelle personali | R-64 | 1 |
 | F-42 | App | `profili_privati`, `blocchi`, `dispositivi_push` | R-30, R-67 | 1 |

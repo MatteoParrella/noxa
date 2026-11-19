@@ -69,6 +69,8 @@ export const CODICI_DATABASE = {
   NX059: 'ritorno_non_attivo',
   NX060: 'posizione_troppo_frequente',
   NX061: 'troppi_ritorni_oggi',
+  NX062: 'riepilogo_non_disponibile',
+  NX063: 'riepilogo_gia_aggiornato',
 } as const;
 
 export type CodiceDatabase = (typeof CODICI_DATABASE)[keyof typeof CODICI_DATABASE];

@@ -199,7 +199,12 @@ export type Endpoint =
   | 'invia_posizione_ritorno'
   | 'ritorni_aggiorna'
   | 'ritorni_destinatari_elimina'
-  | 'servizi_trasporto';
+  | 'servizi_trasporto'
+  | 'mie_statistiche'
+  | 'badge_leggi'
+  | 'badge_utente_leggi'
+  | 'riepiloghi_leggi'
+  | 'rigenera_mio_riepilogo';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
@@ -561,6 +566,82 @@ export const SERVIZI_TRASPORTO_DI_PROVA = [
   },
 ];
 
+/** Statistiche di un periodo senza serate, come le restituisce `mie_statistiche`. */
+export const STATISTICHE_VUOTE = {
+  anno: 2026,
+  serate: 0,
+  per_mese: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  per_anno: null,
+  locali: [],
+  generi: [],
+  dj: [],
+  spese: { totale_centesimi: 0, per_categoria: [] },
+};
+
+export const STATISTICHE_DI_PROVA = {
+  anno: 2026,
+  serate: 16,
+  per_mese: [1, 2, 0, 3, 2, 1, 0, 0, 4, 2, 1, 0],
+  per_anno: null,
+  locali: [
+    { nome: 'Binario 7', serate: 6 },
+    { nome: 'Sala Ventuno', serate: 4 },
+  ],
+  generi: [{ codice: 'techno', nome: 'Techno', serate: 7 }],
+  dj: [{ nome: 'DJ Lumen', serate: 4 }],
+  spese: {
+    totale_centesimi: 21460,
+    per_categoria: [
+      { categoria: 'ingresso', importo_centesimi: 12000 },
+      { categoria: 'trasporto', importo_centesimi: 9460 },
+    ],
+  },
+};
+
+/** Catalogo come lo restituisce PostgREST (design/F-32-badge). */
+export const CATALOGO_BADGE_DI_PROVA = [
+  {
+    codice: 'prima_pagina',
+    nome: 'Prima pagina',
+    descrizione: 'Hai annotato la prima serata nel tuo diario.',
+    criterio: { tipo: 'serate', soglia: 1 },
+    ordine: 1,
+  },
+  {
+    codice: 'esploratore_2',
+    nome: 'Esploratore II',
+    descrizione: 'Hai annotato serate in 10 locali diversi.',
+    criterio: { tipo: 'locali_diversi', soglia: 10 },
+    ordine: 3,
+  },
+  {
+    codice: 'cronista',
+    nome: 'Cronista',
+    descrizione: 'Hai scritto le note di 10 serate.',
+    criterio: { tipo: 'serate_con_note', soglia: 10 },
+    ordine: 7,
+  },
+];
+
+export const RIEPILOGO_DI_PROVA = {
+  anno: 2026,
+  generato_il: '2026-12-01T03:00:00Z',
+  dati: {
+    anno: 2026,
+    serate: 16,
+    per_mese: [1, 2, 0, 3, 2, 1, 0, 0, 4, 2, 1, 0],
+    mese_top: { mese: 9, serate: 4 },
+    locali_diversi: 7,
+    locali_top: [{ nome: 'Binario 7', serate: 6 }],
+    genere_top: { codice: 'techno', nome: 'Techno', serate: 7 },
+    dj_top: [{ nome: 'DJ Lumen', serate: 4 }],
+    serate_con_amici: 11,
+    amici_diversi: 7,
+    badge: ['prima_pagina'],
+    voto_top: { data_serata: '2026-09-26', locale: 'Sala Ventuno', voto: 5 },
+  },
+};
+
 export const PIXEL_PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
   'base64',
@@ -882,6 +963,14 @@ export class SupabaseSimulato {
   mioRitorno: unknown = null;
   /** Ritorni ricevuti dagli amici (`ritorni_vivi.ricevuti`). */
   ritorniAmici: unknown[] = [];
+  /** Risposta di `mie_statistiche` (un periodo vuoto per default). */
+  statistiche: unknown = STATISTICHE_VUOTE;
+  /** Catalogo dei badge visibile (la RLS reale toglie quelli per adulti ai minorenni). */
+  catalogoBadge: unknown[] = CATALOGO_BADGE_DI_PROVA;
+  /** Badge ottenuti dall'utente. */
+  mieiBadge: unknown[] = [];
+  /** Riepiloghi annuali dell'utente, dal più recente. */
+  riepiloghi: unknown[] = [];
 
   constructor(account: AccountSimulato | null) {
     this.account = account;
@@ -1089,6 +1178,19 @@ export class SupabaseSimulato {
         return { stato: 201 };
       case 'mio_diario':
         return { stato: 200, corpo: this.diario };
+      case 'mie_statistiche':
+        return { stato: 200, corpo: this.statistiche };
+      case 'badge_leggi':
+        return { stato: 200, corpo: this.catalogoBadge };
+      case 'badge_utente_leggi':
+        return { stato: 200, corpo: this.mieiBadge };
+      case 'riepiloghi_leggi':
+        return { stato: 200, corpo: this.riepiloghi };
+      case 'rigenera_mio_riepilogo':
+        return {
+          stato: 200,
+          corpo: (this.riepiloghi[0] as { dati?: unknown } | undefined)?.dati ?? null,
+        };
       case 'salva_serata_diario':
         return { stato: 200, corpo: ID_VOCE };
       case 'cerca_per_diario':
@@ -1277,6 +1379,9 @@ export class SupabaseSimulato {
       '/rest/v1/codici_invito': { GET: 'codici_invito_leggi' },
       '/rest/v1/generi_musicali': { GET: 'generi_musicali' },
       '/rest/v1/servizi_trasporto': { GET: 'servizi_trasporto' },
+      '/rest/v1/badge': { GET: 'badge_leggi' },
+      '/rest/v1/badge_utente': { GET: 'badge_utente_leggi' },
+      '/rest/v1/riepiloghi_annuali': { GET: 'riepiloghi_leggi' },
       '/rest/v1/profili_privati': { GET: 'profili_privati_leggi' },
       '/rest/v1/membri_gruppo': { PATCH: 'membri_aggiorna', DELETE: 'membri_elimina' },
       '/rest/v1/gruppi': { PATCH: 'gruppi_aggiorna', DELETE: 'gruppi_elimina' },
@@ -1337,6 +1442,8 @@ export class SupabaseSimulato {
       'avvia_ritorno',
       'proroga_ritorno',
       'invia_posizione_ritorno',
+      'mie_statistiche',
+      'rigenera_mio_riepilogo',
     ];
     if (rpc && rpcSimulate.includes(rpc)) return rpc as Endpoint;
     if (percorso.startsWith('/storage/v1/object/sign/') && metodo === 'POST')

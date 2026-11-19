@@ -506,9 +506,9 @@ Componenti e flussi coinvolti da ogni funzionalità del [PRD](PRD.md). Le tabell
 | F-23 Non hai un passaggio? | App: elenco letto dalla tabella `servizi_trasporto` (RLS con l'età), link `tel:` e link esterni; nessun servizio di terze parti nell'app | ADR-0034 |
 | F-22 Notifiche push | Nella Fase 1 campanella e `/notifiche/` con Realtime; dall'iterazione 9 Web Push con l'Edge Function `invia-push` (FCM con l'app Android, ADR-0027; APNs con iOS, D-13) | §5.4, ADR-0026 |
 | F-30 Tracker | App (offline con coda di scritture) | §5.5 |
-| F-31 Statistiche | Vista `statistiche_personali` | §3.2 |
+| F-31 Statistiche | RPC `mie_statistiche` (security invoker, RLS del diario), cache sul dispositivo per l'offline | §3.2 |
 | F-32 Badge | Funzione SQL `private.assegna_badge()` con `pg_cron` | §3.2 |
-| F-33 Wrapped | Funzione SQL `private.genera_riepiloghi()` con `pg_cron`, App (immagine generata sul dispositivo) | §3.2 |
+| F-33 Wrapped | Funzione SQL `private.genera_riepiloghi()` con `pg_cron`, RPC `rigenera_mio_riepilogo`, App: schede disegnate su canvas (lo stesso disegno per lo schermo e per l'immagine 1080 × 1920), condivise con il foglio di sistema o scaricate; nessun caricamento sul server | §3.2 |
 | F-40 Moderazione | App (area `/moderazione/` con navigazione propria, attivazione e codice TOTP, accesso di 8 ore; `src/features/moderazione/`), RPC di moderazione con registro delle azioni; code di flyer, segnalazioni e reclami con avviso delle urgenti | §4.5, §4.6, §5.1, SAFETY_PRIVACY.md §11, DATA_MODEL.md §5.10 |
 | F-41 Diritti privacy | RPC `esporta_miei_dati`, `elimina_mio_account`; Edge Function `elimina-account` | §3.2 |
 | F-42 Impostazioni di privacy | App | §3.1 |

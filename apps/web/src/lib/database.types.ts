@@ -121,6 +121,68 @@ export type Database = {
           },
         ];
       };
+      badge: {
+        Row: {
+          codice: string;
+          criterio: NonNullable<Json>;
+          descrizione: string;
+          nome: string;
+          ordine: number;
+          solo_maggiorenni: boolean;
+        };
+        ComputedFields: never;
+        Insert: {
+          codice: string;
+          criterio: NonNullable<Json>;
+          descrizione: string;
+          nome: string;
+          ordine?: number;
+          solo_maggiorenni?: boolean;
+        };
+        Update: {
+          codice?: string;
+          criterio?: NonNullable<Json>;
+          descrizione?: string;
+          nome?: string;
+          ordine?: number;
+          solo_maggiorenni?: boolean;
+        };
+        Relationships: [];
+      };
+      badge_utente: {
+        Row: {
+          badge_codice: string;
+          ottenuto_il: string;
+          utente_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          badge_codice: string;
+          ottenuto_il?: string;
+          utente_id: string;
+        };
+        Update: {
+          badge_codice?: string;
+          ottenuto_il?: string;
+          utente_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'badge_utente_badge_codice_fkey';
+            columns: ['badge_codice'];
+            isOneToOne: false;
+            referencedRelation: 'badge';
+            referencedColumns: ['codice'];
+          },
+          {
+            foreignKeyName: 'badge_utente_utente_id_fkey';
+            columns: ['utente_id'];
+            isOneToOne: false;
+            referencedRelation: 'profili';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       blocchi: {
         Row: {
           bloccante_id: string;
@@ -1539,6 +1601,36 @@ export type Database = {
           },
         ];
       };
+      riepiloghi_annuali: {
+        Row: {
+          anno: number;
+          dati: NonNullable<Json>;
+          generato_il: string;
+          utente_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          anno: number;
+          dati: NonNullable<Json>;
+          generato_il?: string;
+          utente_id: string;
+        };
+        Update: {
+          anno?: number;
+          dati?: NonNullable<Json>;
+          generato_il?: string;
+          utente_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'riepiloghi_annuali_utente_id_fkey';
+            columns: ['utente_id'];
+            isOneToOne: false;
+            referencedRelation: 'profili';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       ritorni_destinatari: {
         Row: {
           amico_id: string;
@@ -2441,6 +2533,7 @@ export type Database = {
           tipo_oggetto: Database['public']['Enums']['tipo_oggetto_segnalabile'];
         }[];
       };
+      mie_statistiche: { Args: { anno?: number }; Returns: Json };
       miei_bloccati: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -2551,6 +2644,7 @@ export type Database = {
           motivazione: string;
         }[];
       };
+      rigenera_mio_riepilogo: { Args: Record<PropertyKey, never>; Returns: Json };
       rimuovi_foto_locale: { Args: { locale: string; motivazione: string }; Returns: string };
       ritorni_vivi: { Args: Record<PropertyKey, never>; Returns: Json };
       salva_foto_locale: {

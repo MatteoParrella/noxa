@@ -35,8 +35,8 @@ const PER_TIPO: Record<string, TestoPush> = {
     testo: 'Apri Noxa per l’ultima posizione e cosa puoi fare.',
   },
   ritorno_arrivato: { titolo: 'Un amico è rientrato sano e salvo', testo: 'Il ritorno sicuro è concluso.' },
-  badge_ottenuto: { titolo: 'Nuovo badge', testo: 'Apri Noxa per vederlo.' },
-  riepilogo_pronto: { titolo: 'Il tuo riepilogo è pronto', testo: 'Apri Noxa per vederlo.' },
+  badge_ottenuto: { titolo: 'Hai un nuovo badge in Ricorda', testo: 'Apri Noxa per vederlo.' },
+  riepilogo_pronto: { titolo: 'Il tuo riepilogo dell’anno è pronto', testo: 'Apri Noxa per vederlo.' },
 };
 
 const PER_ESITO: Record<string, TestoPush> = {

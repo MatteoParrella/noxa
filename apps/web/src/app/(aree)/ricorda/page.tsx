@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { IntestazioneArea } from '@/components/guscio/IntestazioneArea';
 import { Rivela } from '@/components/ui/Movimento';
 import { Campanella } from '@/features/notifiche/Campanella';
+import { CommutatoreRicorda } from '@/features/ricorda/CommutatoreRicorda';
 import { Diario, EtichettaPrivato } from '@/features/ricorda/Diario';
 import { messaggi } from '@/lib/messaggi/it';
 
@@ -18,6 +19,7 @@ export default function PaginaRicorda() {
         azioni={<Campanella />}
       />
       <Rivela className="pagina pagina-larga pb-8" indice={2}>
+        <CommutatoreRicorda attiva="diario" />
         <Diario />
       </Rivela>
     </>

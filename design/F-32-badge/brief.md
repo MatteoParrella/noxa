@@ -7,6 +7,8 @@ regole R-41, R-43, R-66 di SAFETY_PRIVACY.md; DATA_MODEL.md (`badge`, `badge_ute
 roadmap): i nomi possono cambiare, i criteri devono restare conformi a R-41. Il prompt da
 incollare in Claude Design è tutto quello che segue la riga `---`.
 
+
+**Stato (2026-11-18).** Tavole pronte in questa cartella: `f32-01`…`f32-07`, `componenti-badge.png`, `badge.html` e il layer `noxa-badge.css`. Le ha disegnate Claude Code su richiesta del product owner con i token e i caratteri di `design/sistema/noxa.css`, non nel progetto Claude Design, che va riallineato. Scostamenti dal prompt: il catalogo proposto ha 10 badge, quindi il contatore è «6 di 10»; la riga «I tuoi badge» è disegnata dentro il profilo reale dell'app (Amici, Le mie segnalazioni, Privacy e dati); nell'elenco delle notifiche il nome del badge compare, sulla schermata di blocco no.
 ---
 
 Nello **stesso progetto "Noxa — Design system"** progetta la **bacheca dei badge** dell'area

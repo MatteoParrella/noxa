@@ -9,6 +9,7 @@ import { Caricamento, ElencoVuoto, ErroreConAzione } from '@/components/ui/Stati
 import { messaggi } from '@/lib/messaggi/it';
 import { perMese, type VoceMostrata } from './coda';
 import { useDiario } from './dati';
+import { LinkRiepiloghi, TesseraAnno } from './Riepiloghi';
 import { conChi, luogoVoce, partiData, titoloMese, titoloVoce } from './formato';
 
 const testi = messaggi.ricorda;
@@ -29,7 +30,7 @@ export function Diario() {
 
   return (
     <div className="flex flex-col">
-      {/* Spazio delle statistiche e dei badge della Fase 2: vuoto, senza contenuti finti. */}
+      {diario.stato === 'pronto' && <TesseraAnno voci={diario.voci} />}
       <div className="ri-azioni">
         <Link className="btn btn-principale" href="/ricorda/modifica/">
           <Icona icona={Plus} dimensione="s" />
@@ -37,6 +38,7 @@ export function Diario() {
         </Link>
       </div>
       <Contenuto diario={diario} />
+      <LinkRiepiloghi />
     </div>
   );
 }
