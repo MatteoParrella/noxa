@@ -33,15 +33,15 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
-  padding: 20px 0 6px;
-  border-bottom: 1px solid var(--colore-linea-forte);
+  padding: var(--spazio-6) var(--spazio-4) 6px;
 }
 .ri-mese h2 {
   margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
+  font-size: var(--tipo-nota);
+  font-weight: 400;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
+  color: var(--colore-testo-secondario);
 }
 .ri-mese span {
   font-family: var(--tipo-famiglia-mono);
@@ -59,12 +59,8 @@
   width: 100%;
   min-height: 72px;
   padding: 12px 0;
-  border-bottom: 1px dashed var(--colore-linea-forte);
   color: inherit;
   text-decoration: none;
-}
-.ri-riga:hover {
-  background: var(--colore-superficie-1);
 }
 .ri-data {
   display: flex;
@@ -74,7 +70,7 @@
   border-right: 1px solid var(--colore-linea);
   font-family: var(--tipo-famiglia-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 0.6875rem;
+  font-size: var(--tipo-didascalia-2);
   line-height: 1.2;
   color: var(--colore-testo-secondario);
   text-transform: uppercase;
@@ -155,10 +151,10 @@
 .ri-sez-testa h2,
 .ri-sez-testa legend {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  font-stretch: 75%;
-  line-height: 1.1;
+  font-size: var(--tipo-titolo-3);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
 }
 .ri-sez-testa span {
   font-size: 0.75rem;
@@ -191,7 +187,7 @@
   background: var(--colore-superficie-3);
   font-family: var(--tipo-famiglia-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 0.6875rem;
+  font-size: var(--tipo-didascalia-2);
   line-height: 1.15;
   overflow: hidden;
 }
@@ -492,38 +488,42 @@
    layer noxa-statistiche.css, noxa-badge.css, noxa-wrapped.css)
    ========================================================= */
 
-/* commutatore Diario · Statistiche · Badge */
+/* commutatore Diario · Statistiche · Badge: segmented control di iOS */
 .ri-comm {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0 0 var(--spazio-4);
-  border-bottom: 1px solid var(--colore-linea-forte);
+  padding: 2px;
+  border-radius: var(--raggio-tondo);
+  background: var(--colore-riempimento-terziario);
 }
 .ri-comm-voce {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--area-tocco);
-  font-size: 0.9375rem;
-  color: var(--colore-testo-secondario);
+  min-height: 36px;
+  border-radius: var(--raggio-tondo);
+  font-size: var(--tipo-corpo-piccolo);
+  font-weight: var(--tipo-peso-medio);
+  letter-spacing: -0.015em;
+  color: var(--colore-testo-primario);
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--movimento-base) var(--curva-molla);
 }
-.ri-comm-voce:hover {
-  color: var(--colore-testo-primario);
-}
-.ri-comm-voce.is-on {
-  color: var(--colore-testo-primario);
-  font-weight: 700;
-}
-.ri-comm-voce.is-on::after {
+/* L'area di tocco arriva a 44 pt anche se il disegno è alto 36. */
+.ri-comm-voce::before {
   content: '';
   position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: -1px;
-  height: 3px;
-  background: var(--colore-accento);
+  inset: -4px 0;
+}
+.ri-comm-voce.is-on {
+  background: var(--colore-segmento-scelto);
+  font-weight: var(--tipo-peso-semi);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.12),
+    0 3px 1px rgba(0, 0, 0, 0.04);
 }
 
 /* statistiche */
@@ -554,12 +554,13 @@
   margin: 0;
   font-size: var(--tipo-etichetta);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 .ri-st-testa span,
 .ri-st-aggiornate {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }
@@ -582,6 +583,7 @@
 }
 .ri-barra b {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   font-weight: 500;
   line-height: 14px;
@@ -603,6 +605,7 @@
 .ri-barre-etichette span {
   text-align: center;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-etichetta);
   color: var(--colore-testo-secondario);
 }
@@ -644,6 +647,7 @@
 .ri-elenco-mesi span,
 .ri-st-spese span {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--colore-testo-secondario);
 }
 .ri-classifica {
@@ -664,11 +668,13 @@
 }
 .ri-pos {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-terziario);
 }
 .ri-num {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-corpo-piccolo);
   font-weight: 500;
   color: var(--colore-testo-secondario);
@@ -698,7 +704,7 @@
 .ri-richiudi-titolo {
   font-size: var(--tipo-etichetta);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 .ri-richiudi-azione {
@@ -738,11 +744,12 @@
   border-bottom: 1px solid var(--colore-linea-forte);
   font-size: var(--tipo-etichetta);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 .ri-badge-testa span {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   font-weight: 400;
   letter-spacing: 0;
@@ -788,6 +795,7 @@
 }
 .ri-tessera small {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }
@@ -849,6 +857,7 @@
   border-radius: var(--raggio-1);
   background: var(--colore-sfondo);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-etichetta);
   font-style: normal;
   font-weight: 500;
@@ -925,6 +934,7 @@
   top: -18px;
   right: -6px;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 72px;
   line-height: 1;
   letter-spacing: -0.04em;
@@ -934,10 +944,11 @@
   grid-column: 1 / -1;
   font-size: var(--tipo-etichetta);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 .ri-tessera-anno b {
+  font-family: var(--tipo-famiglia-marchio);
   font-size: 1.625rem;
   font-weight: 700;
   font-stretch: 75%;
@@ -1002,6 +1013,7 @@
 }
 .ri-riga-anno-numero {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 1.75rem;
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -1110,6 +1122,7 @@
   align-items: center;
   gap: 6px;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
 }

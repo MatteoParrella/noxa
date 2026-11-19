@@ -193,10 +193,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 12px calc(-1 * var(--spazio-5)) 0;
-  padding: 12px var(--spazio-5) 16px;
-  background: var(--colore-sfondo);
-  border-top: 1px solid var(--colore-linea);
+  margin: 12px 0 0;
+  padding: 6px 6px 6px var(--spazio-5);
+  border-radius: var(--raggio-tondo);
 }
 .gr-barra-fondo .btn {
   flex: none;

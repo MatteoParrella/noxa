@@ -1524,9 +1524,9 @@ button.cella {
   min-height: 100dvh;
   overflow-x: clip;
 }
-.guscio {
+:root {
   /* Spazio occupato in basso dalla barra delle schede, dal bordo dello schermo: lo usano le
-     barre delle azioni che le stanno sopra e il fondo del contenuto. */
+     barre delle azioni e le notifiche brevi che le stanno sopra e il fondo del contenuto. */
   --nav-ingombro: calc(var(--barra-schede-altezza) + var(--barra-schede-fondo) + var(--spazio-2));
 }
 .guscio-contenuto {
@@ -1634,7 +1634,7 @@ button.cella {
 /* Desktop (≥ 1024 px): Noxa si presenta come un sito. Barra in alto con marchio e aree,
    contenuti più larghi e a griglia, piè di pagina con i documenti (ADR-0033). */
 @media (min-width: 64rem) {
-  .guscio {
+  :root {
     --nav-ingombro: 0px;
   }
   .guscio-contenuto {
@@ -1828,9 +1828,8 @@ button.cella {
     position: sticky;
     top: calc(var(--spazio-16) + var(--spazio-6));
     padding: var(--spazio-8) var(--spazio-6);
-    border: 1px solid var(--vetro-bordo);
     border-radius: var(--raggio-3);
-    background: var(--vetro-fondo);
+    background: var(--colore-cella);
   }
   .ri-elenco {
     display: grid;
@@ -1879,7 +1878,14 @@ button.cella {
   separatori partono dal testo. Vale per le righe già esistenti (persone, gruppi, serate,
   membri, presenti), senza cambiare il markup.
 */
-:is(ul, ol):has(> li.riga-persona, > li.mb-riga, > li.pr-riga, > li > .gr-voce, > li > .sr-riga) {
+:is(ul, ol):has(
+  > li.riga-persona,
+  > li.mb-riga,
+  > li.pr-riga,
+  > li > .gr-voce,
+  > li > .sr-riga,
+  > li > .ri-riga
+) {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1888,7 +1894,7 @@ button.cella {
   overflow: hidden;
 }
 li:is(.riga-persona, .mb-riga, .pr-riga),
-li > :is(.gr-voce, .sr-riga) {
+li > :is(.gr-voce, .sr-riga, .ri-riga) {
   box-sizing: border-box;
   padding-left: var(--spazio-4);
   padding-right: var(--spazio-4);
@@ -1896,7 +1902,7 @@ li > :is(.gr-voce, .sr-riga) {
   -webkit-tap-highlight-color: transparent;
 }
 li + li:is(.riga-persona, .mb-riga, .pr-riga),
-li + li > :is(.gr-voce, .sr-riga) {
+li + li > :is(.gr-voce, .sr-riga, .ri-riga) {
   background-image: linear-gradient(var(--colore-separatore), var(--colore-separatore));
   background-repeat: no-repeat;
   background-position: right top;
@@ -1905,11 +1911,12 @@ li + li > :is(.gr-voce, .sr-riga) {
 li + li > .gr-voce {
   --rientro-separatore: var(--spazio-4);
 }
-li + li > .sr-riga {
+li + li > :is(.sr-riga, .ri-riga) {
   --rientro-separatore: 84px;
 }
 a.gr-voce:active,
-a.sr-riga:active {
+a.sr-riga:active,
+a.ri-riga:active {
   background-color: var(--colore-cella-premuta);
 }
 li > .gr-voce:hover,

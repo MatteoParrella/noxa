@@ -32,13 +32,13 @@ export function leggiColori(elemento: Element): Colori {
   const stile = getComputedStyle(elemento);
   const v = (nome: string, riserva: string) => stile.getPropertyValue(nome).trim() || riserva;
   return {
-    sfondo: v('--colore-sfondo', '#0e1116'),
-    superficie: v('--colore-superficie-2', '#1c212a'),
-    accento: v('--colore-accento', '#f28c28'),
-    accentoTenue: v('--colore-accento-tenue', '#3a2614'),
-    accentoTesto: v('--colore-accento-testo', '#f5a04d'),
-    testo: v('--colore-testo-primario', '#edeae4'),
-    suAccento: v('--colore-testo-su-accento', '#0e1116'),
+    sfondo: v('--colore-sfondo', '#000000'),
+    superficie: v('--colore-superficie-2', '#2c2c2e'),
+    accento: v('--colore-accento', '#3ee0cf'),
+    accentoTenue: v('--colore-accento-tenue', '#0d3632'),
+    accentoTesto: v('--colore-accento-testo', '#3ee0cf'),
+    testo: v('--colore-testo-primario', '#ffffff'),
+    suAccento: v('--colore-testo-su-accento', '#000000'),
   };
 }
 
@@ -67,7 +67,8 @@ type Stile = {
 };
 
 const TESTO = "'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif";
-const MONO = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
+// Numeri e date: Inter, incluso nell'app, così l'immagine è uguale su ogni telefono (ADR-0035).
+const MONO = "'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, Roboto, sans-serif";
 
 function imposta(ctx: CanvasRenderingContext2D, stile: Stile) {
   ctx.font = `${stile.peso ?? 400} ${stile.stretta ? 'condensed ' : ''}${stile.dim}px ${stile.mono ? MONO : TESTO}`;
@@ -411,7 +412,7 @@ export function disegnaScheda(ctx: CanvasRenderingContext2D, contesto: Contesto)
   ctx.restore();
 }
 
-/** Carica Archivo e Plex Mono prima di disegnare, così il canvas non usa caratteri di riserva. */
+/** Carica Archivo e Inter prima di disegnare, così il canvas non usa caratteri di riserva. */
 export async function caricaCaratteri(): Promise<void> {
   if (!('fonts' in document)) return;
   await Promise.all([

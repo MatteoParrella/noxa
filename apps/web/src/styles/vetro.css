@@ -65,6 +65,7 @@
 .toast,
 .btn-indietro,
 .guscio .barra-nav,
+.guscio .gr-barra-fondo,
 .menu-azioni {
   box-shadow:
     inset 0 0.5px 0 var(--materiale-riflesso),

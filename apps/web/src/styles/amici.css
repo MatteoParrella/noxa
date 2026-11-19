@@ -435,11 +435,11 @@
   position: fixed;
   left: var(--spazio-3);
   right: var(--spazio-3);
-  bottom: calc(96px + env(safe-area-inset-bottom));
-  z-index: 7;
+  bottom: calc(var(--nav-ingombro) + var(--spazio-2));
+  z-index: 11;
   max-width: 560px;
   margin: 0 auto;
-  animation: toast-entra var(--movimento-base) var(--curva-entrata) both;
+  animation: toast-entra var(--movimento-molla) var(--curva-molla-viva) both;
 }
 @keyframes toast-entra {
   from {
