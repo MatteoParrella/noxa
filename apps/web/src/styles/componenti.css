@@ -1937,3 +1937,74 @@ li > .sr-riga:hover {
 .etichetta-riga::after {
   display: none;
 }
+
+/*
+  Schede e riquadri del contenuto: celle piene con gli angoli ampi, senza bordo (ADR-0035). Il
+  bordo resta solo dove porta un significato (stato tratteggiato, errore).
+*/
+.guscio :is(.ck-spento, .ck-timbro, .rt-invito, .rt-biglietto, .ps-scheda, .evidenza) {
+  border: 0;
+  background: var(--colore-cella);
+}
+/* Un interruttore da solo in una sezione (Aspetto) sta in una cella. */
+.profilo-aspetto > .scelta {
+  padding: 11px var(--spazio-4);
+  border-radius: var(--raggio-3);
+  background: var(--colore-cella);
+}
+.profilo-aspetto > .etichetta-riga {
+  margin-bottom: calc(-1 * var(--spazio-2));
+}
+
+/* Impostazioni di Profilo e Privacy come liste raggruppate, senza cambiare il markup. */
+.profilo-voci nav {
+  border-radius: var(--raggio-3);
+  background: var(--colore-cella);
+  overflow: hidden;
+}
+.profilo-voci .voce-profilo {
+  min-height: var(--area-tocco);
+  padding: 11px var(--spazio-4);
+  border-bottom: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.profilo-voci .voce-profilo:hover {
+  background: transparent;
+}
+.profilo-voci .voce-profilo:active {
+  background: var(--colore-cella-premuta);
+}
+.profilo-voci .voce-profilo + .voce-profilo {
+  background-image: linear-gradient(var(--colore-separatore), var(--colore-separatore));
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: calc(100% - 54px) 0.5px;
+}
+.pv-sezione > :is(.pv-impostazione, .pv-riga) {
+  padding: 11px var(--spazio-4);
+  border-bottom: 0;
+  background-color: var(--colore-cella);
+}
+.pv-sezione > :is(.pv-impostazione, .pv-riga) + :is(.pv-impostazione, .pv-riga) {
+  background-image: linear-gradient(var(--colore-separatore), var(--colore-separatore));
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: calc(100% - var(--spazio-4)) 0.5px;
+}
+.pv-sezione > :is(.pv-impostazione, .pv-riga):not(:is(.pv-impostazione, .pv-riga) + *) {
+  border-top-left-radius: var(--raggio-3);
+  border-top-right-radius: var(--raggio-3);
+}
+.pv-sezione > :is(.pv-impostazione, .pv-riga):not(:has(+ :is(.pv-impostazione, .pv-riga))) {
+  border-bottom-left-radius: var(--raggio-3);
+  border-bottom-right-radius: var(--raggio-3);
+}
+.pv-sezione > .pv-riga:hover {
+  background-color: var(--colore-cella);
+}
+.pv-sezione > .pv-riga:active {
+  background-color: var(--colore-cella-premuta);
+}
+.pv-sezione > .etichetta {
+  padding: 0 var(--spazio-4);
+}

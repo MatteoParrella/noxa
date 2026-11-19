@@ -610,7 +610,7 @@
 }
 .rt-dato span {
   font-size: 0.6875rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--colore-testo-secondario);
 }

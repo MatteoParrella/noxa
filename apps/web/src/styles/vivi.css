@@ -43,10 +43,8 @@
   align-items: center;
   gap: var(--spazio-3);
 }
-.ck-sezione-testa::after {
-  content: '';
-  flex: 1;
-  border-top: 1px solid var(--colore-linea);
+.ck-sezione-testa {
+  padding: 0 var(--spazio-4);
 }
 .ck-sezione-testa h2 {
   margin: 0;
@@ -786,7 +784,7 @@
   font-family: var(--tipo-famiglia-mono);
   font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--colore-testo-secondario);
 }
@@ -946,7 +944,7 @@
   font-size: var(--tipo-etichetta);
   line-height: 1.5;
   font-weight: var(--tipo-peso-medio);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--colore-testo-secondario);
 }
