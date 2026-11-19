@@ -102,6 +102,7 @@
   .guscio .se-risposta,
   .guscio .rt-barra-guscio,
   .guscio .gr-barra-fondo,
+  .schermo-piede,
   .cg-mini .cg-ora {
     background: var(--colore-sfondo-secondario);
     -webkit-backdrop-filter: none;

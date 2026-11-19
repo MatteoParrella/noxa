@@ -8,6 +8,14 @@
 .titolo-rivelato {
   display: block;
 }
+/* Le parole sono separate da spazi non divisibili: ognuna resta un blocco in linea perché il
+   titolo vada a capo tra una parola e l'altra. */
+.titolo-rivelato .parola {
+  display: inline-block;
+  overflow: visible;
+  padding: 0;
+  margin: 0;
+}
 .titolo-rivelato .parola > span {
   display: inline;
 }
