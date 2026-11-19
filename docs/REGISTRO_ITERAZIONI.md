@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 10 su 15.
+Iterazioni completate: 11 su 15.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -31,7 +31,7 @@ Iterazioni completate: 10 su 15.
 | 8 | completata con attese esterne | 2026-10-27 | 2026-10-30 | 3 | `iterazione-08-tracker-privacy` | Backup cifrato e diritti privacy (ADR-0025); mancano lo staging (segreti di R2, Brevo, Sentry e backup), la beta con utenti reali e la verifica con VoiceOver e TalkBack |
 | 9 | completata con attese esterne | 2026-11-05 | 2026-11-05 | 2 | `iterazione-09-notifiche-checkin` | Web Push con testi di sistema (ADR-0026); mancano chiavi VAPID, segreti e deploy di `invia-push` in staging e la prova su telefoni reali |
 | 10 | completata con attese esterne | 2026-11-06 | 2026-11-06 | 2 | `iterazione-10-ritorno-sicuro` | Servizio in primo piano, posizioni lette con la RLS, aree solo sul telefono (ADR-0028); mancano il progetto Firebase, l'APK sul telefono e le 20 prove reali del criterio 1 della Fase 2 |
-| 11 | in corso | 2026-11-19 | — | 0 | `iterazione-11-statistiche-badge-wrapped` | — |
+| 11 | completata con attese esterne | 2026-11-19 | 2026-11-19 | 1 | `iterazione-11-statistiche-badge-wrapped` | Tavole preparate il 2026-11-18; mancano la migrazione in staging e produzione prima del 1° dicembre e la prova di «Salva immagine» su iPhone e nell'app Android |
 | 12 | da iniziare | — | — | 0 | — | — |
 | 13 | da iniziare | — | — | 0 | — | — |
 | 14 | da iniziare | — | — | 0 | — | — |
@@ -1242,3 +1242,65 @@ persone, nessun messaggio, nessun pulsante per chiamare o scrivere.
 - Passi: migrazione e pgTAP → tipi generati → API e motore delle schede → schermate → test
   unitari ed e2e → documenti → cicli di revisione e `safety-review`.
 - Criteri dell'iterazione: test pgTAP di R-41 e R-42; `safety-review` del catalogo dei badge.
+
+**Cicli di revisione**
+- Ciclo 1: trovati, con i test e la prova dal vivo su Supabase locale: nome `anno` ambiguo tra
+  parametro e colonna in `scrivi_riepilogo` e `rigenera_riepilogo` → `on conflict on constraint`
+  e variabile `anno_riepilogo`; i DJ uniti senza maiuscole prendevano la grafia minuscola →
+  ordine binario (`collate "C"`); il visualizzatore non si vedeva perché le animazioni delle
+  pagine usano `transform` e vincolano il `position: fixed` → portale nel body; con l'altezza
+  limitata il canvas lasciava due bande ai lati della scheda → larghezza calcolata
+  sull'altezza; al primo rendering le statistiche chiedevano il periodo «Sempre» prima di
+  conoscere l'anno → lettura solo dopo il montaggio; mancava `moderatore_senza_mfa` sui
+  riepiloghi nei pgTAP → aggiunto; due test e2e su WebKit superavano i 30 s con 8 processi in
+  parallelo (da soli passano) → `test.slow()`.
+
+**Safety review — F-31, F-32, F-33**: SUPERATA.
+
+| Dato | Chi lo vede | Regole |
+|---|---|---|
+| Statistiche del diario (`mie_statistiche`: serate, locali, generi, DJ, spese) | solo il titolare (RPC invoker, RLS del diario) | R-40, R-43, R-69 |
+| `badge` (catalogo) | utenti autenticati; i badge per adulti solo ai maggiorenni | R-41 |
+| `badge_utente` | solo il titolare | R-41, R-69 |
+| `riepiloghi_annuali.dati` | solo il titolare; immagine esportata dal telefono per scelta della persona | R-42, R-43, R-69 |
+| Notifiche `badge_ottenuto`, `riepilogo_pronto` | il titolare; push con testo di sistema senza nome del badge | F-22, R-66 |
+
+Superfici di contatto: nessuna nuova. Gli amici indicati nel diario compaiono solo come
+conteggi (statistiche escluse, riepilogo `amici_diversi` e `serate_con_amici`); nessuna lista
+di persone, nessun profilo, nessuna condivisione con link.
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | RLS e policy in `20261119090000_crea_statistiche_badge_riepiloghi.sql`; `044_statistiche_badge_riepiloghi` (catalogo per le età 14–21, titolare, amico, adulto, moderatore con e senza due fattori, scritture rifiutate, anon); funzioni definer in `private` con `search_path` vuoto; età solo da `private.e_minorenne` |
+| B. Contatti | SÌ / N/A | nessuna superficie nuova; notifiche con soli testi di sistema e nomi del catalogo |
+| C. Contenuti | SÌ | check `badge_criterio` (niente spesa, alcol, orari, finestre di tempo); catalogo senza alcol né badge per adulti; riepilogo senza spesa, senza titoli di eventi né luoghi scritti a mano (test `R-42`, `R-43` nel pgTAP 044 e nei test unitari `ricordaAnno`); nessuna percentuale, conto alla rovescia o confronto (e2e `ricorda-anno.spec.ts`) |
+| D. Posizione | N/A | nessun dato di posizione |
+| E. Moderazione | SÌ / N/A | nessun contenuto caricato; l'immagine resta sul telefono; nessuna policy per i moderatori (R-69, pgTAP 044) |
+| F. Privacy | SÌ | dati derivati dal diario, già nella tabella di conservazione («tracker, badge, riepiloghi»); cancellati con l'account (`on delete cascade`); `esporta_miei_dati` con `badge` e `riepiloghi_annuali` (pgTAP 044); nessun SDK o fornitore nuovo |
+| G. Documentazione | SÌ | PRD §4 e §7, ARCHITECTURE, DATA_MODEL §4, §5.6, §5.10, §8, SAFETY_PRIVACY R-41 e R-42, ROADMAP; `verifica_documentazione.py` 0 problemi |
+
+Catalogo dei badge rivisto (criterio della roadmap): i 10 badge del brief F-32 premiano
+scoperta, varietà e ricordo (luoghi, generi, DJ, note, stagioni, un locale abituale, serate
+con amici); nessuno conta spesa, alcol, orari o serate ravvicinate. «In compagnia» conta
+serate annotate con almeno un amico in qualunque arco di tempo: nessuna pressione sociale.
+
+**Esito dei test**: pgTAP 1387/1387 (37 file, nuovo `044_statistiche_badge_riepiloghi` con 68
+casi); unitari 178/178 (nuovo `ricordaAnno`, 16 casi); e2e 919/920, 1 saltato per scelta (coda
+offline su WebKit); worker 355 passati, 4 saltati (integrazione senza database); lint,
+typecheck, Ruff, mypy e `verifica_documentazione.py` puliti. La suite e2e completa con 8
+processi ha dato 143 errori per tempo scaduto con la macchina sovraccarica (carico medio 60 su
+WSL con 8 GB): rilanciati con 2 processi sono passati tutti e 143.
+
+**Prova dal vivo**: Supabase locale e app in sviluppo con `minore_16` e 16 serate nel 2026:
+statistiche con spese ed elenco dei mesi, bacheca con foglio di dettaglio, riga nel profilo, le
+otto schede del riepilogo (anche con il movimento ridotto), elenco dei riepiloghi.
+
+**Attese esterne**
+- Applicare la migrazione `20261119090000_crea_statistiche_badge_riepiloghi` in staging e in
+  produzione prima del 1° dicembre 2026, quando parte `genera-riepiloghi`.
+- Provare «Salva immagine» su un iPhone (foglio di condivisione) e nell'app Android, dove il
+  download da link può non funzionare come nell'esportazione dei dati: se non funziona serve il
+  plugin di condivisione di Capacitor.
+
+**Commit**: a52289e, dedde05, c1878e3, d45a3d2 e il commit finale sul branch
+`iterazione-11-statistiche-badge-wrapped`.
