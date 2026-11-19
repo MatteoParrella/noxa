@@ -4,46 +4,22 @@
   prefers-reduced-motion il contenuto è sempre visibile e al suo posto.
 */
 
-/* ---------- Titolo che sale parola per parola ---------- */
+/* ---------- Titolo (ADR-0035: fermo, niente salita parola per parola) ---------- */
 .titolo-rivelato {
   display: block;
 }
-.titolo-rivelato .parola {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: top;
-  padding-bottom: 0.08em;
-  margin-bottom: -0.08em;
-}
 .titolo-rivelato .parola > span {
-  display: inline-block;
-  animation: sale var(--movimento-ingresso) var(--curva-espressiva) both;
-  animation-delay: calc(var(--indice, 0) * var(--ritardo-passo) + 80ms);
-}
-@keyframes sale {
-  from {
-    transform: translateY(105%);
-  }
-  to {
-    transform: none;
-  }
+  display: inline;
 }
 
-/* ---------- Etichetta che entra dal sfocato ---------- */
+/* ---------- Etichetta che compare (dissolvenza breve) ---------- */
 .a-fuoco {
-  animation: a-fuoco var(--movimento-ingresso) var(--curva-espressiva) both;
+  animation: a-fuoco var(--movimento-lento) var(--curva-standard) both;
   animation-delay: var(--ritardo, 0ms);
 }
 @keyframes a-fuoco {
   from {
     opacity: 0;
-    filter: blur(var(--rivela-sfocatura));
-    transform: scale(1.03);
-  }
-  to {
-    opacity: 1;
-    filter: none;
-    transform: none;
   }
 }
 
@@ -129,36 +105,21 @@
   }
 }
 
-/* ---------- Indicatore della barra di navigazione che scorre ---------- */
+/* ---------- Capsula della scheda attiva che scivola a molla ---------- */
 .barra-nav {
   position: relative;
 }
-.nav-voce.is-on::before {
-  content: none;
-}
 .nav-indicatore {
   position: absolute;
-  top: -1px;
+  top: 4px;
+  bottom: 4px;
   left: 4px;
   width: calc((100% - 8px) / 5);
-  height: 2px;
-  display: flex;
-  justify-content: center;
+  border-radius: var(--raggio-tondo);
+  background: var(--colore-riempimento-secondario);
   transform: translateX(calc(var(--indice, 0) * 100%));
-  transition: transform var(--movimento-espressivo) var(--curva-espressiva);
+  transition: transform var(--movimento-molla) var(--curva-molla-viva);
   pointer-events: none;
-}
-.nav-indicatore::after {
-  content: '';
-  width: 24px;
-  height: 2px;
-  background: var(--colore-accento);
-}
-.nav-voce .ico {
-  transition: transform var(--movimento-base) var(--curva-espressiva);
-}
-.nav-voce.is-on .ico {
-  transform: translateY(-1px) scale(1.08);
 }
 
 /* ---------- Micro-interazioni al tocco ---------- */
@@ -171,7 +132,7 @@
 .btn:active:not(:disabled),
 .segmento:active,
 .nav-voce:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 .copertina-evidenza .copertina-immagine {
   transition: transform var(--movimento-ingresso) var(--curva-espressiva);
@@ -223,7 +184,9 @@
     opacity: 1;
     transform: none;
   }
-  .nav-voce.is-on .ico,
+  .nav-indicatore {
+    transition: none;
+  }
   .btn:active,
   .segmento:active,
   .nav-voce:active,

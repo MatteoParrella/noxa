@@ -1,34 +1,27 @@
 /*
-  Trasparenza in tutta l'app (ADR-0033, aggiornamento del 2026-11-15).
+  Materiali traslucidi (ADR-0035, sostituisce la trasparenza diffusa di ADR-0033).
 
-  Un elemento traslucido su un fondo nero piatto resta nero: perché la trasparenza si veda
-  servono due cose. Dietro, un fondo d'atmosfera con aloni di colore, fisso mentre la pagina
-  scorre. Davanti, superfici che lo lasciano passare: nelle aree dell'app i tre colori di
-  superficie diventano veli del colore del testo, così schede, campi, segmenti e righe sono
-  di vetro senza cambiare i componenti uno per uno. L'area di moderazione e le schermate di
-  accesso restano piene. Ciò che si sovrappone al contenuto (fogli, barre fisse) usa un vetro
-  più denso con la sfocatura, per restare leggibile.
+  Due strati, come in iOS. Il contenuto (schede, celle, campi, liste) sta su superfici piene:
+  si legge sempre e non si confonde con i controlli. Lo strato funzionale che galleggia sopra
+  il contenuto (barra delle schede, barra del titolo, fogli, menu, avvisi, barre delle azioni,
+  pulsanti sopra le foto) è di vetro: sfoca e satura quello che scorre sotto. Il colore del
+  marchio vive nel contenuto (il fondo d'atmosfera, le copertine) e il vetro lo raccoglie.
 */
 
-/* Colore pieno delle superfici, risolto qui prima che le aree lo rendano traslucido. */
 :root,
 [data-tema] {
-  --colore-superficie-piena: var(--colore-superficie-1);
-  --atmosfera-1: color-mix(in srgb, var(--colore-accento) 20%, transparent);
-  --atmosfera-2: color-mix(in srgb, var(--colore-info) 15%, transparent);
-  --atmosfera-3: color-mix(in srgb, var(--copertina-house-1) 10%, transparent);
-  --vetro-foglio: color-mix(in srgb, var(--colore-superficie-piena) 84%, transparent);
-  --vetro-sfocatura-forte: blur(28px) saturate(1.4);
+  --atmosfera-1: color-mix(in srgb, var(--colore-tinta) 16%, transparent);
+  --atmosfera-2: color-mix(in srgb, var(--colore-info) 10%, transparent);
+  --atmosfera-3: color-mix(in srgb, var(--copertina-house-1) 8%, transparent);
 }
 :root[data-tema='chiaro'],
 [data-tema='chiaro'] {
-  --atmosfera-1: color-mix(in srgb, var(--colore-accento) 13%, transparent);
-  --atmosfera-2: color-mix(in srgb, var(--colore-info) 10%, transparent);
-  --atmosfera-3: color-mix(in srgb, var(--copertina-house-1) 7%, transparent);
-  --vetro-foglio: color-mix(in srgb, var(--colore-superficie-piena) 88%, transparent);
+  --atmosfera-1: color-mix(in srgb, var(--colore-tinta) 9%, transparent);
+  --atmosfera-2: color-mix(in srgb, var(--colore-info) 6%, transparent);
+  --atmosfera-3: color-mix(in srgb, var(--copertina-house-1) 5%, transparent);
 }
 
-/* ---------- Fondo d'atmosfera ---------- */
+/* ---------- Fondo d'atmosfera (strato del contenuto) ---------- */
 .guscio {
   isolation: isolate;
 }
@@ -39,60 +32,106 @@
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(70% 55% at 88% -5%, var(--atmosfera-1), transparent 70%),
-    radial-gradient(60% 50% at -8% 55%, var(--atmosfera-2), transparent 70%),
-    radial-gradient(65% 50% at 70% 108%, var(--atmosfera-3), transparent 70%);
+    radial-gradient(70% 45% at 90% -8%, var(--atmosfera-1), transparent 70%),
+    radial-gradient(60% 45% at -10% 60%, var(--atmosfera-2), transparent 70%),
+    radial-gradient(60% 40% at 70% 110%, var(--atmosfera-3), transparent 70%);
 }
 
-/* ---------- Superfici di vetro nelle aree dell'app ---------- */
-.guscio {
-  --colore-superficie-1: color-mix(in srgb, var(--colore-testo-primario) 5%, transparent);
-  --colore-superficie-2: color-mix(in srgb, var(--colore-testo-primario) 9%, transparent);
-  --colore-superficie-3: color-mix(in srgb, var(--colore-testo-primario) 14%, transparent);
-  --colore-linea: color-mix(in srgb, var(--colore-testo-primario) 13%, transparent);
-}
-
-/* Schede e riquadri: un filo di luce sul bordo e la sfocatura di quello che hanno dietro. */
-.guscio .scheda,
-.guscio .evidenza,
-.guscio .ck-spento,
-.guscio .rt-invito,
-.guscio .rt-biglietto,
-.guscio .ck-timbro,
-.guscio .ps-scheda,
-.guscio .segmenti,
-.guscio .campo-box {
-  border-color: var(--vetro-bordo);
-  background: var(--colore-superficie-1);
-  -webkit-backdrop-filter: var(--vetro-sfocatura);
-  backdrop-filter: var(--vetro-sfocatura);
-}
-.guscio .scheda {
-  background: var(--colore-superficie-1);
-}
-.guscio .btn-secondario {
-  border-color: var(--vetro-bordo);
-  background: var(--colore-superficie-1);
-}
-.guscio .btn-secondario:hover {
-  background: var(--colore-superficie-2);
-}
-
-/* Fogli e finestre: stanno sopra la pagina, quindi vetro denso e molto sfocato. */
+/* ---------- Strato funzionale: vetro ---------- */
+.materiale,
 .foglio,
-.modale {
-  background: var(--vetro-foglio);
-  -webkit-backdrop-filter: var(--vetro-sfocatura-forte);
-  backdrop-filter: var(--vetro-sfocatura-forte);
-}
-
-/* Barre che restano ferme mentre il contenuto scorre sotto. */
+.modale,
+.menu-azioni,
+.toast,
+.btn-indietro,
+.barra-titolo,
+.guscio .barra-nav,
 .guscio .se-risposta,
 .guscio .rt-barra-guscio,
 .guscio .gr-barra-fondo {
-  background: var(--vetro-barra);
-  -webkit-backdrop-filter: var(--vetro-sfocatura);
-  backdrop-filter: var(--vetro-sfocatura);
+  background: var(--materiale-normale);
+  -webkit-backdrop-filter: var(--sfocatura-normale);
+  backdrop-filter: var(--sfocatura-normale);
+}
+.foglio,
+.modale,
+.menu-azioni {
+  background: var(--materiale-spesso);
+  -webkit-backdrop-filter: var(--sfocatura-spessa);
+  backdrop-filter: var(--sfocatura-spessa);
+}
+/* Il bordo di luce del vetro: un filo chiaro in alto e un contorno sottile. */
+.materiale,
+.toast,
+.btn-indietro,
+.guscio .barra-nav,
+.menu-azioni {
+  box-shadow:
+    inset 0 0.5px 0 var(--materiale-riflesso),
+    var(--ombra-galleggiante);
+}
+
+/* ---------- Ripieghi opachi ---------- */
+/* Browser senza backdrop-filter: il vetro diventa pieno, mai trasparente senza sfocatura. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .materiale,
+  .foglio,
+  .modale,
+  .menu-azioni,
+  .toast,
+  .btn-indietro,
+  .barra-titolo,
+  .guscio .barra-nav,
+  .guscio .se-risposta,
+  .guscio .rt-barra-guscio,
+  .guscio .gr-barra-fondo {
+    background: var(--colore-sfondo-secondario);
+  }
+}
+/* Riduci trasparenza e Aumenta contrasto: superfici piene e bordi a ≥ 3:1. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .materiale,
+  .foglio,
+  .modale,
+  .menu-azioni,
+  .toast,
+  .btn-indietro,
+  .barra-titolo,
+  .guscio .barra-nav,
+  .guscio .se-risposta,
+  .guscio .rt-barra-guscio,
+  .guscio .gr-barra-fondo,
+  .cg-mini .cg-ora {
+    background: var(--colore-sfondo-secondario);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .guscio::before {
+    display: none;
+  }
+}
+@media (prefers-contrast: more) {
+  :root,
+  [data-tema] {
+    --colore-separatore: var(--colore-linea-forte);
+    --colore-separatore-opaco: var(--colore-linea-forte);
+    --colore-etichetta-secondaria: var(--colore-etichetta);
+    --materiale-bordo: var(--colore-linea-forte);
+  }
+  .materiale,
+  .foglio,
+  .modale,
+  .menu-azioni,
+  .toast,
+  .btn-indietro,
+  .guscio .barra-nav,
+  .scheda,
+  .gruppo-celle,
+  .campo-box,
+  .segmenti {
+    outline: 1px solid var(--colore-linea-forte);
+    outline-offset: -1px;
+  }
 }
 
 /* ---------- Copertine: niente più fascia scura sotto la foto ---------- */
@@ -147,11 +186,6 @@
 /* L'etichetta dell'età sopra la copertina non prende l'alone. */
 .cg.copertina-evidenza > .badge-sopra {
   text-shadow: none;
-}
-
-/* Scheda in evidenza: il corpo è vetro appoggiato alla foto, non una fascia a parte. */
-.guscio .evidenza-corpo {
-  background: transparent;
 }
 
 /* Tema chiaro: il testo delle copertine è scuro su foto di media luminosità, quindi il vetro

@@ -200,7 +200,7 @@
 /* Sul telefono la navigazione è una barra fissa in fondo (componenti.css, «Guscio dell'app»):
    la barra delle azioni si ferma sopra di lei, alla stessa altezza che il contenuto le lascia. */
 .guscio .gr-barra-fondo {
-  bottom: calc(var(--nav-altezza) + env(safe-area-inset-bottom));
+  bottom: var(--nav-ingombro);
 }
 @media (min-width: 48rem) {
   .guscio .gr-barra-fondo {

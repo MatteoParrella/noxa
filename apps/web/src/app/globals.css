@@ -45,6 +45,14 @@
   --color-info: var(--colore-info);
   --color-info-tenue: var(--colore-info-tenue);
   --color-velo: var(--colore-velo);
+  --color-etichetta: var(--colore-etichetta);
+  --color-etichetta-secondaria: var(--colore-etichetta-secondaria);
+  --color-etichetta-terziaria: var(--colore-etichetta-terziaria);
+  --color-cella: var(--colore-cella);
+  --color-riempimento: var(--colore-riempimento);
+  --color-riempimento-terziario: var(--colore-riempimento-terziario);
+  --color-separatore: var(--colore-separatore);
+  --color-tinta: var(--colore-tinta);
 
   --spacing: 4px;
 
@@ -52,6 +60,7 @@
   --radius-1: var(--raggio-1);
   --radius-2: var(--raggio-2);
   --radius-3: var(--raggio-3);
+  --radius-4: var(--raggio-4);
   --radius-tondo: var(--raggio-tondo);
 
   --shadow-*: initial;
@@ -62,6 +71,7 @@
   --font-*: initial;
   --font-testo: var(--tipo-famiglia-testo);
   --font-mono: var(--tipo-famiglia-mono);
+  --font-marchio: var(--tipo-famiglia-marchio);
 
   --text-*: initial;
   --text-display: var(--tipo-display);
@@ -70,6 +80,11 @@
   --text-titolo-3: var(--tipo-titolo-3);
   --text-corpo: var(--tipo-corpo);
   --text-corpo-piccolo: var(--tipo-corpo-piccolo);
+  --text-titolo-grande: var(--tipo-titolo-grande);
+  --text-titoletto: var(--tipo-titoletto);
+  --text-richiamo: var(--tipo-richiamo);
+  --text-nota: var(--tipo-nota);
+  --text-didascalia-2: var(--tipo-didascalia-2);
   --text-didascalia: var(--tipo-didascalia);
   --text-etichetta: var(--tipo-etichetta);
   --text-mono-dato: var(--tipo-mono-dato);
@@ -77,22 +92,38 @@
   --ease-standard: var(--curva-standard);
   --ease-entrata: var(--curva-entrata);
   --ease-uscita: var(--curva-uscita);
+  --ease-molla: var(--curva-molla);
 }
 
 @layer base {
+  /*
+    Base tipografica = Body (17 px): tutta la scala di tokens.css è in rem. Su iPhone e iPad
+    (Safari e app) la base è -apple-system-body, quindi segue la dimensione del testo scelta
+    nelle impostazioni (Dynamic Type). -webkit-touch-callout esiste solo su iOS e iPadOS: così
+    Safari su Mac, dove il testo di sistema è più piccolo, resta a 17 px.
+  */
   html {
     background: var(--colore-sfondo);
     color: var(--colore-testo-primario);
     font-family: var(--tipo-famiglia-testo);
-    font-size: 100%;
+    font-size: 106.25%;
     -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+  }
+  @supports (font: -apple-system-body) and (-webkit-touch-callout: none) {
+    html {
+      font: -apple-system-body;
+      font-family: var(--tipo-famiglia-testo);
+    }
   }
   body {
     margin: 0;
     min-height: 100dvh;
     font-size: var(--tipo-corpo);
-    line-height: 1.5;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
   }
   a {
     color: var(--colore-accento-testo);

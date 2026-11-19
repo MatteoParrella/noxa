@@ -7,7 +7,7 @@ const configurazione: CapacitorConfig = {
   appId: 'it.noxanight',
   appName: 'Noxa',
   webDir: 'out',
-  backgroundColor: '#0E1116',
+  backgroundColor: '#000000',
   ios: { contentInset: 'never' },
   // Bridge legacy: senza, Android ferma la posizione del ritorno sicuro dopo 5 minuti in
   // background (@capacitor-community/background-geolocation, ADR-0028).

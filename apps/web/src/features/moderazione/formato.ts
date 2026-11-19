@@ -29,7 +29,7 @@ const formatoOra = new Intl.DateTimeFormat('it-IT', {
   minute: '2-digit',
 });
 
-/** "19.10 08:12": data e ora compatte nelle tabelle (IBM Plex Mono). */
+/** "19.10 08:12": data e ora compatte nelle tabelle (cifre tabulari). */
 export function dataOra(istante: string): string {
   const parti = Object.fromEntries(
     formatoDataOra.formatToParts(new Date(istante)).map((p) => [p.type, p.value]),

@@ -37,28 +37,24 @@ flowchart LR
   Le palette predefinite di Tailwind sono azzerate: le utility disponibili sono solo quelle
   dei token (`bg-superficie-1`, `text-testo-secondario`, `rounded-3`…). Nessun valore di
   colore, spaziatura o raggio scritto direttamente nei componenti.
-- Origine: il foglio `design/sistema/noxa.css` del progetto Claude Design "Noxa — Design
-  system" (accento A, arancio "lampione al sodio"). Le classi dei componenti stanno in
-  `src/styles/componenti.css` e usano solo i token.
-- Temi: scuro su `:root`, chiaro con `data-tema="chiaro"` su `<html>`, scelto nel Profilo e
-  ricordato sul dispositivo; un elemento con `data-tema` applica il tema solo al suo
-  contenuto (catalogo dei componenti).
-- Font: Archivo (variabile, assi peso e larghezza) e IBM Plex Mono, serviti dall'app con
-  Fontsource, senza richieste a Google Fonts (R-62).
+- **Stile iOS (ADR-0035)**: dal 2026-11-19 il design system segue le Human Interface
+  Guidelines di Apple (iOS 26, materiali tipo Liquid Glass), definito direttamente nel codice
+  per deroga del product owner; il progetto Claude Design va riallineato. Le regole sono in
+  §2.1. Le classi dei componenti stanno in `src/styles/componenti.css` e usano solo i token.
+- Temi: **scuro predefinito** su `:root` anche con il sistema in chiaro; chiaro con
+  `data-tema="chiaro"` su `<html>`, scelto con l'interruttore del Profilo e ricordato sul
+  dispositivo; un elemento con `data-tema` applica il tema solo al suo contenuto (catalogo dei
+  componenti).
+- Font: carattere di sistema (`-apple-system`, SF Pro su Apple, Roboto su Android) con Inter
+  variabile come ripiego; Archivo variabile solo per i momenti di marca
+  (`--tipo-famiglia-marchio`, classe `.t-marchio`). Tutti serviti dall'app con Fontsource,
+  senza richieste a Google Fonts (R-62).
 - Foto dei locali (ADR-0018): la velatura `.velatura` di `src/styles/scopri.css` sfuma la foto
   nel colore di sfondo del tema, come nel layer "scopri" di Claude Design; i token
   `--colore-velo-foto` e `--colore-testo-su-foto` della prima versione sono stati tolti con
   l'iterazione 4.
-- Superfici «di vetro» e larghezza del sito (2026-11-15, deroga chiesta dal product owner
-  come per il rinfresco del 2026-11-14: definite nel codice, da riportare nel progetto Claude
-  Design): `--vetro-fondo`, `--vetro-fondo-forte`, `--vetro-barra`, `--vetro-bordo`,
-  `--vetro-sfocatura` per tag dei generi, etichette sopra le copertine, pulsanti tondi, barra
-  di navigazione e riquadri appoggiati alle foto; `--sito-larghezza`, `--sito-margine`,
-  `--sito-max` per il layout desktop (ADR-0033). Il raggio tondo vale anche per i tag.
-  Dalla sera del 2026-11-15 la trasparenza vale per tutte le aree dell'app
-  (`src/styles/vetro.css`): fondo d'atmosfera (`--atmosfera-1…3`), superfici e linea come
-  veli dentro `.guscio`, `--vetro-foglio` e `--vetro-sfocatura-forte` per fogli e finestre,
-  `--colore-superficie-piena` per chi ha bisogno del colore pieno.
+- Larghezza del sito (ADR-0033): `--sito-larghezza`, `--sito-margine`, `--sito-max` per il
+  layout desktop. La trasparenza diffusa del 2026-11-15 è sostituita dai materiali di §2.1.
 - Token delle schermate di accesso, dal layer "accesso" del progetto Claude Design
   (design/F-10-accesso): `--tipo-titolo-accesso`, `--tipo-marchio`,
   `--tipo-larghezza-marchio`, `--movimento-passo`, `--spostamento-passo`. Le classi stanno in
@@ -71,17 +67,16 @@ flowchart LR
   `--qr-moduli`, `--qr-velo-testo` (il QR resta nero su bianco in entrambi i temi, per la
   lettura delle fotocamere), `--mirino-sfondo`, `--mirino-testo` (il mirino è l'immagine
   della fotocamera, sempre scuro), `--avatar-grande`. Classi in `src/styles/amici.css`.
-- Categorie: `colore` (superfici, testo, accento, stato: successo, avviso, errore, info),
-  `spazio` (scala di 4 px), `raggio`, `ombra`, `tipografia` (famiglie, scala, interlinea),
-  `movimento` (durate e curve, con la versione ridotta).
-- **Tema scuro come predefinito** (uso notturno), con tema chiaro completo; entrambi
-  rispettano i contrasti del §4.
-- Movimento: transizioni funzionali di 150–250 ms e ingressi espressivi di 700–900 ms con la
-  curva `cubic-bezier(.2,.7,.2,1)` (titoli che salgono, contenuti dal sfocato al nitido,
-  bagliore dell'intestazione, indicatore della barra che scorre). Transizioni di navigazione
-  tra route con View Transitions API (fade + leggero traslato, 180/280 ms). Nessuna
-  animazione infinita; con `prefers-reduced-motion` solo dissolvenze brevi (ADR-0019,
-  ADR-0022, `src/styles/movimento.css`).
+- Categorie: `colore` (etichette, sfondi, celle, riempimenti, separatori, tinta, stato:
+  successo, avviso, errore, info), `spazio` (griglia da 8 pt), `raggio`, `ombra`, `materiale`,
+  `tipografia` (famiglie e scala Dynamic Type), `movimento` (durate, curve a molla, versione
+  ridotta).
+- Movimento: transizioni di 150–450 ms con curve a molla (`--curva-molla`,
+  `--curva-molla-viva`); niente titoli che salgono parola per parola né sfocature d'ingresso
+  (ADR-0035, che sostituisce le durate di ADR-0019). Transizioni di navigazione tra route con
+  View Transitions API (dissolvenza con un leggero spostamento, 180/280 ms). Nessuna
+  animazione infinita; con `prefers-reduced-motion` solo dissolvenze brevi
+  (`src/styles/movimento.css`).
 - Layout responsive (ADR-0022, ADR-0033): l'app è portrait-first ma funziona pienamente in
   landscape e su browser desktop. Tra **768 e 1023 px** la barra di navigazione è una sidebar
   sinistra (68 px, sole icone); a **≥ 1024 px** Noxa si presenta come un sito: barra in alto
@@ -90,7 +85,24 @@ flowchart LR
   L'area di moderazione usa container query e si adatta a qualsiasi larghezza, compreso il
   portrait su tablet. Token di riferimento: `--bp-tablet` (768 px), `--bp-desktop` (1024 px),
   `--sidebar-stretta` (68 px), `--sidebar-larga` (200 px) in `tokens.css`.
-- Una modifica ai token si fa prima in Claude Design, poi in `tokens.css`, nella stessa PR.
+- Una modifica ai token si fa prima in Claude Design, poi in `tokens.css`, nella stessa PR;
+  per lo stile iOS di ADR-0035 la fonte è il codice finché Claude Design non è riallineato.
+
+### 2.1 Stile iOS (ADR-0035)
+
+| Ambito | Regola |
+|---|---|
+| Colori | Ruoli semantici di iOS: `--colore-etichetta` (+ `-secondaria`, `-terziaria`), `--colore-sfondo` (pagina raggruppata), `--colore-sfondo-secondario`/`-terziario`, `--colore-cella` (+ `-premuta`), `--colore-riempimento` (+ `-secondario`, `-terziario`), `--colore-separatore` (+ `-opaco`), `--colore-tinta` (+ `-premuta`, `-tenue`). I nomi storici (`--colore-superficie-*`, `--colore-testo-*`, `--colore-accento*`, `--colore-linea*`) sono alias: nei componenti nuovi si usano i ruoli iOS |
+| Tinta | Ambra al sodio: `#FFB340` in scuro (11,8:1 sul nero), `#A35200` in chiaro (5,0:1 su `#F2F2F7`). Una sola tinta: azioni principali, scheda attiva, interruttori accesi, link. Mai su più di una o due azioni per schermata |
+| Sfondi | Scuro: pagina `#000000`, celle `#1C1C1E`, elevato `#2C2C2E`. Chiaro: pagina `#F2F2F7`, celle `#FFFFFF`. Il contenuto sta su superfici piene |
+| Tipografia | Scala Dynamic Type in `rem` su base Body = 17 px: `--tipo-titolo-grande` 34, `--tipo-titolo-1` 28, `-2` 22, `-3` 20, `--tipo-titoletto` 17 semibold, `--tipo-corpo` 17, `--tipo-richiamo` 16, `--tipo-corpo-piccolo` 15, `--tipo-nota` 13, `--tipo-didascalia` 12, `--tipo-didascalia-2` 11 (minimo assoluto). Su iPhone e iPad la base è `-apple-system-body` e segue la dimensione del testo di sistema (`globals.css`). Classi `.t-titolo-grande`, `.t-titolo-1…3`, `.t-titoletto`, `.t-corpo`, `.t-richiamo`, `.t-corpo-s`, `.t-nota`, `.t-didascalia`, `.etichetta` (intestazione di sezione) |
+| Spazi e raggi | Griglia da 8 pt (4 come mezzo passo), `--margine-schermo` 16 pt. Raggi: `--raggio-1` 6, `-2` 12 (campi, celle singole), `-3` 20 (schede e gruppi di celle), `-4` 26 (avvisi, schede grandi), `--raggio-foglio` 34, `--raggio-tondo` per pulsanti a capsula, segmenti e barra delle schede |
+| Materiali | Solo nello strato funzionale che galleggia sul contenuto: barra delle schede, `.barra-titolo`, fogli, menu, avvisi, toast, barre delle azioni, pulsanti sopra le foto (`.materiale` per i nuovi). Token `--materiale-sottile/-normale/-spesso`, `--sfocatura-*`, `--materiale-bordo`. Mai su schede, celle, campi o contenitori di contenuto. Ripieghi opachi in `vetro.css` senza `backdrop-filter`, con `prefers-reduced-transparency` e con `prefers-contrast: more` (che alza anche i bordi a 3:1) |
+| Navigazione | Telefono: barra delle schede a capsula di vetro che galleggia sopra l'indicatore di Home, icona attiva piena e tinta, capsula che scivola a molla. Il fondo occupato è `--nav-ingombro`: le barre delle azioni fisse si appoggiano lì. Titolo grande (`IntestazioneArea`) che scorrendo lascia il posto a `.barra-titolo` di vetro con il titolo piccolo. Tablet e desktop come ADR-0022 e ADR-0033 |
+| Componenti | Pulsanti a capsula: `principale` pieno, `secondario` tinto grigio, `testo` semplice, `neutro`, `pericolo` tinto rosso. Liste raggruppate `.gruppo` > `.gruppo-titolo`, `.gruppo-celle` > `.cella` (con `.cella-testo`, `.cella-dettaglio`, `.cella-freccia`, `.cella-icona`), separatori rientrati. Segmented control (`Segmenti`, `Schede`). Interruttore 51 × 31 con il segno di spunta. Campo di ricerca `.campo-ricerca`. Fogli con maniglia che si trascinano per chiudere (`Foglio`). Scheletri con un riflesso che scorre tre volte. Stati vuoti centrati con simbolo grande |
+| Movimento | Durate `--movimento-veloce` 150, `-base` 250, `-lento` 350, `-molla` 450 ms. Pressione: `scale(0.96)`. Fogli che salgono a molla, avvisi che entrano leggermente ingranditi. La schermata di apertura e i momenti di Ricorda possono durare di più, una volta |
+| Sicurezza delle aree | Barre e fogli rispettano `env(safe-area-inset-*)` (notch, Dynamic Island, indicatore di Home) |
+| Marchio | Nessun logo, nome o asset Apple: si imita lo stile, non l'identità. Icone Lucide a tratto 1,75 |
 
 ## 3. Componenti e schermate
 
@@ -133,7 +145,7 @@ flowchart LR
 
 - `src/components/ui/`: componenti del design system (Pulsante, Campo, Scheda,
   SchedaEvidenza e RigaEvento, Copertina, Genere, AmiciPartecipano, SelettorePartecipazione,
-  LinkEsterno, Calendario, Avviso, Foglio, Badge e Contatore, Avatar e GruppoAvatar, Interruttore,
+  LinkEsterno, Calendario, Avviso, Foglio (con trascinamento per chiudere), Badge e Contatore, Avatar e GruppoAvatar, Interruttore,
   Segmenti, Schede, ElencoVuoto, Caricamento, ErroreConAzione, StrisciaOffline,
   PulsanteSegnala, Mappa, CampoPassword con i requisiti, CampoData con il calendario in un
   foglio, CasellaLunga per i consensi, IndicatorePassi e IndicatorePunti, RigaPersona,
@@ -149,7 +161,7 @@ flowchart LR
   produzione; la CI lo controlla.
 - `src/features/<area>/`: schermate e componenti specifici di una funzionalità. Le schermate
   di accesso (`src/features/account/`) condividono l'impaginazione `Schermata` (testa con
-  "Indietro", titolo che sale parola per parola, piede fisso) e fanno entrare i blocchi
+  "Indietro", titolo grande, piede fisso) e fanno entrare i blocchi
   all'apertura con `Entra`, non allo scorrimento: sono schermate brevi, già tutte in vista.
 - Il link "indietro" delle pagine interne (`LinkIndietro` e `useIndietro` in
   `src/components/guscio/Indietro.tsx`) riporta alla pagina dell'app da cui si è arrivati,
@@ -164,10 +176,12 @@ flowchart LR
 | Requisito | Regola |
 |---|---|
 | Contrasto | Testo normale ≥ 4,5:1, testo grande e componenti dell'interfaccia ≥ 3:1, in entrambi i temi |
-| Aree di tocco | Almeno 44 × 44 px |
+| Aree di tocco | Almeno 44 × 44 px (controlli disegnati più piccoli, come segmenti e interruttori, allargano l'area con uno pseudo-elemento) |
 | Focus | Indicatore di focus visibile, ordine di tabulazione logico, nessuna trappola del focus nei fogli e nelle finestre modali |
 | Lettori di schermo | Etichette accessibili per tutti i controlli; annunci `aria-live` per gli aggiornamenti in tempo reale (conferme della serata, stato del ritorno sicuro) |
 | Movimento | `prefers-reduced-motion` rispettato ovunque, compreso il Wrapped |
+| Trasparenza e contrasto | `prefers-reduced-transparency` e `prefers-contrast: more` rendono pieni i materiali; con il contrasto aumentato separatori e bordi passano a 3:1 |
+| Dimensione del testo | Su iPhone e iPad il testo segue Dynamic Type; nessun testo sotto gli 11 pt |
 | Testo | Ridimensionabile al 200% senza perdita di contenuto; lingua `it` dichiarata |
 | Mappa | Ogni informazione della mappa è disponibile anche nell'elenco |
 | Colore | Il colore non è mai l'unico modo per comunicare uno stato |

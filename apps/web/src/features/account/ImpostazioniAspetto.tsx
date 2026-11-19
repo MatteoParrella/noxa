@@ -9,7 +9,7 @@ function iscrivi(avvisa: () => void) {
   return () => window.removeEventListener(EVENTO_TEMA, avvisa);
 }
 
-/** Scelta del tema: scuro predefinito, chiaro a richiesta. */
+/** Scelta del tema: scuro predefinito, chiaro a richiesta (salvato sul dispositivo). */
 export function ImpostazioniAspetto() {
   const tema = useSyncExternalStore<Tema>(iscrivi, temaAttivo, () => 'scuro');
   return (

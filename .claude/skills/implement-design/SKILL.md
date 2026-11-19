@@ -5,7 +5,8 @@ description: Come trasformare una schermata o un componente progettato in Claude
 
 # Implementare un design da Claude Design
 
-Riferimenti: `docs/DESIGN.md`, ADR-0011, `apps/web/src/styles/tokens.css`.
+Riferimenti: `docs/DESIGN.md` (§2.1 per lo stile iOS), ADR-0011, ADR-0035,
+`apps/web/src/styles/tokens.css`.
 
 ## Prerequisiti
 
@@ -36,6 +37,18 @@ Se manca qualcosa, chiedilo prima di iniziare: non inventare stati o testi.
    - se è un nuovo valore voluto, aggiungilo prima in Claude Design e poi in `tokens.css` e
      nella configurazione di Tailwind (`@theme inline` in `src/app/globals.css`), nella stessa PR.
 3. Verifica i contrasti dei colori con i valori dei token, in entrambi i temi (DESIGN.md §4).
+4. Controlla lo stile iOS (DESIGN.md §2.1, ADR-0035):
+   - colori dai ruoli semantici (`--colore-etichetta*`, `--colore-cella`,
+     `--colore-riempimento*`, `--colore-separatore`, `--colore-tinta`), una sola tinta per le
+     azioni principali;
+   - testo solo dalla scala Dynamic Type (`.t-titolo-grande` … `.t-didascalia`), mai sotto
+     `--tipo-didascalia-2` (11 pt); Archivo (`.t-marchio`) solo nei momenti di marca;
+   - impostazioni ed elenchi come lista raggruppata (`.gruppo`, `.gruppo-celle`, `.cella`);
+   - vetro (`.materiale`, `--materiale-*`) solo su ciò che galleggia sopra il contenuto
+     (barre, fogli, menu, pulsanti sopra le foto), mai su schede o celle;
+   - movimento breve con `--curva-molla`, nessuna animazione che si ripete a ogni visita;
+   - barre e fogli fissi con `env(safe-area-inset-*)`; le barre in basso sopra
+     `--nav-ingombro`.
 
 ### 2. Codice esportato
 Il codice esportato da Claude Design è un **riferimento visivo**. Non va copiato: si
@@ -91,6 +104,7 @@ In `src/features/<area>/`:
 ## Checklist finale
 
 - [ ] Solo token del design system; nuovi token aggiunti anche in Claude Design
+- [ ] Stile iOS rispettato (DESIGN.md §2.1): ruoli semantici, scala Dynamic Type, vetro solo sullo strato funzionale, safe area
 - [ ] Tutti gli stati implementati
 - [ ] Test unitari dei componenti ed e2e con axe senza violazioni
 - [ ] Prova manuale con un lettore di schermo annotata
