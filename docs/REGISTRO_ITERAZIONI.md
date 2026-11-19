@@ -31,7 +31,7 @@ Iterazioni completate: 10 su 15.
 | 8 | completata con attese esterne | 2026-10-27 | 2026-10-30 | 3 | `iterazione-08-tracker-privacy` | Backup cifrato e diritti privacy (ADR-0025); mancano lo staging (segreti di R2, Brevo, Sentry e backup), la beta con utenti reali e la verifica con VoiceOver e TalkBack |
 | 9 | completata con attese esterne | 2026-11-05 | 2026-11-05 | 2 | `iterazione-09-notifiche-checkin` | Web Push con testi di sistema (ADR-0026); mancano chiavi VAPID, segreti e deploy di `invia-push` in staging e la prova su telefoni reali |
 | 10 | completata con attese esterne | 2026-11-06 | 2026-11-06 | 2 | `iterazione-10-ritorno-sicuro` | Servizio in primo piano, posizioni lette con la RLS, aree solo sul telefono (ADR-0028); mancano il progetto Firebase, l'APK sul telefono e le 20 prove reali del criterio 1 della Fase 2 |
-| 11 | da iniziare | — | — | 0 | — | — |
+| 11 | in corso | 2026-11-19 | — | 0 | `iterazione-11-statistiche-badge-wrapped` | — |
 | 12 | da iniziare | — | — | 0 | — | — |
 | 13 | da iniziare | — | — | 0 | — | — |
 | 14 | da iniziare | — | — | 0 | — | — |
@@ -1214,3 +1214,31 @@ persone, nessun messaggio, nessun pulsante per chiamare o scrivere.
 **Commit**: 1dc3ad2, 7f4649b, 31b19e3, b7fe4d7, 3eba5d9, fe98338 e il commit finale sul branch
 `iterazione-10-ritorno-sicuro`.
 
+### Iterazione 11 — Statistiche, badge e Wrapped
+
+**Piano**
+- Funzionalità: F-31 (statistiche personali: serate per mese o per anno, locali, generi e DJ
+  più frequenti, spese chiuse di default), F-32 (catalogo dei badge, assegnazione giornaliera,
+  notifica, bacheca e riga nel proprio profilo), F-33 (riepilogo annuale dal 1° dicembre, da 5
+  a 8 schede, avanzamento fermabile e assente con il movimento ridotto, immagine generata sul
+  dispositivo, aggiornamento una volta al giorno). Regole: R-40, R-41, R-42, R-43, R-64, R-66,
+  R-69. Design: `design/F-31-statistiche/`, `design/F-32-badge/`, `design/F-33-wrapped/`
+  (tavole preparate il 2026-11-18 su richiesta del product owner).
+- Decisioni prese all'avvio (proposte dei brief): il Wrapped non contiene la spesa (R-43);
+  servono almeno 3 serate nell'anno; il riepilogo generato il 1° dicembre si aggiorna fino al 31
+  gennaio, una volta al giorno; nel Wrapped compaiono per nome solo i locali del catalogo, non
+  i nomi scritti a mano (potrebbero contenere nomi di persone, R-42); i badge ottenuti restano
+  anche se si cancellano serate; catalogo di 10 badge del brief F-32 da confermare con la
+  `safety-review`.
+- Database: `badge` (con il catalogo e il controllo dei tipi di criterio), `badge_utente`,
+  `riepiloghi_annuali` con RLS; `private.assegna_badge()` (ogni giorno, notifica unica per
+  utente), `private.calcola_riepilogo()`, `private.genera_riepiloghi(anno)` (1° dicembre e 1°
+  gennaio per l'anno appena chiuso), RPC `mie_statistiche(anno)` e `rigenera_mio_riepilogo()`;
+  esportazione dei dati estesa; nessuna policy per i moderatori (R-69).
+- App: commutatore Diario · Statistiche · Badge in Ricorda, schermate delle statistiche e della
+  bacheca con il foglio di dettaglio, riga dei badge nel profilo, tessera del riepilogo nel
+  diario, visualizzatore delle schede, elenco dei riepiloghi, immagine 1080 × 1920 disegnata su
+  canvas e condivisa con il foglio di sistema o scaricata, testi delle notifiche.
+- Passi: migrazione e pgTAP → tipi generati → API e motore delle schede → schermate → test
+  unitari ed e2e → documenti → cicli di revisione e `safety-review`.
+- Criteri dell'iterazione: test pgTAP di R-41 e R-42; `safety-review` del catalogo dei badge.
