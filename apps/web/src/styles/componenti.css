@@ -277,15 +277,16 @@
 .btn-neutro.is-premuto {
   background: var(--colore-riempimento-secondario);
 }
+/* Fondo pieno, non trasparente: il contrasto del testo non dipende da cosa c'è dietro. */
 .btn-pericolo {
-  background: color-mix(in srgb, var(--colore-errore) 16%, transparent);
+  background: var(--colore-errore-tenue);
   color: var(--colore-errore);
 }
 .btn-pericolo:hover,
 .btn-pericolo.is-hover,
 .btn-pericolo:active,
 .btn-pericolo.is-premuto {
-  background: color-mix(in srgb, var(--colore-errore) 24%, transparent);
+  background: var(--colore-errore-tenue-premuto);
 }
 .btn:disabled,
 .btn.is-disabilitato {

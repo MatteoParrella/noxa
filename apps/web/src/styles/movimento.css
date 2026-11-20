@@ -109,7 +109,9 @@
   left: 4px;
   width: calc((100% - 8px) / 5);
   border-radius: var(--raggio-tondo);
-  background: var(--colore-riempimento-secondario);
+  /* Pieno: l'etichetta della scheda attiva (11 pt nella tinta) resta ≥ 4,5:1 qualunque cosa
+     scorra sotto il vetro della barra. */
+  background: var(--colore-sfondo-terziario);
   transform: translateX(calc(var(--indice, 0) * 100%));
   transition: transform var(--movimento-molla) var(--curva-molla-viva);
   pointer-events: none;

@@ -164,7 +164,8 @@
   --colore-avviso: #ffd60a;
   --colore-avviso-tenue: #332b06;
   --colore-errore: #ff6961;
-  --colore-errore-tenue: #3a1513;
+  --colore-errore-tenue: #3a1513; /* testo #ff6961 sopra: 5,7:1 */
+  --colore-errore-tenue-premuto: #4a1a17;
   --colore-info: #409cff;
   --colore-info-tenue: #0d2440;
   --colore-velo: rgba(0, 0, 0, 0.5);
@@ -278,7 +279,8 @@
   --colore-avviso: #8a6100;
   --colore-avviso-tenue: #fbf0cc;
   --colore-errore: #ad0017; /* 5,0:1 anche sul fondo tinto del pulsante pericolo */
-  --colore-errore-tenue: #fbe0e2;
+  --colore-errore-tenue: #fbe0e2; /* testo #ad0017 sopra: 6,0:1 */
+  --colore-errore-tenue-premuto: #f6cfd2;
   --colore-info: #0062cc;
   --colore-info-tenue: #dde9fa;
   --colore-velo: rgba(0, 0, 0, 0.25);
