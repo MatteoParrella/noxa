@@ -27,7 +27,14 @@ const t = testi.pubblico;
 const GIORNI = 7;
 
 /** Pagine che restano aperte senza account: tutto il resto porta all'iscrizione. */
-const LIBERE = [PERCORSI.registrazione, PERCORSI.accesso, PERCORSI.termini, PERCORSI.privacy];
+const LIBERE = [
+  PERCORSI.registrazione,
+  PERCORSI.accesso,
+  PERCORSI.benvenuto,
+  PERCORSI.termini,
+  PERCORSI.privacy,
+  '/bot/',
+];
 
 /** Scheda di una serata pubblica; ogni scheda apre l'iscrizione (ADR-0036). */
 function datiPubblici(
@@ -102,13 +109,26 @@ export function ScopriPubblico() {
   // Un clic su un link interno dell'app (anche nella barra delle schede) porta all'iscrizione.
   useEffect(() => {
     const suClic = (evento: MouseEvent) => {
-      if (evento.defaultPrevented || evento.button !== 0) return;
+      // Il clic con un tasto modificatore apre una nuova scheda: lì decide ProtezioneAccount.
+      if (
+        evento.defaultPrevented ||
+        evento.button !== 0 ||
+        evento.metaKey ||
+        evento.ctrlKey ||
+        evento.shiftKey ||
+        evento.altKey
+      )
+        return;
       const link = (evento.target as Element | null)?.closest?.('a[href]');
       if (!(link instanceof HTMLAnchorElement) || link.origin !== window.location.origin) return;
+      // I salti nella pagina («Vai al contenuto») restano salti.
+      if (link.getAttribute('href')?.startsWith('#')) return;
       const percorso = link.pathname.endsWith('/') ? link.pathname : `${link.pathname}/`;
-      if (LIBERE.some((libera) => percorso.startsWith(libera))) return;
+      // Scopri stessa (la scheda o il marchio) resta qui; le sue sottopagine no.
+      if (percorso === PERCORSI.home || LIBERE.some((libera) => percorso.startsWith(libera)))
+        return;
       evento.preventDefault();
-      if (percorso !== PERCORSI.home) ricordaPaginaDopoAccesso(percorso + link.search);
+      ricordaPaginaDopoAccesso(percorso + link.search);
       router.push(PERCORSI.registrazione);
     };
     document.addEventListener('click', suClic, true);

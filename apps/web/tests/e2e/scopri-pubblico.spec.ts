@@ -52,4 +52,14 @@ test.describe('elenco pubblico delle serate', () => {
     expect(supabase.chiamate('cerca_eventi_pubblici')).toHaveLength(1);
     expect(supabase.chiamate('mio_account')).toHaveLength(0);
   });
+
+  test('«Vai al contenuto» e la scheda Scopri non portano all’iscrizione', async ({ page }) => {
+    await page.goto('/scopri/');
+    await expect(page.getByRole('link', { name: /^Notte Ferrovia/ })).toBeVisible();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/scopri\/(#contenuto)?$/);
+    await page.getByRole('link', { name: 'Scopri' }).first().click();
+    await expect(page).toHaveURL(/\/scopri\/(#contenuto)?$/);
+  });
 });

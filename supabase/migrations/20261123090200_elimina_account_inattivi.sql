@@ -204,7 +204,10 @@ begin
   -- Nuovi avvisi: al massimo 100 al giorno, dentro il limite gratuito di Brevo (ADR-0021).
   for utente in
     select u.id from auth.users u
-    where private.ultimo_accesso(u.id) < now() - interval '24 months'
+    -- Filtro economico prima: l'ultimo accesso non è mai prima di questi due istanti.
+    where coalesce(u.last_sign_in_at, u.created_at) < now() - interval '24 months'
+      and u.created_at < now() - interval '24 months'
+      and private.ultimo_accesso(u.id) < now() - interval '24 months'
       and not exists (select 1 from private.avvisi_inattivita a where a.utente_id = u.id)
     order by private.ultimo_accesso(u.id)
     limit greatest(0, 100 - (select count(*) from private.avvisi_inattivita a
