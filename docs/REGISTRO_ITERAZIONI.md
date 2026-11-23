@@ -1313,24 +1313,24 @@ otto schede del riepilogo (anche con il movimento ridotto), elenco dei riepilogh
   usa più Claude Design: brief e tavole degli stati li prepara Claude in `design/` (deroga a
   DESIGN.md §1, registrata in DESIGN.md).
 - Decisioni prese all'avvio con il product owner:
-  - **D-18**: sul **sito** (non nell'app installata) le serate si sfogliano senza account, in
-    forma ridotta (copertina generata, titolo, locale, comune, data, ora, età minima, generi);
-    descrizione, prezzo, biglietti, mappa, amici e partecipazioni restano agli iscritti. Le
-    serate con riferimenti all'alcol compaiono senza titolo, descrizione e generi, solo con
-    locale, data e «18+» e l'invito a entrare con un account maggiorenne (R-23). Nuovo ADR che
-    modifica R-07.
+  - **D-18**: sul **sito** (non nell'app installata) l'elenco delle serate si vede senza
+    account, in forma ridotta (copertina generata, titolo, locale, comune, data, ora, età
+    minima, generi); **qualsiasi clic** (una serata, i filtri, la mappa) porta all'iscrizione,
+    poi si riapre ciò che si era scelto. Nessun dettaglio pubblico. Le serate con riferimenti
+    all'alcol compaiono senza titolo e generi, solo con locale, data e «18+» (R-23). Nuovo ADR
+    che modifica R-07.
   - **D-19**: guida di tono scritta da Claude in DESIGN.md, revisione dei testi di
     `messaggi/it.ts`, descrizioni accorciate con «Leggi tutto».
   - **Età predefinita per locale**: non si fa; resta 18+ quando la serata non la dichiara
     (R-21). Tolta dal piano con il motivo.
-- Database: RPC pubbliche `cerca_eventi_pubblici` ed `evento_pubblico` (security definer,
-  colonne ridotte, unico accesso del ruolo `anon`); link solo `https` su
+- Database: RPC pubblica `cerca_eventi_pubblici` (security definer, colonne ridotte, unico
+  accesso del ruolo `anon`); link solo `https` su
   `eventi.url_biglietti`, `eventi_fonti.url_originale`, `locali.sito_web`; avviso ed
   eliminazione degli account senza accessi da 24 mesi; gestione di `servizi_trasporto` dai
   moderatori con registro (R-69); colore dei gruppi. Test pgTAP con il ruolo `anon` e le età
   del seed.
 - Worker: link normalizzati a `https`.
-- App: Scopri e dettaglio senza account sul sito; momenti di riscontro (amicizia confermata,
+- App: elenco di Scopri senza account sul sito, con ogni clic verso l'iscrizione; momenti di riscontro (amicizia confermata,
   gruppo creato, serata confermata da tutti); layout desktop di Organizza, Vivi, Ricorda e
   Profilo; carattere monospazio solo per orari e date; «Privacy e dati» più leggibile; titoli
   allineati ai nomi delle aree; tinta delle foto nel tema chiaro; colore dei gruppi; servizi di
