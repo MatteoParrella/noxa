@@ -27,7 +27,7 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0016](0016-mappe-protomaps-autospitate.md) | Mappe gratuite con Protomaps auto-ospitato | Accettato (hosting sostituito da ADR-0021) |
 | [0017](0017-fascia-unica-minorenni.md) | Un'unica fascia per i minorenni dai 14 ai 17 anni | Accettato |
 | [0018](0018-foto-dei-locali.md) | Foto dei locali come immagine degli eventi | Accettato |
-| [0019](0019-movimento-espressivo.md) | Movimento espressivo | Accettato |
+| [0019](0019-movimento-espressivo.md) | Movimento espressivo | Sostituito in parte da ADR-0035 |
 | [0020](0020-captcha-cloudflare-turnstile.md) | CAPTCHA con Cloudflare Turnstile | Accettato |
 | [0021](0021-infrastruttura-a-costo-minimo.md) | Infrastruttura a costo minimo | Accettato |
 | [0022](0022-layout-responsive.md) | Layout responsive con sidebar di navigazione | Accettato |
@@ -43,3 +43,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0032](0032-foto-d-atmosfera-nelle-copertine.md) | Foto d'atmosfera con licenza libera nelle copertine | Accettato |
 | [0033](0033-layout-desktop-da-sito.md) | Su desktop Noxa si presenta come un sito | Accettato |
 | [0034](0034-non-hai-un-passaggio.md) | «Non hai un passaggio?» con numeri e link, senza integrazioni | Accettato |
+| [0035](0035-stile-ios-e-materiali-traslucidi.md) | Interfaccia in stile iOS con materiali traslucidi | Accettato |

@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+// Carattere di sistema per l'interfaccia (ADR-0035): Inter è il ripiego dove non c'è SF Pro
+// né Roboto, Archivo resta per i momenti di marca.
 import '@fontsource-variable/archivo/wdth.css';
-import '@fontsource/ibm-plex-mono/latin-400.css';
-import '@fontsource/ibm-plex-mono/latin-500.css';
+import '@fontsource-variable/inter/index.css';
 import { Apertura } from '@/components/guscio/Apertura';
 import { Fornitori } from '@/components/guscio/Fornitori';
 import { RegistraServiceWorker } from '@/components/guscio/RegistraServiceWorker';
@@ -38,7 +39,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   // Colore della barra di sistema: lo sfondo del tema scuro predefinito (tokens.css).
-  themeColor: '#0E1116',
+  themeColor: '#000000',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

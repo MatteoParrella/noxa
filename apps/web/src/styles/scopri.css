@@ -50,6 +50,7 @@
   padding: 7px;
 }
 .mini-tipo b {
+  font-family: var(--tipo-famiglia-marchio);
   font-size: 0.8125rem;
   line-height: 1;
   font-weight: var(--tipo-peso-forte);
@@ -59,6 +60,7 @@
 }
 .mini-tipo span {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-didascalia);
 }
 .cop-tipo {
@@ -68,6 +70,7 @@
 }
 .cop-ora {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 4.5rem;
   line-height: 0.9;
   letter-spacing: -0.06em;
@@ -98,7 +101,7 @@
   z-index: 3;
 }
 .cop-credito {
-  font-size: 0.6875rem;
+  font-size: var(--tipo-didascalia-2);
   line-height: 1.4;
   color: var(--colore-testo-secondario);
 }
@@ -124,9 +127,12 @@
   justify-content: flex-end;
   gap: 6px;
   padding: var(--spazio-4);
+  /* Il testo non sale sotto l'etichetta dell'età in alto a sinistra. */
+  padding-top: calc(var(--spazio-3) + 30px + var(--spazio-3));
 }
 .evidenza-titolo {
   margin: 0;
+  font-family: var(--tipo-famiglia-marchio);
   font-size: 1.75rem;
   line-height: 1.02;
   font-weight: var(--tipo-peso-forte);
@@ -148,10 +154,10 @@
   gap: 6px;
 }
 .badge-sopra .badge {
-  border-color: var(--vetro-bordo);
-  background: var(--vetro-fondo-forte);
-  -webkit-backdrop-filter: var(--vetro-sfocatura);
-  backdrop-filter: var(--vetro-sfocatura);
+  border-color: var(--materiale-bordo);
+  background: var(--materiale-normale);
+  -webkit-backdrop-filter: var(--sfocatura-sottile);
+  backdrop-filter: var(--sfocatura-sottile);
   color: var(--colore-testo-primario);
 }
 /* Senza amici, generi né prezzo il corpo non lascia spazio vuoto sulla copertina. */
@@ -188,10 +194,10 @@
 }
 .rc-titolo {
   margin: 0;
-  font-size: 1.0625rem;
-  line-height: 1.25;
-  font-weight: var(--tipo-peso-forte);
-  font-stretch: 87.5%;
+  font-size: var(--tipo-titoletto);
+  line-height: 1.29;
+  font-weight: var(--tipo-peso-semi);
+  letter-spacing: -0.02em;
 }
 .rc-luogo {
   margin: 2px 0 0;
@@ -201,6 +207,7 @@
 }
 .rc-ora {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-corpo-piccolo);
   font-weight: var(--tipo-peso-medio);
   font-variant-numeric: tabular-nums;
@@ -222,6 +229,7 @@
   gap: var(--spazio-1) var(--spazio-3);
   margin-top: 6px;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-corpo-piccolo);
   color: var(--colore-testo-secondario);
 }
@@ -365,47 +373,45 @@
   align-items: center;
   justify-content: center;
   gap: var(--spazio-2);
-  min-height: var(--spazio-12);
-  padding: 10px var(--spazio-3);
-  border: 1px solid var(--colore-linea-forte);
-  border-radius: var(--raggio-2);
-  background: transparent;
+  min-height: 50px;
+  padding: 0 var(--spazio-4);
+  border: 0;
+  border-radius: var(--raggio-tondo);
+  background: var(--colore-riempimento-secondario);
   color: var(--colore-testo-primario);
   font: inherit;
-  font-size: 0.9375rem;
-  font-weight: var(--tipo-peso-medio);
+  font-size: var(--tipo-corpo);
+  font-weight: var(--tipo-peso-semi);
+  letter-spacing: -0.02em;
+  -webkit-tap-highlight-color: transparent;
   cursor: pointer;
   transition:
     background-color var(--movimento-veloce) var(--curva-standard),
     color var(--movimento-veloce) var(--curva-standard);
 }
 .partecipa-opz:hover {
-  background: var(--colore-superficie-2);
+  background: var(--colore-riempimento);
 }
 .partecipa-opz.is-on {
   background: var(--colore-testo-primario);
-  border-color: var(--colore-testo-primario);
   color: var(--colore-sfondo);
 }
-/* Partecipo è l'unico arancio della schermata: tenue a riposo, pieno quando è scelto. */
+/* Partecipo è l'unico elemento nella tinta della schermata: tenue a riposo, pieno quando è scelto. */
 .partecipa-opz.forte {
-  background: var(--colore-accento-tenue);
-  border-color: var(--colore-accento);
+  background: var(--colore-tinta-tenue);
   color: var(--colore-accento-testo);
-  font-weight: var(--tipo-peso-forte);
 }
 .partecipa-opz.forte:hover {
-  background: var(--colore-accento-tenue);
+  background: var(--colore-tinta-tenue);
 }
 .partecipa-opz.is-on.forte {
-  background: var(--colore-accento);
-  border-color: var(--colore-accento);
+  background: var(--colore-tinta);
   color: var(--colore-testo-su-accento);
 }
 /* Riscontro alla scelta: un solo battito, solo dopo il tocco (ADR-0019). */
 @media (prefers-reduced-motion: no-preference) {
   .partecipa-opz.appena-scelto {
-    animation: battito 400ms var(--curva-standard) 1;
+    animation: battito var(--movimento-molla) var(--curva-molla-viva) 1;
   }
   @keyframes battito {
     40% {
@@ -496,6 +502,7 @@
 }
 .dettaglio-titolo {
   margin: 0 0 var(--spazio-2);
+  font-family: var(--tipo-famiglia-marchio);
   font-size: 2.25rem;
   line-height: 1;
   font-weight: var(--tipo-peso-forte);
@@ -504,6 +511,7 @@
 }
 .dettaglio-quando {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-corpo);
   font-weight: var(--tipo-peso-medio);
 }
@@ -535,9 +543,9 @@
 .dati dt {
   font-size: var(--tipo-etichetta);
   line-height: 1.9;
-  font-weight: var(--tipo-peso-medio);
+  font-weight: var(--tipo-peso-normale);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.02em;
   color: var(--colore-testo-secondario);
 }
 .dati dd {
@@ -572,6 +580,7 @@
 }
 .segmenti-mono .segmento {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
 }
 .scopri-contenuto {
   animation: dissolvi var(--movimento-base) linear both;
@@ -630,8 +639,8 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spazio-2);
   padding: var(--spazio-3) 0 var(--spazio-1);
-  border-top: 1px solid var(--colore-linea);
-  background: var(--colore-superficie-1);
+  border-top: 0.5px solid var(--colore-separatore);
+  background: transparent;
 }
 .opz-riga {
   display: flex;
@@ -697,23 +706,26 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--area-tocco);
-  padding: 0 14px;
-  border: 1px solid var(--colore-linea-forte);
-  border-radius: var(--raggio-2);
-  background: transparent;
+  padding: 0 var(--spazio-4);
+  border: 0;
+  border-radius: var(--raggio-tondo);
+  background: var(--colore-riempimento-terziario);
   color: var(--colore-testo-primario);
   font: inherit;
   font-size: var(--tipo-corpo-piccolo);
   font-weight: var(--tipo-peso-medio);
+  letter-spacing: -0.015em;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 .chip:hover {
-  background: var(--colore-superficie-2);
+  background: var(--colore-riempimento-secondario);
 }
+/* Scelto: pieno nella tinta, con il peso del testo che cambia (non solo il colore). */
 .chip.is-on {
-  background: var(--colore-testo-primario);
-  border-color: var(--colore-testo-primario);
-  color: var(--colore-sfondo);
+  background: var(--colore-tinta);
+  color: var(--colore-testo-su-accento);
+  font-weight: var(--tipo-peso-semi);
 }
 
 /* Giorni che non si possono scegliere: spenti e barrati (design/F-01-scopri, tavola 02). */
@@ -775,9 +787,10 @@
   border-radius: 10px;
   background: var(--colore-superficie-3);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-didascalia);
 }
-/* Il segnaposto selezionato è l'unico arancio. */
+/* Il segnaposto selezionato è l'unico nella tinta. */
 .marker-locale.is-on {
   z-index: 3;
   background: var(--colore-accento);
@@ -806,6 +819,7 @@
     0 0 0 4px var(--colore-sfondo),
     0 0 0 5px var(--colore-linea-forte);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-mono-dato);
   font-weight: var(--tipo-peso-medio);
   cursor: pointer;

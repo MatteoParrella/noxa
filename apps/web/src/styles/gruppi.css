@@ -6,6 +6,7 @@
 /* ---------- Gruppi ---------- */
 .gr-conteggio {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
   font-variant-numeric: tabular-nums;
@@ -41,8 +42,9 @@
   flex-wrap: wrap;
 }
 .gr-titolo b {
-  font-size: 1.0625rem;
-  line-height: 1.25;
+  font-size: var(--tipo-titoletto);
+  line-height: 1.29;
+  font-weight: var(--tipo-peso-semi);
 }
 .gr-membri {
   display: flex;
@@ -55,6 +57,7 @@
 }
 .gr-prossima .mono {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--colore-testo-primario);
   font-weight: 500;
 }
@@ -76,10 +79,9 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 14px;
-  border: 1px solid var(--colore-linea);
+  padding: var(--spazio-4);
   border-radius: var(--raggio-3);
-  background: var(--colore-superficie-1);
+  background: var(--colore-cella);
 }
 .inv-testa {
   display: grid;
@@ -140,6 +142,7 @@
 .sel-username {
   display: block;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
 }
@@ -160,6 +163,7 @@
 }
 .sel-conta {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
 }
 .sel-regola {
@@ -189,10 +193,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 12px calc(-1 * var(--spazio-5)) 0;
-  padding: 12px var(--spazio-5) 16px;
-  background: var(--colore-sfondo);
-  border-top: 1px solid var(--colore-linea);
+  margin: 12px 0 0;
+  padding: 6px 6px 6px var(--spazio-5);
+  border-radius: var(--raggio-tondo);
 }
 .gr-barra-fondo .btn {
   flex: none;
@@ -200,7 +203,7 @@
 /* Sul telefono la navigazione è una barra fissa in fondo (componenti.css, «Guscio dell'app»):
    la barra delle azioni si ferma sopra di lei, alla stessa altezza che il contenuto le lascia. */
 .guscio .gr-barra-fondo {
-  bottom: calc(var(--nav-altezza) + env(safe-area-inset-bottom));
+  bottom: var(--nav-ingombro);
 }
 @media (min-width: 48rem) {
   .guscio .gr-barra-fondo {
@@ -312,6 +315,7 @@
 }
 .se-cop .se-cop-meta {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.875rem;
 }
 .se-cop .se-cop-badge {
@@ -373,12 +377,11 @@
 /* la mia risposta, sempre in alto */
 .se-risposta {
   position: sticky;
-  top: 0;
   z-index: 4;
-  margin: 0 calc(-1 * var(--spazio-5));
-  padding: 10px var(--spazio-5) 12px;
-  background: var(--colore-sfondo);
-  border-bottom: 1px solid var(--colore-linea);
+  top: env(safe-area-inset-top);
+  margin: 0 calc(-1 * var(--margine-schermo));
+  padding: 10px var(--margine-schermo) 12px;
+  border-bottom: 0.5px solid var(--colore-separatore);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -404,8 +407,9 @@
 
 .se-conti {
   font-family: var(--tipo-famiglia-mono);
-  font-size: 0.8125rem;
-  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--tipo-nota);
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--colore-testo-secondario);
 }
@@ -446,6 +450,7 @@
 .pr-username {
   display: block;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
 }
@@ -507,6 +512,7 @@
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
 }
 .se-link .se-fuori {
   margin-left: auto;
@@ -528,14 +534,16 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid var(--colore-linea-forte);
+  min-height: var(--area-tocco);
+  padding: 0 var(--spazio-4);
+  border: 0;
   border-radius: var(--raggio-tondo);
-  background: transparent;
+  background: var(--colore-riempimento-terziario);
   color: var(--colore-testo-primario);
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--tipo-corpo-piccolo);
+  letter-spacing: -0.015em;
+  -webkit-tap-highlight-color: transparent;
   cursor: pointer;
 }
 .pillola:focus-visible {
@@ -543,18 +551,16 @@
   outline-offset: 2px;
 }
 .pillola[aria-checked='true'] {
-  background: var(--colore-testo-primario);
-  border-color: var(--colore-testo-primario);
-  color: var(--colore-sfondo);
-  font-weight: 500;
+  background: var(--colore-tinta);
+  color: var(--colore-testo-su-accento);
+  font-weight: var(--tipo-peso-semi);
 }
 .pillola:disabled {
   color: var(--colore-testo-terziario);
-  border-color: var(--colore-superficie-3);
   cursor: not-allowed;
 }
 .pillola[aria-checked='true']:disabled {
-  background: var(--colore-superficie-3);
+  background: var(--colore-riempimento);
   color: var(--colore-testo-secondario);
 }
 .se-mezzo {
@@ -571,6 +577,7 @@
 }
 .se-mezzo-testa small {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--colore-testo-secondario);
 }
 
@@ -583,6 +590,7 @@
 }
 .se-posti .se-valore {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 1.25rem;
   text-align: center;
 }
@@ -619,6 +627,7 @@
 .se-passaggio small {
   display: block;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
 }
@@ -668,6 +677,7 @@
 }
 .se-auto-posti {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
 }
 .se-sedili {
@@ -694,6 +704,7 @@
   background: transparent;
   color: var(--colore-testo-secondario);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
 }
 
@@ -747,7 +758,8 @@
   display: flex;
   flex-direction: column;
   font-family: var(--tipo-famiglia-mono);
-  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--tipo-didascalia-2);
   line-height: 1.2;
   color: var(--colore-testo-secondario);
   text-transform: uppercase;
@@ -764,8 +776,9 @@
   min-width: 0;
 }
 .sr-corpo b {
-  font-size: 0.9375rem;
-  line-height: 1.3;
+  font-size: var(--tipo-titoletto);
+  line-height: 1.29;
+  font-weight: var(--tipo-peso-semi);
 }
 .sr-corpo small {
   font-size: 0.8125rem;
@@ -773,6 +786,7 @@
 }
 .sr-risposte {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--colore-testo-secondario);
 }
@@ -847,6 +861,7 @@
   margin-top: 4px;
   align-items: center;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
 }
 

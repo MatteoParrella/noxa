@@ -14,7 +14,7 @@ import { useSessione } from './sessione';
 /** Una copertina generata per promessa: motivi di esempio, nessun evento reale (R-07). */
 const FAMIGLIE_PROMESSE: readonly Famiglia[] = ['house', 'techno', 'accento', 'dnb'];
 
-/** Prima schermata senza account: l'unica con il bagliore arancio (design/F-10-accesso). */
+/** Prima schermata senza account: l'unica con il bagliore della tinta (design/F-10-accesso). */
 export function Benvenuto() {
   const testi = messaggi.benvenuto;
   const router = useRouter();

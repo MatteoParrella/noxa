@@ -33,6 +33,7 @@
 }
 .rp-user {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-mono-dato);
   line-height: 1.35;
   color: var(--colore-testo-secondario);
@@ -72,6 +73,11 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spazio-2);
 }
+/* Due capsule affiancate: etichette su una riga anche quando sono lunghe. */
+.azioni-doppie > .btn {
+  padding: 0 var(--spazio-3);
+  font-size: var(--tipo-richiamo);
+}
 .inviata {
   display: inline-flex;
   align-items: center;
@@ -105,6 +111,7 @@
   display: block;
   padding: var(--spazio-2) var(--spazio-3) 6px;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-didascalia);
   color: var(--colore-testo-secondario);
 }
@@ -161,6 +168,7 @@
 }
 .pg-user {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-corpo);
   color: var(--colore-testo-secondario);
 }
@@ -203,7 +211,7 @@
 .codice {
   margin: 0;
   text-align: center;
-  font-family: var(--tipo-famiglia-mono);
+  font-family: var(--tipo-famiglia-codice);
   font-size: var(--tipo-titolo-2);
   line-height: 1.2;
   font-weight: var(--tipo-peso-medio);
@@ -288,7 +296,7 @@
   font-weight: var(--tipo-peso-medio);
 }
 .campo-codice input {
-  font-family: var(--tipo-famiglia-mono);
+  font-family: var(--tipo-famiglia-codice);
   font-size: var(--tipo-titolo-3);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -405,6 +413,7 @@
 }
 .segn-meta {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-didascalia);
   color: var(--colore-testo-secondario);
 }
@@ -426,11 +435,11 @@
   position: fixed;
   left: var(--spazio-3);
   right: var(--spazio-3);
-  bottom: calc(96px + env(safe-area-inset-bottom));
-  z-index: 7;
+  bottom: calc(var(--nav-ingombro) + var(--spazio-2));
+  z-index: 11;
   max-width: 560px;
   margin: 0 auto;
-  animation: toast-entra var(--movimento-base) var(--curva-entrata) both;
+  animation: toast-entra var(--movimento-molla) var(--curva-molla-viva) both;
 }
 @keyframes toast-entra {
   from {

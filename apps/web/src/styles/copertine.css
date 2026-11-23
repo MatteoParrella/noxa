@@ -183,6 +183,7 @@
 
 .cg-ora {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-copertina-ora);
   font-weight: var(--tipo-peso-medio);
   letter-spacing: 0.02em;
@@ -190,6 +191,7 @@
 }
 .cg-titolo {
   margin: 0;
+  font-family: var(--tipo-famiglia-marchio);
   font-weight: var(--tipo-peso-forte);
   font-stretch: var(--tipo-larghezza-manifesto);
   text-transform: uppercase;

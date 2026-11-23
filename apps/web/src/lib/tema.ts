@@ -27,6 +27,8 @@ export const EVENTO_TEMA = 'noxa:tema';
 /**
  * Script eseguito prima del rendering: applica il tema (niente lampo del tema sbagliato) e
  * attiva le animazioni allo scorrimento (.movimento), che senza JavaScript restano spente.
+ * Il tema scuro è il predefinito, anche se il sistema è chiaro: il chiaro vale solo se la
+ * persona lo ha scelto con l'interruttore del profilo (ADR-0035).
  * Segna anche la schermata di apertura come già vista in questa sessione (Apertura.tsx).
  */
 export const SCRIPT_TEMA = `document.documentElement.classList.add('movimento');try{if(localStorage.getItem('${CHIAVE}')==='chiaro')document.documentElement.dataset.tema='chiaro'}catch(e){}try{if(sessionStorage.getItem('${CHIAVE_APERTURA}'))document.documentElement.dataset.apertura='vista';else sessionStorage.setItem('${CHIAVE_APERTURA}','1')}catch(e){}`;

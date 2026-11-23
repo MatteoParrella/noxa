@@ -33,6 +33,9 @@ badge e riepilogo annuale. È un prodotto destinato al lancio pubblico, non un p
   (Workbox) e app iOS/Android con Capacitor (ADR-0001). TanStack Query, Zod, MapLibre GL JS
   con la basemap Protomaps auto-ospitata in PMTiles, senza servizi di mappe a pagamento
   (ADR-0016).
+- **Interfaccia**: stile iOS con materiali traslucidi (ADR-0035, DESIGN.md §2.1): colori
+  semantici, carattere di sistema con la scala Dynamic Type, vetro solo su barre, fogli e
+  menu, tinta ciano neon, tema scuro predefinito.
 - **Backend**: Supabase in UE (Postgres + PostGIS, Auth, Storage, Realtime, Edge Functions
   Deno, `pg_cron`). **La RLS è l'unico punto di autorizzazione** (ADR-0002).
 - **Worker**: Python 3.12, FastAPI, httpx, Playwright, rapidfuzz, Pydantic, structlog, SDK
@@ -164,7 +167,8 @@ invece di implementarla.
   dominio (`src/lib/errori.ts`); nessun `console.log` in produzione (logger + Sentry).
 - **React**: componenti funzionali; dati con TanStack Query; stati di caricamento, vuoto,
   errore e offline sempre gestiti; solo token del design system, nessun valore di stile
-  scritto a mano.
+  scritto a mano; stile iOS di DESIGN.md §2.1 (liste raggruppate, scala Dynamic Type, vetro
+  solo sullo strato funzionale).
 - **Python**: mypy strict, Ruff (lint e format), Pydantic per ogni dato in ingresso e uscita,
   eccezioni tipizzate, `structlog` con contesto (`job_id`, `fonte_id`), mai `print`; codice
   async con timeout espliciti.

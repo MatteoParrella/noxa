@@ -26,6 +26,7 @@
 }
 .ck-stasera time {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -42,10 +43,8 @@
   align-items: center;
   gap: var(--spazio-3);
 }
-.ck-sezione-testa::after {
-  content: '';
-  flex: 1;
-  border-top: 1px solid var(--colore-linea);
+.ck-sezione-testa {
+  padding: 0 var(--spazio-4);
 }
 .ck-sezione-testa h2 {
   margin: 0;
@@ -167,6 +166,7 @@
   border-radius: var(--raggio-2);
   transform: rotate(-4deg);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
   line-height: 1.25;
   letter-spacing: 0.08em;
@@ -195,6 +195,7 @@
   gap: 4px 12px;
   margin: 0;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -261,6 +262,7 @@
 }
 .ck-amico-corpo .username {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   font-weight: 400;
   color: var(--colore-testo-secondario);
@@ -274,6 +276,7 @@
 }
 .ck-dalle {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -308,6 +311,7 @@
   border-radius: var(--raggio-tondo);
   border: 1px solid var(--colore-linea-forte);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
 }
 .ck-passo.is-ora .ck-passo-testa .n {
@@ -542,6 +546,7 @@
 .ck-username {
   display: block;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }
@@ -564,6 +569,7 @@
 /* notifica: check-in di un amico */
 .nt-ck {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -685,6 +691,7 @@
   border-radius: var(--raggio-tondo);
   border: 1px solid var(--colore-linea-forte);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
 }
 .nf-passi li svg {
@@ -732,6 +739,7 @@
   padding: 0;
   list-style: none;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   letter-spacing: 0.02em;
 }
@@ -774,8 +782,9 @@
   align-items: baseline;
   gap: var(--spazio-2);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--colore-testo-secondario);
 }
@@ -823,6 +832,7 @@
 }
 .dsp-testo .mono {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--colore-testo-secondario);
 }
@@ -831,6 +841,7 @@
   align-items: center;
   gap: 6px;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -933,7 +944,7 @@
   font-size: var(--tipo-etichetta);
   line-height: 1.5;
   font-weight: var(--tipo-peso-medio);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--colore-testo-secondario);
 }

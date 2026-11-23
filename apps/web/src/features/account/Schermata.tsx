@@ -19,7 +19,7 @@ type Props = {
   children?: ReactNode;
   piede?: ReactNode;
   piedeSenzaFilo?: boolean;
-  /** Bagliore arancio: solo nel Benvenuto (design/F-10-accesso). */
+  /** Bagliore della tinta: solo nel Benvenuto (design/F-10-accesso). */
   bagliore?: boolean;
   /** Corpo allineato in basso (Benvenuto). */
   inFondo?: boolean;

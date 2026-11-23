@@ -47,8 +47,10 @@
   flex-direction: column;
   gap: var(--spazio-2);
   padding: var(--spazio-3) var(--spazio-5) calc(var(--spazio-5) + env(safe-area-inset-bottom));
-  background: var(--colore-sfondo);
-  border-top: 1px solid var(--colore-linea);
+  background: var(--materiale-normale);
+  -webkit-backdrop-filter: var(--sfocatura-normale);
+  backdrop-filter: var(--sfocatura-normale);
+  border-top: 0.5px solid var(--colore-separatore);
 }
 .schermo-piede.senza-filo {
   border-top: 0;
@@ -60,11 +62,11 @@
 }
 .titolo-accesso {
   margin: var(--spazio-2) 0 var(--spazio-6);
-  font-size: var(--tipo-titolo-accesso);
-  line-height: 1.02;
+  font-family: var(--tipo-famiglia-titoli);
+  font-size: var(--tipo-titolo-grande);
+  line-height: 1.2;
   font-weight: var(--tipo-peso-forte);
-  font-stretch: var(--tipo-larghezza-stretta);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.01em;
 }
 .testo-accesso {
   margin: 0;
@@ -114,6 +116,7 @@
   display: flex;
   align-items: baseline;
   margin: 0;
+  font-family: var(--tipo-famiglia-marchio);
   font-size: var(--tipo-marchio);
   line-height: 0.9;
   font-weight: var(--tipo-peso-forte);
@@ -156,6 +159,7 @@
 .passi-testo {
   flex: none;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-mono-dato);
   font-weight: var(--tipo-peso-medio);
   color: var(--colore-testo-secondario);
@@ -255,17 +259,20 @@
 .campo-conta {
   margin-left: auto;
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-didascalia);
   color: var(--colore-testo-secondario);
 }
 .prefisso {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--colore-testo-secondario);
 }
 
 /* ---------- campo data e calendario ---------- */
 .campo-data input {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-corpo);
   letter-spacing: 0.02em;
 }
@@ -296,7 +303,7 @@
 .calendario-griglia .giorno-settimana {
   padding: var(--spazio-1) 0;
   font-size: var(--tipo-etichetta);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--colore-testo-secondario);
 }
@@ -306,10 +313,11 @@
   justify-content: center;
   height: var(--area-tocco);
   border: 0;
-  border-radius: var(--raggio-2);
+  border-radius: var(--raggio-tondo);
   background: transparent;
   color: var(--colore-testo-primario);
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--tipo-corpo);
   cursor: pointer;
 }
@@ -440,6 +448,7 @@
 }
 .illustrazione text {
   font-family: var(--tipo-famiglia-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 12px;
   fill: var(--colore-testo-primario);
 }

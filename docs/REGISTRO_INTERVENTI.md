@@ -331,3 +331,83 @@ Richiesta: «vedi te per il resto, sistema tutto prima della IT11». Ramo
   quando passa in secondo piano, tranne mentre un campo di testo è attivo
   (`lib/aggiornamento.ts`, ARCHITECTURE.md §5.5). Ramo
   `fix/aggiornamento-app-in-secondo-piano`.
+
+## 2026-11-19/20 — Interfaccia in stile iOS (ADR-0035)
+
+Richiesta: rifare tutta l'interfaccia perché sembri un'app nativa Apple (iOS 26, materiali
+tipo Liquid Glass), senza toccare logica, route, API o dati, con la skill `apple-design`
+(audit HIG prima e dopo). Scelte del product owner: tinta che non sia arancio (poi ciano
+neon), tema scuro predefinito con l'interruttore del tema che resta, deroga a Claude Design,
+lavoro in un worktree separato mentre l'iterazione 11 procedeva in parallelo.
+
+### Ramo e commit (locali, non caricati su GitHub)
+
+Ramo `feat/stile-ios`, sopra `main` con l'iterazione 11 (PR #94).
+
+| Commit | Contenuto |
+|---|---|
+| `2c942cd` | Design system: token semantici iOS, scala Dynamic Type, materiali, componenti, ADR-0035, DESIGN.md §2.1, CLAUDE.md, skill `implement-design` |
+| `3c171f3` | Tinta ciano neon (anche icona e anteprima dei link), cifre tabulari di sistema al posto di IBM Plex Mono |
+| `7f16394` | Scopri e dettaglio evento |
+| `96d2761` | Organizza, gruppi e serate; liste raggruppate senza cambiare il markup |
+| `b8b9656` | Ricorda con statistiche, badge, riepiloghi e Wrapped dell'iterazione 11 |
+| `cf693ea` | Vivi, ritorno sicuro, Profilo e Privacy |
+| `a316231` | Benvenuto, accesso e registrazione |
+| `023f863`, `48c11dc`, `a596f74` e seguenti | Correzioni dalle verifiche (testo a 10 px, contrasti, menu ⋯ nelle liste, test del movimento, liste senza `:has()`), questo registro |
+
+### Che cosa è cambiato
+
+- Colori: ruoli semantici di iOS con i nomi storici come alias, così tutte le schermate li
+  ereditano; contrasti calcolati e scritti accanto ai token. Tinta `#3EE0CF` in scuro e
+  `#005A52` in chiaro.
+- Testo: carattere di sistema con Inter incluso come ripiego, scala sul modello di Dynamic
+  Type in `rem` su base 17 px; su iPhone e iPad la base segue la dimensione del testo di
+  sistema. Archivo resta per copertine, marchio e Wrapped.
+- Vetro solo su barra delle schede, barra del titolo, fogli, menu, notifiche e barre delle
+  azioni, con ripieghi opachi; schede e celle piene.
+- Componenti: barra delle schede a capsula galleggiante con la capsula attiva che scivola a
+  molla, titolo grande che si riduce in una barra di vetro, fogli che si chiudono
+  trascinando, segmented control, interruttore 51 × 31, pulsanti a capsula, liste
+  raggruppate, scheletri, stati vuoti centrati.
+- Movimento: 150–450 ms a molla, niente titoli parola per parola (sostituisce le durate di
+  ADR-0019).
+- Errori trovati lungo la strada e corretti: l'età sulla copertina in evidenza copriva la
+  data (anche su `main`); i menu ⋯ dentro le liste non si aprivano; i titoli composti parola
+  per parola non andavano a capo dopo il cambio di carattere.
+
+### Verifica
+
+- Tipi, lint, formattazione, `verifica_documentazione.py`, 178 test unitari.
+- e2e Chromium telefono e desktop: 460 su 460 (al primo giro 40 falliti per contrasti nel
+  tema chiaro, menu delle liste e test del movimento, tutti corretti).
+- e2e Safari per iPhone (WebKit): su questa macchina WebKit sotto WSL va in timeout anche
+  su `main` (19 falliti su 229). Sul ramo i falliti erano 30, 17 diversi da `main`: rieseguiti
+  da soli passano tutti e 46 i casi, dopo aver corretto i due contrasti veri che solo WebKit
+  mostrava (etichetta della scheda attiva e pulsante pericolo).
+- e2e Firefox desktop: al primo giro 6 falliti. Quattro erano timeout e passano rieseguiti;
+  i due test di accessibilità della moderazione andavano davvero oltre i 90 secondi (su
+  `main` ne servono 34) per i selettori `:has()` delle liste raggruppate, che Firefox
+  ricalcola a ogni lettura di stile di axe. Riscritti senza `:has()`: 168 su 168 tra
+  moderazione, amici, gruppi, privacy e Ricorda su Firefox e Chromium, aspetto invariato.
+- Foto prima e dopo di ogni area in entrambi i temi, con Supabase simulato.
+- `safety-review`: superata, rapporto qui sotto.
+
+### Safety review — interfaccia in stile iOS (nessuna F-xx nuova)
+
+Esito: SUPERATA. Nessun file in `supabase/`, `services/` o `packages/`; nessuna nuova
+chiamata di rete, archiviazione, posizione o dato personale; nessuna superficie di contatto
+nuova. L'unica dipendenza nuova è Inter, servito dall'app (R-62). La scelta del tema resta
+salvata solo sul dispositivo, come prima. Il Wrapped condivisibile cambia solo carattere e
+colori (R-42). I pulsanti Accetta e Rifiuta degli inviti restano con lo stesso peso visivo
+(nessun dark pattern, R-43). Test del database non eseguiti: il ramo non tocca il database.
+
+### Che cosa resta
+
+- Fogli senza l'altezza intermedia (si aprono interi).
+- Safari non supporta ancora `prefers-reduced-transparency`: su iPhone il vetro diventa
+  opaco solo con «Aumenta contrasto».
+- Da provare su un iPhone vero: Dynamic Type nell'app Capacitor e resa del vetro.
+- Moderazione: solo i nuovi token, senza un controllo visivo schermata per schermata.
+- Layout desktop non rivisto schermata per schermata.
+- Con la barra del titolo visibile, i lettori di schermo trovano due pulsanti «indietro».
+- Il progetto Claude Design va riallineato allo stile iOS (ADR-0035).

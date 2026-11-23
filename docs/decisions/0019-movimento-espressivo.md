@@ -1,6 +1,6 @@
 # ADR-0019: Movimento espressivo
 
-- **Stato**: Accettato
+- **Stato**: Accettato; durate, titoli parola per parola e sfocature sostituiti da ADR-0035
 - **Data**: 2026-10-15
 
 ## Contesto
