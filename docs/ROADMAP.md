@@ -377,6 +377,17 @@ Ogni iterazione ha:
     la procedura di GUIDA_OPERATIVA.md §9, prima della beta;
   - beta chiusa con utenti su invito (criterio 7 della Fase 1), con la moderazione
     organizzata (D-10) e, se i flyer usano Claude API, l'accordo con Anthropic (D-12);
+  - fonti per arrivare ai 40 locali della Fase 1: adattatori o Instagram per i locali senza
+    pagina della serata (skill `add-event-source`, una verifica di conformità per sito;
+    rimandato dall'iterazione 12, dove serviva il codice e non i dati);
+  - libreria delle foto d'atmosfera ad almeno 120 foto: la scelta e il controllo a piena
+    risoluzione li fa una persona del team (R-56); dall'iterazione 12 il codice non ripete la
+    stessa foto nello stesso elenco;
+  - numeri e app di trasporto ancora da verificare su fonte ufficiale (02 7777, 02 6969,
+    FreeNow, itTaxi, treni notturni Trenord): li aggiunge un moderatore dall'area di
+    moderazione (iterazione 12), dopo averli letti sul sito ufficiale; le pagine del Comune di
+    Milano non si leggono con uno strumento automatico e quella italiana della rete notturna
+    ATM non esiste (resta il link alla versione inglese);
   - scadenza delle sessioni dei moderatori quando il piano di Supabase la consente;
   - correzioni del penetration test, test di carico, DPIA e testi legali definitivi (D-07,
     D-21);
