@@ -92,7 +92,7 @@ export const messaggi = {
     passoAccessibile: (passo: number, totale: number) => `Passo ${passo} di ${totale}`,
     data: {
       etichettaSezione: 'Iniziamo',
-      titolo: 'Quando sei nata o nato?',
+      titolo: 'La tua data di nascita',
       campo: 'Data di nascita',
       segnaposto: 'gg.mm.aaaa',
       aiuto:
@@ -211,8 +211,7 @@ export const messaggi = {
       titolo: 'L’email non è partita',
       testo: 'Succede quando la rete è debole. Riprova tra poco.',
     },
-    scadutoSenzaEmail:
-      'Scrivi l’email con cui ti sei registrata o registrato: ti mandiamo un nuovo link.',
+    scadutoSenzaEmail: 'Scrivi l’email del tuo account: ti mandiamo un nuovo link.',
     email: 'Email',
   },
 
@@ -356,7 +355,7 @@ export const messaggi = {
     mioCodice: 'Il mio codice',
     caricamento: 'Carico gli amici',
     offline:
-      'Servono la connessione per cercare, creare codici e rispondere alle richieste. Si riattivano da sole.',
+      'Per cercare, creare codici e rispondere alle richieste serve la connessione. Tornano attivi da soli.',
     errore: {
       titolo: 'L’elenco non si è caricato',
       testo: 'Colpa nostra o della rete. Riprova tra un attimo.',
@@ -429,7 +428,7 @@ export const messaggi = {
     titolo: 'Scansiona un codice',
     inquadra: 'Inquadra il QR di chi è con te',
     senzaPermesso:
-      'Noxa non ha il permesso di usare la fotocamera. Va bene così: puoi scrivere il codice qui sotto. Se cambi idea, il permesso si attiva dalle impostazioni del telefono.',
+      'Noxa non può usare la fotocamera. Nessun problema: scrivi il codice qui sotto. Il permesso si cambia dalle impostazioni del telefono.',
     nonSupportata: 'Su questo dispositivo il codice si scrive a mano.',
     scrivi: 'Scrivi il codice',
     continua: 'Continua',
@@ -627,7 +626,7 @@ export const messaggi = {
         'Restringe tra gli eventi che puoi già vedere: utile se esci con amici più piccoli.',
       etaTutte: 'Tutte',
       soloAmici: 'Solo eventi con amici',
-      soloAmiciDescrizione: 'Dove un tuo amico ci va o è interessato.',
+      soloAmiciDescrizione: 'Dove almeno un tuo amico ci va o ci sta pensando.',
       azzera: 'Azzera',
       mostra: (numero: number | null) =>
         numero === null
@@ -675,7 +674,7 @@ export const messaggi = {
       sottotitolo: 'Scopri',
       indietro: 'Scopri',
       descrizione:
-        'Hai trovato il flyer di un evento a Milano o in Brianza? Caricalo: un moderatore lo esamina e, se tutto è a posto, lo pubblichiamo.',
+        'Hai il flyer di una serata a Milano o in Brianza? Caricalo: lo controlla una persona del team e poi lo pubblichiamo.',
       seleziona: 'Scegli un’immagine',
       cambia: 'Cambia immagine',
       dati: {
@@ -697,7 +696,7 @@ export const messaggi = {
         troppiOggi: 'Hai già caricato 10 flyer nelle ultime 24 ore. Riprova domani.',
         generico: 'Qualcosa non ha funzionato. Riprova tra poco.',
       },
-      note: 'L’immagine viene esaminata da una persona del team prima della pubblicazione.',
+      note: 'Prima di pubblicarlo lo guarda una persona del team.',
     },
     mieiFlyer: {
       titolo: 'I miei flyer',
@@ -708,7 +707,7 @@ export const messaggi = {
       vuoto: {
         titolo: 'Nessun flyer caricato',
         testo:
-          'Carica un flyer di un evento di Milano o della Brianza: lo esaminiamo e, se è tutto a posto, lo pubblichiamo.',
+          'Carica il flyer di una serata a Milano o in Brianza: lo controlliamo e poi lo pubblichiamo.',
         azione: 'Carica un flyer',
       },
       errore: {
@@ -762,6 +761,8 @@ export const messaggi = {
     },
     dove: 'Dove',
     lineUp: 'Line-up',
+    leggiTutto: 'Leggi tutto',
+    leggiMeno: 'Mostra meno',
     eta: 'Età',
     etaDichiarata: 'Dichiarata dal locale.',
     etaNonDichiarataBreve: 'Il locale non la indica: per sicurezza vale 18+.',
@@ -786,7 +787,7 @@ export const messaggi = {
     amici: {
       titolo: 'Amici a questo evento',
       partecipa: 'ci va',
-      interessato: 'è interessato',
+      interessato: 'ci sta pensando',
       nota: 'Vedi solo gli amici che hanno reso visibile la loro scelta.',
     },
     partecipazione: {

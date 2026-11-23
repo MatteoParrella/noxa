@@ -28,6 +28,7 @@ import { urlPubblicoApp } from '@/lib/ambiente';
 import { useOnline } from '@/lib/connessione';
 import { daIso } from '@/lib/date';
 import { classi } from '@/lib/classi';
+import { TestoEspandibile } from '@/components/ui/TestoEspandibile';
 import { messaggi } from '@/lib/messaggi/it';
 import { registraErrore } from '@/lib/registro';
 import { cambiaPartecipazione, type DettaglioEvento as Dati, type Partecipazione } from './api';
@@ -357,7 +358,14 @@ function Scheda({ io, dati, online }: { io: string; dati: Dati; online: boolean 
               {testi.etaNonDichiarata.testo}
             </Avviso>
           )}
-          {dati.descrizione && <p className="t-corpo c-2 m-0">{dati.descrizione}</p>}
+          {dati.descrizione && (
+            <TestoEspandibile
+              testo={dati.descrizione}
+              className="t-corpo c-2"
+              etichettaApri={testi.leggiTutto}
+              etichettaChiudi={testi.leggiMeno}
+            />
+          )}
           {testoAmiciEvento && (
             <AmiciPartecipano
               className="riga-amici-dettaglio"

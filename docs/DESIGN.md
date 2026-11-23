@@ -30,6 +30,12 @@ flowchart LR
    riscritto con i componenti, i token e le convenzioni del progetto.
 4. **Implementazione**: skill `implement-design`.
 
+**Dal 2026-11-23 il product owner non usa più Claude Design**: brief e tavole degli stati li
+prepara Claude, nella stessa cartella `design/F-xx-nome/`, partendo dal codice e dai token
+esistenti. Le tavole sono le immagini della schermata implementata, per ogni stato e nei due
+temi, catturate con Playwright; il brief elenca stati, testi e decisioni. Il passo 2 e il
+link al progetto Claude Design non servono più.
+
 ## 2. Design token
 
 - Fonte di verità nel codice: `apps/web/src/styles/tokens.css` (variabili CSS), mappate nella
@@ -193,6 +199,19 @@ percorsi principali prima di ogni rilascio. Su Safari va provata a mano anche la
 barre del browser, che i test non riproducono.
 
 ## 5. Tono e testi
+
+Guida di tono scritta il 2026-11-23 per chiudere D-19: il product owner trovava i testi poco
+naturali. Vale per ogni testo nuovo e per ogni revisione.
+
+| Regola | Sì | No |
+|---|---|---|
+| Parla come un amico di 20 anni di Milano: frasi corte, verbo all'inizio | «Invita gli amici quando vuoi.» | «È possibile procedere con l'invito degli amici in un secondo momento.» |
+| Una cosa per frase; i dettagli vanno nel testo d'aiuto, non nel titolo | «Il link vale un'ora. Chiedine un altro.» | «Il link che hai ricevuto è valido per un'ora, pertanto è necessario richiederne uno nuovo.» |
+| Nessuna formula da assistente: niente «Ecco», «Ottimo!», «Non preoccuparti», punti esclamativi a raffica | «Flyer ricevuto, grazie!» (uno, quando è un ringraziamento vero) | «Ottimo! Ecco il tuo flyer!» |
+| Niente forme doppie per il genere: si riscrive la frase | «La tua data di nascita» | «Quando sei nata o nato?» |
+| Gli errori dicono che cosa fare, e di chi è la colpa solo se è nostra | «Colpa nostra o della rete. Riprova tra un attimo.» | «Si è verificato un errore imprevisto.» |
+| Nomi propri con la maiuscola, niente maiuscole a effetto | «Techno», «Drum & bass» | «techno», «SERATA INCREDIBILE» |
+| Le descrizioni dei locali si mostrano per tre righe con «Leggi tutto» (TestoEspandibile) | | Un muro di 500 caratteri copiato dal sito |
 
 - Si usa il "tu", con un linguaggio diretto e amichevole e frasi brevi.
 - Le regole di sicurezza si spiegano senza paternalismo: cosa succede e perché, in una frase.
