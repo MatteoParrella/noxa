@@ -199,7 +199,7 @@ export function ElencoEventi({
   );
 }
 
-function StatoElenco({
+export function StatoElenco({
   icona,
   titolo,
   children,
@@ -222,7 +222,7 @@ function StatoElenco({
   );
 }
 
-function ScheletroElenco() {
+export function ScheletroElenco() {
   return (
     <div className="pagina flex flex-col gap-4 pt-4" role="status" aria-live="polite">
       <span className="sr-only">{testi.caricamento}</span>

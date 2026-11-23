@@ -1,10 +1,12 @@
 'use client';
 
+import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, type CSSProperties } from 'react';
 import { Copertina } from '@/components/ui/Copertina';
 import { Entra } from '@/components/ui/Movimento';
+import { useMontato } from '@/lib/connessione';
 import type { Famiglia } from '@/lib/copertinaGenerata';
 import { messaggi } from '@/lib/messaggi/it';
 import { PERCORSI } from './documenti';
@@ -19,6 +21,8 @@ export function Benvenuto() {
   const testi = messaggi.benvenuto;
   const router = useRouter();
   const sessione = useSessione();
+  // Solo sul sito: nell'app installata le serate si vedono con l'account (ADR-0036).
+  const sulSito = useMontato() && !Capacitor.isNativePlatform();
 
   useEffect(() => {
     if (sessione.stato === 'presente') router.replace(PERCORSI.home);
@@ -38,6 +42,11 @@ export function Benvenuto() {
           <Link className="btn btn-l btn-secondario btn-pieno" href={PERCORSI.accesso}>
             {testi.hoGiaUnAccount}
           </Link>
+          {sulSito && (
+            <Link className="btn btn-l btn-testo btn-pieno" href={PERCORSI.home}>
+              {testi.guardaLeSerate}
+            </Link>
+          )}
           <p className="testo-piccolo flex justify-center gap-1">
             <Link className="link-accesso px-2" href={PERCORSI.termini}>
               {testi.termini}

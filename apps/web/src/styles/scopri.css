@@ -553,6 +553,17 @@
 }
 
 /* ---------- Scopri: comandi, elenco, stati ---------- */
+/* Senza account (ADR-0036): l'invito a iscriversi al posto dei comandi. */
+.scopri-invito {
+  display: flex;
+  align-items: center;
+  gap: var(--spazio-3);
+  padding: var(--spazio-3) var(--spazio-4);
+  margin-bottom: var(--spazio-3);
+  border-radius: var(--raggio-3);
+  background: var(--colore-accento-tenue);
+  color: var(--colore-testo-primario);
+}
 .scopri-comandi {
   display: flex;
   flex-direction: column;

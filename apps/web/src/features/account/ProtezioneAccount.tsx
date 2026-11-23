@@ -1,9 +1,11 @@
 'use client';
 
+import { Capacitor } from '@capacitor/core';
 import { useIsRestoring } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Caricamento } from '@/components/ui/Stati';
+import { ScopriPubblico } from '@/features/scopri/ScopriPubblico';
 import { messaggi } from '@/lib/messaggi/it';
 import { ricordaPaginaDopoAccesso } from './dopoAccesso';
 import { PERCORSI } from './documenti';
@@ -11,14 +13,26 @@ import { FoglioNuoviTermini } from './FoglioNuoviTermini';
 import { useMioAccount, useSessione } from './sessione';
 
 /**
- * Le aree dell'app richiedono un account (R-07). Il controllo qui serve solo all'esperienza
- * d'uso: senza sessione la RLS non restituisce comunque nulla (ADR-0002).
+ * Senza account si vede solo l'elenco di Scopri, e solo sul sito: nell'app installata resta
+ * l'accesso obbligatorio (ADR-0036).
+ */
+function scopriPubblico(percorso: string): boolean {
+  const senzaBarra = (testo: string) => testo.replace(/\/$/, '');
+  return senzaBarra(percorso) === senzaBarra(PERCORSI.home) && !Capacitor.isNativePlatform();
+}
+
+/**
+ * Le aree dell'app richiedono un account (R-07), tranne l'elenco pubblico di Scopri sul sito
+ * (ADR-0036). Il controllo qui serve solo all'esperienza d'uso: senza sessione la RLS non
+ * restituisce comunque nulla (ADR-0002).
  */
 export function ProtezioneAccount({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const percorso = usePathname();
   const sessione = useSessione();
   const account = useMioAccount(sessione);
   const ripristino = useIsRestoring();
+  const pubblico = sessione.stato === 'assente' && scopriPubblico(percorso);
 
   const daOnboarding = account.data?.onboarding_completato === false;
   // Una sessione c'è stata in questa pagina: se sparisce è un'uscita, non un link da riaprire.
@@ -27,14 +41,16 @@ export function ProtezioneAccount({ children }: { children: ReactNode }) {
     if (sessione.stato === 'presente') eraPresente.current = true;
   }, [sessione.stato]);
   useEffect(() => {
-    if (sessione.stato === 'assente') {
+    if (sessione.stato === 'assente' && !pubblico) {
       // Un link aperto senza sessione (per esempio un invito) si riapre dopo l'accesso.
       if (!eraPresente.current) {
         ricordaPaginaDopoAccesso(window.location.pathname + window.location.search);
       }
       router.replace(PERCORSI.benvenuto);
     } else if (daOnboarding) router.replace(PERCORSI.sicurezza);
-  }, [sessione.stato, daOnboarding, router]);
+  }, [sessione.stato, daOnboarding, router, pubblico]);
+
+  if (pubblico) return <ScopriPubblico />;
 
   // Si aspetta il ripristino della cache dal dispositivo, poi la lettura dell'account; una
   // lettura in pausa perché manca la rete non blocca l'app. Mostrare la pagina prima del

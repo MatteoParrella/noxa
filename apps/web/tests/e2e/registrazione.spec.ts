@@ -53,7 +53,7 @@ function datiInviati(supabase: SupabaseSimulato) {
 }
 
 test('R-07: senza account le aree portano al Benvenuto', async ({ page }) => {
-  await page.goto('/scopri/');
+  await page.goto('/organizza/');
   await expect(page).toHaveURL(/\/benvenuto\/$/);
   await expect(page.getByRole('heading', { level: 1, name: 'noxa' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Crea un account' })).toBeVisible();

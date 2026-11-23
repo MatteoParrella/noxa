@@ -82,6 +82,7 @@ export const messaggi = {
     ],
     creaAccount: 'Crea un account',
     hoGiaUnAccount: 'Ho già un account',
+    guardaLeSerate: 'Guarda le serate senza account',
     termini: 'Termini',
     privacy: 'Informativa privacy',
   },
@@ -578,6 +579,19 @@ export const messaggi = {
       testo: 'Colpa nostra o della rete. Riprova tra un attimo.',
     },
     offline: 'Sei offline: vedi gli eventi salvati sul telefono.',
+    pubblico: {
+      invito: 'Iscriviti per vedere prezzi, biglietti, la mappa e chi dei tuoi amici ci va.',
+      creaAccount: 'Crea un account',
+      entra: 'Entra',
+      prossimiGiorni: 'Prossimi giorni',
+      riservata: 'Serata 18+',
+      riservataNota: 'La vedi con un account maggiorenne.',
+      vuoto: {
+        titolo: 'Nessuna serata nei prossimi giorni',
+        testo: 'Il catalogo si aggiorna ogni giorno: ripassa presto.',
+      },
+      soloIscritti: 'Filtri, mappa e dettagli sono per chi è iscritto.',
+    },
     offlineVuoto: {
       titolo: 'Sei offline',
       testo: 'Gli eventi compaiono quando torna la connessione.',

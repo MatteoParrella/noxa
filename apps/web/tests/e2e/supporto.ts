@@ -204,7 +204,9 @@ export type Endpoint =
   | 'badge_leggi'
   | 'badge_utente_leggi'
   | 'riepiloghi_leggi'
-  | 'rigenera_mio_riepilogo';
+  | 'rigenera_mio_riepilogo'
+  | 'cerca_eventi_pubblici'
+  | 'generi_pubblici';
 
 type Risposta = { stato: number; corpo?: unknown } | 'rete';
 
@@ -346,6 +348,46 @@ export const AMICIZIE_DI_PROVA = [
 export function serataDiProva(spostamento = 0): string {
   const istante = new Date(Date.now() - 6 * 3600_000 + spostamento * 86_400_000);
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(istante);
+}
+
+/**
+ * Elenco pubblico delle serate (ADR-0036): una serata con il titolo e una con riferimenti
+ * all'alcol, che arriva dal database senza titolo né generi.
+ */
+export function eventiPubbliciDiProva() {
+  const oggi = serataDiProva();
+  return [
+    {
+      id: '00000000-0000-4000-8000-00000000e001',
+      riservato: false,
+      titolo: 'Notte Ferrovia',
+      inizio: alle(oggi, '23:00'),
+      fine: alle(oggi, '05:00', true),
+      data_serata: oggi,
+      eta_minima: 18,
+      eta_minima_dichiarata: true,
+      stato: 'pubblicato',
+      generi_evento: ['techno'],
+      locale_nome: 'Binario 7',
+      locale_comune: 'Milano',
+      copertina_colori: null,
+    },
+    {
+      id: '00000000-0000-4000-8000-00000000e008',
+      riservato: true,
+      titolo: null,
+      inizio: alle(oggi, '23:30'),
+      fine: alle(oggi, '04:00', true),
+      data_serata: oggi,
+      eta_minima: 18,
+      eta_minima_dichiarata: true,
+      stato: 'pubblicato',
+      generi_evento: [],
+      locale_nome: 'Magazzino Nove',
+      locale_comune: 'Milano',
+      copertina_colori: null,
+    },
+  ];
 }
 
 /** Istante a Milano nella serata `giorno` (le ore dopo mezzanotte vanno al giorno dopo). */
@@ -1186,6 +1228,16 @@ export class SupabaseSimulato {
         return { stato: 200, corpo: this.mieiBadge };
       case 'riepiloghi_leggi':
         return { stato: 200, corpo: this.riepiloghi };
+      case 'cerca_eventi_pubblici':
+        return { stato: 200, corpo: eventiPubbliciDiProva() };
+      case 'generi_pubblici':
+        return {
+          stato: 200,
+          corpo: [
+            { codice: 'techno', nome: 'Techno' },
+            { codice: 'indie', nome: 'Indie' },
+          ],
+        };
       case 'rigenera_mio_riepilogo':
         return {
           stato: 200,
@@ -1444,6 +1496,8 @@ export class SupabaseSimulato {
       'invia_posizione_ritorno',
       'mie_statistiche',
       'rigenera_mio_riepilogo',
+      'cerca_eventi_pubblici',
+      'generi_pubblici',
     ];
     if (rpc && rpcSimulate.includes(rpc)) return rpc as Endpoint;
     if (percorso.startsWith('/storage/v1/object/sign/') && metodo === 'POST')
