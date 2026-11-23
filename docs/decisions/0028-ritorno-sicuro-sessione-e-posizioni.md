@@ -50,7 +50,7 @@ notifica fissa. Implementandolo sono emersi vincoli tecnici che cambiano alcuni 
 - **Plugin commerciale con azioni nella notifica**: costo annuo (ADR-0021, ADR-0027).
 
 ## Conseguenze
-- La dichiarazione della posizione in background su Google Play (iterazione 12) diventa più
+- La dichiarazione della posizione in background su Google Play (iterazione 13) diventa più
   semplice: servizio in primo piano di tipo `location` con notifica visibile.
 - I criteri della Fase 2 si verificano su un telefono Android reale con l'APK di debug.
 - Documenti aggiornati: DATA_MODEL.md (§5.5, §7, §8), ARCHITECTURE.md (§4.4, §5.3),

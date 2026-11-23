@@ -1,7 +1,7 @@
 ---
 name: iterazione
-description: Esegue un'iterazione completa della roadmap di Noxa (/iterazione 0 … /iterazione 14) - verifica prerequisiti e design, pianifica, implementa con le altre skill, ripete cicli di revisione finché tutti i criteri sono soddisfatti, aggiorna documenti e registro, fa il commit su un branch dedicato. Con /iterazione stato mostra l'avanzamento.
-argument-hint: "<numero da 0 a 14> | stato"
+description: Esegue un'iterazione completa della roadmap di Noxa (/iterazione 0 … /iterazione 15) - verifica prerequisiti e design, pianifica, implementa con le altre skill, ripete cicli di revisione finché tutti i criteri sono soddisfatti, aggiorna documenti e registro, fa il commit su un branch dedicato. Con /iterazione stato mostra l'avanzamento.
+argument-hint: "<numero da 0 a 15> | stato"
 disable-model-invocation: true
 ---
 
@@ -10,15 +10,15 @@ disable-model-invocation: true
 Argomento ricevuto: `$ARGUMENTS`
 
 - Se l'argomento è `stato` (o è vuoto): esegui solo il §A.
-- Se è un numero da 0 a 14: esegui i passi da §1 a §8 per quell'iterazione.
-- Altrimenti: rispondi che il formato è `/iterazione <0-14>` oppure `/iterazione stato`.
+- Se è un numero da 0 a 15: esegui i passi da §1 a §8 per quell'iterazione.
+- Altrimenti: rispondi che il formato è `/iterazione <0-15>` oppure `/iterazione stato`.
 
 Riferimenti: `docs/ROADMAP.md` §5 (definizione delle iterazioni), `docs/REGISTRO_ITERAZIONI.md`
 (stato), `docs/DECISIONI_APERTE.md`, `CLAUDE.md`.
 
 ## A. Stato
 
-1. Leggi `docs/REGISTRO_ITERAZIONI.md` e mostra: iterazioni completate su 15, stato di ogni
+1. Leggi `docs/REGISTRO_ITERAZIONI.md` e mostra: iterazioni completate su 16, stato di ogni
    iterazione, attese esterne aperte, cicli di revisione totali.
 2. Indica la **prossima iterazione** eseguibile e cosa serve per lanciarla: design da
    preparare in Claude Design (colonna "Design" di ROADMAP.md §5), decisioni aperte e
@@ -108,7 +108,7 @@ descrivi il problema con le opzioni possibili e fermati.
    - data di fine, numero di cicli di revisione e nome del branch;
    - nel dettaglio: cicli con le correzioni, esito dei test (numeri), rapporto di
      `safety-review`, commit;
-   - aggiorna la riga "Iterazioni completate: X su 15" (le iterazioni `completata con attese
+   - aggiorna la riga "Iterazioni completate: X su 16" (le iterazioni `completata con attese
      esterne` contano come completate).
 2. Commit finale sul branch: `iterazione N: <nome> completata`.
 3. **Non** fare merge in `main` né push senza la richiesta esplicita dell'utente.
@@ -126,7 +126,7 @@ Rispondi con:
 **Test**: pgTAP n/n, unitari n/n, e2e n/n, worker n/n.
 **Safety review**: superata (punti principali).
 **Attese esterne**: elenco, oppure nessuna.
-**Avanzamento**: X iterazioni completate su 15 (cicli di revisione totali: T).
+**Avanzamento**: X iterazioni completate su 16 (cicli di revisione totali: T).
 **Prossima iterazione**: N+1 — <nome>.
 **Da preparare in Claude Design prima di lanciarla**: elenco delle schermate, oppure nessuna.
 **Per unire il lavoro**: `git switch main && git merge iterazione-NN-<nome>` (lo eseguo se me lo chiedi).

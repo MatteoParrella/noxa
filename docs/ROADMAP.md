@@ -146,7 +146,7 @@ l'ultimo passo, a funzionalità complete; App Store solo se D-13 si chiude per A
 
 ## 5. Iterazioni
 
-Le fasi sono divise in **15 iterazioni** (da 0 a 14). Ogni iterazione è un blocco di lavoro
+Le fasi sono divise in **16 iterazioni** (da 0 a 15). Ogni iterazione è un blocco di lavoro
 completo e verificabile che si esegue con il comando `/iterazione <numero>` (skill
 `iterazione`). Lo stato di ogni iterazione e il numero di cicli di revisione fatti sono in
 [REGISTRO_ITERAZIONI.md](REGISTRO_ITERAZIONI.md).
@@ -174,9 +174,10 @@ Ogni iterazione ha:
 | 9 | 2 | Notifiche e check-in | F-22, F-20 | Centro notifiche, permessi, check-in |
 | 10 | 2 | Ritorno sicuro | F-21, F-43 (app Android) | Avvio, ritorno in corso, ritorno di un amico, allerta |
 | 11 | 2 | Statistiche, badge e Wrapped | F-31, F-32, F-33 | Statistiche, bacheca badge, schede del Wrapped |
-| 12 | 2 | Preparazione al lancio | F-43 (Google Play), F-23 (gestione dall'area di moderazione; primo rilascio fuori iterazione il 2026-11-15, ADR-0034), consolidamento | Icona, schermate e testi per gli store |
-| 13 | 3 | Accesso con Apple e Google | F-17 | Accesso social e completamento del profilo |
-| 14 | 3 | Aggregatori e nuove aree | F-07, F-46 | — |
+| 12 | 2 | Consolidamento prima della beta | F-23 (gestione dall'area di moderazione; primo rilascio fuori iterazione il 2026-11-15, ADR-0034), consolidamento | Momenti di riscontro (`design/F-01-rinfresco-interfaccia/` §4); icona, schermata di apertura e anteprima dei link (`design/store/`) |
+| 13 | 2 | Produzione, beta e lancio | F-43 (Google Play), beta della Fase 1 | Schermate e testi per Google Play (`design/store/`) |
+| 14 | 3 | Accesso con Apple e Google | F-17 | Accesso social e completamento del profilo |
+| 15 | 3 | Aggregatori e nuove aree | F-07, F-46 | — |
 
 ### Iterazione 0 — Fondamenta del repository
 - **Contenuto**: monorepo pnpm + uv; `apps/web` con Next.js in export statico, TypeScript
@@ -200,7 +201,7 @@ Ogni iterazione ha:
   (ADR-0016); scheda evento con spazio per la foto del locale e velatura al posto del blocco
   colorato del design (ADR-0018); axe nei test e2e.
 - **Prerequisiti esterni**: nessuno; le build locali non richiedono account (Google Play
-  solo nell'iterazione 12, ADR-0027).
+  solo nell'iterazione 13, ADR-0027).
 - **Criteri**: nessuna violazione axe nel catalogo e nella navigazione, in entrambi i temi;
   l'app gira su browser, emulatore Android e simulatore iOS; la mappa si apre senza
   richieste a domini esterni (verificato nel test e2e).
@@ -326,16 +327,14 @@ Ogni iterazione ha:
   sul dispositivo.
 - **Criteri**: test pgTAP di R-41 e R-42; `safety-review` del catalogo dei badge.
 
-### Iterazione 12 — Preparazione al lancio
-- **Contenuto**: correzioni del penetration test, test di carico, DPIA e testi legali
-  definitivi, come ultimo passo account Google Play Console (25 $ una tantum), test chiuso richiesto da
-  Google (12 tester per 14 giorni con un account personale), dichiarazione della posizione in
-  background, questionario d'età (D-06) e pubblicazione su Google Play (ADR-0027); App Store
-  solo se D-13 si chiude per Apple;
-  eliminazione degli account senza accessi da 24 mesi, con l'avviso via email 30 giorni
-  prima (SAFETY_PRIVACY.md §10): nessun account della beta può arrivarci prima.
-- **Consolidamento proposto il 2026-11-14** (REGISTRO_INTERVENTI.md), da fare qui o prima
-  della beta se c'è tempo:
+### Iterazione 12 — Consolidamento prima della beta
+- **Perimetro**: solo lavoro di codice, provato in locale e su staging. Nessun ambiente di
+  produzione, nessun account degli store, nessuna pubblicazione: sono nell'iterazione 13.
+  L'iterazione 12 è stata divisa in due il 2026-11-23, su richiesta del product owner, che ha
+  altro da sistemare prima della pubblicazione.
+- **Contenuto** (in gran parte proposto il 2026-11-14 e il 2026-11-15, REGISTRO_INTERVENTI.md):
+  - eliminazione degli account senza accessi da 24 mesi, con l'avviso via email 30 giorni
+    prima (SAFETY_PRIVACY.md §10): nessun account della beta può arrivarci prima;
   - link di biglietti e fonti solo `https` (migrazione su `eventi.url_biglietti`,
     `eventi_fonti.url_originale`, `locali.sito_web`, con i test pgTAP);
   - momenti di riscontro del rinfresco (amicizia confermata, gruppo creato, serata confermata
@@ -344,34 +343,59 @@ Ogni iterazione ha:
     stesso elenco (ADR-0032); controllo umano di ogni foto a piena risoluzione;
   - icona, schermata di apertura e anteprima dei link definitive da Claude Design
     (`design/store/`), con il carattere del marchio; progetto Claude Design riallineato al
-    rinfresco;
-  - prova dell'apertura, del Benvenuto e delle copertine su telefoni reali (iPhone e Android);
-  - scadenza delle sessioni dei moderatori quando il piano di Supabase la consente; repository
-    privato o segreti del worker in un environment protetto; esito della prima analisi CodeQL;
+    rinfresco e allo stile iOS (ADR-0035);
+  - prova dell'apertura, del Benvenuto, delle copertine e di «Salva immagine» del riepilogo
+    (attesa dell'iterazione 11) su telefoni reali con l'app di staging: iPhone con la PWA,
+    Android con l'APK di debug; se il salvataggio non funziona nell'app Android, plugin di
+    condivisione di Capacitor;
+  - repository privato o segreti del worker in un environment protetto; esito della prima
+    analisi CodeQL;
   - dopo l'analisi delle schermate del 2026-11-14: layout desktop a più colonne anche per
     Organizza, Vivi, Ricorda e Profilo (ADR-0033); carattere monospazio solo per orari e date;
     «Privacy e dati» più leggibile; titoli delle pagine allineati ai nomi delle aree; tinta
     delle foto d'atmosfera per il tema chiaro; identità visiva dei gruppi (colore o copertina);
-  - dopo gli interventi del 2026-11-15 (REGISTRO_INTERVENTI.md): gestione di
-    `servizi_trasporto` dall'area di moderazione con la data di verifica (F-23, ADR-0034);
-    verifica su fonte ufficiale di 02 7777 e 02 6969 (Milano), dell'età minima di FreeNow e
-    itTaxi e dei treni notturni Trenord, prima di aggiungerli all'elenco; pagina in italiano
-    della rete notturna ATM; adattatori o Instagram per i locali senza pagina della serata;
-    età predefinita del locale verificata da un moderatore, solo con un ADR (tocca R-21); la
-    regola deve poter avere eccezioni per tipo di serata (Gate, FAQ ufficiale letta il
-    2026-11-17: 18+ per le serate, 16+ per i concerti), altrimenti un'età unica per locale
-    sarebbe sbagliata;
-  - decisioni D-18 (pagine evento pubbliche), D-19 (tono dei testi), D-20 (locandine vere) e
-    D-21 (età dichiarata).
-- **Prerequisiti esterni**: penetration test esterno, consulente legale.
-- **Criteri**: criteri della **Fase 2** (§Fase 2) verificati.
+  - dopo gli interventi del 2026-11-15: gestione di `servizi_trasporto` dall'area di
+    moderazione con la data di verifica (F-23, ADR-0034); verifica su fonte ufficiale di
+    02 7777 e 02 6969 (Milano), dell'età minima di FreeNow e itTaxi e dei treni notturni
+    Trenord, prima di aggiungerli all'elenco; pagina in italiano della rete notturna ATM;
+    adattatori o Instagram per i locali senza pagina della serata; età predefinita del locale
+    verificata da un moderatore, solo con un ADR (tocca R-21); la regola deve poter avere
+    eccezioni per tipo di serata (Gate, FAQ ufficiale letta il 2026-11-17: 18+ per le serate,
+    16+ per i concerti), altrimenti un'età unica per locale sarebbe sbagliata;
+  - decisioni D-19 (tono dei testi) e D-18 (pagine evento pubbliche): se D-18 si chiude per la
+    pagina pubblica, la si realizza qui con il suo ADR.
+- **Prerequisiti esterni**: nessun account; un iPhone e un telefono Android per le prove.
+- **Criteri**: ogni voce del contenuto è fatta oppure spostata, con il motivo, in questa
+  ROADMAP o in DECISIONI_APERTE.md; migrazioni con RLS e test pgTAP; criteri 4, 5, 6 (parte
+  automatica con axe) e 8 della **Fase 1** verificati; tutto online su staging.
 
-### Iterazione 13 — Accesso con Apple e Google
+### Iterazione 13 — Produzione, beta e lancio
+- **Perimetro**: si avvia solo quando il product owner decide che l'app è pronta per essere
+  pubblicata. Contiene tutto ciò che richiede la produzione, gli utenti reali o gli store.
+- **Contenuto**:
+  - ambiente di produzione (Supabase a Francoforte, Cloudflare Pages e R2, Brevo, Sentry) con
+    la procedura di GUIDA_OPERATIVA.md §9, prima della beta;
+  - beta chiusa con utenti su invito (criterio 7 della Fase 1), con la moderazione
+    organizzata (D-10) e, se i flyer usano Claude API, l'accordo con Anthropic (D-12);
+  - scadenza delle sessioni dei moderatori quando il piano di Supabase la consente;
+  - correzioni del penetration test, test di carico, DPIA e testi legali definitivi (D-07,
+    D-21);
+  - prove reali del ritorno sicuro e delle notifiche (criterio 1 della Fase 2);
+  - come ultimo passo: account Google Play Console (25 $ una tantum), test chiuso richiesto da
+    Google (12 tester per 14 giorni con un account personale), dichiarazione della posizione in
+    background, questionario d'età (D-06) e pubblicazione su Google Play (ADR-0027); App Store
+    solo se D-13 si chiude per Apple.
+- **Prerequisiti esterni**: penetration test esterno, consulente legale, account dei servizi
+  di produzione e di Google Play Console, tester per il test chiuso.
+- **Criteri**: criteri della **Fase 1** ancora aperti e criteri della **Fase 2** (§Fase 2)
+  verificati.
+
+### Iterazione 14 — Accesso con Apple e Google
 - **Contenuto**: ADR per il profilo da completare; provider OAuth; completamento obbligatorio
   della data di nascita prima di qualsiasi accesso ai dati.
 - **Criteri**: criterio 2 della Fase 3.
 
-### Iterazione 14 — Aggregatori e nuove aree
+### Iterazione 15 — Aggregatori e nuove aree
 - **Contenuto**: adattatori degli aggregatori con accordo (D-05); estensione di
   `locali.provincia` e bootstrap dei locali della nuova area.
 - **Criteri**: criteri 1 e 3 della **Fase 3**.

@@ -1,6 +1,6 @@
 # Registro delle iterazioni
 
-Stato di avanzamento delle 15 iterazioni definite in [ROADMAP.md](ROADMAP.md) §5. Il file è
+Stato di avanzamento delle 16 iterazioni definite in [ROADMAP.md](ROADMAP.md) §5. Il file è
 aggiornato **dalla skill `iterazione`** all'inizio e alla fine di ogni iterazione; a mano si
 modifica solo per correggere un errore, spiegandolo nelle note.
 
@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 11 su 15.
+Iterazioni completate: 11 su 16.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -32,9 +32,10 @@ Iterazioni completate: 11 su 15.
 | 9 | completata con attese esterne | 2026-11-05 | 2026-11-05 | 2 | `iterazione-09-notifiche-checkin` | Web Push con testi di sistema (ADR-0026); mancano chiavi VAPID, segreti e deploy di `invia-push` in staging e la prova su telefoni reali |
 | 10 | completata con attese esterne | 2026-11-06 | 2026-11-06 | 2 | `iterazione-10-ritorno-sicuro` | Servizio in primo piano, posizioni lette con la RLS, aree solo sul telefono (ADR-0028); mancano il progetto Firebase, l'APK sul telefono e le 20 prove reali del criterio 1 della Fase 2 |
 | 11 | completata con attese esterne | 2026-11-19 | 2026-11-19 | 1 | `iterazione-11-statistiche-badge-wrapped` | Tavole preparate il 2026-11-18; mancano la migrazione in staging e produzione prima del 1° dicembre e la prova di «Salva immagine» su iPhone e nell'app Android |
-| 12 | da iniziare | — | — | 0 | — | — |
-| 13 | da iniziare | — | — | 0 | — | — |
-| 14 | da iniziare | — | — | 0 | — | — |
+| 12 | da iniziare | — | — | 0 | — | Divisa il 2026-11-23 su richiesta del product owner: qui solo il consolidamento del codice su staging |
+| 13 | da iniziare | — | — | 0 | — | Nata dalla divisione del 2026-11-23: produzione, beta e Google Play |
+| 14 | da iniziare | — | — | 0 | — | Era la 13 prima della divisione del 2026-11-23 |
+| 15 | da iniziare | — | — | 0 | — | Era la 14 prima della divisione del 2026-11-23 |
 
 ## Dettaglio
 
