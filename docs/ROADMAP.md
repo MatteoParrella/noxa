@@ -358,10 +358,10 @@ Ogni iterazione ha:
     moderazione con la data di verifica (F-23, ADR-0034); verifica su fonte ufficiale di
     02 7777 e 02 6969 (Milano), dell'età minima di FreeNow e itTaxi e dei treni notturni
     Trenord, prima di aggiungerli all'elenco; pagina in italiano della rete notturna ATM;
-    adattatori o Instagram per i locali senza pagina della serata; età predefinita del locale
-    verificata da un moderatore, solo con un ADR (tocca R-21); la regola deve poter avere
-    eccezioni per tipo di serata (Gate, FAQ ufficiale letta il 2026-11-17: 18+ per le serate,
-    16+ per i concerti), altrimenti un'età unica per locale sarebbe sbagliata;
+    adattatori o Instagram per i locali senza pagina della serata. L'età predefinita per locale
+    è stata scartata il 2026-11-23 con il product owner: servirebbe solo ad abbassare l'età delle
+    serate che non la dichiarano, la direzione più rischiosa per i minorenni, e il worker legge
+    già l'età dalla pagina di ogni serata (R-21 resta com'è);
   - decisioni D-19 (tono dei testi) e D-18 (pagine evento pubbliche): se D-18 si chiude per la
     pagina pubblica, la si realizza qui con il suo ADR.
 - **Prerequisiti esterni**: nessun account; un iPhone e un telefono Android per le prove.

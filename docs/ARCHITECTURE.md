@@ -81,7 +81,7 @@ flowchart LR
 | Aspetto | Scelta |
 |---|---|
 | Framework | Next.js (App Router) con `output: 'export'`: niente rendering lato server, Route Handlers o Server Actions (ADR-0001). |
-| Routing | Route statiche; i dettagli usano parametri di query (`/evento?id=…`, `/gruppo?id=…`) perché l'export statico non genera pagine per identificativi dinamici. Il service worker ignora i parametri quando cerca una pagina nella cache. Le aree richiedono un account: senza sessione l'app porta al Benvenuto (R-07). |
+| Routing | Route statiche; i dettagli usano parametri di query (`/evento?id=…`, `/gruppo?id=…`) perché l'export statico non genera pagine per identificativi dinamici. Il service worker ignora i parametri quando cerca una pagina nella cache. Le aree richiedono un account: senza sessione l'app porta al Benvenuto (R-07). Eccezione sul sito (non nell'app installata, `Capacitor.isNativePlatform()`): `/scopri/` senza sessione mostra l'elenco pubblico (`ScopriPubblico`, RPC `cerca_eventi_pubblici` con la sola chiave `anon`) e un ascoltatore dei clic porta ogni link interno all'iscrizione, ricordando la pagina scelta (ADR-0036). |
 | Dati | `@supabase/supabase-js` con tipi generati (`src/lib/database.types.ts`); TanStack Query per cache, retry e stato offline; validazione dei dati in ingresso e uscita con Zod. |
 | Stile | Tailwind con design token generati da Claude Design (ADR-0011, [DESIGN.md](DESIGN.md)). |
 | Mappe | MapLibre GL JS con la basemap Protomaps (stili `dark` e `light` personalizzati con i design token) in un file PMTiles servito, insieme a font e icone, dal bucket `mappe` in locale e da Cloudflare R2 in staging e produzione: nessuna richiesta a servizi di mappe esterni (ADR-0016, ADR-0021). |
