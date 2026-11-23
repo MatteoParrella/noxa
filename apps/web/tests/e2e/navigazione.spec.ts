@@ -1,12 +1,12 @@
 import { expect, ID_GRUPPO, impostaTema, TEMI, test, verificaAccessibilita } from './supporto';
 
-// Ricorda si apre sul diario (design/F-30-tracker) e Vivi su «Stasera» (design/F-20-checkin):
-// il titolo è quello della schermata.
+// Il titolo grande di ogni area è il nome dell'area nella barra (iterazione 12); Ricorda si apre
+// sul diario e Vivi su «Stasera», scritti sopra il titolo.
 const AREE = [
   { percorso: '/scopri/', nome: 'Scopri', titolo: 'Scopri' },
   { percorso: '/organizza/', nome: 'Organizza', titolo: 'Organizza' },
-  { percorso: '/vivi/', nome: 'Vivi', titolo: 'Stasera' },
-  { percorso: '/ricorda/', nome: 'Ricorda', titolo: 'Il mio diario' },
+  { percorso: '/vivi/', nome: 'Vivi', titolo: 'Vivi' },
+  { percorso: '/ricorda/', nome: 'Ricorda', titolo: 'Ricorda' },
   { percorso: '/profilo/', nome: 'Profilo', titolo: 'Profilo' },
 ] as const;
 
@@ -51,7 +51,7 @@ test('la barra porta da un’area all’altra e il link “Vai al contenuto” �
     .getByRole('link', { name: 'Ricorda' })
     .click();
   await expect(page).toHaveURL(/\/ricorda\/$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Il mio diario' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Ricorda' })).toBeVisible();
 });
 
 test('il tema chiaro scelto nel profilo resta dopo il ricaricamento', async ({ page }) => {

@@ -13,8 +13,8 @@ export default function PaginaVivi() {
   return (
     <>
       <IntestazioneArea
-        sottotitolo={`${testi.titolo} · ${testi.sottotitolo}`}
-        titolo={testi.stasera}
+        sottotitolo={`${testi.stasera} · ${testi.sottotitolo}`}
+        titolo={testi.titolo}
         dopoTitolo={<OraStasera />}
         azioni={<Campanella />}
       />
