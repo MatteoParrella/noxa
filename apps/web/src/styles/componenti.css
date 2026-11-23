@@ -1879,19 +1879,11 @@ button.cella {
   separatori partono dal testo. Vale per le righe già esistenti (persone, gruppi, serate,
   membri, presenti), senza cambiare il markup.
 */
-:is(ul, ol):has(
-  > li.riga-persona,
-  > li.mb-riga,
-  > li.pr-riga,
-  > li > .gr-voce,
-  > li > .sr-riga,
-  > li > .ri-riga
-) {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-radius: var(--raggio-3);
-  background: var(--colore-cella);
+/* Il fondo della cella sta sulle righe e non sull'elenco: niente :has(), che su Firefox
+   rallenta molto le pagine con tante righe. */
+li:is(.riga-persona, .mb-riga, .pr-riga),
+li > :is(.gr-voce, .sr-riga, .ri-riga) {
+  background-color: var(--colore-cella);
 }
 /* Angoli sulle righe e non overflow sull'elenco: i menu ⋯ delle righe devono poter uscire. */
 :is(ul, ol) > li:is(.riga-persona, .mb-riga, .pr-riga):first-child,
@@ -1932,7 +1924,7 @@ a.ri-riga:active {
 }
 li > .gr-voce:hover,
 li > .sr-riga:hover {
-  background-color: transparent;
+  background-color: var(--colore-cella);
 }
 
 /* Intestazione di sezione: Footnote maiuscolo, come sopra i gruppi di celle di iOS. */
@@ -2002,11 +1994,11 @@ li > .sr-riga:hover {
   background-position: right top;
   background-size: calc(100% - var(--spazio-4)) 0.5px;
 }
-.pv-sezione > :is(.pv-impostazione, .pv-riga):not(:is(.pv-impostazione, .pv-riga) + *) {
+.pv-sezione > :nth-child(1 of .pv-impostazione, .pv-riga) {
   border-top-left-radius: var(--raggio-3);
   border-top-right-radius: var(--raggio-3);
 }
-.pv-sezione > :is(.pv-impostazione, .pv-riga):not(:has(+ :is(.pv-impostazione, .pv-riga))) {
+.pv-sezione > :nth-last-child(1 of .pv-impostazione, .pv-riga) {
   border-bottom-left-radius: var(--raggio-3);
   border-bottom-right-radius: var(--raggio-3);
 }
