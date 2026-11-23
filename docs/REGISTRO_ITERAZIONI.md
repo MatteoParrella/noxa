@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 11 su 16.
+Iterazioni completate: 12 su 16.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -32,7 +32,7 @@ Iterazioni completate: 11 su 16.
 | 9 | completata con attese esterne | 2026-11-05 | 2026-11-05 | 2 | `iterazione-09-notifiche-checkin` | Web Push con testi di sistema (ADR-0026); mancano chiavi VAPID, segreti e deploy di `invia-push` in staging e la prova su telefoni reali |
 | 10 | completata con attese esterne | 2026-11-06 | 2026-11-06 | 2 | `iterazione-10-ritorno-sicuro` | Servizio in primo piano, posizioni lette con la RLS, aree solo sul telefono (ADR-0028); mancano il progetto Firebase, l'APK sul telefono e le 20 prove reali del criterio 1 della Fase 2 |
 | 11 | completata con attese esterne | 2026-11-19 | 2026-11-19 | 1 | `iterazione-11-statistiche-badge-wrapped` | Tavole preparate il 2026-11-18; mancano la migrazione in staging e produzione prima del 1° dicembre e la prova di «Salva immagine» su iPhone e nell'app Android |
-| 12 | in corso | 2026-11-23 | — | 0 | `iterazione-12-consolidamento` | Divisa il 2026-11-23 su richiesta del product owner: qui solo il consolidamento del codice su staging |
+| 12 | completata con attese esterne | 2026-11-23 | 2026-11-23 | 2 | `iterazione-12-consolidamento` | Elenco pubblico delle serate sul sito (ADR-0036), D-18 e D-19 chiuse; mancano la chiave API di Brevo, le migrazioni in staging, le prove su telefoni reali e la scelta delle foto |
 | 13 | da iniziare | — | — | 0 | — | Nata dalla divisione del 2026-11-23: produzione, beta e Google Play |
 | 14 | da iniziare | — | — | 0 | — | Era la 13 prima della divisione del 2026-11-23 |
 | 15 | da iniziare | — | — | 0 | — | Era la 14 prima della divisione del 2026-11-23 |
@@ -1343,4 +1343,70 @@ otto schede del riepilogo (anche con il movimento ridotto), elenco dei riepilogh
   cicli di revisione e `safety-review`.
 - Criteri: ogni voce fatta o spostata con il motivo; migrazioni con RLS e pgTAP; criteri 4, 5,
   6 (axe) e 8 della Fase 1; tutto online su staging.
+
+**Cicli di revisione**
+- Ciclo 1: rilettura del diff, controlli automatici e `safety-review`. Trovati e corretti:
+  l'ascoltatore dei clic dell'elenco pubblico mandava all'iscrizione anche «Vai al
+  contenuto», la scheda Scopri e i clic con ctrl/cmd per una nuova scheda, e lasciava passare
+  le sottopagine di Scopri → salti nella pagina, Scopri e clic con modificatore esclusi,
+  sottopagine intercettate; il job degli account inattivi calcolava l'ultimo accesso per ogni
+  utente a ogni ora → filtro economico su `last_sign_in_at` e `created_at` prima; la
+  `safety-review` (F) ha trovato che l'avviso di inattività non era nell'esportazione dei
+  dati → migrazione `esporta_avviso_inattivita` e test; 60 errori e2e in
+  `registrazione.spec.ts` su tutti i browser perché il nuovo titolo «La tua data di nascita»
+  ha un `aria-label` che `getByLabel('Data di nascita')` trova insieme al campo → selettore
+  per ruolo; 4 test WebKit oltre i 30 s con la macchina carica (passano da soli); il test
+  d'integrazione della registrazione partiva da Scopri, ora pubblico → parte dal Benvenuto.
+  Il test di prestazioni `021` è fallito una volta con il carico medio a 19 (suite e2e in
+  parallelo) e passa da solo.
+- Ciclo 2: tutti i controlli di nuovo verdi (sotto), nessun problema nuovo.
+
+**Test**
+- pgTAP dopo `supabase db reset`: 1447/1447 (nuovi `045_catalogo_pubblico`,
+  `046_link_https`, `047_account_inattivi`, `048_gestione_servizi_trasporto`,
+  `049_colore_gruppi`).
+- Unitari: 181/181. Worker: ruff, mypy, 363/363 compresi i 4 test d'integrazione sul
+  database locale (il test di Alcatraz ora fissa la data della pagina salvata).
+- E2e simulati su Chromium (telefono e computer), WebKit (iPhone) e Firefox: 907 superati al
+  primo giro completo, i 64 falliti superati dopo le correzioni del ciclo 1 (96/96 di
+  registrazione ed elenco pubblico su tutti i browser, 4/4 WebKit da soli), 1 saltato come
+  prima. E2e di integrazione con Supabase locale e `supabase functions serve`: 14/14.
+- `verifica_documentazione.py`, `verifica_migrazioni.py`, Prettier, ESLint, tsc: puliti.
+
+**Safety review — iterazione 12**: SUPERATA.
+
+| Sezione | Esito | Evidenza |
+|---|---|---|
+| A. Autorizzazione | SÌ | `cerca_eventi_pubblici` e `generi_pubblici` `security definer` con `search_path = ''`, eseguibili solo da `anon` (`045_catalogo_pubblico`: anon positivo, `minore_16` negativo, `eventi` e `locali` ancora chiusi ad anon); `private.avvisi_inattivita` senza accesso dai ruoli dell'app (`047`, `minore_16`); RPC dei trasporti solo per moderatori con `aal2` (`048`: `adulto_21`, `moderatore_senza_mfa`, `moderatore`); colore dei gruppi con le policy del nome (`049`); nessuna `service_role` in `apps/web/src` |
+| B. Contatti | SÌ | L'elenco pubblico non contiene utenti; i riscontri mostrano solo amici già confermati o membri della serata già visibili da `dettaglio_serata`; nessuna nuova ricerca o lista di persone |
+| C. Eventi e contenuti | SÌ | ADR-0036 (R-07 modificata con il product owner): serate con riferimenti all'alcol senza titolo, generi né colori e almeno 18+ (`045`, e2e `scopri-pubblico.spec.ts`); età non dichiarata resta 18+ (`045`); età predefinita per locale scartata (R-21 invariata); riscontri senza punteggi né inviti a uscire di più; anteprima dei link senza dati di utenti |
+| D. Posizione | N/A | Nessun dato di posizione nuovo |
+| E. Moderazione | SÌ | Ogni modifica dei servizi di trasporto in `azioni_moderazione` con motivazione (`048`); nessun contenuto caricato dagli utenti; il colore dei gruppi non è un'immagine |
+| F. Privacy | SÌ | Unico dato nuovo: la data dell'avviso di inattività, nella tabella di conservazione, in `esporta_miei_dati` (`047`) e cancellata con l'account; email di avviso con Brevo (UE, ADR-0021) con il solo indirizzo; nessun SDK o tracciamento nell'elenco pubblico |
+| G. Documentazione | SÌ | ADR-0036, SAFETY_PRIVACY.md (R-07, §10), DATA_MODEL.md, PRD.md, ARCHITECTURE.md, DESIGN.md §1 e §5, DECISIONI_APERTE.md (D-18, D-19 chiuse) |
+
+**Voci del piano**
+- Fatte: elenco pubblico (D-18); D-19; link solo `https`; account inattivi; servizi di
+  trasporto in moderazione; colore dei gruppi; momenti di riscontro; icona, apertura e
+  anteprima dei link (`design/store/`); titoli delle aree; foto non ripetute nello stesso
+  elenco; avvisi CodeQL. Già fatte prima e verificate: layout desktop di Organizza, Vivi,
+  Ricorda e Profilo (intervento del 2026-11-15), carattere monospazio (ADR-0035), «Privacy e
+  dati» leggibile (ADR-0035), foto nel tema chiaro (intervento del 2026-11-17), segreti del
+  worker nell'environment `staging` limitato a `main`.
+- Scartata con il product owner: età predefinita per locale (ROADMAP §5, iterazione 12).
+- Spostate nell'iterazione 13, con il motivo: adattatori o Instagram per i locali senza
+  pagina della serata, foto d'atmosfera fino a 120, numeri e app di trasporto da verificare
+  a mano.
+
+**Attese esterne**
+- Applicare le migrazioni `20261123090000`…`20261123090800` in staging (con la pubblicazione
+  dopo l'unione in `main`).
+- Chiave API di Brevo (`BREVO_API_CHIAVE` in `.env.staging`, poi
+  `scripts/configura_ambiente.sh`): senza, nessun account inattivo è avvisato né eliminato.
+- Prove su telefoni reali con l'app di staging: apertura, Benvenuto, copertine, «Salva
+  immagine» del riepilogo (attesa dell'iterazione 11; plugin di condivisione se Android non
+  scarica), icone nuove su iPhone e Android.
+
+**Commit**: dal piano (`931c595`) al commit finale sul branch `iterazione-12-consolidamento`,
+dopo la divisione dell'iterazione (`2b1b082`).
 
