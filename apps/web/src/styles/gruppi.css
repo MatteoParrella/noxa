@@ -23,6 +23,9 @@
   color: inherit;
   text-decoration: none;
 }
+.gr-voce-segno {
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+}
 .gr-voce:hover {
   background: var(--colore-superficie-1);
 }
@@ -888,4 +891,100 @@
 /* Il conteggio dei membri non si spezza a capo tra numero e parola. */
 .gr-conteggio {
   white-space: nowrap;
+}
+
+/* ---------- Colore dei gruppi (iterazione 12) ---------- */
+[data-colore='ciano'] {
+  --colore-gruppo: var(--colore-gruppo-ciano);
+}
+[data-colore='blu'] {
+  --colore-gruppo: var(--colore-gruppo-blu);
+}
+[data-colore='viola'] {
+  --colore-gruppo: var(--colore-gruppo-viola);
+}
+[data-colore='rosa'] {
+  --colore-gruppo: var(--colore-gruppo-rosa);
+}
+[data-colore='rosso'] {
+  --colore-gruppo: var(--colore-gruppo-rosso);
+}
+[data-colore='arancione'] {
+  --colore-gruppo: var(--colore-gruppo-arancione);
+}
+[data-colore='giallo'] {
+  --colore-gruppo: var(--colore-gruppo-giallo);
+}
+[data-colore='verde'] {
+  --colore-gruppo: var(--colore-gruppo-verde);
+}
+.segno-gruppo {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--raggio-2);
+  background: var(--colore-gruppo, var(--colore-tinta));
+  color: var(--colore-testo-su-gruppo);
+  font-family: var(--tipo-famiglia-marchio);
+  font-size: var(--tipo-titolo-3);
+  font-weight: var(--tipo-peso-forte);
+  line-height: 1;
+}
+.segno-gruppo-grande {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--raggio-3);
+  font-size: var(--tipo-titolo-1);
+}
+.scelta-colore {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.scelta-colore-voci {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spazio-3);
+  padding-top: var(--spazio-2);
+}
+.scelta-colore-voce {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--area-tocco);
+  height: var(--area-tocco);
+  cursor: pointer;
+}
+/* L'opzione vera copre il campione, trasparente: si tocca e si sceglie con la tastiera. */
+.scelta-colore-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.scelta-colore-campione {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--raggio-tondo);
+  background: var(--colore-gruppo);
+  color: var(--colore-testo-su-gruppo);
+  box-shadow:
+    0 0 0 2px var(--colore-sfondo),
+    0 0 0 0 transparent;
+  transition: box-shadow var(--movimento-veloce) var(--curva-standard);
+}
+.scelta-colore-voce input:checked + .scelta-colore-campione {
+  box-shadow:
+    0 0 0 2px var(--colore-sfondo),
+    0 0 0 4px var(--colore-gruppo);
+}
+.scelta-colore-voce input:focus-visible + .scelta-colore-campione {
+  outline: 2px solid var(--colore-focus);
+  outline-offset: 5px;
 }

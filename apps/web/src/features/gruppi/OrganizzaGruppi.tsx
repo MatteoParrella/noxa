@@ -19,6 +19,7 @@ import { useGruppiDalVivo, useMieiGruppi, useProssimeSerate } from './dati';
 import { dataBreve } from './formato';
 import { VoceInvito } from './InvitoGruppo';
 import { RigaSerata } from './RigaSerata';
+import { SegnoGruppo } from '@/components/ui/SegnoGruppo';
 
 const testi = messaggi.gruppi;
 
@@ -184,7 +185,8 @@ function RigaGruppo({ gruppo }: { gruppo: GruppoElenco }) {
   const membri = gruppo.membri ?? gruppo.primi.length;
   return (
     <li>
-      <Link className="gr-voce" href={`/gruppo/?id=${gruppo.id}`}>
+      <Link className="gr-voce gr-voce-segno" href={`/gruppo/?id=${gruppo.id}`}>
+        <SegnoGruppo nome={gruppo.nome} colore={gruppo.colore} />
         <span className="gr-corpo">
           <span className="gr-titolo">
             <b>{gruppo.nome}</b>

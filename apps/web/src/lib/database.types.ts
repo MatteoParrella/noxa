@@ -2302,7 +2302,10 @@ export type Database = {
           scade_il: string;
         }[];
       };
-      crea_gruppo: { Args: { invitati?: string[]; nome: string }; Returns: string };
+      crea_gruppo: {
+        Args: { colore?: string; invitati?: string[]; nome: string };
+        Returns: string;
+      };
       decidi_candidato_locale: {
         Args: { candidato: string; esito: string; locale?: string; motivazione?: string };
         Returns: undefined;
@@ -2372,6 +2375,7 @@ export type Database = {
         Args: { gruppo: string };
         Returns: {
           altri: number;
+          colore: string;
           creato_da: Json;
           id: string;
           membri: Json;
@@ -2590,6 +2594,7 @@ export type Database = {
       miei_gruppi: {
         Args: Record<PropertyKey, never>;
         Returns: {
+          colore: string;
           id: string;
           invitato_da: Json;
           membri: number;

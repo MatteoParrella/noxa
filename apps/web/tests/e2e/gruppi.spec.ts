@@ -63,12 +63,17 @@ test('creare un gruppo: nome obbligatorio, amici non invitabili spenti con il mo
   await expect(page).toHaveURL(/\/gruppi\/nuovo\//);
 
   await page.getByLabel('Nome del gruppo').fill('Quelli del sabato');
+  await page.getByRole('radio', { name: 'Viola' }).check();
   await page.getByRole('checkbox', { name: /Davide/ }).click();
   await expect(page.getByText('1 selezionato · 2/30')).toBeVisible();
   await page.getByRole('button', { name: 'Crea il gruppo' }).click();
   await expect(page).toHaveURL(new RegExp(`/gruppo/\\?id=${ID_GRUPPO}`));
   const richiesta = supabase.richieste.find((r) => r.endpoint === 'crea_gruppo');
-  expect(richiesta?.corpo).toEqual({ nome: 'Quelli del sabato', invitati: [PERSONE.davide.id] });
+  expect(richiesta?.corpo).toEqual({
+    nome: 'Quelli del sabato',
+    invitati: [PERSONE.davide.id],
+    colore: 'viola',
+  });
 });
 
 test('creare un gruppo rifiutato dal database mostra il motivo (R-15)', async ({

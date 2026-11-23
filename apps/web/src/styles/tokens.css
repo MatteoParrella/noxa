@@ -170,6 +170,16 @@
   --colore-info-tenue: #0d2440;
   --colore-velo: rgba(0, 0, 0, 0.5);
   --colore-segmento-scelto: #636366; /* etichetta bianca 6,0:1 */
+  /* Colori dei gruppi: ≥ 3:1 sul fondo (componente grafico), iniziale nera sopra ≥ 4,5:1. */
+  --colore-gruppo-ciano: #3ee0cf;
+  --colore-gruppo-blu: #409cff;
+  --colore-gruppo-viola: #bf5af2;
+  --colore-gruppo-rosa: #ff6482;
+  --colore-gruppo-rosso: #ff6961;
+  --colore-gruppo-arancione: #ff9f0a;
+  --colore-gruppo-giallo: #ffd60a;
+  --colore-gruppo-verde: #30d158;
+  --colore-testo-su-gruppo: #000000;
   --ombra-0: none;
   --ombra-1: none;
   --ombra-2: 0 0 0 0.5px var(--colore-separatore);
@@ -285,6 +295,16 @@
   --colore-info-tenue: #dde9fa;
   --colore-velo: rgba(0, 0, 0, 0.25);
   --colore-segmento-scelto: #ffffff;
+  /* Colori dei gruppi nel tema chiaro: ≥ 3:1 sul bianco, iniziale bianca sopra ≥ 4,5:1. */
+  --colore-gruppo-ciano: #005a52;
+  --colore-gruppo-blu: #0062cc;
+  --colore-gruppo-viola: #8944ab;
+  --colore-gruppo-rosa: #c4234b;
+  --colore-gruppo-rosso: #ad0017;
+  --colore-gruppo-arancione: #a35200;
+  --colore-gruppo-giallo: #7a5600;
+  --colore-gruppo-verde: #1a7431;
+  --colore-testo-su-gruppo: #ffffff;
   --ombra-0: none;
   --ombra-1: 0 1px 2px rgba(0, 0, 0, 0.05);
   --ombra-2: 0 2px 10px rgba(0, 0, 0, 0.06);

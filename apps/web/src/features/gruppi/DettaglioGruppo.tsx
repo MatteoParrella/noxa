@@ -7,6 +7,7 @@ import {
   CircleAlert,
   Flag,
   LogOut,
+  Palette,
   Pencil,
   Shield,
   Trash2,
@@ -43,6 +44,7 @@ import {
   eliminaGruppo,
   invitaNelGruppo,
   rinominaGruppo,
+  cambiaColoreGruppo,
   togliDalGruppo,
   type DettaglioGruppo as Dati,
   type Membro,
@@ -52,6 +54,9 @@ import { CHIAVI, useDettaglioGruppo } from './dati';
 import { FoglioSegnalaTesto } from './FoglioSegnalaTesto';
 import { RigaSerata } from './RigaSerata';
 import { SelettoreAmici } from './SelettoreAmici';
+import { SceltaColore } from '@/components/ui/SceltaColore';
+import { SegnoGruppo } from '@/components/ui/SegnoGruppo';
+import type { ColoreGruppo } from '@/lib/coloriGruppo';
 
 const testi = messaggi.gruppi;
 
@@ -102,6 +107,7 @@ function NonDisponibile() {
 type FoglioAperto =
   | { tipo: 'invita' }
   | { tipo: 'rinomina' }
+  | { tipo: 'colore' }
   | { tipo: 'esci' }
   | { tipo: 'elimina' }
   | { tipo: 'segnalaNome' }
@@ -143,6 +149,11 @@ function Gruppo({ io, dati }: { io: string; dati: Dati }) {
             icona: <Icona icona={Pencil} />,
             onScegli: () => setFoglio({ tipo: 'rinomina' }),
           },
+          {
+            etichetta: testi.dettaglio.cambiaColore,
+            icona: <Icona icona={Palette} />,
+            onScegli: () => setFoglio({ tipo: 'colore' }),
+          },
         ]
       : []),
     {
@@ -180,7 +191,10 @@ function Gruppo({ io, dati }: { io: string; dati: Dati }) {
 
       <header className="gr-testa">
         <span className="etichetta">{testi.dettaglio.etichetta}</span>
-        <TitoloRivelato testo={dati.nome} className="t-display m-0" />
+        <div className="flex items-center gap-4">
+          <SegnoGruppo nome={dati.nome} colore={dati.colore} grande />
+          <TitoloRivelato testo={dati.nome} className="t-display m-0 min-w-0" />
+        </div>
         <div className="gr-membri">
           <GruppoAvatar
             persone={attivi.map((m) => ({ nome: m.nome_visualizzato, foto: m.avatar_path }))}
@@ -321,6 +335,17 @@ function Gruppo({ io, dati }: { io: string; dati: Dati }) {
             chiudi();
             void aggiorna();
             toast({ testo: testi.dettaglio.rinominato });
+          }}
+        />
+      )}
+      {foglio?.tipo === 'colore' && (
+        <FoglioColore
+          gruppo={dati}
+          onChiudi={chiudi}
+          onFatto={() => {
+            chiudi();
+            void aggiorna();
+            toast({ testo: testi.dettaglio.coloreCambiato });
           }}
         />
       )}
@@ -588,6 +613,53 @@ function FoglioEsci({
           </Pulsante>
         </div>
       </div>
+    </Foglio>
+  );
+}
+
+function FoglioColore({
+  gruppo,
+  onChiudi,
+  onFatto,
+}: {
+  gruppo: Dati;
+  onChiudi: () => void;
+  onFatto: () => void;
+}) {
+  const [colore, setColore] = useState<ColoreGruppo>(gruppo.colore);
+  const azione = useMutation({
+    mutationFn: () => cambiaColoreGruppo(gruppo.id, colore),
+    onSuccess: onFatto,
+  });
+  return (
+    <Foglio aperto titolo={testi.conferme.colore.titolo} onChiudi={onChiudi}>
+      <form
+        className="flex flex-col gap-4"
+        noValidate
+        onSubmit={(evento) => {
+          evento.preventDefault();
+          azione.mutate();
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <SegnoGruppo nome={gruppo.nome} colore={colore} grande />
+          <SceltaColore etichetta={testi.crea.colore} valore={colore} onCambia={setColore} />
+        </div>
+        {azione.isError && <Avviso tipo="errore">{testi.dettaglio.erroreAzione}</Avviso>}
+        <div className="azioni-doppie">
+          <Pulsante type="button" variante="secondario" onClick={onChiudi}>
+            {testi.conferme.annulla}
+          </Pulsante>
+          <Pulsante
+            type="submit"
+            variante="principale"
+            disabled={azione.isPending || colore === gruppo.colore}
+            caricamento={azione.isPending}
+          >
+            {testi.conferme.colore.conferma}
+          </Pulsante>
+        </div>
+      </form>
     </Foglio>
   );
 }

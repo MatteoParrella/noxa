@@ -13,6 +13,8 @@ import { messaggi } from '@/lib/messaggi/it';
 import { creaGruppo } from './api';
 import { CHIAVI } from './dati';
 import { SelettoreAmici } from './SelettoreAmici';
+import { SceltaColore } from '@/components/ui/SceltaColore';
+import type { ColoreGruppo } from '@/lib/coloriGruppo';
 
 const testi = messaggi.gruppi;
 const MASSIMO_NOME = 40;
@@ -35,6 +37,7 @@ export function CreaGruppo() {
   const online = useOnline();
   const [nome, setNome] = useState('');
   const [selezionati, setSelezionati] = useState<string[]>([]);
+  const [colore, setColore] = useState<ColoreGruppo>('ciano');
   const [inviato, setInviato] = useState(false);
 
   const pulito = nome.trim();
@@ -47,7 +50,7 @@ export function CreaGruppo() {
         : undefined;
 
   const crea = useMutation({
-    mutationFn: () => creaGruppo(pulito, selezionati),
+    mutationFn: () => creaGruppo(pulito, selezionati, colore),
     onSuccess: (id) => {
       void client.invalidateQueries({ queryKey: CHIAVI.gruppi });
       toast({ testo: testi.crea.creato(selezionati.length) });
@@ -77,6 +80,7 @@ export function CreaGruppo() {
         autoComplete="off"
         required
       />
+      <SceltaColore etichetta={testi.crea.colore} valore={colore} onCambia={setColore} />
       <section aria-labelledby="titolo-invita" className="flex flex-col gap-2">
         <h2 className="etichetta-riga m-0" id="titolo-invita">
           {testi.crea.invita}
