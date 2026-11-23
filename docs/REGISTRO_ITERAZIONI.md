@@ -32,7 +32,7 @@ Iterazioni completate: 11 su 16.
 | 9 | completata con attese esterne | 2026-11-05 | 2026-11-05 | 2 | `iterazione-09-notifiche-checkin` | Web Push con testi di sistema (ADR-0026); mancano chiavi VAPID, segreti e deploy di `invia-push` in staging e la prova su telefoni reali |
 | 10 | completata con attese esterne | 2026-11-06 | 2026-11-06 | 2 | `iterazione-10-ritorno-sicuro` | Servizio in primo piano, posizioni lette con la RLS, aree solo sul telefono (ADR-0028); mancano il progetto Firebase, l'APK sul telefono e le 20 prove reali del criterio 1 della Fase 2 |
 | 11 | completata con attese esterne | 2026-11-19 | 2026-11-19 | 1 | `iterazione-11-statistiche-badge-wrapped` | Tavole preparate il 2026-11-18; mancano la migrazione in staging e produzione prima del 1° dicembre e la prova di «Salva immagine» su iPhone e nell'app Android |
-| 12 | da iniziare | — | — | 0 | — | Divisa il 2026-11-23 su richiesta del product owner: qui solo il consolidamento del codice su staging |
+| 12 | in corso | 2026-11-23 | — | 0 | `iterazione-12-consolidamento` | Divisa il 2026-11-23 su richiesta del product owner: qui solo il consolidamento del codice su staging |
 | 13 | da iniziare | — | — | 0 | — | Nata dalla divisione del 2026-11-23: produzione, beta e Google Play |
 | 14 | da iniziare | — | — | 0 | — | Era la 13 prima della divisione del 2026-11-23 |
 | 15 | da iniziare | — | — | 0 | — | Era la 14 prima della divisione del 2026-11-23 |
@@ -1305,3 +1305,42 @@ otto schede del riepilogo (anche con il movimento ridotto), elenco dei riepilogh
 
 **Commit**: a52289e, dedde05, c1878e3, d45a3d2 e il commit finale sul branch
 `iterazione-11-statistiche-badge-wrapped`.
+
+### Iterazione 12 — Consolidamento prima della beta
+
+**Piano**
+- Perimetro (ROADMAP.md §5): solo codice provato in locale e su staging. Il product owner non
+  usa più Claude Design: brief e tavole degli stati li prepara Claude in `design/` (deroga a
+  DESIGN.md §1, registrata in DESIGN.md).
+- Decisioni prese all'avvio con il product owner:
+  - **D-18**: sul **sito** (non nell'app installata) le serate si sfogliano senza account, in
+    forma ridotta (copertina generata, titolo, locale, comune, data, ora, età minima, generi);
+    descrizione, prezzo, biglietti, mappa, amici e partecipazioni restano agli iscritti. Le
+    serate con riferimenti all'alcol compaiono senza titolo, descrizione e generi, solo con
+    locale, data e «18+» e l'invito a entrare con un account maggiorenne (R-23). Nuovo ADR che
+    modifica R-07.
+  - **D-19**: guida di tono scritta da Claude in DESIGN.md, revisione dei testi di
+    `messaggi/it.ts`, descrizioni accorciate con «Leggi tutto».
+  - **Età predefinita per locale**: non si fa; resta 18+ quando la serata non la dichiara
+    (R-21). Tolta dal piano con il motivo.
+- Database: RPC pubbliche `cerca_eventi_pubblici` ed `evento_pubblico` (security definer,
+  colonne ridotte, unico accesso del ruolo `anon`); link solo `https` su
+  `eventi.url_biglietti`, `eventi_fonti.url_originale`, `locali.sito_web`; avviso ed
+  eliminazione degli account senza accessi da 24 mesi; gestione di `servizi_trasporto` dai
+  moderatori con registro (R-69); colore dei gruppi. Test pgTAP con il ruolo `anon` e le età
+  del seed.
+- Worker: link normalizzati a `https`.
+- App: Scopri e dettaglio senza account sul sito; momenti di riscontro (amicizia confermata,
+  gruppo creato, serata confermata da tutti); layout desktop di Organizza, Vivi, Ricorda e
+  Profilo; carattere monospazio solo per orari e date; «Privacy e dati» più leggibile; titoli
+  allineati ai nomi delle aree; tinta delle foto nel tema chiaro; colore dei gruppi; servizi di
+  trasporto nell'area di moderazione; icona, apertura e anteprima dei link definitive; testi
+  rivisti (D-19); libreria delle foto d'atmosfera ad almeno 120.
+- Sicurezza: avvisi CodeQL aperti (esclusione di `design/` e delle pagine salvate dei test,
+  `crypto` al posto di `Math.random` nei test, controllo dello schema `blob:` nelle anteprime).
+  Segreti del worker già nell'environment `staging` limitato a `main`: voce chiusa.
+- Passi: migrazioni e pgTAP → tipi → worker → app e tavole → test unitari ed e2e → documenti →
+  cicli di revisione e `safety-review`.
+- Criteri: ogni voce fatta o spostata con il motivo; migrazioni con RLS e pgTAP; criteri 4, 5,
+  6 (axe) e 8 della Fase 1; tutto online su staging.
+
