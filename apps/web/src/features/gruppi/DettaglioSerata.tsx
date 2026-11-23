@@ -42,6 +42,7 @@ import { dominio, etichettaEta, ora, orario } from '@/features/scopri/formato';
 import { copertina } from '@/features/scopri/schede';
 import { useOnline } from '@/lib/connessione';
 import { ErroreValidazione } from '@/lib/errori';
+import { useRiscontro } from '@/components/ui/Riscontro';
 import { messaggi } from '@/lib/messaggi/it';
 import { registraErrore } from '@/lib/registro';
 import {
@@ -153,6 +154,38 @@ function useNovita(partecipanti: readonly Partecipante[]) {
   return novita;
 }
 
+/**
+ * «Ci siete tutti» (brief del rinfresco §4.3): una sola volta per serata su questo dispositivo,
+ * solo quando ogni membro ha risposto sì. Se qualcuno manca o ha detto no non compare nulla,
+ * per nessuno.
+ */
+function useCiSieteTutti(dati: Dati) {
+  const mostra = useRiscontro();
+  const tutti =
+    !dati.passata &&
+    dati.stato !== 'annullata' &&
+    dati.altri === 0 &&
+    dati.partecipanti.length >= 2 &&
+    dati.partecipanti.every((p) => p.risposta === 'si');
+  useEffect(() => {
+    if (!tutti) return;
+    const chiave = `noxa-ci-siete-tutti-${dati.id}`;
+    try {
+      if (window.localStorage.getItem(chiave)) return;
+      window.localStorage.setItem(chiave, '1');
+    } catch {
+      // Senza archivio il riscontro può ripetersi: resta breve e si chiude con un tocco.
+    }
+    mostra({
+      tipo: 'serata',
+      titolo: messaggi.riscontri.serata.titolo,
+      testo: messaggi.riscontri.serata.testo,
+      persone: dati.partecipanti.map((p) => ({ nome: p.nome_visualizzato, foto: p.avatar_path })),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- una volta quando diventa vero
+  }, [tutti, dati.id]);
+}
+
 function Serata({ io, dati }: { io: string; dati: Dati }) {
   const online = useOnline();
   const client = useQueryClient();
@@ -162,6 +195,7 @@ function Serata({ io, dati }: { io: string; dati: Dati }) {
     dati.evento ? [{ tipo: dati.evento.copertina_tipo, path: dati.evento.copertina_path }] : [],
   );
   const novita = useNovita(dati.partecipanti);
+  useCiSieteTutti(dati);
 
   const mio = dati.partecipanti.find((p) => p.io);
   const sola = dati.stato === 'annullata' || dati.passata;

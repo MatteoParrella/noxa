@@ -14,7 +14,9 @@ import { useOnline } from '@/lib/connessione';
 import { messaggi } from '@/lib/messaggi/it';
 import { accettaRichiesta, eliminaAmicizia, type Relazione } from './api';
 import { AzioniPersona } from './AzioniPersona';
-import { CHIAVI, useAmici, useIo } from './dati';
+import { CHIAVI, useAmici, useIo, useIoPersona } from './dati';
+import { useRiscontro } from '@/components/ui/Riscontro';
+import { riscontroAmicizia } from './riscontri';
 
 const testi = messaggi.amici;
 
@@ -30,9 +32,14 @@ export function ElencoAmici() {
   const amici = useAmici();
   const client = useQueryClient();
 
+  const mostraRiscontro = useRiscontro();
+  const ioPersona = useIoPersona();
   const risposta = useMutation({
     mutationFn: ({ relazione, accetta }: { relazione: Relazione; accetta: boolean }) =>
       accetta ? accettaRichiesta(relazione.amiciziaId) : eliminaAmicizia(relazione.amiciziaId),
+    onSuccess: (_esito, { relazione, accetta }) => {
+      if (accetta) mostraRiscontro(riscontroAmicizia(ioPersona, relazione.persona));
+    },
     onSettled: () => client.invalidateQueries({ queryKey: CHIAVI.relazioni }),
   });
 

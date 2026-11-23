@@ -2,6 +2,7 @@ import {
   expect,
   ID_GRUPPO,
   ID_SERATA,
+  serataDiGruppoDiProva,
   impostaTema,
   PERSONE,
   TEMI,
@@ -68,6 +69,11 @@ test('creare un gruppo: nome obbligatorio, amici non invitabili spenti con il mo
   await expect(page.getByText('1 selezionato · 2/30')).toBeVisible();
   await page.getByRole('button', { name: 'Crea il gruppo' }).click();
   await expect(page).toHaveURL(new RegExp(`/gruppo/\\?id=${ID_GRUPPO}`));
+  // Riscontro «Il gruppo è pronto» (brief del rinfresco §4.2), che si chiude con un tocco.
+  await expect(page.getByRole('status').filter({ hasText: 'Il gruppo è pronto' })).toBeVisible();
+  await expect(page.getByText('Abbiamo mandato l’invito.')).toBeVisible();
+  await page.getByText('Il gruppo è pronto').click();
+  await expect(page.getByText('Il gruppo è pronto')).toHaveCount(0);
   const richiesta = supabase.richieste.find((r) => r.endpoint === 'crea_gruppo');
   expect(richiesta?.corpo).toEqual({
     nome: 'Quelli del sabato',
@@ -163,4 +169,28 @@ test('le azioni in fondo ai moduli restano sopra la barra di navigazione', async
     });
     expect(libero).toBe(true);
   }
+});
+
+test('«Ci siete tutti» compare una volta sola, solo se tutti hanno detto sì', async ({
+  page,
+  supabase,
+}) => {
+  const base = serataDiGruppoDiProva(false);
+  supabase.rispondi('dettaglio_serata', {
+    stato: 200,
+    corpo: [{ ...base, partecipanti: base.partecipanti.map((p) => ({ ...p, risposta: 'si' })) }],
+  });
+  await page.goto(serata);
+  await expect(page.getByRole('status').filter({ hasText: 'Ci siete tutti' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByText('Ci siete tutti')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Pizza e poi da Marco' })).toBeVisible();
+  await expect(page.getByText('Ci siete tutti')).toHaveCount(0);
+});
+
+test('con una risposta «forse» il riscontro non compare', async ({ page }) => {
+  await page.goto(serata);
+  await expect(page.getByRole('heading', { name: 'Pizza e poi da Marco' })).toBeVisible();
+  await expect(page.getByText('Ci siete tutti')).toHaveCount(0);
 });

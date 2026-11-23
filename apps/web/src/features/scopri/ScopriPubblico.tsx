@@ -29,7 +29,10 @@ const GIORNI = 7;
 const LIBERE = [PERCORSI.registrazione, PERCORSI.accesso, PERCORSI.termini, PERCORSI.privacy];
 
 /** Scheda di una serata pubblica; ogni scheda apre l'iscrizione (ADR-0036). */
-function datiPubblici(evento: EventoPubblico, nomiGeneri: Record<string, string>): DatiSchedaEvento {
+function datiPubblici(
+  evento: EventoPubblico,
+  nomiGeneri: Record<string, string>,
+): DatiSchedaEvento {
   const titolo = evento.titolo ?? t.riservata;
   const eta = etichettaEta(evento.eta_minima, evento.eta_minima_dichiarata);
   const giorno = giornoBreve(daIso(evento.data_serata));

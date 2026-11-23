@@ -879,6 +879,26 @@ export const messaggi = {
     },
   },
 
+  riscontri: {
+    amicizia: {
+      titolo: 'Ora siete amici',
+      testo: (nome: string) => `Tu e ${nome} potete organizzare le serate insieme.`,
+    },
+    gruppo: {
+      titolo: 'Il gruppo è pronto',
+      testo: (inviti: number) =>
+        inviti === 0
+          ? 'Invita gli amici quando vuoi.'
+          : inviti === 1
+            ? 'Abbiamo mandato l’invito.'
+            : `Abbiamo mandato ${inviti} inviti.`,
+    },
+    serata: {
+      titolo: 'Ci siete tutti',
+      testo: 'Tutto il gruppo ha detto sì.',
+    },
+  },
+
   notifiche: {
     titolo: 'Notifiche',
     caricamento: 'Carico le notifiche',
