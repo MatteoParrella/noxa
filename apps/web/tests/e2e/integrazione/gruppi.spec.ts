@@ -52,6 +52,11 @@ test('R-15: gruppo misto valido tra amici, invito rifiutato a chi non è amico d
   const adulto21 = foglio.getByRole('checkbox', { name: /Adulto 21/ });
   await expect(adulto21).toHaveAttribute('aria-disabled', 'true');
   await expect(foglio.getByText('Non è amico di tutte le persone del gruppo')).toBeVisible();
+  // Il foglio sale da fuori schermo con una molla (ADR-0035) e `force` salta l'attesa che la
+  // riga sia ferma: si aspetta la fine dell'animazione prima del tocco.
+  await foglio.evaluate((elemento) =>
+    Promise.all(elemento.getAnimations().map((animazione) => animazione.finished)),
+  );
   await adulto21.click({ force: true });
   await expect(adulto21).toHaveAttribute('aria-checked', 'false');
   await adulto.keyboard.press('Escape');
