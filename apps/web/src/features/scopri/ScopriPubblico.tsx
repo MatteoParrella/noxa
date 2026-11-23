@@ -12,6 +12,7 @@ import { RigaEvento, SchedaEvidenza, type DatiSchedaEvento } from '@/components/
 import { ricordaPaginaDopoAccesso } from '@/features/account/dopoAccesso';
 import { PERCORSI } from '@/features/account/documenti';
 import { famigliaDaGeneri, semeCopertina } from '@/lib/copertinaGenerata';
+import { fotoDiUnElenco } from '@/lib/fotoSerata';
 import { useMontato, useOnline } from '@/lib/connessione';
 import { aggiungiGiorni, daIso, dataIso, serataInCorso, type DataCalendario } from '@/lib/date';
 import { messaggi } from '@/lib/messaggi/it';
@@ -116,6 +117,20 @@ export function ScopriPubblico() {
 
   const nomiGeneri = generi.data ?? {};
   const elenco = eventi.data ?? [];
+  // Nessuna foto d'atmosfera ripetuta nell'elenco (ADR-0032).
+  useMemo(
+    () =>
+      fotoDiUnElenco(
+        (eventi.data ?? []).map((evento) => ({
+          seme: semeCopertina(
+            evento.riservato ? evento.id : (evento.titolo ?? ''),
+            evento.locale_nome,
+          ),
+          famiglia: evento.riservato ? 'accento' : famigliaDaGeneri(evento.generi_evento),
+        })),
+      ),
+    [eventi.data],
+  );
 
   let contenuto;
   if (!eventi.data) {
