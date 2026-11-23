@@ -44,3 +44,4 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0033](0033-layout-desktop-da-sito.md) | Su desktop Noxa si presenta come un sito | Accettato |
 | [0034](0034-non-hai-un-passaggio.md) | «Non hai un passaggio?» con numeri e link, senza integrazioni | Accettato |
 | [0035](0035-stile-ios-e-materiali-traslucidi.md) | Interfaccia in stile iOS con materiali traslucidi | Accettato |
+| [0036](0036-elenco-pubblico-delle-serate.md) | Elenco pubblico delle serate sul sito | Accettato |
