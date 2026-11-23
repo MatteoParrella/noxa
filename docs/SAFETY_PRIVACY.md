@@ -146,7 +146,7 @@ non può essere rilasciata, indipendentemente da scadenze o richieste commercial
 | Backup cifrati del database | 30 giorni | `scripts/backup_database.sh` (ADR-0025) |
 | Log applicativi (worker, Edge Functions) | 30 giorni | impostazione del fornitore di hosting; per il worker, conservazione dei log di GitHub Actions del repository (ADR-0021) |
 | Dati dell'account (profilo e foto profilo, amicizie, blocchi, gruppi, serate, partecipazioni, tracker, badge, riepiloghi, consensi, dispositivi) | Fino all'eliminazione dell'account. Un account senza accessi da 24 mesi riceve un avviso via email ed è eliminato dopo altri 30 giorni senza accessi; senza un avviso accettato da Brevo nessun account è eliminato | Job orario `private.gestisci_account_inattivi()`: «accesso» è l'ultimo accesso con la password o l'ultimo rinnovo di una sessione (`private.ultimo_accesso`); email con l'API di Brevo e solo l'indirizzo del destinatario; eliminazione con `private.elimina_account`, la stessa di `elimina_mio_account` (R-55). Test pgTAP `047_account_inattivi` |
-| Avvisi di inattività (`private.avvisi_inattivita`: utente e data dell'avviso) | Fino al rientro dell'utente o all'eliminazione dell'account | Cancellati da `private.gestisci_account_inattivi()` o con l'account (cascata) |
+| Avvisi di inattività (`private.avvisi_inattivita`: utente e data dell'avviso) | Fino al rientro dell'utente o all'eliminazione dell'account | Cancellati da `private.gestisci_account_inattivi()` o con l'account (cascata); inclusi in `esporta_miei_dati` |
 | Eventi (`eventi` e tabelle collegate) | Indefinita: sono informazioni pubbliche sugli eventi, non dati personali | — |
 
 ## 11. Procedura operativa di moderazione (sintesi)

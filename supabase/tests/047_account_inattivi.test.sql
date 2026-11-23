@@ -1,6 +1,6 @@
 -- Avviso ed eliminazione degli account senza accessi da 24 mesi (SAFETY_PRIVACY.md §10).
 begin;
-select plan(14);
+select plan(15);
 
 -- Tre account del seed diventano inattivi da 25 mesi, senza sessioni.
 update auth.users set created_at = now() - interval '30 months',
@@ -63,6 +63,12 @@ select ok(
   (select confermato from private.avvisi_inattivita where utente_id = tests.id('adulto_20')),
   'Un avviso accettato da Brevo è confermato'
 );
+select tests.autentica_come('adulto_20');
+select ok(
+  (public.esporta_miei_dati() -> 'avviso_inattivita' ->> 'avvisato_il') is not null,
+  'R-64: l''esportazione dei dati contiene l''avviso di inattività'
+);
+select tests.esci();
 select ok(
   not exists (select 1 from private.avvisi_inattivita a
               where a.utente_id = tests.id('minore_14') and a.confermato),
