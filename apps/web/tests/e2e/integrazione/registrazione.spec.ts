@@ -74,7 +74,7 @@ test.beforeAll(() => {
 
 test('R-01: un tredicenne non si registra dall’app', async ({ page }) => {
   await page.goto('/registrazione/');
-  await page.getByLabel('Data di nascita').fill(nascita(13, 'app'));
+  await page.getByRole('textbox', { name: 'Data di nascita' }).fill(nascita(13, 'app'));
   await page.getByRole('button', { name: 'Avanti' }).click();
   await expect(
     page.getByRole('heading', { level: 1, name: 'Ci vediamo più avanti' }),
@@ -97,7 +97,7 @@ test('R-01: un tredicenne non si registra nemmeno chiamando direttamente l’API
 
 test('un’email già registrata non crea un secondo account e non lo rivela', async ({ page }) => {
   await page.goto('/registrazione/');
-  await page.getByLabel('Data di nascita').fill(nascita(16, 'app'));
+  await page.getByRole('textbox', { name: 'Data di nascita' }).fill(nascita(16, 'app'));
   await page.getByRole('button', { name: 'Avanti' }).click();
   // Utente del seed, già confermato.
   await page.getByLabel('Email').fill('minore_16@example.com');
@@ -118,10 +118,11 @@ test('un’email già registrata non crea un secondo account e non lo rivela', a
 test('registrazione, verifica dell’email, onboarding, uscita e nuovo accesso', async ({ page }) => {
   test.slow();
   const { email, username } = unico('giulia');
-  await page.goto('/scopri/');
-  await expect(page).toHaveURL(/\/benvenuto\/$/);
+  // Il rinvio dalle aree al Benvenuto è nei test simulati: qui si parte da lì, così nessuna
+  // pagina resta da riaprire dopo l'accesso.
+  await page.goto('/benvenuto/');
   await page.getByRole('link', { name: 'Crea un account' }).click();
-  await page.getByLabel('Data di nascita').fill(nascita(16, 'app'));
+  await page.getByRole('textbox', { name: 'Data di nascita' }).fill(nascita(16, 'app'));
   await page.getByRole('button', { name: 'Avanti' }).click();
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password', { exact: true }).fill('notte.sul.tram7');
