@@ -137,7 +137,8 @@ const SchemaRegistro = z.object({
   motivazione: z.string().nullable(),
 });
 export type VoceRegistro = z.infer<typeof SchemaRegistro>;
-export type TipoRegistro = 'locale' | 'fonte' | 'evento' | 'candidato_locale';
+export type TipoRegistro =
+  'locale' | 'fonte' | 'evento' | 'candidato_locale' | 'servizio_trasporto';
 
 export async function leggiRegistro(tipo: TipoRegistro, oggetto: string): Promise<VoceRegistro[]> {
   const { data, error } = await supabase().rpc('registro_moderazione', { tipo, oggetto });
@@ -1106,4 +1107,57 @@ export async function decidiReclamo(
     motivazione,
   });
   if (error) throw converti(error);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Servizi di trasporto (F-23, ADR-0034): gestiti dai moderatori con il registro (R-69)
+// ---------------------------------------------------------------------------------------------
+
+const SchemaServizioTrasporto = z.object({
+  id: z.uuid(),
+  tipo: z.enum(['mezzi_pubblici', 'taxi', 'app_trasporto']),
+  nome: z.string(),
+  zona: z.enum(['milano', 'brianza', 'tutte']),
+  telefono: z.string().nullable(),
+  url: z.string().nullable(),
+  nota: z.string().nullable(),
+  eta_minima: z.number().int(),
+  ordine: z.number().int(),
+  fonte_url: z.string(),
+  verificato_il: z.string(),
+  attivo: z.boolean(),
+});
+export type ServizioTrasporto = z.infer<typeof SchemaServizioTrasporto>;
+export type DatiServizioTrasporto = Omit<ServizioTrasporto, 'id'>;
+
+export async function leggiServiziTrasporto(): Promise<ServizioTrasporto[]> {
+  const { data, error } = await supabase().rpc('servizi_trasporto_moderazione');
+  if (error) throw converti(error);
+  return verifica(z.array(SchemaServizioTrasporto), data);
+}
+
+/** Crea (id null) o modifica una voce; restituisce il suo identificativo. */
+export async function salvaServizioTrasporto(
+  id: string | null,
+  dati: DatiServizioTrasporto,
+  motivazione: string,
+): Promise<string> {
+  const { data, error } = await supabase().rpc('salva_servizio_trasporto', {
+    // Il parametro accetta null per una voce nuova; i tipi generati lo dichiarano stringa.
+    servizio: id as string,
+    tipo: dati.tipo,
+    nome: dati.nome,
+    zona: dati.zona,
+    telefono: dati.telefono as string,
+    url: dati.url as string,
+    nota: dati.nota as string,
+    eta_minima: dati.eta_minima,
+    ordine: dati.ordine,
+    fonte_url: dati.fonte_url,
+    verificato_il: dati.verificato_il,
+    attivo: dati.attivo,
+    motivazione,
+  });
+  if (error) throw converti(error);
+  return verifica(z.uuid(), data);
 }

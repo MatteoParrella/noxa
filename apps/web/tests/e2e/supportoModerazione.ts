@@ -687,6 +687,38 @@ export type OpzioniModerazione = {
 };
 
 /** Simulatore dell'area: registra le chiamate e permette di cambiare le risposte. */
+/** Voci di «Non hai un passaggio?» come le restituisce servizi_trasporto_moderazione. */
+const SERVIZI_TRASPORTO = [
+  {
+    id: '00000000-0000-4000-8000-0000000a7001',
+    tipo: 'taxi',
+    nome: 'Radiotaxi 02 4040',
+    zona: 'milano',
+    telefono: '+39024040',
+    url: null,
+    nota: 'Taxi a Milano, a ogni ora.',
+    eta_minima: 14,
+    ordine: 20,
+    fonte_url: 'https://milanolinate-airport.com/en/from-to/by-taxi',
+    verificato_il: '2026-11-15',
+    attivo: true,
+  },
+  {
+    id: '00000000-0000-4000-8000-0000000a7002',
+    tipo: 'app_trasporto',
+    nome: 'Uber',
+    zona: 'tutte',
+    telefono: null,
+    url: 'https://m.uber.com/ul/?action=setPickup&pickup=my_location',
+    nota: null,
+    eta_minima: 18,
+    ordine: 50,
+    fonte_url: 'https://www.uber.com/legal/terms/it',
+    verificato_il: '2026-11-15',
+    attivo: true,
+  },
+];
+
 export class ModerazioneSimulata {
   readonly chiamate: Array<{ chiave: string; corpo: unknown; url: string }> = [];
   private readonly risposte = new Map<string, Risposta>();
@@ -784,6 +816,10 @@ export class ModerazioneSimulata {
         return { stato: 200, corpo: [LOCALE_SCHEDA] };
       case 'POST /rest/v1/rpc/candidati_da_verificare':
         return { stato: 200, corpo: CANDIDATI };
+      case 'POST /rest/v1/rpc/servizi_trasporto_moderazione':
+        return { stato: 200, corpo: SERVIZI_TRASPORTO };
+      case 'POST /rest/v1/rpc/salva_servizio_trasporto':
+        return { stato: 200, corpo: SERVIZI_TRASPORTO[0]?.id ?? null };
       case 'POST /rest/v1/rpc/registro_moderazione':
         return { stato: 200, corpo: REGISTRO };
       case 'POST /rest/v1/rpc/coda_duplicati':

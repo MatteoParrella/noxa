@@ -164,7 +164,7 @@ test.describe('locali e candidati', () => {
     await page.getByRole('textbox', { name: /Sito/ }).fill('binario7.example');
     await page.getByRole('button', { name: 'Salva modifiche' }).click();
     await expect(page.getByText('Scrivi il nome (fino a 120 caratteri).')).toBeVisible();
-    await expect(page.getByText('Il sito inizia con https:// o http://.')).toBeVisible();
+    await expect(page.getByText('Il sito inizia con https://.')).toBeVisible();
     await page.getByRole('textbox', { name: 'Nome' }).fill('Club Binario 7 – Sala grande');
     await page.getByRole('textbox', { name: /Sito/ }).fill('https://binario7.example');
     await page.getByRole('textbox', { name: 'Latitudine' }).fill('45.59');
@@ -454,4 +454,57 @@ test('a 390 px la navigazione si apre dal menu', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /^Fonti/ })).toBeVisible();
   await expect(navigazione).toBeHidden();
   await verificaAccessibilita(page);
+});
+
+test.describe('servizi di trasporto (F-23, R-69)', () => {
+  for (const tema of TEMI) {
+    test(`elenco e pannello senza violazioni axe (${tema})`, async ({ page }) => {
+      await impostaTema(page, tema);
+      await apri(page);
+      await page.goto('/moderazione/trasporti/');
+      await expect(page.getByRole('button', { name: 'Radiotaxi 02 4040' })).toBeVisible();
+      await verificaAccessibilita(page);
+      await page.getByRole('button', { name: 'Radiotaxi 02 4040' }).click();
+      await expect(page.getByRole('textbox', { name: 'Nome' })).toHaveValue('Radiotaxi 02 4040');
+      await verificaAccessibilita(page);
+    });
+  }
+
+  test('una modifica chiede che cosa si è controllato e la registra', async ({ page }) => {
+    const simulata = await apri(page);
+    await page.goto('/moderazione/trasporti/');
+    await page.getByRole('button', { name: 'Radiotaxi 02 4040' }).click();
+    await page.getByRole('textbox', { name: 'Fonte ufficiale' }).fill('http://comune.milano.it');
+    await page.getByRole('button', { name: 'Salva' }).click();
+    await expect(page.getByText('La fonte inizia con https://.')).toBeVisible();
+    await expect(page.getByText('Scrivi cosa hai controllato.')).toBeVisible();
+    expect(simulata.di('POST /rest/v1/rpc/salva_servizio_trasporto')).toHaveLength(0);
+
+    await page
+      .getByRole('textbox', { name: 'Fonte ufficiale' })
+      .fill('https://comune.milano.it/taxi');
+    await page
+      .getByRole('textbox', { name: 'Cosa hai controllato' })
+      .fill('Numero sul sito del Comune');
+    await page.getByRole('button', { name: 'Salva' }).click();
+    await expect(page.getByText('Servizio salvato.')).toBeVisible();
+    expect(simulata.di('POST /rest/v1/rpc/salva_servizio_trasporto')[0]?.corpo).toMatchObject({
+      nome: 'Radiotaxi 02 4040',
+      tipo: 'taxi',
+      telefono: '+39024040',
+      fonte_url: 'https://comune.milano.it/taxi',
+      motivazione: 'Numero sul sito del Comune',
+    });
+  });
+
+  test('un nuovo servizio app senza link non si salva', async ({ page }) => {
+    const simulata = await apri(page);
+    await page.goto('/moderazione/trasporti/');
+    await page.getByRole('button', { name: 'Nuovo servizio' }).click();
+    await page.getByRole('textbox', { name: 'Nome' }).fill('App di prova');
+    await page.getByRole('combobox', { name: 'Tipo' }).selectOption('app_trasporto');
+    await page.getByRole('button', { name: 'Salva' }).click();
+    await expect(page.getByText('Mezzi pubblici e app si aprono con un link.')).toBeVisible();
+    expect(simulata.di('POST /rest/v1/rpc/salva_servizio_trasporto')).toHaveLength(0);
+  });
 });

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   ArrowLeft,
+  Bus,
   CalendarDays,
   Copy,
   Flag,
@@ -54,6 +55,7 @@ export const PERCORSI_MODERAZIONE = {
   segnalazioni: '/moderazione/segnalazioni/',
   segnalazione: (id: string) => `/moderazione/segnalazione/?id=${id}`,
   reclami: '/moderazione/reclami/',
+  trasporti: '/moderazione/trasporti/',
 } as const;
 
 const CHIAVE_DUE_FATTORI = ['moderazione', 'due-fattori'] as const;
@@ -284,6 +286,12 @@ function NavigazioneLaterale({ utenteId, aperta }: { utenteId: string; aperta: b
         icona={Rss}
         etichetta={nav.fonti}
         attiva={sezione === 'fonti' || sezione === 'fonte'}
+      />
+      <VoceNavigazione
+        href={PERCORSI_MODERAZIONE.trasporti}
+        icona={Bus}
+        etichetta={nav.trasporti}
+        attiva={sezione === 'trasporti'}
       />
       <VoceNavigazione
         href={PERCORSI_MODERAZIONE.duplicati}
