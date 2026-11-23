@@ -7,7 +7,7 @@ const MAILPIT = process.env.MAILPIT_URL ?? 'http://127.0.0.1:54324';
 
 /** Identificativi unici per ogni esecuzione, così i test si possono ripetere sullo stesso DB. */
 function unico(prefisso: string) {
-  const codice = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4).toString(36)}`;
+  const codice = `${Date.now().toString(36)}${crypto.randomUUID().slice(0, 4)}`;
   return {
     email: `${prefisso}.${codice}@example.com`,
     username: `${prefisso}.${codice}`.slice(0, 20),

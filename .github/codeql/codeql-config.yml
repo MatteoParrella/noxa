@@ -1,0 +1,7 @@
+# Configurazione di CodeQL: si analizza solo il codice che gira. Restano fuori le esportazioni
+# di Claude Design in `design/` (pagine HTML con i loro script, mai servite dall'app) e le
+# pagine dei siti dei locali salvate come dati dei test del worker.
+name: Noxa
+paths-ignore:
+  - design
+  - services/worker/tests/dati

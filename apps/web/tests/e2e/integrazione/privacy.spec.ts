@@ -12,7 +12,7 @@ const PASSWORD = 'notte.sul.tram7';
 const BASE = 'http://127.0.0.1:4173';
 
 function unico(prefisso: string) {
-  const codice = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4).toString(36)}`;
+  const codice = `${Date.now().toString(36)}${crypto.randomUUID().slice(0, 4)}`;
   return {
     email: `${prefisso}.${codice}@example.com`,
     username: `${prefisso}.${codice}`.slice(0, 20),
