@@ -4,13 +4,14 @@ Dalla fixture sono stati tolti `<script>`, `<style>` e gli `<svg>` in linea (qua
 l'adattatore legge solo le schede degli eventi, rimaste identiche all'originale.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime, tzinfo
 from uuid import UUID
 
 import jsonschema
 import pytest
 
 from noxa_worker.errori import ErroreConformita, ErroreFonte
+from noxa_worker.fonti import sito_html_alcatraz
 from noxa_worker.fonti.base import EventoGrezzo, Fonte, TipoFonte
 from noxa_worker.fonti.sito_html import AdattatoreSitoHtml, entro_il_limite
 from noxa_worker.fonti.sito_html_alcatraz import AdattatoreSitoHtmlAlcatraz
@@ -49,6 +50,20 @@ def _sito(robots: str = "User-agent: *\nDisallow:\n") -> SitoFinto:
         FONTE.url, leggi_dato("pagine/sito_html_alcatraz/2026-11-14.html"), tipo="text/html"
     )
     return sito
+
+
+class _GiornoDellaPagina(datetime):
+    """Il giorno in cui la pagina è stata salvata: l'anno delle date senza anno ("Sab 14 Nov")
+    si deduce da oggi, quindi il test non deve dipendere dalla data in cui gira."""
+
+    @classmethod
+    def now(cls, tz: tzinfo | None = None) -> "_GiornoDellaPagina":
+        return cls(2026, 11, 14, 12, 0, tzinfo=tz or UTC)
+
+
+@pytest.fixture(autouse=True)
+def _oggi_fisso(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(sito_html_alcatraz, "datetime", _GiornoDellaPagina)
 
 
 async def _tutti(sito: SitoFinto | None = None) -> list[EventoGrezzo]:

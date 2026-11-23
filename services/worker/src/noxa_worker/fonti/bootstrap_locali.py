@@ -38,6 +38,7 @@ from pydantic import JsonValue
 from noxa_worker.configurazione import Impostazioni, leggi_impostazioni
 from noxa_worker.errori import ErroreRaccolta
 from noxa_worker.fonti.http import ClientHttpConforme, StatoCondiviso, crea_client_httpx
+from noxa_worker.normalizzazione.modelli import in_https
 from noxa_worker.normalizzazione.testo import senza_accenti
 from noxa_worker.osservabilita import configura_log
 
@@ -79,6 +80,11 @@ class Candidato:
     lon: float | None = None
     sito_web: str | None = None
     esclusione: str | None = None
+
+    def __post_init__(self) -> None:
+        # Nel catalogo si salvano solo link cifrati (vincolo `locali_sito_web`).
+        if self.sito_web is not None:
+            object.__setattr__(self, "sito_web", str(in_https(self.sito_web)))
 
 
 def normalizza_nome(nome: str) -> str:

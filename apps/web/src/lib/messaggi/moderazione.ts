@@ -248,7 +248,7 @@ export const moderazione = {
       nome: 'Scrivi il nome (fino a 120 caratteri).',
       indirizzo: 'Scrivi l’indirizzo.',
       comune: 'Scrivi il comune.',
-      sito: 'Il sito inizia con https:// o http://.',
+      sito: 'Il sito inizia con https://.',
       instagram: 'Solo lettere, numeri, punti e trattini bassi, senza @.',
       coordinate: 'Coordinate fuori da Milano e Brianza.',
     },

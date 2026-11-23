@@ -66,12 +66,15 @@ function moduloDa(locale: Locale | null): Modulo {
   };
 }
 
+/** Un sito scritto con `http://` si salva con `https://` (vincolo `locali_sito_web`). */
+const inHttps = (sito: string) => sito.replace(/^http:\/\//i, 'https://');
+
 function valida(modulo: Modulo): Errori {
   const errori: Errori = {};
   if (!modulo.nome.trim() || modulo.nome.trim().length > 120) errori.nome = s.errori.nome;
   if (!modulo.indirizzo.trim()) errori.indirizzo = s.errori.indirizzo;
   if (!modulo.comune.trim()) errori.comune = s.errori.comune;
-  if (modulo.sito_web.trim() && !/^https?:\/\/\S+$/.test(modulo.sito_web.trim())) {
+  if (modulo.sito_web.trim() && !/^https:\/\/\S+$/.test(inHttps(modulo.sito_web.trim()))) {
     errori.sito_web = s.errori.sito;
   }
   if (
@@ -183,7 +186,7 @@ function ModuloLocale({
     provincia: modulo.provincia,
     lat: Number(modulo.lat),
     lon: Number(modulo.lon),
-    sito_web: modulo.sito_web,
+    sito_web: inHttps(modulo.sito_web.trim()),
     instagram_username: modulo.instagram_username,
     attivo,
   });
