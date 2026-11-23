@@ -147,13 +147,25 @@ if [[ "$MIGRAZIONI_APPLICATE" == "true" ]]; then
   else
     echo "GITHUB_TOKEN_WORKER vuoto: sveglia del worker spenta."
   fi
+  # Avviso degli account senza accessi da 24 mesi (SAFETY_PRIVACY.md §10): senza la chiave
+  # API di Brevo nessun account viene avvisato, quindi nessuno viene eliminato.
+  AVVISI="'{}'::jsonb"
+  if [[ -n "${BREVO_API_CHIAVE:-}" ]]; then
+    : "${EMAIL_MITTENTE:?manca EMAIL_MITTENTE}"
+    AVVISI="jsonb_build_object(
+    'brevo_api_chiave', $(letterale "$BREVO_API_CHIAVE"),
+    'email_mittente', $(letterale "$EMAIL_MITTENTE"),
+    'url_app', $(letterale "${URL_APP%/}"))"
+  else
+    echo "BREVO_API_CHIAVE vuota: nessun avviso agli account inattivi."
+  fi
   sql_remoto >/dev/null <<SQL
 alter role noxa_worker with login password $(letterale "$WORKER_DB_PASSWORD");
 do \$\$
 declare
   segreti constant jsonb := jsonb_build_object(
     'invia_push_url', $(letterale "$URL_PUSH"),
-    'invia_push_segreto', $(letterale "$NOXA_PUSH_SEGRETO")) || $SVEGLIA;
+    'invia_push_segreto', $(letterale "$NOXA_PUSH_SEGRETO")) || $SVEGLIA || $AVVISI;
   nome text;
 begin
   for nome in select jsonb_object_keys(segreti) loop
