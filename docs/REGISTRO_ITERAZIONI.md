@@ -1,6 +1,6 @@
 # Registro delle iterazioni
 
-Stato di avanzamento delle 16 iterazioni definite in [ROADMAP.md](ROADMAP.md) §5. Il file è
+Stato di avanzamento delle 20 iterazioni definite in [ROADMAP.md](ROADMAP.md) §5. Il file è
 aggiornato **dalla skill `iterazione`** all'inizio e alla fine di ogni iterazione; a mano si
 modifica solo per correggere un errore, spiegandolo nelle note.
 
@@ -16,7 +16,7 @@ Stati possibili:
 
 ## Riepilogo
 
-Iterazioni completate: 12 su 16.
+Iterazioni completate: 12 su 20.
 
 | N | Stato | Inizio | Fine | Cicli di revisione | Branch | Note |
 |---|---|---|---|---|---|---|
@@ -33,9 +33,13 @@ Iterazioni completate: 12 su 16.
 | 10 | completata con attese esterne | 2026-11-06 | 2026-11-06 | 2 | `iterazione-10-ritorno-sicuro` | Servizio in primo piano, posizioni lette con la RLS, aree solo sul telefono (ADR-0028); mancano il progetto Firebase, l'APK sul telefono e le 20 prove reali del criterio 1 della Fase 2 |
 | 11 | completata con attese esterne | 2026-11-19 | 2026-11-19 | 1 | `iterazione-11-statistiche-badge-wrapped` | Tavole preparate il 2026-11-18; mancano la migrazione in staging e produzione prima del 1° dicembre e la prova di «Salva immagine» su iPhone e nell'app Android |
 | 12 | completata con attese esterne | 2026-11-23 | 2026-11-23 | 2 | `iterazione-12-consolidamento` | Elenco pubblico delle serate sul sito (ADR-0036), D-18 e D-19 chiuse; mancano la chiave API di Brevo, le migrazioni in staging, le prove su telefoni reali e la scelta delle foto |
-| 13 | da iniziare | — | — | 0 | — | Nata dalla divisione del 2026-11-23: produzione, beta e Google Play |
-| 14 | da iniziare | — | — | 0 | — | Era la 13 prima della divisione del 2026-11-23 |
-| 15 | da iniziare | — | — | 0 | — | Era la 14 prima della divisione del 2026-11-23 |
+| 13 | da iniziare | — | — | 0 | — | Piano di crescita del 2026-11-24: scoperta e abitudine |
+| 14 | da iniziare | — | — | 0 | — | Piano di crescita del 2026-11-24: amici e inviti (ADR-0037, D-22, D-23) |
+| 15 | da iniziare | — | — | 0 | — | Piano di crescita del 2026-11-24: sito e pagine per la ricerca (D-24) |
+| 16 | da iniziare | — | — | 0 | — | Piano di crescita del 2026-11-24: misure per i locali e per chi investe (D-25) |
+| 17 | da iniziare | — | — | 0 | — | Produzione, beta e Google Play; era la 13 fino al 2026-11-24 |
+| 18 | da iniziare | — | — | 0 | — | Accesso con Apple e Google; era la 14 fino al 2026-11-24 |
+| 19 | da iniziare | — | — | 0 | — | Aggregatori e nuove aree; era la 15 fino al 2026-11-24 |
 
 ## Dettaglio
 

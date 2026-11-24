@@ -25,7 +25,7 @@ rapide con lo stesso modello), `/help`.
 
 ## 3. Lo sviluppo a iterazioni: `/iterazione`
 
-La roadmap è divisa in **16 iterazioni** (da 0 a 15), descritte in
+La roadmap è divisa in **20 iterazioni** (da 0 a 19), descritte in
 [ROADMAP.md](ROADMAP.md) §5. Ognuna si esegue con un solo comando:
 
 ```
@@ -49,7 +49,7 @@ Altri usi:
 
 | Comando | Effetto |
 |---|---|
-| `/iterazione stato` | Avanzamento: iterazioni completate su 16, attese esterne, prossima iterazione e cosa serve |
+| `/iterazione stato` | Avanzamento: iterazioni completate su 20, attese esterne, prossima iterazione e cosa serve |
 | `/iterazione 3` lanciata prima della 2 | Si ferma e ti dice quale iterazione eseguire prima |
 | `/iterazione 4` senza i design pronti | Si ferma ed elenca le schermate da preparare in Claude Design |
 
@@ -152,7 +152,11 @@ DECISIONI_APERTE.md, aggiorna i documenti e, se serve, scrive un ADR.
 | Prima dell'iterazione 9 | Niente: le chiavi VAPID del Web Push le genera Claude in locale |
 | Prima dell'iterazione 10 | Progetto Firebase gratuito per le notifiche Android; un telefono Android con le opzioni sviluppatore per installare l'APK di debug. Nessun account degli store (ADR-0027) |
 | Prima dell'iterazione 12 | Le tavole di Claude Design della riga 12 del §7 e un iPhone e un telefono Android per le prove con l'app di staging. Nessun account |
-| Prima dell'iterazione 13 | La decisione di pubblicare. Account dei servizi di produzione (§9), organizzazione della moderazione (D-10), penetration test esterno, testi legali definitivi. Come ultima cosa, ad app completa: account Google Play Console (25 $ una tantum), 12 tester per il test chiuso di 14 giorni e questionario d'età (D-06). Account Apple solo se si chiude D-13 |
+| Prima dell'iterazione 13 | Niente: le tavole le prepara Claude |
+| Prima dell'iterazione 14 | Accettare o cambiare D-22 e D-23 (ADR-0038 e ADR-0039) |
+| Prima dell'iterazione 15 | Accettare o cambiare D-24 (ADR-0040) |
+| Prima dell'iterazione 16 | Accettare o cambiare D-25 (ADR-0041) |
+| Prima dell'iterazione 17 | La decisione di pubblicare. Account dei servizi di produzione (§9), organizzazione della moderazione (D-10), penetration test esterno, testi legali definitivi. Come ultima cosa, ad app completa: account Google Play Console (25 $ una tantum), 12 tester per il test chiuso di 14 giorni e questionario d'età (D-06). Account Apple solo se si chiude D-13 |
 
 ## 9. Creare un ambiente online (staging o produzione)
 

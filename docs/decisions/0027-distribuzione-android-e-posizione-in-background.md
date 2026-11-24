@@ -16,7 +16,7 @@ per la posizione in background (D-04).
   gratuito, con la notifica di sistema permanente durante la sessione (R-31). Nessun plugin
   commerciale.
 - **Android sì, su Google Play per ultimo**: l'account Google Play Console (25 $ una tantum)
-  si crea solo nell'iterazione 13, a funzionalità complete e verificate. Fino ad allora la
+  si crea solo nell'iterazione 17, a funzionalità complete e verificate. Fino ad allora la
   build Android si prova sui telefoni del team installando l'APK di debug da Android Studio,
   senza account e senza costi. Le notifiche native Android passano da FCM con un progetto
   Firebase gratuito, aggiunto a `invia-push` con gli stessi testi di sistema (ADR-0026).
@@ -41,7 +41,7 @@ per la posizione in background (D-04).
 - Il criterio 1 della Fase 2 si verifica su Android con l'APK di debug; la parte iOS si
   aggiunge quando D-13 si chiude per Apple.
 - Con un account personale, Google chiede un test chiuso con almeno 12 tester per 14 giorni
-  prima della pubblicazione: va messo in calendario nell'iterazione 13, dopo la creazione
+  prima della pubblicazione: va messo in calendario nell'iterazione 17, dopo la creazione
   dell'account, insieme alla dichiarazione d'uso della posizione in background (con video) e
   al questionario del pubblico (D-06).
 - I link delle email aperti nell'app Android (App Links) richiedono il dominio di D-01; finché

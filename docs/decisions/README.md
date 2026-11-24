@@ -45,3 +45,8 @@ Le decisioni ancora aperte sono in [../DECISIONI_APERTE.md](../DECISIONI_APERTE.
 | [0034](0034-non-hai-un-passaggio.md) | «Non hai un passaggio?» con numeri e link, senza integrazioni | Accettato |
 | [0035](0035-stile-ios-e-materiali-traslucidi.md) | Interfaccia in stile iOS con materiali traslucidi | Accettato |
 | [0036](0036-elenco-pubblico-delle-serate.md) | Elenco pubblico delle serate sul sito | Accettato |
+| [0037](0037-amici-in-comune-e-numero-di-amici.md) | Amici in comune e numero di amici, al posto dei follower | Accettato |
+| [0038](0038-link-di-amicizia-nella-stessa-fascia.md) | Link di amicizia di 48 ore nella stessa fascia | Proposto |
+| [0039](0039-invito-al-gruppo-con-link.md) | Invito al gruppo con link | Proposto |
+| [0040](0040-pagine-pubbliche-per-la-ricerca.md) | Pagine pubbliche statiche per la ricerca e per i link condivisi | Proposto |
+| [0041](0041-interessati-aggregati-e-clic-sui-biglietti.md) | Interessati in forma aggregata e clic sui biglietti contati | Proposto |
