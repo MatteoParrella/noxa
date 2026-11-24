@@ -431,3 +431,44 @@ product owner ha altro da sistemare prima della pubblicazione. Ramo `docs/dividi
   delle sessioni).
 - Verifica: `verifica_documentazione.py`; ricerca dei rimandi alle iterazioni 12, 13 e 14 in
   tutto il repository.
+
+## 2026-11-24 — Pubblicazione dell'iterazione 12 e piano di crescita
+
+Richiesta: riprendere il lavoro dopo l'unione della PR #97, poi analizzare l'app per renderla
+più competitiva («tecniche psicologiche o quello che vuoi»), mostrare i follower delle persone
+e pensare a ciò che vorrebbe chi la compra: chi la usa, chi investe e un locale. Il product
+owner ha scelto di dividere il lavoro in più iterazioni.
+
+### 1. Pubblicazione su staging
+
+- La CI di `main` dopo l'unione era stata annullata: il job Safari aveva superato i 30 minuti
+  perché `playwright install --with-deps webkit` aveva impiegato 27 minuti (mirror apt di
+  Ubuntu lento; i test passavano). La Pubblicazione era stata quindi saltata.
+- Rilanciato il solo job Safari (9 minuti, verde); la Pubblicazione ha applicato in staging le
+  migrazioni da `20261123090000` a `20261123090800`, le Edge Functions e l'app.
+- Tempo massimo del job dei browser portato a 45 minuti in `.github/workflows/ci.yml`.
+- Resta aperto: `BREVO_API_CHIAVE` nei segreti di staging.
+
+### 2. Analisi per la crescita
+
+- Escluse le tecniche che R-43 e il DSA (art. 25 e 28) vietano con un pubblico di 14–17 anni:
+  falsa scarsità, conti alla rovescia, serie di giorni, scorrimento infinito, pressione sociale,
+  premi casuali. Usate invece curiosità, riprova sociale vera, attesa, senso di possesso e
+  ricordo.
+- Freni individuati: un link condiviso non mostra la serata; i motori di ricerca non vedono
+  nulla (`robots.txt`); senza amici iscritti l'app vale poco e il codice di 15 minuti non serve
+  a invitare chi non è iscritto; su iPhone c'è solo la PWA (D-13).
+- **Follower**: non realizzabili, perché contraddicono R-10, R-11 e R-13. Il product owner ha
+  scelto le alternative compatibili, amici in comune e numero di amici solo agli amici
+  (ADR-0037, accettato; il numero è nascosto di default per chi ha 14–17 anni).
+
+### 3. Piano
+
+- Nuove iterazioni 13–16 in ROADMAP.md §5; produzione e lancio passano a 17, accesso social a
+  18, aggregatori a 19 (20 iterazioni in tutto). Numeri aggiornati in CLAUDE.md, nella skill
+  `iterazione`, in GUIDA_OPERATIVA.md, ARCHITECTURE.md, ADR-0027, ADR-0028 e
+  `design/store/brief.md`; le voci storiche dei registri restano com'erano.
+- ADR proposti, da accettare prima delle iterazioni: ADR-0038 (D-22), ADR-0039 (D-23), ADR-0040
+  (D-24), ADR-0041 (D-25). D-11 e D-13 aggiornate con le proposte.
+- Verifica: `python3 scripts/verifica_documentazione.py`.
+

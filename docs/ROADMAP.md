@@ -101,6 +101,8 @@ l'ultimo passo, a funzionalità complete; App Store solo se D-13 si chiude per A
 
 **Contenuto aggiuntivo**
 
+- Piano di crescita del 2026-11-24 (iterazioni 13–16): scoperta e abitudine, amici e inviti,
+  sito e pagine per la ricerca, misure per i locali e per chi investe, prima del lancio.
 - Plugin `@capacitor-community/background-geolocation` (ADR-0027) testato su dispositivi
   reali Android, con l'app in background e con lo schermo bloccato; iOS se D-13 si chiude.
 - Notifiche push per Android (FCM) e web; APNs con iOS.
@@ -146,7 +148,7 @@ l'ultimo passo, a funzionalità complete; App Store solo se D-13 si chiude per A
 
 ## 5. Iterazioni
 
-Le fasi sono divise in **16 iterazioni** (da 0 a 15). Ogni iterazione è un blocco di lavoro
+Le fasi sono divise in **20 iterazioni** (da 0 a 19). Ogni iterazione è un blocco di lavoro
 completo e verificabile che si esegue con il comando `/iterazione <numero>` (skill
 `iterazione`). Lo stato di ogni iterazione e il numero di cicli di revisione fatti sono in
 [REGISTRO_ITERAZIONI.md](REGISTRO_ITERAZIONI.md).
@@ -175,9 +177,13 @@ Ogni iterazione ha:
 | 10 | 2 | Ritorno sicuro | F-21, F-43 (app Android) | Avvio, ritorno in corso, ritorno di un amico, allerta |
 | 11 | 2 | Statistiche, badge e Wrapped | F-31, F-32, F-33 | Statistiche, bacheca badge, schede del Wrapped |
 | 12 | 2 | Consolidamento prima della beta | F-23 (gestione dall'area di moderazione; primo rilascio fuori iterazione il 2026-11-15, ADR-0034), consolidamento | Momenti di riscontro (`design/F-01-rinfresco-interfaccia/` §4); icona, schermata di apertura e anteprima dei link (`design/store/`) |
-| 13 | 2 | Produzione, beta e lancio | F-43 (Google Play), beta della Fase 1 | Schermate e testi per Google Play (`design/store/`) |
-| 14 | 3 | Accesso con Apple e Google | F-17 | Accesso social e completamento del profilo |
-| 15 | 3 | Aggregatori e nuove aree | F-07, F-46 | — |
+| 13 | 2 | Crescita: scoperta e abitudine | F-01, F-03, F-05, F-10 (preferenze), F-22 (weekend), F-30, F-33 | Tavole preparate da Claude in `design/F-01-crescita-scoperta/` |
+| 14 | 2 | Crescita: amici e inviti | F-11, F-13, F-14 | Tavole preparate da Claude in `design/F-11-amici-e-inviti/` |
+| 15 | 2 | Sito e pagine per la ricerca | F-01 (pagine pubbliche), sito | Tavole preparate da Claude in `design/F-01-sito-pubblico/` |
+| 16 | 2 | Misure per i locali e per chi investe | F-40 (cruscotto), F-04 (interessati) | Tavole preparate da Claude in `design/F-40-misure/` |
+| 17 | 2 | Produzione, beta e lancio | F-43 (Google Play), beta della Fase 1 | Schermate e testi per Google Play (`design/store/`) |
+| 18 | 3 | Accesso con Apple e Google | F-17 | Accesso social e completamento del profilo |
+| 19 | 3 | Aggregatori e nuove aree | F-07, F-46 | — |
 
 ### Iterazione 0 — Fondamenta del repository
 - **Contenuto**: monorepo pnpm + uv; `apps/web` con Next.js in export statico, TypeScript
@@ -201,7 +207,7 @@ Ogni iterazione ha:
   (ADR-0016); scheda evento con spazio per la foto del locale e velatura al posto del blocco
   colorato del design (ADR-0018); axe nei test e2e.
 - **Prerequisiti esterni**: nessuno; le build locali non richiedono account (Google Play
-  solo nell'iterazione 13, ADR-0027).
+  solo nell'iterazione 17, ADR-0027).
 - **Criteri**: nessuna violazione axe nel catalogo e nella navigazione, in entrambi i temi;
   l'app gira su browser, emulatore Android e simulatore iOS; la mappa si apre senza
   richieste a domini esterni (verificato nel test e2e).
@@ -329,7 +335,7 @@ Ogni iterazione ha:
 
 ### Iterazione 12 — Consolidamento prima della beta
 - **Perimetro**: solo lavoro di codice, provato in locale e su staging. Nessun ambiente di
-  produzione, nessun account degli store, nessuna pubblicazione: sono nell'iterazione 13.
+  produzione, nessun account degli store, nessuna pubblicazione: sono nell'iterazione 17.
   L'iterazione 12 è stata divisa in due il 2026-11-23, su richiesta del product owner, che ha
   altro da sistemare prima della pubblicazione.
 - **Contenuto** (in gran parte proposto il 2026-11-14 e il 2026-11-15, REGISTRO_INTERVENTI.md):
@@ -369,9 +375,106 @@ Ogni iterazione ha:
   ROADMAP o in DECISIONI_APERTE.md; migrazioni con RLS e test pgTAP; criteri 4, 5, 6 (parte
   automatica con axe) e 8 della **Fase 1** verificati; tutto online su staging.
 
-### Iterazione 13 — Produzione, beta e lancio
+### Iterazione 13 — Crescita: scoperta e abitudine
+- **Perimetro**: piano di crescita del 2026-11-24 (REGISTRO_INTERVENTI.md), prima parte. Solo
+  funzioni che non cambiano le regole di sicurezza: rendono Noxa utile da soli, dal primo
+  giorno, e danno un motivo per tornare ogni settimana senza pressione (R-43). Ogni
+  funzionalità nuova passa da `new-feature` (PRD, matrice, ARCHITECTURE, DATA_MODEL).
+- **Contenuto**:
+  - **preferenze all'ingresso**: dopo l'onboarding due domande saltabili, i generi preferiti
+    (salvati in `profili_privati`, leggibili solo dal titolare) e il comune di partenza
+    (solo sul dispositivo, R-33); Scopri mette prima le serate dei generi scelti; si cambiano
+    da Profilo. Nuovo dato personale: SAFETY_PRIVACY.md §10 e l'esportazione (R-64) aggiornati;
+  - **il weekend di Noxa**: pagina con fino a 8 serate del fine settimana scelte per i generi
+    preferiti e una notifica facoltativa, **disattivata di default**, il giovedì alle 18, al
+    massimo una alla settimana, con un testo di sistema senza nomi (F-22, R-43); job in
+    `pg_cron` (ADR-0003);
+  - **«Nuova»** sulle serate pubblicate dopo l'ultima visita (data dell'ultima visita solo sul
+    dispositivo) e **«Lasciami sorprendere»**: una serata a caso tra quelle filtrate, con un
+    tocco, senza animazioni da estrazione né premi;
+  - **«Aggiungi al calendario»**: file `.ics` generato sul dispositivo dal dettaglio di una
+    serata con «Mi interessa» o «Partecipo» e dalla serata di gruppo, con il link alla
+    pagina di Noxa e nessun dato di altre persone;
+  - **stati vuoti che invitano**: amici, gruppi e diario vuoti mostrano un'azione concreta
+    (il proprio codice invito, crea un gruppo, «Ero a questo evento»);
+  - **mappa dei tuoi locali** in Ricorda: i locali delle voci del diario sulla mappa, solo per
+    il titolare (F-30, R-40), con l'elenco testuale come alternativa accessibile;
+  - **dominio nel Wrapped**: `noxanight.it` scritto nell'immagine esportata accanto al marchio
+    (testo, non link), dopo la verifica di R-42 con `safety-review`.
+- **Prerequisiti esterni**: nessuno.
+- **Criteri**: test unitari ed e2e delle nuove schermate, axe in entrambi i temi, pgTAP per le
+  preferenze (solo il titolare legge e scrive, tutte le età del seed); `safety-review` con
+  attenzione a R-33 e R-43; tutto online su staging.
+
+### Iterazione 14 — Crescita: amici e inviti
+- **Perimetro**: seconda parte del piano di crescita. Il passaparola nasce dagli inviti tra
+  persone che si conoscono; le regole R-10…R-15 restano il confine. Modifiche alle regole solo
+  con gli ADR indicati, accettati dal product owner prima di iniziare.
+- **Contenuto**:
+  - **amici in comune e numero di amici** ([ADR-0037](decisions/0037-amici-in-comune-e-numero-di-amici.md)):
+    sul profilo di una persona che si può già vedere, gli amici in comune con avatar e nome;
+    il numero di amici visibile solo agli amici confermati, da 5 in su, mai l'elenco,
+    nascosto di default per chi ha 14–17 anni; RPC `security definer` con test pgTAP;
+  - **link di amicizia di 48 ore** tra persone della stessa fascia (D-22,
+    [ADR-0038](decisions/0038-link-di-amicizia-nella-stessa-fascia.md)): chi non ha un account
+    si iscrive e torna al link; tra fasce diverse resta solo il codice di 15 minuti (R-12);
+  - **invito al gruppo con link** (D-23,
+    [ADR-0039](decisions/0039-invito-al-gruppo-con-link.md)): anteprima senza nomi, richiesta
+    di ingresso approvata da un admin, invariante delle fasce verificata nel database (R-15);
+  - condivisione nativa del link (foglio di condivisione del sistema) dagli stati vuoti
+    dell'iterazione 13.
+- **Prerequisiti esterni**: nessuno; D-22 e D-23 chiuse dal product owner.
+- **Criteri**: test pgTAP positivi e negativi per tutte le età del seed su ogni RPC nuova
+  (compresi un adulto che usa il link di un minorenne e un gruppo misto); e2e degli inviti con
+  Supabase locale; SAFETY_PRIVACY.md aggiornato con le regole modificate; `safety-review`.
+
+### Iterazione 15 — Sito e pagine per la ricerca
+- **Perimetro**: terza parte del piano di crescita. Il sito porta persone dai motori di
+  ricerca e dai link condivisi, e parla anche ai genitori e ai locali. Le pagine mostrano solo
+  i dati ridotti dell'elenco pubblico (ADR-0036): i dettagli restano agli iscritti.
+- **Contenuto**:
+  - **pagine statiche delle serate, dei locali e dei generi** (D-24,
+    [ADR-0040](decisions/0040-pagine-pubbliche-per-la-ricerca.md)): generate a ogni
+    pubblicazione e una volta al giorno (sveglia da `pg_cron`, come ADR-0031), con i dati
+    strutturati schema.org `Event`, la mappa del sito e l'anteprima del link per serata;
+    serate con riferimenti all'alcol come «Serata 18+», fuori dall'indice;
+  - **pagina iniziale del sito**: promessa in una riga, serate di stasera, schermate dell'app,
+    come installarla, collegamenti a genitori e locali;
+  - **«Per i genitori»**: le regole sui minorenni, il ritorno sicuro, l'assenza di chat e
+    pubblicità, in linguaggio semplice, con le domande frequenti;
+  - **«Per i locali»**: come finire su Noxa (sito, Instagram, flyer), le regole dei contenuti
+    (R-23, R-44) e un indirizzo email del dominio per scrivere; nessun modulo che raccolga dati;
+  - «Condividi il link» dal dettaglio di una serata usa la pagina pubblica quando esiste.
+- **Prerequisiti esterni**: nessuno; D-24 chiusa dal product owner.
+- **Criteri**: test della generazione (nessun titolo né genere per le serate con alcol, nessun
+  dato degli utenti), Lighthouse SEO e accessibilità ≥ 95 sulle pagine pubbliche, validatore
+  dei dati strutturati di Google senza errori, axe; `safety-review`.
+
+### Iterazione 16 — Misure per i locali e per chi investe
+- **Perimetro**: ultima parte del piano di crescita. Chi valuta Noxa (un locale, un PR, un
+  investitore) chiede numeri: si calcolano nel database in forma aggregata (R-62), senza
+  strumenti di terze parti e senza dati di singole persone.
+- **Contenuto**:
+  - **cruscotto delle metriche** del PRD §2 nell'area di moderazione, solo per i moderatori
+    con due fattori: utenti attivi settimanali, attivazione (prima serata di gruppo entro 7
+    giorni), retention a 4 settimane per coorte, serate di gruppo ogni 100 utenti, quota con
+    almeno un amico; nessun valore sotto le 10 persone;
+  - **interessati in forma aggregata** sulle serate e **clic sui biglietti contati** (D-25,
+    [ADR-0041](decisions/0041-interessati-aggregati-e-clic-sui-biglietti.md)): fasce «più di
+    10, 25, 50, 100», nessun nome; contatore dei clic senza identificativo di chi clicca;
+  - **rapporto per i locali**: esportazione dall'area di moderazione, per locale e per mese,
+    di serate pubblicate, interessati e clic sui biglietti, solo valori aggregati;
+  - **scheda per chi investe** (`docs/SCHEDA_PRODOTTO.md`): problema, utenti, metriche con la
+    definizione, costi mensili (ADR-0021), conformità (DSA, GDPR, regole R-xx), rischi aperti
+    da DECISIONI_APERTE.md e ipotesi di ricavo da D-11, senza pubblicità (R-61).
+- **Prerequisiti esterni**: nessuno; D-25 chiusa dal product owner.
+- **Criteri**: test pgTAP delle RPC del cruscotto (solo moderatori con `aal2`, nessun valore
+  sotto soglia) e dei contatori (nessuna colonna con l'utente); e2e del cruscotto e del
+  rapporto; `safety-review`.
+
+### Iterazione 17 — Produzione, beta e lancio
 - **Perimetro**: si avvia solo quando il product owner decide che l'app è pronta per essere
-  pubblicata. Contiene tutto ciò che richiede la produzione, gli utenti reali o gli store.
+  pubblicata, di norma dopo le iterazioni 13–16 (era la 13 fino al 2026-11-24). Contiene tutto ciò che richiede la produzione, gli utenti reali o gli store.
 - **Contenuto**:
   - ambiente di produzione (Supabase a Francoforte, Cloudflare Pages e R2, Brevo, Sentry) con
     la procedura di GUIDA_OPERATIVA.md §9, prima della beta;
@@ -392,6 +495,8 @@ Ogni iterazione ha:
   - correzioni del penetration test, test di carico, DPIA e testi legali definitivi (D-07,
     D-21);
   - prove reali del ritorno sicuro e delle notifiche (criterio 1 della Fase 2);
+  - account Apple Developer e pubblicazione su App Store se D-13 si chiude prima del lancio, come
+    proposto il 2026-11-24;
   - come ultimo passo: account Google Play Console (25 $ una tantum), test chiuso richiesto da
     Google (12 tester per 14 giorni con un account personale), dichiarazione della posizione in
     background, questionario d'età (D-06) e pubblicazione su Google Play (ADR-0027); App Store
@@ -401,12 +506,12 @@ Ogni iterazione ha:
 - **Criteri**: criteri della **Fase 1** ancora aperti e criteri della **Fase 2** (§Fase 2)
   verificati.
 
-### Iterazione 14 — Accesso con Apple e Google
+### Iterazione 18 — Accesso con Apple e Google
 - **Contenuto**: ADR per il profilo da completare; provider OAuth; completamento obbligatorio
   della data di nascita prima di qualsiasi accesso ai dati.
 - **Criteri**: criterio 2 della Fase 3.
 
-### Iterazione 15 — Aggregatori e nuove aree
+### Iterazione 19 — Aggregatori e nuove aree
 - **Contenuto**: adattatori degli aggregatori con accordo (D-05); estensione di
   `locali.provincia` e bootstrap dei locali della nuova area.
 - **Criteri**: criteri 1 e 3 della **Fase 3**.

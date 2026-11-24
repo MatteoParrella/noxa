@@ -106,7 +106,10 @@ jobs:
     needs: modifiche
     if: needs.modifiche.outputs.web == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # 45 minuti: i test durano 10–25 minuti, ma le dipendenze di WebKit arrivano dal mirror apt di
+    # Ubuntu, che il 2026-11-24 ne ha impiegati 27 e ha fatto annullare la CI di main (e saltare
+    # la Pubblicazione).
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:

@@ -421,7 +421,7 @@ flowchart LR
     CI -->|pmtiles + assets| R2[Cloudflare R2<br/>mappa]
     SBP -->|pg_cron: workflow_dispatch<br/>se ci sono job, ADR-0031| CRONGH[GitHub Actions<br/>worker.yml]
     CRONGH -->|worker a esaurimento| SBP
-    CI -->|cap sync + fastlane<br/>dall'iterazione 13| STORE[Google Play<br/>ADR-0027]
+    CI -->|cap sync + fastlane<br/>dall'iterazione 17| STORE[Google Play<br/>ADR-0027]
     SBS[(Supabase staging)] -.stesse migrazioni.-> SBP
 ```
 

@@ -30,5 +30,5 @@ schermata di apertura dell'app e anteprima dei link condivisi.
 | `04-apertura-android.png` | Schermata di apertura nativa di Android (verticale) |
 | `05-apertura-app.png` | Apertura animata dell'app a metà animazione |
 
-## Da fare nell'iterazione 13
+## Da fare nell'iterazione 17
 Schermate e testi per la scheda di Google Play (e App Store se si chiude D-13).
