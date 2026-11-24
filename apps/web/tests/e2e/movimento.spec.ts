@@ -34,7 +34,7 @@ test.describe('movimento breve a molla (ADR-0035)', () => {
   test('con “riduci movimento” niente spostamenti né animazioni', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/vivi/');
-    const titolo = page.getByRole('heading', { level: 1, name: 'Stasera' });
+    const titolo = page.getByRole('heading', { level: 1, name: 'Vivi' });
     await expect(titolo).toBeVisible();
     expect(await titolo.evaluate((el) => el.getAnimations({ subtree: true }).length)).toBe(0);
     const contenuto = page.locator('.rivela').first();
@@ -47,7 +47,7 @@ test.describe('movimento breve a molla (ADR-0035)', () => {
 
   test('i titoli restano leggibili come testo unico dai lettori di schermo', async ({ page }) => {
     await page.goto('/ricorda/');
-    await expect(page.getByRole('heading', { level: 1, name: 'Il mio diario' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Ricorda' })).toBeVisible();
   });
 });
 

@@ -1108,6 +1108,7 @@ export type Database = {
       gruppi: {
         Row: {
           aggiornato_il: string;
+          colore: string;
           creato_da: string | null;
           creato_il: string;
           id: string;
@@ -1117,6 +1118,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           aggiornato_il?: string;
+          colore?: string;
           creato_da?: string | null;
           creato_il?: string;
           id?: string;
@@ -1125,6 +1127,7 @@ export type Database = {
         };
         Update: {
           aggiornato_il?: string;
+          colore?: string;
           creato_da?: string | null;
           creato_il?: string;
           id?: string;
@@ -2181,6 +2184,24 @@ export type Database = {
           titolo: string;
         }[];
       };
+      cerca_eventi_pubblici: {
+        Args: { al?: string; dal?: string };
+        Returns: {
+          copertina_colori: Json;
+          data_serata: string;
+          eta_minima: number;
+          eta_minima_dichiarata: boolean;
+          fine: string;
+          generi_evento: string[];
+          id: string;
+          inizio: string;
+          locale_comune: string;
+          locale_nome: string;
+          riservato: boolean;
+          stato: Database['public']['Enums']['stato_evento'];
+          titolo: string;
+        }[];
+      };
       cerca_per_diario: {
         Args: { testo: string };
         Returns: {
@@ -2281,7 +2302,10 @@ export type Database = {
           scade_il: string;
         }[];
       };
-      crea_gruppo: { Args: { invitati?: string[]; nome: string }; Returns: string };
+      crea_gruppo: {
+        Args: { colore?: string; invitati?: string[]; nome: string };
+        Returns: string;
+      };
       decidi_candidato_locale: {
         Args: { candidato: string; esito: string; locale?: string; motivazione?: string };
         Returns: undefined;
@@ -2351,6 +2375,7 @@ export type Database = {
         Args: { gruppo: string };
         Returns: {
           altri: number;
+          colore: string;
           creato_da: Json;
           id: string;
           membri: Json;
@@ -2468,6 +2493,13 @@ export type Database = {
           rimasti: number;
         }[];
       };
+      generi_pubblici: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          codice: string;
+          nome: string;
+        }[];
+      };
       invia_posizione_ritorno: {
         Args: { latitudine: number; longitudine: number; precisione_m: number; ritorno: string };
         Returns: undefined;
@@ -2562,6 +2594,7 @@ export type Database = {
       miei_gruppi: {
         Args: Record<PropertyKey, never>;
         Returns: {
+          colore: string;
           id: string;
           invitato_da: Json;
           membri: number;
@@ -2660,6 +2693,49 @@ export type Database = {
         Returns: string;
       };
       salva_serata_diario: { Args: { serata: Json }; Returns: string };
+      salva_servizio_trasporto: {
+        Args: {
+          attivo: boolean;
+          eta_minima: number;
+          fonte_url: string;
+          motivazione: string;
+          nome: string;
+          nota: string;
+          ordine: number;
+          servizio: string;
+          telefono: string;
+          tipo: Database['public']['Enums']['tipo_servizio_trasporto'];
+          url: string;
+          verificato_il: string;
+          zona: string;
+        };
+        Returns: string;
+      };
+      servizi_trasporto_moderazione: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          aggiornato_il: string;
+          attivo: boolean;
+          creato_il: string;
+          eta_minima: number;
+          fonte_url: string;
+          id: string;
+          nome: string;
+          nota: string | null;
+          ordine: number;
+          telefono: string | null;
+          tipo: Database['public']['Enums']['tipo_servizio_trasporto'];
+          url: string | null;
+          verificato_il: string;
+          zona: string;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'servizi_trasporto';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       suggerimenti_checkin: { Args: Record<PropertyKey, never>; Returns: Json };
       suggerimenti_ritorno: { Args: Record<PropertyKey, never>; Returns: Json };
       usa_codice_invito: { Args: { codice: string }; Returns: string };
@@ -2698,7 +2774,9 @@ export type Database = {
         | 'occulta_contenuto'
         | 'ripristina_contenuto'
         | 'conferma_decisione'
-        | 'cambia_decisione';
+        | 'cambia_decisione'
+        | 'crea_servizio_trasporto'
+        | 'modifica_servizio_trasporto';
       canale_amicizia: 'ricerca' | 'codice_invito';
       categoria_spesa:
         | 'ingresso'
@@ -2760,7 +2838,8 @@ export type Database = {
         | 'locale'
         | 'fonte'
         | 'candidato_locale'
-        | 'foto_profilo';
+        | 'foto_profilo'
+        | 'servizio_trasporto';
       tipo_servizio_trasporto: 'mezzi_pubblici' | 'taxi' | 'app_trasporto';
     };
     CompositeTypes: {
@@ -2910,6 +2989,8 @@ export const Constants = {
         'ripristina_contenuto',
         'conferma_decisione',
         'cambia_decisione',
+        'crea_servizio_trasporto',
+        'modifica_servizio_trasporto',
       ],
       canale_amicizia: ['ricerca', 'codice_invito'],
       categoria_spesa: [
@@ -2988,6 +3069,7 @@ export const Constants = {
         'fonte',
         'candidato_locale',
         'foto_profilo',
+        'servizio_trasporto',
       ],
       tipo_servizio_trasporto: ['mezzi_pubblici', 'taxi', 'app_trasporto'],
     },

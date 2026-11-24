@@ -91,7 +91,7 @@ controllo umano di ogni foto a piena risoluzione resta consigliato prima della b
 | Momenti di riscontro (amicizia, gruppo, serata al completo) | Tre flussi diversi con i loro test: da disegnare prima | ROADMAP, iterazione 12; brief §4 |
 | Testi «troppo da intelligenza artificiale» | La richiesta non dice quali testi; le descrizioni vengono dai siti dei locali e i generi sono un elenco fisso | D-19 |
 | Pagine evento pubbliche | Tocca le regole di visibilità degli eventi: serve un ADR | D-18 |
-| Scadenza delle sessioni | Non disponibile nel piano gratuito di Supabase | ROADMAP, iterazione 12 |
+| Scadenza delle sessioni | Non disponibile nel piano gratuito di Supabase | ROADMAP, iterazione 13 |
 | Repository privato | Scelta del product owner nelle impostazioni di GitHub | ROADMAP, iterazione 12 |
 
 ## 2026-11-14 (sera) — Rifiniture dell'interfaccia e layout desktop da sito
@@ -411,3 +411,23 @@ colori (R-42). I pulsanti Accetta e Rifiuta degli inviti restano con lo stesso p
 - Layout desktop non rivisto schermata per schermata.
 - Con la barra del titolo visibile, i lettori di schermo trovano due pulsanti «indietro».
 - Il progetto Claude Design va riallineato allo stile iOS (ADR-0035).
+
+## 2026-11-23 — Iterazione 12 divisa in codice e produzione
+
+Richiesta: dividere l'iterazione 12 in una parte di codice e una di produzione, perché il
+product owner ha altro da sistemare prima della pubblicazione. Ramo `docs/dividi-iterazione-12`.
+
+- **Iterazione 12 — Consolidamento prima della beta**: solo codice, provato in locale e su
+  staging; nessun ambiente di produzione, account degli store o pubblicazione. Contiene il
+  consolidamento proposto il 2026-11-14 e il 2026-11-15, l'eliminazione degli account inattivi,
+  la prova di «Salva immagine» rimasta dall'iterazione 11 e le decisioni D-18 e D-19.
+- **Iterazione 13 — Produzione, beta e lancio**: ambiente di produzione, beta chiusa,
+  scadenza delle sessioni dei moderatori, penetration test, test di carico, testi legali e
+  Google Play. Si avvia solo quando il product owner decide di pubblicare.
+- Le iterazioni «Accesso con Apple e Google» e «Aggregatori e nuove aree» diventano la 14 e la
+  15: in tutto sono 16. Aggiornati ROADMAP.md §5, REGISTRO_ITERAZIONI.md, GUIDA_OPERATIVA.md
+  §3, §7 e §8, CLAUDE.md, la skill `iterazione`, ARCHITECTURE.md, DECISIONI_APERTE.md (D-13),
+  ADR-0027 e ADR-0028 (rimandi a Google Play) e la tabella del 2026-11-14 qui sopra (scadenza
+  delle sessioni).
+- Verifica: `verifica_documentazione.py`; ricerca dei rimandi alle iterazioni 12, 13 e 14 in
+  tutto il repository.

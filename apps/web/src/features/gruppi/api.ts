@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { converti } from '@/lib/errori';
 import { supabase } from '@/lib/supabase';
+import { COLORI_GRUPPO, type ColoreGruppo as ColoreGruppoScelto } from '@/lib/coloriGruppo';
 
 /**
  * Gruppi, inviti e serate di gruppo (F-13…F-16). Le regole stanno nel database (R-11, R-15,
@@ -38,9 +39,12 @@ function valida<T>(schema: z.ZodType<T>, dati: unknown): T {
 // Gruppi
 // ---------------------------------------------------------------------------------------------
 
+const ColoreGruppo = z.enum(COLORI_GRUPPO).catch('ciano');
+
 const SchemaGruppoElenco = z.object({
   id: z.uuid(),
   nome: z.string(),
+  colore: ColoreGruppo,
   mio_ruolo: Ruolo,
   mio_stato: StatoMembro,
   membri: z.number().int().nullable(),
@@ -79,6 +83,7 @@ export type Membro = z.infer<typeof SchemaMembro>;
 const SchemaDettaglioGruppo = z.object({
   id: z.uuid(),
   nome: z.string(),
+  colore: ColoreGruppo,
   mio_ruolo: Ruolo,
   creato_da: SchemaPersona.nullable(),
   membri_totale: z.number().int(),
@@ -133,10 +138,15 @@ export async function amiciInvitabili(
   return valida(z.array(SchemaInvitabile), data);
 }
 
-export async function creaGruppo(nome: string, invitati: readonly string[]): Promise<string> {
+export async function creaGruppo(
+  nome: string,
+  invitati: readonly string[],
+  colore: ColoreGruppoScelto,
+): Promise<string> {
   const { data, error } = await supabase().rpc('crea_gruppo', {
     nome: nome.trim(),
     invitati: [...invitati],
+    colore,
   });
   if (error) throw converti(error);
   return valida(z.uuid(), data);
@@ -189,6 +199,14 @@ export async function cambiaRuolo(
 
 export async function rinominaGruppo(gruppo: string, nome: string): Promise<void> {
   const { error } = await supabase().from('gruppi').update({ nome: nome.trim() }).eq('id', gruppo);
+  if (error) throw converti(error);
+}
+
+export async function cambiaColoreGruppo(
+  gruppo: string,
+  colore: ColoreGruppoScelto,
+): Promise<void> {
+  const { error } = await supabase().from('gruppi').update({ colore }).eq('id', gruppo);
   if (error) throw converti(error);
 }
 

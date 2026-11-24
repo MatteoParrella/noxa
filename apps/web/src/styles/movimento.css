@@ -275,3 +275,107 @@
     }
   }
 }
+
+/* ---------- Momenti di riscontro (brief del rinfresco §4, iterazione 12) ----------
+  Al massimo 900 ms di movimento, una sola volta, si chiudono con un tocco. Con
+  prefers-reduced-motion resta la sola dissolvenza. */
+.riscontro-velo {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--spazio-6);
+  background: var(--colore-velo);
+  animation: riscontro-dissolvi var(--movimento-base) var(--curva-entrata) both;
+}
+.riscontro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spazio-3);
+  max-width: 320px;
+  padding: var(--spazio-6) var(--spazio-8);
+  border-radius: var(--raggio-4);
+  background: var(--colore-superficie-elevata);
+  color: var(--colore-testo-primario);
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+.riscontro-persone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+}
+.riscontro-avatar {
+  display: inline-flex;
+  border-radius: var(--raggio-tondo);
+  box-shadow: 0 0 0 3px var(--colore-superficie-elevata);
+}
+.riscontro-avatar + .riscontro-avatar {
+  margin-left: -12px;
+}
+.riscontro-altri {
+  margin-left: var(--spazio-2);
+  color: var(--colore-testo-secondario);
+  font-size: var(--tipo-corpo-piccolo);
+}
+.riscontro-titolo {
+  margin: 0;
+  font-size: var(--tipo-titolo-2);
+  font-weight: var(--tipo-peso-forte);
+}
+.riscontro-testo {
+  margin: 0;
+  color: var(--colore-testo-secondario);
+  font-size: var(--tipo-corpo-piccolo);
+}
+@keyframes riscontro-dissolvi {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Amicizia: i due avatar arrivano dai lati e si affiancano. */
+  .riscontro-amicizia .riscontro-avatar {
+    animation: riscontro-avvicina 700ms var(--curva-molla) both;
+  }
+  /* Gruppo: i membri entrano in fila, uno dopo l'altro (al massimo 5 × 90 ms + 450 ms). */
+  .riscontro-gruppo .riscontro-avatar {
+    animation: riscontro-in-fila 450ms var(--curva-entrata) both;
+    animation-delay: calc(var(--indice) * 90ms);
+  }
+  /* Serata: tutti insieme, con un piccolo rimbalzo. */
+  .riscontro-serata .riscontro-avatar {
+    animation: riscontro-insieme 600ms var(--curva-molla) both;
+    animation-delay: calc(var(--indice) * 50ms);
+  }
+  .riscontro {
+    animation: riscontro-sale var(--movimento-lento) var(--curva-entrata) both;
+  }
+}
+@keyframes riscontro-avvicina {
+  from {
+    transform: translateX(calc((var(--indice) * 2 - 1) * 40px));
+    opacity: 0;
+  }
+}
+@keyframes riscontro-in-fila {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+@keyframes riscontro-insieme {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+}
+@keyframes riscontro-sale {
+  from {
+    transform: translateY(12px) scale(0.98);
+    opacity: 0;
+  }
+}

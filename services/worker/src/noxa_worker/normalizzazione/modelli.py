@@ -10,7 +10,7 @@ from enum import StrEnum
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
 VERSIONE_SCHEMA: Literal[1] = 1
 
@@ -61,7 +61,18 @@ def _con_fuso(valore: datetime) -> datetime:
 
 
 DataOra = Annotated[datetime, AfterValidator(_con_fuso)]
-UrlHttp = Annotated[str, Field(pattern=r"^https?://\S+$", max_length=2000)]
+
+
+def in_https(valore: object) -> object:
+    """Porta un link `http://` a `https://`: nel catalogo si salvano solo link cifrati."""
+    if isinstance(valore, str) and valore[:7].lower() == "http://":
+        return "https://" + valore[7:]
+    return valore
+
+
+UrlHttp = Annotated[
+    str, BeforeValidator(in_https), Field(pattern=r"^https://\S+$", max_length=2000)
+]
 
 
 class Origine(BaseModel):

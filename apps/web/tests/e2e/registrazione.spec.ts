@@ -23,7 +23,7 @@ function nascita(anni: number): string {
 
 async function compilaFinoAlConsenso(pagina: Page, username = 'giulia.rota') {
   await pagina.goto('/registrazione/');
-  await pagina.getByLabel('Data di nascita').fill(nascita(16));
+  await pagina.getByRole('textbox', { name: 'Data di nascita' }).fill(nascita(16));
   await pagina.getByRole('button', { name: 'Avanti' }).click();
   await pagina.getByLabel('Email').fill('giulia.rota@example.com');
   await pagina.getByLabel('Password', { exact: true }).fill('notte.sul.tram7');
@@ -53,7 +53,7 @@ function datiInviati(supabase: SupabaseSimulato) {
 }
 
 test('R-07: senza account le aree portano al Benvenuto', async ({ page }) => {
-  await page.goto('/scopri/');
+  await page.goto('/organizza/');
   await expect(page).toHaveURL(/\/benvenuto\/$/);
   await expect(page.getByRole('heading', { level: 1, name: 'noxa' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Crea un account' })).toBeVisible();
@@ -71,7 +71,7 @@ for (const tema of TEMI) {
     await page.getByRole('link', { name: 'Crea un account' }).click();
     await expect(page.getByRole('img', { name: 'Passo 1 di 4' })).toBeVisible();
     await verificaAccessibilita(page);
-    await page.getByLabel('Data di nascita').fill(nascita(16));
+    await page.getByRole('textbox', { name: 'Data di nascita' }).fill(nascita(16));
     await page.getByRole('button', { name: 'Avanti' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Email e password' })).toBeVisible();
     await page.getByRole('button', { name: 'Avanti' }).click();
@@ -93,7 +93,7 @@ for (const tema of TEMI) {
   test(`età non sufficiente senza violazioni axe (${tema})`, async ({ page }) => {
     await impostaTema(page, tema);
     await page.goto('/registrazione/');
-    await page.getByLabel('Data di nascita').fill(nascita(13));
+    await page.getByRole('textbox', { name: 'Data di nascita' }).fill(nascita(13));
     await page.getByRole('button', { name: 'Avanti' }).click();
     await expect(
       page.getByRole('heading', { level: 1, name: 'Ci vediamo più avanti' }),
@@ -107,7 +107,7 @@ test('R-01: chi ha 13 anni non va avanti, non vede modi per cambiare la data e n
   supabase,
 }) => {
   await page.goto('/registrazione/');
-  await page.getByLabel('Data di nascita').fill(nascita(13));
+  await page.getByRole('textbox', { name: 'Data di nascita' }).fill(nascita(13));
   await page.getByRole('button', { name: 'Avanti' }).click();
   await expect(page.getByText('Noxa è per chi ha almeno 14 anni.')).toBeVisible();
   await expect(
@@ -123,7 +123,7 @@ test('la data si scrive con i punti automatici e gli errori spiegano come correg
   page,
 }) => {
   await page.goto('/registrazione/');
-  const campo = page.getByLabel('Data di nascita');
+  const campo = page.getByRole('textbox', { name: 'Data di nascita' });
   await campo.fill('31022009');
   await expect(campo).toHaveValue('31.02.2009');
   await page.getByRole('button', { name: 'Avanti' }).click();
@@ -138,7 +138,7 @@ test('la data si scrive con i punti automatici e gli errori spiegano come correg
 
 test('il calendario si usa da tastiera e scrive la data nel campo', async ({ page }) => {
   await page.goto('/registrazione/');
-  await page.getByLabel('Data di nascita').fill('14.03.2009');
+  await page.getByRole('textbox', { name: 'Data di nascita' }).fill('14.03.2009');
   await page.getByRole('button', { name: 'Apri il calendario' }).click();
   const foglio = page.getByRole('dialog', { name: 'Data di nascita' });
   await expect(foglio).toBeVisible();
@@ -151,7 +151,7 @@ test('il calendario si usa da tastiera e scrive la data nel campo', async ({ pag
   await expect(foglio.getByRole('button', { name: '15 marzo 2009' })).toBeFocused();
   await page.keyboard.press('Enter');
   await foglio.getByRole('button', { name: 'Conferma' }).click();
-  await expect(page.getByLabel('Data di nascita')).toHaveValue('15.03.2009');
+  await expect(page.getByRole('textbox', { name: 'Data di nascita' })).toHaveValue('15.03.2009');
 });
 
 test('registrazione completa: i dati arrivano al database e si passa a "Controlla la posta"', async ({

@@ -242,7 +242,7 @@ app (tipi TypeScript generati). Esempio:
 | `versione_schema` | sì | intero; una modifica incompatibile incrementa il valore e richiede una migrazione dei grezzi |
 | `origine.tipo` | sì | `sito_locale`, `instagram`, `resident_advisor`, `xceed`, `dice`, `flyer` |
 | `origine.fonte_id` / `origine.caricamento_flyer_id` | uno dei due | |
-| `origine.url` | sì tranne che per `flyer` | link mostrato all'utente |
+| `origine.url` | sì tranne che per `flyer` | link mostrato all'utente; solo `https` (un `http://` diventa `https://`) |
 | `locale.id` | no | null finché il locale non è risolto (passo 5) |
 | `locale.nome` | sì | |
 | `titolo` | sì | 1–200 caratteri |

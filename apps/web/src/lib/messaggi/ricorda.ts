@@ -7,8 +7,8 @@ const serate = (n: number) => (n === 1 ? '1 serata' : `${n} serate`);
 
 export const ricorda = {
   area: {
-    titolo: 'Il mio diario',
-    sottotitolo: 'Ricorda · Il tuo diario',
+    titolo: 'Ricorda',
+    sottotitolo: 'Il tuo diario',
     privato: 'Lo vedi solo tu',
     aggiungi: 'Aggiungi una serata',
     caricamento: 'Carico il tuo diario',

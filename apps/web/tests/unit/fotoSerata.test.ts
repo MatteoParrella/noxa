@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { FAMIGLIE } from '@/lib/copertinaGenerata';
-import { FOTO_LIBERE, fotoSerata, type FotoLibera } from '@/lib/fotoSerata';
+import { FOTO_LIBERE, fotoDiUnElenco, fotoSerata, type FotoLibera } from '@/lib/fotoSerata';
 
 const PROVA: FotoLibera[] = [
   { file: 'club-01.webp', tema: 'club', autore: 'A', licenza: 'cc0', fonte: 'https://a.example/1' },
@@ -56,5 +56,36 @@ describe('foto d’atmosfera delle copertine (ADR-0032)', () => {
   it('sceglie solo tra i temi della famiglia e senza foto adatte non ne mostra', () => {
     expect(fotoSerata('Concerto · Sala', 'live', PROVA)?.src).toBe('/copertine/palco-01.webp');
     expect(fotoSerata('Concerto · Sala', 'live', PROVA.slice(0, 2))).toBeNull();
+  });
+
+  it('nello stesso elenco nessuna foto si ripete finché la libreria ne ha', () => {
+    const serate = Array.from({ length: 10 }, (_, numero) => ({
+      seme: `Techno ${numero} · Locale`,
+      famiglia: 'techno' as const,
+    }));
+    const foto = [...fotoDiUnElenco(serate).values()].map((scelta) => scelta.src);
+    expect(foto).toHaveLength(10);
+    expect(new Set(foto).size).toBe(
+      Math.min(10, FOTO_LIBERE.filter((f) => f.tema === 'club').length),
+    );
+  });
+
+  it('il dettaglio mostra la foto che la serata aveva nell’elenco', () => {
+    const serate = [
+      { seme: 'Prima · Locale', famiglia: 'techno' as const },
+      { seme: 'Seconda · Locale', famiglia: 'techno' as const },
+    ];
+    const elenco = fotoDiUnElenco(serate);
+    expect(fotoSerata('Seconda · Locale', 'techno')).toEqual(elenco.get('Seconda · Locale'));
+  });
+
+  it('con più serate che foto le foto tornano, ma una per giro', () => {
+    const serate = Array.from({ length: 5 }, (_, numero) => ({
+      seme: `Live ${numero} · Sala`,
+      famiglia: 'live' as const,
+    }));
+    const scelte = [...fotoDiUnElenco(serate, PROVA).values()].map((scelta) => scelta.src);
+    expect(scelte).toHaveLength(5);
+    expect(new Set(scelte.slice(0, 1)).size).toBe(1);
   });
 });

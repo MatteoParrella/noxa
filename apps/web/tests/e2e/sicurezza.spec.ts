@@ -143,7 +143,7 @@ test('dal profilo si esce dall’account', async ({ page, supabase }) => {
   await page.getByRole('button', { name: 'Esci dall’account' }).click();
   await expect(page).toHaveURL(/\/benvenuto\/$/);
   expect(supabase.chiamate('logout')).toHaveLength(1);
-  await page.goto('/scopri/');
+  await page.goto('/ricorda/');
   await expect(page).toHaveURL(/\/benvenuto\/$/);
 });
 

@@ -21,6 +21,7 @@ import { messaggi } from '@/lib/messaggi/it';
 import { aggiornaProfilo } from './api';
 import { caricaAvatar, eliminaAvatar } from './api-avatar';
 import { CHIAVE_MIO_AVATAR, useMioAvatar } from './dati';
+import { anteprimaDelFile } from '@/lib/anteprima';
 
 /** Modifica di nome visualizzato, username e foto profilo. */
 export function ModificaProfilo() {
@@ -84,7 +85,7 @@ function SezioneAvatar({ io }: { io: string }) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (anteprimaLocale) URL.revokeObjectURL(anteprimaLocale);
-    setAnteprimaLocale(URL.createObjectURL(file));
+    setAnteprimaLocale(anteprimaDelFile(file));
     upload.mutate(file);
     e.target.value = '';
   }

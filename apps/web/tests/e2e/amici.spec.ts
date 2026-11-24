@@ -98,6 +98,10 @@ test('accettare e rifiutare una richiesta dalla ricerca', async ({ page, supabas
   await page.getByRole('button', { name: 'Accetta' }).click();
   await expect.poll(() => supabase.chiamate('amicizie_aggiorna').length).toBe(1);
   expect(supabase.chiamate('amicizie_aggiorna')[0]?.corpo).toEqual({ stato: 'accettata' });
+  // Riscontro «Ora siete amici» (brief del rinfresco §4.1), che si chiude con un tocco.
+  await expect(page.getByRole('status').filter({ hasText: 'Ora siete amici' })).toBeVisible();
+  await page.getByText('Ora siete amici').click();
+  await expect(page.getByText('Ora siete amici')).toHaveCount(0);
   await page.getByRole('button', { name: 'Rifiuta' }).click();
   await expect.poll(() => supabase.chiamate('amicizie_elimina').length).toBe(1);
 });

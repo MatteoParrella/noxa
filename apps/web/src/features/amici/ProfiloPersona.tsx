@@ -19,7 +19,9 @@ import {
   type ProfiloPersona as Dati,
 } from './api';
 import { AzioniPersona } from './AzioniPersona';
-import { CHIAVI, useIo, usePersona } from './dati';
+import { CHIAVI, useIo, useIoPersona, usePersona } from './dati';
+import { useRiscontro } from '@/components/ui/Riscontro';
+import { riscontroAmicizia } from './riscontri';
 
 const testi = messaggi.amici;
 
@@ -81,9 +83,14 @@ function Scheda({ io, dati, onBloccata }: { io: string; dati: Dati; onBloccata: 
     enabled: relazione.tipo === 'ricevuta' && relazione.canale === 'codice_invito',
   });
 
+  const mostraRiscontro = useRiscontro();
+  const ioPersona = useIoPersona();
   const azione = useMutation({
     mutationFn: ({ accetta, amiciziaId }: { accetta: boolean; amiciziaId: string }) =>
       accetta ? accettaRichiesta(amiciziaId) : eliminaAmicizia(amiciziaId),
+    onSuccess: (_esito, { accetta }) => {
+      if (accetta) mostraRiscontro(riscontroAmicizia(ioPersona, persona));
+    },
     onSettled: () => client.invalidateQueries({ queryKey: CHIAVI.relazioni }),
   });
 

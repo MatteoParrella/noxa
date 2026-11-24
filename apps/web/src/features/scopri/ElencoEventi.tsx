@@ -2,13 +2,15 @@
 
 import type { UseQueryResult } from '@tanstack/react-query';
 import { CircleAlert, CloudOff, SlidersHorizontal } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { AmiciPartecipano } from '@/components/ui/AmiciPartecipano';
 import { Icona } from '@/components/ui/Icona';
 import { Rivela } from '@/components/ui/Movimento';
 import { Pulsante } from '@/components/ui/Pulsante';
 import { RigaEvento, SchedaAmici, SchedaEvidenza } from '@/components/ui/SchedaEvento';
 import type { DataCalendario } from '@/lib/date';
+import { famigliaDaGeneri, semeCopertina } from '@/lib/copertinaGenerata';
+import { fotoDiUnElenco } from '@/lib/fotoSerata';
 import { messaggi } from '@/lib/messaggi/it';
 import type { EventoElenco } from './api';
 import { useCopertine, useNomiGeneri } from './dati';
@@ -71,6 +73,20 @@ export function ElencoEventi({
     elenco.map((evento) => ({ tipo: evento.copertina_tipo, path: evento.copertina_path })),
   );
   const nomiGeneri = useNomiGeneri();
+  // Nessuna foto d'atmosfera ripetuta nello stesso elenco (ADR-0032): si assegnano prima delle
+  // schede, così ogni copertina (e poi il dettaglio della serata) usa la foto scelta qui.
+  useMemo(
+    () =>
+      fotoDiUnElenco(
+        (eventi.data ?? [])
+          .filter((evento) => evento.copertina_tipo === 'tipografica')
+          .map((evento) => ({
+            seme: semeCopertina(evento.titolo, evento.locale_nome),
+            famiglia: famigliaDaGeneri(evento.generi_evento),
+          })),
+      ),
+    [eventi.data],
+  );
 
   if (!eventi.data) {
     if (!online || eventi.fetchStatus === 'paused') {
@@ -199,7 +215,7 @@ export function ElencoEventi({
   );
 }
 
-function StatoElenco({
+export function StatoElenco({
   icona,
   titolo,
   children,
@@ -222,7 +238,7 @@ function StatoElenco({
   );
 }
 
-function ScheletroElenco() {
+export function ScheletroElenco() {
   return (
     <div className="pagina flex flex-col gap-4 pt-4" role="status" aria-live="polite">
       <span className="sr-only">{testi.caricamento}</span>

@@ -178,6 +178,10 @@ ma non sono esposte come RPC, perché lo schema `private` non è esposto.
 | `calcola_riepilogo(utente uuid, anno smallint)` | `jsonb` | Riepilogo di un anno solare dal diario della persona, o null con meno di 3 serate: solo le chiavi ammesse da `riepiloghi_annuali.dati`, locali del catalogo per nome e luoghi scritti a mano solo contati, amici solo contati, nessuna spesa (R-42, R-43). |
 | `scrivi_riepilogo(utente uuid, anno smallint)` | `boolean` | Scrive il riepilogo (o lo toglie sotto le 3 serate); vero se la riga è nuova, per la notifica `riepilogo_pronto`. |
 | `rigenera_riepilogo(utente uuid, oggi date)` | `jsonb` | Corpo di `rigenera_mio_riepilogo()` con la data passata da fuori (i test la scelgono): a dicembre l'anno in corso, a gennaio quello chiuso, altrimenti `NX062`; una volta al giorno (`NX063`). |
+| `ultimo_accesso(utente uuid)` | `timestamptz` | Il più recente tra registrazione, ultimo accesso con la password e ultimo uso o rinnovo di una sessione (`auth.sessions`): chi usa l'app installata ogni giorno non rifà l'accesso ma rinnova la sessione. Solo per il job degli account inattivi. |
+| `elimina_account(utente uuid)` | `void` | Elimina l'account (`auth.users`, cascata su tutti i dati) dopo aver copiato l'identità in `private.account_conservati` se c'è un'escalation (R-55). Usata da `elimina_mio_account` e dal job degli account inattivi; nessun ruolo dell'app la esegue. |
+| `invia_avviso_inattivita(utente uuid)` | `bigint` | Email di avviso con l'API di Brevo (`pg_net`), con chiave, mittente e indirizzo dell'app dal Vault (`brevo_api_chiave`, `email_mittente`, `url_app`); nel corpo solo l'indirizzo del destinatario. Restituisce l'identificativo della richiesta, null se manca la configurazione. |
+| `gestisci_account_inattivi()` | `void` | Job orario (§8): conferma gli avvisi accettati da Brevo (risposta 2xx in `net._http_response`), cancella quelli rifiutati o senza esito dopo 5 ore, toglie l'avviso a chi è rientrato, elimina con `elimina_account` gli account avvisati e confermati da più di 30 giorni senza accessi, avvisa al massimo 100 nuovi account al giorno senza accessi da 24 mesi (SAFETY_PRIVACY.md §10). Tabella `private.avvisi_inattivita` (`utente_id` PK → `auth.users` con cascata, `avvisato_il`, `richiesta_id`, `confermato`), senza accesso per i ruoli dell'app; la data dell'avviso è in `esporta_miei_dati` (`avviso_inattivita`). Test: `047_account_inattivi`. |
 
 Le policy di due tabelle che si riferiscono l'una all'altra (`checkin` ↔ `checkin_destinatari`,
 `ritorni_sicuri` ↔ `ritorni_destinatari`, `gruppi` ↔ `membri_gruppo`) usano **sempre** queste
@@ -207,7 +211,7 @@ Le funzioni di tipo trigger e di manutenzione (`gestisci_nuovo_utente`,
 `verifica_codice_invito`, `accoda_analisi_flyer`, `proteggi_caricamento_flyer`,
 `ritira_evento_del_flyer`, `esito_caricamento_flyer`, `sincronizza_avatar_nascosto`,
 `occulta_in_attesa`) sono descritte insieme alle tabelle a cui si applicano; quelle
-pianificate (`elimina_account_non_confermati`, `elimina_codici_invito_scaduti`, `verifica_invariante_gruppi`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`, `sveglia_worker`,
+pianificate (`elimina_account_non_confermati`, `gestisci_account_inattivi`, `elimina_codici_invito_scaduti`, `verifica_invariante_gruppi`, `verifica_ritorni_scaduti`, `applica_conservazione`, `accoda_fonti_da_eseguire`, `sveglia_worker`,
 `assegna_badge`, `genera_riepiloghi`, `accoda_pulizia_flyer`) nel §8.
 
 ## 5. Tabelle
@@ -483,7 +487,7 @@ Vincoli: unico su (`azione_id`, `utente_id`); `stato = 'deciso'` se e solo se es
 | `posizione` | `geography(Point, 4326)` | indice GiST |
 | `osm_id` | `text` | nullable, unico |
 | `google_place_id` | `text` | nullable, unico (unico dato di Google conservato, ADR-0008) |
-| `sito_web`, `instagram_username` | `text` | nullable; check sul formato (`https?://…`, username Instagram) |
+| `sito_web`, `instagram_username` | `text` | nullable; check sul formato (solo `https://…` dall'iterazione 12, username Instagram) |
 | `immagine_path` | `text` | nullable; percorso nel bucket `immagini-locali`: `<id>.webp` o, dall'iterazione 5, `<id>-<versione>.webp` (ADR-0018). Ogni foto nuova ha un percorso suo, così resta invisibile agli utenti finché non è approvata |
 | `immagine_fonte` | `fonte_immagine_locale` | nullable; obbligatoria se `immagine_path` non è null |
 | `immagine_attribuzione` | `text` | nullable; obbligatoria con `licenza_libera`; mostrata nel dettaglio evento |
@@ -558,7 +562,7 @@ Locali trovati dal bootstrap (EVENT_INGESTION.md §2.1), da verificare a mano.
 | `id` | `uuid` | PK |
 | `origine` | `text` | `osm` o `google` |
 | `osm_id`, `google_place_id` | `text` | unici; uno dei due secondo l'origine |
-| `nome`, `indirizzo`, `comune`, `provincia`, `posizione`, `sito_web` | | solo per OSM: da Google si conserva **solo** il `place_id` (check `candidati_locali_identificativo`, ADR-0008) |
+| `nome`, `indirizzo`, `comune`, `provincia`, `posizione`, `sito_web` (solo `https://…`) | | solo per OSM: da Google si conserva **solo** il `place_id` (check `candidati_locali_identificativo`, ADR-0008) |
 | `possibile_doppione_id` | `uuid` | FK → `locali(id)`: locale entro 200 m o con lo stesso nome normalizzato |
 | `stato` | `text` | `da_verificare`, `creato`, `unito`, `scartato` |
 | `locale_id`, `deciso_da`, `deciso_il` | | esito della verifica |
@@ -585,7 +589,7 @@ Locali trovati dal bootstrap (EVENT_INGESTION.md §2.1), da verificare a mano.
 | `riferimenti_alcol` | `boolean` | default `false` (R-23) |
 | `artisti` | `text[]` | al massimo 20 elementi |
 | `prezzo_min_centesimi` | `integer` | nullable, ≥ 0 |
-| `url_biglietti` | `text` | nullable, link esterno (PRD F-15), check `https?://…` |
+| `url_biglietti` | `text` | nullable, link esterno (PRD F-15), check `https://…` (dall'iterazione 12 nessun link in chiaro) |
 | `immagine_path` | `text` | nullable, solo da flyer approvato, bucket `flyer-pubblicati`, sempre `eventi/<id>.webp` |
 | `copertina_colori` | `jsonb` | nullable; tavolozza della copertina generata letta in memoria da un'immagine della fonte (ADR-0030): `{scuro: {fondo, 1, 2, bagliore}, chiaro: {…}, calcolata_il}`, colori `#RRGGBB` maiuscoli; check `private.copertina_colori_valida`, che usa `private.tavolozza_valida` per ogni tema (nessun altro campo, mai l'immagine). Scritta dal worker, una volta per serata (titolo + locale), ricalcolata dopo 30 giorni |
 | `stato` | `stato_evento` | default `in_revisione` (R-51) |
@@ -601,6 +605,7 @@ Indici: `(data_serata)`, `(locale_id, data_serata)`, GIN su `artisti`, indice tr
 - Worker: `SELECT`, `INSERT`, `UPDATE` con policy `to noxa_worker`. Il trigger `private.proteggi_eta_evento` impedisce al worker di abbassare `eta_minima` o di rendere "non dichiarata" un'età quando `eta_minima_dichiarata = true` (`NX017`) e di impostare `riferimenti_alcol` da `true` a `false` (`NX018`) (R-22); solo un moderatore può farlo, con una riga in `azioni_moderazione`. Se invece l'età era quella predefinita (`eta_minima_dichiarata = false`), la prima età dichiarata da una fonte verificata la sostituisce, anche se più bassa di 18: diventa un dato noto e non più una supposizione (R-21).
 - Trigger `private.calcola_data_serata`: `data_serata` = data di `inizio` nel fuso `Europe/Rome` meno 6 ore (un evento che inizia alle 02:30 appartiene alla serata precedente).
 - RPC `public.cerca_eventi(lat double precision, lon double precision, raggio_km numeric, dal date, al date, generi text[], eta_minima_max smallint, solo_amici boolean)`, tutti i parametri facoltativi: `security invoker`, quindi soggetta alla policy. Senza date cerca la serata in corso; rifiuta con `22023` coordinate incomplete o fuori intervallo, distanze fuori da 1–100 km e intervalli di date invertiti o più lunghi di 62 giorni. Esclude gli eventi già finiti (`fine`, o `inizio` + 6 ore) e quelli di locali non attivi. `eta_minima_max` restringe soltanto tra gli eventi già visibili; `generi` vale se l'evento ha almeno uno dei generi; `solo_amici` tiene gli eventi con almeno un amico visibile. Sceglie prima al massimo 300 eventi in ordine di inizio, poi calcola per quelli: generi, coordinate del locale, distanza in metri dal punto (`ST_Distance` su `geography`, null senza punto), copertina (`copertina_tipo` `locale` → `flyer` → `tipografica`, `copertina_path`, `copertina_attribuzione`, ADR-0018; `copertina_colori` per la copertina generata, ADR-0030), numero di amici che partecipano e interessati, i primi tre amici (id, nome, stato) e la propria scelta. Gli amici passano dalla RLS di `partecipazioni_evento` e `profili` (R-67). Le coordinate non vengono salvate (R-33). Prova di prestazioni: `021_prestazioni_cerca_eventi` (5.000 eventi, 95° percentile < 800 ms).
+- RPC `public.cerca_eventi_pubblici(dal date, al date)` (ADR-0036): `security definer`, eseguibile **solo** dal ruolo `anon` (né `authenticated` né altri), è l'unico accesso ai dati per chi non ha un account, usato dall'elenco pubblico del sito. Senza date la serata in corso; rifiuta con `22023` intervalli invertiti, più lunghi di 31 giorni, che iniziano prima di ieri o finiscono oltre 92 giorni da oggi. Stesse condizioni della policy per un adulto: eventi `pubblicato` o `annullato` di locali attivi, non ancora finiti; al massimo 300 in ordine di inizio. Restituisce `id`, `riservato` (= `riferimenti_alcol`), titolo, orari, `data_serata`, età minima e se è dichiarata, stato, generi, nome e comune del locale, `copertina_colori`. Per le serate con riferimenti all'alcol titolo, generi e colori sono null o vuoti e l'età minima è almeno 18 (R-23). Nessun dato degli utenti, nessuna posizione, nessuna immagine. `public.generi_pubblici()` (stessi permessi) restituisce codice e nome dei generi. Test: `045_catalogo_pubblico`.
 - RPC `public.dettaglio_evento(evento uuid)`: `security invoker`; zero righe se l'evento non si vede. Restituisce i campi dell'evento, generi, locale con indirizzo e coordinate, copertina come sopra (con `copertina_colori`), la fonte più affidabile con un link (`sito_locale` → `instagram` → altre, poi la più recente; per i soli flyer il sito o l'Instagram del locale), gli amici visibili con username e stato, la propria scelta e la sua visibilità.
 
 #### `generi_musicali`
@@ -637,7 +642,7 @@ Provenienza di ogni evento: tutte le fonti che lo hanno confermato.
 | `fonte_id` | `uuid` | nullable, FK → `fonti(id)` (iterazione 5) |
 | `caricamento_flyer_id` | `uuid` | nullable, FK → `caricamenti_flyer(id)` `on delete set null` (aggiunta con la tabella `caricamenti_flyer`, iterazione 6) |
 | `tipo_origine` | `text` | un valore di `tipo_fonte` oppure `flyer` (check) |
-| `url_originale` | `text` | `https?://…`; obbligatorio tranne per i flyer (check `eventi_fonti_link`) |
+| `url_originale` | `text` | `https://…` (il worker porta `http://` a `https://`, `in_https`); obbligatorio tranne per i flyer (check `eventi_fonti_link`) |
 | `id_esterno` | `text` | nullable |
 | `raccolto_il` | `timestamptz` | |
 | `ultima_conferma_il` | `timestamptz` | ultima esecuzione della fonte che ha trovato l'evento |
@@ -730,11 +735,12 @@ Area di transito della pipeline (EVENT_INGESTION.md §3).
 | `nome` | `text` | 1–40 caratteri, senza spazi ai lati |
 | `creato_da` | `uuid` | FK → `profili(id)` `on delete set null` |
 | `nome_scritto_da` | `uuid` | FK → `profili(id)` `on delete set null`; chi ha scritto il nome attuale, riceve la decisione se un moderatore lo rimuove (R-52) |
+| `colore` | `text` | predefinito `ciano`; check `gruppi_colore`: `ciano`, `blu`, `viola`, `rosa`, `rosso`, `arancione`, `giallo`, `verde` (token `--colore-gruppo-*`, iterazione 12) |
 | `creato_il`, `aggiornato_il` | `timestamptz` | |
 
 - **S**: `private.e_membro(id)`: membri e invitati, nessun elenco di gruppi altrui (R-11).
-- **I**: `creato_da = auth.uid()` e `private.account_attivo(auth.uid())` (R-55); `GRANT INSERT (id, nome, creato_da)`. Il trigger `private.aggiungi_creatore_gruppo` (`after insert`) inserisce il creatore come `admin` attivo.
-- **U**: `private.e_admin_gruppo(id)` (using e with check); `GRANT UPDATE (nome)`.
+- **I**: `creato_da = auth.uid()` e `private.account_attivo(auth.uid())` (R-55); `GRANT INSERT (id, nome, creato_da, colore)`. Il trigger `private.aggiungi_creatore_gruppo` (`after insert`) inserisce il creatore come `admin` attivo.
+- **U**: `private.e_admin_gruppo(id)` (using e with check); `GRANT UPDATE (nome, colore)`. Test del colore: `049_colore_gruppi`.
 - **D**: `private.e_admin_gruppo(id)`; inviti, serate e risposte si eliminano a cascata.
 - Trigger `private.prepara_gruppo` (`before insert or update of nome`): al massimo 10 gruppi creati ogni 24 ore per utente (`NX045`, come R-14); imposta `nome_scritto_da`, che una rimozione dei moderatori conserva.
 - La rimozione del nome con `decidi_segnalazione` lo sostituisce con «Gruppo».
@@ -918,13 +924,20 @@ per chi non ha un passaggio. Non contiene dati personali.
 - **S** (`authenticated`): `attivo` e `private.eta_di(auth.uid()) >= eta_minima` (R-04): un
   minorenne non riceve le app di trasporto che richiedono 18 anni. Nessuna policy per `anon`
   (R-07).
-- **I/U/D**: nessuna, nemmeno per i moderatori: le voci si aggiungono e si correggono con una
-  migrazione, dopo la verifica sulla fonte ufficiale. La gestione dall'area di moderazione è
-  nella roadmap (iterazione 12).
+- **I/U/D**: nessuna policy: dall'iterazione 12 i moderatori con due fattori leggono tutte le
+  voci con `public.servizi_trasporto_moderazione()` e le creano o modificano (compresi
+  `attivo` e `verificato_il`) con `public.salva_servizio_trasporto(servizio, tipo, nome, zona,
+  telefono, url, nota, eta_minima, ordine, fonte_url, verificato_il, attivo, motivazione)`
+  (`servizio` null = nuova voce; motivazione obbligatoria, `NX021`; data di verifica tra due
+  anni fa e oggi, `22023`; i vincoli della tabella restano). Ogni cambio è registrato in
+  `azioni_moderazione` (`crea_servizio_trasporto`, `modifica_servizio_trasporto`, tipo
+  `servizio_trasporto`, non segnalabile dagli utenti) e si legge con `registro_moderazione`
+  (R-69).
 - Voci iniziali (2026-11-15): Rete notturna ATM, Radiotaxi 02 4040 e 02 8585 (Milano),
   Radiotaxi Monza 039 36379, Uber (18 anni, link universale con la sola partenza «dove sei»).
 - Test: `043_servizi_trasporto` (lettura per 14, 15, 16, 17, 18, 20, 21 anni e moderatori,
-  nessuna scrittura dall'app, vincoli).
+  nessuna scrittura dall'app, vincoli), `048_gestione_servizi_trasporto` (RPC dei moderatori,
+  registro, R-04 dopo una modifica).
 
 ### 5.6 Ricorda: tracker, badge, riepilogo
 
@@ -1076,6 +1089,7 @@ per chi non ha un passaggio. Non contiene dati personali.
 |---|---|---|---|
 | `mio_account()` | definer | utenti | Stato dell'account del chiamante: username, nome, `stato_account`, `minorenne` (solo per i testi dell'onboarding, R-05), `onboarding_completato`, documenti in vigore non ancora accettati con le novità (R-63); nessuna data di nascita |
 | `cerca_eventi(...)` | invoker | utenti | Ricerca degli eventi (F-01, F-02, F-04), §5.3 `eventi` |
+| `cerca_eventi_pubblici(dal, al)`, `generi_pubblici()` | definer | solo `anon` | Elenco ridotto delle serate per il sito senza account (ADR-0036), §5.3 `eventi` |
 | `dettaglio_evento(evento uuid)` | invoker | utenti | Dettaglio di un evento visibile con fonte, amici e propria scelta (F-03, F-04, F-05), §5.3 `eventi` |
 | `cerca_utenti(testo text)` | definer | utenti | Ricerca per prefisso di username (almeno 3 caratteri, la `@` iniziale si ignora, nessun carattere jolly) nella propria fascia, esclusi sé stessi, bloccati e sospesi; al massimo 20 risultati con identificativo (per la richiesta), username, nome visualizzato e rapporto (`nessuna`, `amici`, `inviata`, `ricevuta`), senza avatar (R-10) |
 | `crea_codice_invito()` | definer | utenti | Codice monouso di 15 minuti (R-12, R-14) |
@@ -1101,7 +1115,7 @@ per chi non ha un passaggio. Non contiene dati personali.
 | `cerca_per_diario(testo text)` | invoker | utenti | Campo «Dove»: eventi pubblicati visibili dell'ultimo anno fino a oggi e locali attivi, almeno 2 caratteri, 10 risultati per tipo |
 | `categorie_spesa_disponibili()` | definer | utenti | Categorie di spesa per chi chiama, senza `alcolici` per i minorenni: l'app non decide da sé (R-40) |
 | `esporta_miei_dati()` | definer | utenti | Tutti i propri dati in un JSON, dall'iterazione 9 con check-in e dispositivi (senza endpoint né chiavi), dall'iterazione 10 con i ritorni sicuri e le loro posizioni, dall'iterazione 11 con badge e riepiloghi annuali (`formato` `noxa-esportazione-1`); delle altre persone solo username e nome di chi ha un legame con te; nessuna segnalazione ricevuta (R-50, R-69). Una richiesta all'ora (`private.esportazioni_dati`), `NX047` con l'ora della prossima (R-64, ADR-0025) |
-| `elimina_mio_account(password text)` | definer | utenti | Verifica la password (5 tentativi sbagliati all'ora in `private.tentativi_eliminazione`, poi `NX048`) e i due fattori se attivi (`serve_codice` senza `aal2`); conserva l'identità in `private.account_conservati` solo se c'è un'escalation (R-55); elimina `auth.users` e restituisce i file della foto profilo che l'Edge Function `elimina-account` cancella (R-64, ADR-0025) |
+| `elimina_mio_account(password text)` | definer | utenti | Verifica la password (5 tentativi sbagliati all'ora in `private.tentativi_eliminazione`, poi `NX048`) e i due fattori se attivi (`serve_codice` senza `aal2`); poi `private.elimina_account`: conserva l'identità in `private.account_conservati` solo se c'è un'escalation (R-55) ed elimina `auth.users` e restituisce i file della foto profilo che l'Edge Function `elimina-account` cancella (R-64, ADR-0025) |
 | `fai_checkin(locale uuid, evento uuid, destinatari uuid[])` | invoker | utenti | Check-in con i destinatari in un'unica transazione; restituisce `id`, `scade_il`, `destinatari` ed `esclusi` (non più amici confermati); `NX049`…`NX053` (F-20, R-30) |
 | `suggerimenti_checkin()` | invoker | utenti | Eventi a cui partecipi e serate di gruppo della serata in corso, con gli amici confermati da proporre (F-20) |
 | `registra_dispositivo_push(piattaforma, token, chiave_p256dh, chiave_auth, descrizione)` | definer | utenti | Registra o rinnova il dispositivo push di chi chiama (Web Push o, dall'iterazione 10, il token FCM dell'app Android senza chiavi); un endpoint appartiene a un solo account; al massimo 10 dispositivi (F-22, ADR-0026, ADR-0027) |
@@ -1129,7 +1143,8 @@ per chi non ha un passaggio. Non contiene dati personali.
 | `correggi_eta_alcol_evento(evento, eta_minima, eta_minima_dichiarata, riferimenti_alcol, motivazione)` | definer | moderatori | Età e alcol con motivazione registrata (R-22, R-23) |
 | `cambia_stato_evento(evento, stato, motivazione)` | definer | moderatori | Pubblicazione, annullamento e rifiuto motivati |
 | `possibili_annullamenti()`, `decidi_possibile_annullamento(evento, annullato, motivazione)` | definer | moderatori | Eventi spariti dalla loro unica fonte (EVENT_INGESTION.md §7) |
-| `registro_moderazione(tipo, oggetto)` | definer | moderatori | Ultime 50 azioni su un locale, una fonte, un evento o un candidato, con il nome del moderatore e, per gli eventi, le operazioni della raccolta |
+| `servizi_trasporto_moderazione()`, `salva_servizio_trasporto(...)` | definer | moderatori | Gestione dei servizi di trasporto con il registro (F-23, R-69), §5.5 |
+| `registro_moderazione(tipo, oggetto)` | definer | moderatori | Ultime 50 azioni su un locale, una fonte, un evento, un candidato o un servizio di trasporto, con il nome del moderatore e, per gli eventi, le operazioni della raccolta |
 | `dettaglio_segnalazione(id uuid)` | definer | moderatori | Oggetto segnalato com'è per gli utenti, testo di chi ha segnalato senza la sua identità, altre segnalazioni sullo stesso oggetto e registro; ogni lettura registra un `accesso_segnalazione` (R-69) |
 | `decidi_segnalazione(segnalazione uuid, azione azione_moderazione, motivazione text, contenuto text)` | definer | moderatori | `nessuna_violazione`, `rimuovi_contenuto` (per un profilo `contenuto` = `foto`, `nome` o `username`; per un gruppo `nome`; per una serata di gruppo `titolo`, `luogo` o `note`), `modifica_evento`, `sospendi_account`; chiude le segnalazioni aperte sullo stesso oggetto, notifica chi ha segnalato e chi è coinvolto (R-53), toglie o conferma l'occultamento automatico (ADR-0023); restituisce il percorso di una foto del locale rimossa, che l'app elimina |
 | `correggi_data_nascita(utente uuid, data date, motivazione text)` | definer | amministratori (`private.e_amministratore()`) | Correzione verificata (R-02) |
@@ -1171,7 +1186,8 @@ RLS (iterazione 7).
 | Codici invito scaduti | ogni ora, al minuto 23 | `private.elimina_codici_invito_scaduti()`: elimina i codici scaduti da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Account non confermati | ogni ora, al minuto 17 | `private.elimina_account_non_confermati()`: elimina gli account senza email confermata creati da più di 24 ore (SAFETY_PRIVACY.md §10) |
 | Ritorni scaduti | ogni minuto | `private.verifica_ritorni_scaduti()`: allerta all'arrivo previsto superato, fine automatica 2 ore dopo (R-31, iterazione 10) |
-| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); dall'iterazione 8 `azioni_moderazione` e `segnalazioni` chiuse dopo 12 mesi (salvo prove e decisioni con un reclamo conservato), il riferimento alla foto dei locali disattivati da 7 giorni, `private.tentativi_eliminazione` e `private.esportazioni_dati` dopo 24 ore; dall'iterazione 9 `checkin` (con i destinatari) 24 ore dopo la fine e `dispositivi_push` dopo 90 giorni senza uso; dall'iterazione 10 `ritorni_sicuri` (con destinatari e posizioni) 24 ore dopo la fine. Gli account inattivi da 24 mesi sono nell'iterazione 12 (ROADMAP.md §5) |
+| Conservazione | ogni ora, al minuto 41 | `private.applica_conservazione()`: dall'iterazione 5 elimina `eventi_grezzi` dopo 30 giorni, `coda_job` conclusi dopo 14 e `esecuzioni_fonte` dopo 90; dall'iterazione 6 `notifiche` dopo 90 giorni, `private.registro_caricamenti_flyer` dopo 24 ore e `reclami` decisi dopo 12 mesi (salvo prove, R-55); dall'iterazione 8 `azioni_moderazione` e `segnalazioni` chiuse dopo 12 mesi (salvo prove e decisioni con un reclamo conservato), il riferimento alla foto dei locali disattivati da 7 giorni, `private.tentativi_eliminazione` e `private.esportazioni_dati` dopo 24 ore; dall'iterazione 9 `checkin` (con i destinatari) 24 ore dopo la fine e `dispositivi_push` dopo 90 giorni senza uso; dall'iterazione 10 `ritorni_sicuri` (con destinatari e posizioni) 24 ore dopo la fine |
+| Account inattivi (`account-inattivi`) | ogni ora, al minuto 20 | `private.gestisci_account_inattivi()`: avviso via email dopo 24 mesi senza accessi, eliminazione dopo altri 30 giorni senza accessi e solo con l'avviso accettato da Brevo (SAFETY_PRIVACY.md §10) |
 | Invariante dei gruppi | ogni giorno alle 04:00 | `private.verifica_invariante_gruppi()` |
 | Accodamento job del worker | ogni 5 minuti | `private.accoda_fonti_da_eseguire()`: inserisce `esegui_fonte` per le fonti attive scadute; dopo un errore l'intervallo raddoppia (fino a 8 volte la frequenza), che è il backoff delle fonti |
 | Sveglia del worker | ogni 15 minuti | `private.sveglia_worker()`: se ci sono job pronti e nessun esecutore attivo, avvia `worker.yml` con `workflow_dispatch` di GitHub (`pg_net`, token nel Vault); senza segreti nel Vault non fa nulla (ADR-0031) |

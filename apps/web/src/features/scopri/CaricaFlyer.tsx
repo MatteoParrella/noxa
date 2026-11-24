@@ -10,6 +10,7 @@ import { Pulsante } from '@/components/ui/Pulsante';
 import { useSessione } from '@/features/account/sessione';
 import { messaggi } from '@/lib/messaggi/it';
 import { caricaFlyer } from './api-flyer';
+import { anteprimaDelFile } from '@/lib/anteprima';
 
 const testi = messaggi.scopri.caricaFlyer;
 
@@ -64,7 +65,7 @@ export function CaricaFlyer() {
       return;
     }
     setFile(selezionato);
-    setAnteprima(URL.createObjectURL(selezionato));
+    setAnteprima(anteprimaDelFile(selezionato));
   }
 
   if (upload.isSuccess) {

@@ -25,7 +25,7 @@ rapide con lo stesso modello), `/help`.
 
 ## 3. Lo sviluppo a iterazioni: `/iterazione`
 
-La roadmap è divisa in **15 iterazioni** (da 0 a 14), descritte in
+La roadmap è divisa in **16 iterazioni** (da 0 a 15), descritte in
 [ROADMAP.md](ROADMAP.md) §5. Ognuna si esegue con un solo comando:
 
 ```
@@ -49,7 +49,7 @@ Altri usi:
 
 | Comando | Effetto |
 |---|---|
-| `/iterazione stato` | Avanzamento: iterazioni completate su 15, attese esterne, prossima iterazione e cosa serve |
+| `/iterazione stato` | Avanzamento: iterazioni completate su 16, attese esterne, prossima iterazione e cosa serve |
 | `/iterazione 3` lanciata prima della 2 | Si ferma e ti dice quale iterazione eseguire prima |
 | `/iterazione 4` senza i design pronti | Si ferma ed elenca le schermate da preparare in Claude Design |
 
@@ -83,10 +83,11 @@ quella corrente.
 | 9 | Centro notifiche, richiesta dei permessi, check-in | `design/F-22-notifiche/`, `design/F-20-checkin/` |
 | 10 | Avvio del ritorno sicuro, ritorno in corso, ritorno di un amico, allerta, aree di arrivo | `design/F-21-ritorno-sicuro/` |
 | 11 | Statistiche, bacheca dei badge, schede del Wrapped | `design/F-31-statistiche/`, `design/F-32-badge/`, `design/F-33-wrapped/` |
-| 12 | Icona dell'app, schermate e testi per App Store e Google Play | `design/store/` |
-| 13 | Accesso con Apple e Google, completamento del profilo | `design/F-17-accesso-social/` |
+| 12 | Momenti di riscontro (amicizia confermata, gruppo creato, serata confermata da tutti); icona dell'app, schermata di apertura e anteprima dei link | `design/F-01-rinfresco-interfaccia/`, `design/store/` |
+| 13 | Schermate e testi per Google Play (e App Store se si chiude D-13) | `design/store/` |
+| 14 | Accesso con Apple e Google, completamento del profilo | `design/F-17-accesso-social/` |
 
-Le iterazioni 0 e 14 non hanno interfaccia: non serve nulla.
+Le iterazioni 0 e 15 non hanno interfaccia: non serve nulla.
 
 In ogni cartella metti:
 - `brief.md`: obiettivo, stati (vuoto, caricamento, errore, successo, offline), differenze
@@ -150,7 +151,8 @@ DECISIONI_APERTE.md, aggiorna i documenti e, se serve, scrive un ADR.
 | Prima dell'iterazione 6 | Organizzazione della moderazione (D-10). Facoltativi finché non si apre la beta: chiave Claude API con limite di spesa e accordo sul trattamento dei dati con Anthropic (D-12); senza chiave i flyer si compilano a mano in moderazione (ADR-0021) |
 | Prima dell'iterazione 9 | Niente: le chiavi VAPID del Web Push le genera Claude in locale |
 | Prima dell'iterazione 10 | Progetto Firebase gratuito per le notifiche Android; un telefono Android con le opzioni sviluppatore per installare l'APK di debug. Nessun account degli store (ADR-0027) |
-| Prima dell'iterazione 12 | Penetration test esterno; testi legali definitivi. Come ultima cosa, ad app completa: account Google Play Console (25 $ una tantum), 12 tester per il test chiuso di 14 giorni e questionario d'età (D-06). Account Apple solo se si chiude D-13 |
+| Prima dell'iterazione 12 | Le tavole di Claude Design della riga 12 del §7 e un iPhone e un telefono Android per le prove con l'app di staging. Nessun account |
+| Prima dell'iterazione 13 | La decisione di pubblicare. Account dei servizi di produzione (§9), organizzazione della moderazione (D-10), penetration test esterno, testi legali definitivi. Come ultima cosa, ad app completa: account Google Play Console (25 $ una tantum), 12 tester per il test chiuso di 14 giorni e questionario d'età (D-06). Account Apple solo se si chiude D-13 |
 
 ## 9. Creare un ambiente online (staging o produzione)
 

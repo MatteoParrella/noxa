@@ -74,6 +74,7 @@ export const gruppi = {
     titolo: 'Crea un gruppo',
     nome: 'Nome del gruppo',
     nomeAiuto: 'Per esempio «Quelli del sabato». Lo vedono solo i membri.',
+    colore: 'Colore del gruppo',
     invita: 'Invita amici',
     invitaFacoltativo: 'Puoi invitare anche dopo.',
     conferma: 'Crea il gruppo',
@@ -135,6 +136,7 @@ export const gruppi = {
     rendiAdmin: 'Rendi admin',
     togli: 'Togli dal gruppo',
     rinomina: 'Rinomina',
+    cambiaColore: 'Cambia colore',
     segnalaNome: 'Segnala il nome',
     esci: 'Esci dal gruppo',
     elimina: 'Elimina il gruppo',
@@ -154,6 +156,7 @@ export const gruppi = {
     adminNominato: (nome: string) => `${nome} ora è admin`,
     tolto: (nome: string) => `${nome} non fa più parte del gruppo`,
     rinominato: 'Nome cambiato',
+    coloreCambiato: 'Colore cambiato',
   },
 
   conferme: {
@@ -181,6 +184,10 @@ export const gruppi = {
     },
     rinomina: {
       titolo: 'Rinomina il gruppo',
+      conferma: 'Salva',
+    },
+    colore: {
+      titolo: 'Colore del gruppo',
       conferma: 'Salva',
     },
     invita: {

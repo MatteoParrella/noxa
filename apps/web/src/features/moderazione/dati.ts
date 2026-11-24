@@ -18,6 +18,7 @@ import {
   leggiEventi,
   leggiFonte,
   leggiFonti,
+  leggiServiziTrasporto,
   leggiGeneri,
   leggiLocale,
   leggiLocali,
@@ -50,6 +51,7 @@ export const CHIAVI = {
   codaSegnalazioni: ['moderazione', 'coda-segnalazioni'] as const,
   segnalazione: (id: string) => ['moderazione', 'segnalazione', id] as const,
   reclamiMod: ['moderazione', 'reclami'] as const,
+  trasporti: ['moderazione', 'trasporti'] as const,
 };
 
 export function useContatori() {
@@ -70,6 +72,10 @@ export function useLocale(id: string | null) {
 
 export function useCandidati() {
   return useQuery({ queryKey: CHIAVI.candidati, queryFn: leggiCandidati });
+}
+
+export function useServiziTrasporto() {
+  return useQuery({ queryKey: CHIAVI.trasporti, queryFn: leggiServiziTrasporto });
 }
 
 export function useFonti() {

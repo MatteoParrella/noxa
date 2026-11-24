@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useSessione } from '@/features/account/sessione';
+import { useMioAccount, useSessione } from '@/features/account/sessione';
 import { leggiAmici, leggiPersona, mieiBloccati, mieSegnalazioni } from './api';
 import { leggiAvatarPath } from './api-avatar';
 
@@ -33,6 +33,13 @@ export function useMioAvatar() {
     queryFn: () => leggiAvatarPath(io!),
     enabled: io !== null,
   });
+}
+
+/** Il mio nome e la mia foto, per i momenti di riscontro (Riscontro). */
+export function useIoPersona(): { nome: string; foto: string | null } {
+  const account = useMioAccount(useSessione());
+  const avatar = useMioAvatar();
+  return { nome: account.data?.nome_visualizzato ?? '', foto: avatar.data ?? null };
 }
 
 export function useAmici() {

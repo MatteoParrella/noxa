@@ -27,7 +27,7 @@
         },
         "fonte_id": { "type": ["string", "null"], "format": "uuid" },
         "caricamento_flyer_id": { "type": ["string", "null"], "format": "uuid" },
-        "url": { "type": ["string", "null"], "format": "uri", "pattern": "^https?://" },
+        "url": { "type": ["string", "null"], "format": "uri", "pattern": "^https://" },
         "id_esterno": { "type": ["string", "null"], "maxLength": 200 },
         "raccolto_il": { "type": "string", "format": "date-time" }
       },
@@ -43,7 +43,7 @@
           "properties": {
             "tipo": { "enum": ["sito_locale", "instagram", "resident_advisor", "xceed", "dice"] },
             "fonte_id": { "type": "string", "format": "uuid" },
-            "url": { "type": "string", "format": "uri", "pattern": "^https?://" }
+            "url": { "type": "string", "format": "uri", "pattern": "^https://" }
           },
           "required": ["fonte_id", "url"]
         }

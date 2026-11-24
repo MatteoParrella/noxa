@@ -34,6 +34,7 @@ from noxa_worker.fonti.base import EventoGrezzo, Fonte
 from noxa_worker.fonti.http import ClientHttpConforme
 from noxa_worker.normalizzazione.date import interpreta_iso
 from noxa_worker.normalizzazione.eta import estrai_eta_minima
+from noxa_worker.normalizzazione.modelli import in_https
 from noxa_worker.normalizzazione.testo import pulisci
 
 log = structlog.get_logger(__name__)
@@ -287,7 +288,8 @@ def applica(grezzo: EventoGrezzo, dettaglio: DatiDettaglio) -> EventoGrezzo:
 
 
 def _senza_barra(url: str) -> str:
-    return url.rstrip("/")
+    """Forma di confronto: nel catalogo i link sono già in `https` (`in_https`)."""
+    return str(in_https(url)).rstrip("/")
 
 
 def _inizio(grezzo: EventoGrezzo) -> datetime | None:

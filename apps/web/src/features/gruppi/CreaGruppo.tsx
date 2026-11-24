@@ -6,13 +6,16 @@ import { useState, type FormEvent } from 'react';
 import { Avviso } from '@/components/ui/Avviso';
 import { Campo } from '@/components/ui/Campo';
 import { Pulsante } from '@/components/ui/Pulsante';
-import { useToast } from '@/components/ui/Toast';
 import { useOnline } from '@/lib/connessione';
 import { ErroreValidazione } from '@/lib/errori';
 import { messaggi } from '@/lib/messaggi/it';
 import { creaGruppo } from './api';
 import { CHIAVI } from './dati';
 import { SelettoreAmici } from './SelettoreAmici';
+import { SceltaColore } from '@/components/ui/SceltaColore';
+import type { ColoreGruppo } from '@/lib/coloriGruppo';
+import { useRiscontro } from '@/components/ui/Riscontro';
+import { useAmici, useIoPersona } from '@/features/amici/dati';
 
 const testi = messaggi.gruppi;
 const MASSIMO_NOME = 40;
@@ -31,10 +34,13 @@ export function erroreInviti(errore: unknown): string {
 export function CreaGruppo() {
   const router = useRouter();
   const client = useQueryClient();
-  const toast = useToast();
   const online = useOnline();
   const [nome, setNome] = useState('');
   const [selezionati, setSelezionati] = useState<string[]>([]);
+  const [colore, setColore] = useState<ColoreGruppo>('ciano');
+  const mostraRiscontro = useRiscontro();
+  const ioPersona = useIoPersona();
+  const amici = useAmici();
   const [inviato, setInviato] = useState(false);
 
   const pulito = nome.trim();
@@ -47,10 +53,25 @@ export function CreaGruppo() {
         : undefined;
 
   const crea = useMutation({
-    mutationFn: () => creaGruppo(pulito, selezionati),
+    mutationFn: () => creaGruppo(pulito, selezionati, colore),
     onSuccess: (id) => {
       void client.invalidateQueries({ queryKey: CHIAVI.gruppi });
-      toast({ testo: testi.crea.creato(selezionati.length) });
+      // «Il gruppo è pronto»: io e gli amici invitati entriamo in fila (brief §4.2).
+      const perId = new Map(
+        (amici.data?.amici ?? []).map((relazione) => [relazione.persona.id, relazione.persona]),
+      );
+      mostraRiscontro({
+        tipo: 'gruppo',
+        titolo: messaggi.riscontri.gruppo.titolo,
+        testo: messaggi.riscontri.gruppo.testo(selezionati.length),
+        persone: [
+          { nome: ioPersona.nome || pulito, foto: ioPersona.foto },
+          ...selezionati.flatMap((amico) => {
+            const persona = perId.get(amico);
+            return persona ? [{ nome: persona.nome_visualizzato, foto: persona.avatar_path }] : [];
+          }),
+        ],
+      });
       router.replace(`/gruppo/?id=${id}`);
     },
   });
@@ -77,6 +98,7 @@ export function CreaGruppo() {
         autoComplete="off"
         required
       />
+      <SceltaColore etichetta={testi.crea.colore} valore={colore} onCambia={setColore} />
       <section aria-labelledby="titolo-invita" className="flex flex-col gap-2">
         <h2 className="etichetta-riga m-0" id="titolo-invita">
           {testi.crea.invita}

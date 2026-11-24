@@ -2011,3 +2011,20 @@ li > .sr-riga:hover {
 .pv-sezione > .etichetta {
   padding: 0 var(--spazio-4);
 }
+
+/* Descrizioni lunghe con «Leggi tutto» (D-19). */
+.testo-tagliato {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.testo-espandibile-pulsante {
+  margin-top: var(--spazio-1);
+  padding: var(--spazio-2) 0;
+  min-height: var(--area-tocco);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: var(--tipo-peso-semi);
+  cursor: pointer;
+}
